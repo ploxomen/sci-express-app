@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Area;
+use App\Models\Rol;
+use App\Models\Tipos\Documentos;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+
+class Usuario extends Controller
+{
+    public function viewHome()
+    {
+        $modulos = User::getModulos(Auth::id());
+        return view('users.home',compact('modulos'));
+    }
+    public function viewLista()
+    {
+        $modulos = User::getModulos(Auth::id());
+        return view('users.lista',compact('modulos'));
+    }
+    public function cerrarSesion(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect(route('login'));
+    }
+    
+    public function viewCrearModificar()
+    {
+        $tipo_documentos = Documentos::where('estado','1')->get();
+        $areas = Area::get();
+        $roles = Rol::get();
+        $modulos = User::getModulos(Auth::id());
+        return view('users.crear',compact('tipo_documentos','areas','roles','modulos'));
+    }
+    public function autenticacion(Request $request)
+    {
+        if($request->ajax()){
+            $credenciales = $request->only('n_document','password');
+            $remember = $request->has('remember');
+            $message = [];
+            if(Auth::attempt($credenciales,$remember)){
+                $request->session()->regenerate();
+                $message = ['success' => true];
+            }else{
+                $message = ['not_user' => true];
+            }
+            return response()->json($message);
+        }
+    }
+    public function viewLogin()
+    {
+        return view('users.login');
+    }
+    public function agregar(Request $request)
+    {
+        if($request->ajax()){
+            $datos = $request->all();
+            $datos['password'] = Hash::make(env('PASSWORD_DEFAULT'));
+            $result = User::addUser($datos);
+            return response()->json($result);
+        }
+    }
+    public function getArea(Request $request)
+    {
+        try {
+            $result = Rol::getRolArea($request->post('id_area'));
+            return response()->json(['success' => $result]);
+            
+        } catch (\Throwable $th) {
+           return response()->json(['error'=>$th->getMessage()]);
+        }
+    }
+    public function listarUsuarios()
+    {
+        return view('intranet.users.lista');
+    }
+}

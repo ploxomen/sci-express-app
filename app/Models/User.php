@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Exception;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    protected $table = 'usuarios';
+    public $timestamps = false;
 
     /**
      * The attributes that are mass assignable.
@@ -18,9 +17,20 @@ class User extends Authenticatable
      * @var string[]
      */
     protected $fillable = [
+        'ty_document',
+        'n_document',
         'name',
+        'last_name',
         'email',
         'password',
+        'phone',
+        'direction',
+        'nacimiento',
+        'sexo',
+        'status',
+        'create_at',
+        'update_at',
+        'small_menu'
     ];
 
     /**
@@ -32,13 +42,37 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public static function addUser($usuario)
+    {
+        DB::beginTransaction();
+        try {
+            $roles = [];
+            if(isset($usuario['roles'])){
+                $roles = $usuario['roles'];
+                unset($usuario['roles']);
+            }
+            $id = User::insertGetId($usuario);
+            $new_roles = [];
+            foreach ($roles as $rol) {
+                $new_roles[] = [
+                    'id_usuario' => $id,
+                    'id_rol' => $rol
+                ];
+            }
+            DB::table('usuario_rol')->insert($new_roles);
+            DB::commit();
+            return ['success' => true];
+        } catch (Exception $error) {
+            DB::rollBack();
+            return ['error' => $error->getMessage()];
+        }
+    }
+    public static function getModulos($id_user)
+    {
+        return DB::select('CALL sp_obtener_modulos(?)',[$id_user]);
+    }
+    public function getRoles($id_user)
+    {
+        return false;
+    }
 }
