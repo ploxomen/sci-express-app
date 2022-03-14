@@ -8,6 +8,7 @@ use App\Models\Tipos\Documentos;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class Usuario extends Controller
@@ -16,6 +17,10 @@ class Usuario extends Controller
     {
         $modulos = User::getModulos(Auth::id());
         return view('users.home',compact('modulos'));
+    }
+    public static function obtenerUsuarioRol($id_rol)
+    {
+        return DB::select('CALL sp_obtener_usuarios_rol(?)', [$id_rol]);
     }
     public function viewLista()
     {

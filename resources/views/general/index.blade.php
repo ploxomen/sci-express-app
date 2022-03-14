@@ -37,7 +37,7 @@
             </div>
             <ul class="menu">
                 <li class="hover-menu {{$url_actual == route('home') ? 'activeli' : ''}}">
-                    <a href="{{route('home')}}" class="menu-prin">
+                    <a href="{{route('home')}}" class="menu-prin" title="Inicio">
                         <i class="fas fa-home icono"></i>
                         <span class="title">Inicio</span>
                     </a>
@@ -55,7 +55,7 @@
                             }
                         @endphp
                         <li class="menu-desplegable">
-                            <a href="javascript:void(0)" class="active-panel {{$active_sub ? 'active-menu' : ''}}">
+                            <a href="javascript:void(0)" title="{{$modulo->grupo}}" class="active-panel {{$active_sub ? 'active-menu' : ''}}">
                                 <i class="icono {{$modulo->icono}}"></i>
                                 <span class="title">{{$modulo->grupo}}</span>
                                 <i class="fas fa-angle-down"></i>                            
@@ -74,7 +74,7 @@
                         
                     @else
                     <li class="hover-menu {{$url_actual == route($modulo->nomRuta) ? 'activeli' : ''}}">
-                        <a href="{{route($modulo->nomRuta)}}">
+                        <a href="{{route($modulo->nomRuta)}}" title="{{$modulo->grupo}}">
                             <i class="icono {{$modulo->icono}}"></i>
                             <span class="title">{{$modulo->grupo}}</span>
                         </a>
@@ -82,7 +82,7 @@
                     @endif
                 @endforeach
                 <li class="hover-menu">
-                    <a href="{{route('closeSesion')}}" class="menu-prin">
+                    <a href="{{route('closeSesion')}}" class="menu-prin" title="Cerrar sesión">
                         <i class="icono fas fa-door-closed"></i>                        
                         <span class="title">Cerrar sesión</span>
                     </a>

@@ -1,17 +1,14 @@
 function loadPage(){
     let general = new General();
-    let tablaSoli = document.getElementById('tabla_solicitud');
+    let bodySoli = document.getElementById('tabla-cuerpo-soli');
     let frmSoli = document.getElementById('frm_recojo');
+    let btnSave = document.getElementById('btn-change-estado');
+    let btnCancel = document.getElementById('btn-cancelar');
     let datosGlobales = {
         id_recojo : null,
         id_solicitud : null
     };
-    $('#id_clientes').select2({
-        theme : 'bootstrap',
-        templateResult: general.tempSeleCli,
-        placeholder: 'Seleccione un cliente'
-    });
-    tablaSoli.addEventListener('click',async function(event) {
+    bodySoli.addEventListener('click',async function(event) {
         if(event.target.classList.contains('btn_editar')){
             frmSoli.reset();
             datosGlobales.id_recojo = null;
@@ -27,6 +24,7 @@ function loadPage(){
             if(!response.recojos){
                 alertify.success('listo para programar el recojo');
                 changeEstadoInput(false,'Agregar');
+                $('.simple-select2').val('').trigger('change');
             }else{
                 for (const key in response.recojos) {
                     if (Object.hasOwnProperty.call(response.recojos, key)) {
@@ -47,13 +45,49 @@ function loadPage(){
                     }
                 }
                 changeEstadoInput(false,'Actualizar');
-                datosGlobales.id_recojo = response.recojos.id;
-                alertify.success('recojo listo para modificar');
+                if(response.recojos.estado_soli == 4){
+                    datosGlobales.id_recojo = false;
+                    btnSave.hidden = true;
+                }else{
+                    datosGlobales.id_recojo = response.recojos.id;
+                    alertify.success('recojo listo para modificar');
+                }
+                $('.simple-select2').trigger('change');
             }
         }
-    })
-    let btnSave = document.getElementById('btn-change-estado');
-    let btnCancel = document.getElementById('btn-cancelar');
+    });
+    let datatableSoli = $('#tabla-solicitud').DataTable({
+        ajax : {
+            url: './../solicitud/obtener?recojos=true',
+            method: 'POST',
+            headers: general.jsonToken,
+            data : function(d){d.estadoSol = $('#id_estado_cli').val()}
+        },
+        columns: [
+            {data: 'nro_soli'},
+            {data: 'fecha_soli', name: 'fecha_soli'},
+            {data: 'dia_recojo', name: 'dia_recojo'},
+            {data: 'hr_estimado', name: 'hr_estimado'},
+            {data: 'nom_soli', name: 'nom_soli'},
+            {data: 'nom_cli', name: 'nom_cli'},
+            {data: 'tipo', name: 'tipo'},
+            {data: 'direccion_cli', name: 'direccion_cli'},
+            {data: 'cant_bulto', name: 'cant_bulto'},
+            {data: 'estado',searchable: false, orderable: false, name: 'estado', render: function(data,type,full){
+                let template = ``;
+                full.listSoli.forEach(sol => {
+                    template += `<option value="${sol.id}" ${data == sol.id ? 'selected' : ''}>${sol.estado}</option>`;
+                });
+                return `<select data-solicitud="${full.id}" ${full.estado == 4 ? 'disabled' : ''} class="form-control form-control-sm ${full.estado < 4 ? 'cb-estado-change' : ''}">${template}</select>`;
+            }},
+            {data: 'id', searchable: false, orderable: false, name: 'id', render: function(data,type,full){return`<div class="d-flex justify-content-center flex-wrap" style="gap:5px;"><button data-toggle="tooltip" title="Editar solicitud" data-idsolicitud="${data}" class="btn btn-sm btn-primary btn_editar"><i class="fas fa-edit"></i></button></div>`}}
+        ],
+        createdRow : function(row,data){
+            let bgTable = data.id_user ? 'table-success' : 'table-warning';
+            $(row).addClass(bgTable);
+        }
+    });
+    
     function changeEstadoInput(active,tipo) {  
         btnSave.hidden = active;
         btnCancel.hidden = active;
@@ -61,9 +95,15 @@ function loadPage(){
     }
     btnCancel.addEventListener('click',function(e){
         changeEstadoInput(true,'');
+        $('.simple-select2').val('').trigger('change');
+        datosGlobales.id_recojo = null;
+        datosGlobales.id_solicitud = null;
     });
     frmSoli.addEventListener('submit',async function(e){
         e.preventDefault();
+        if(datosGlobales.id_recojo === false){
+            return
+        }
         let url = datosGlobales.id_recojo !== null ? 'recojos/modificar' : 'recojos/agregar';
         let datos = new FormData(this);
         datos.append('id_solicitud',datosGlobales.id_solicitud);
@@ -77,38 +117,13 @@ function loadPage(){
         }
         changeEstadoInput(true,'');
         alertify.alert('Mensaje',response.success);
-        obtenerSolicitud();
+        datatableSoli.draw();
         this.reset();
+        $('.simple-select2').val('').trigger('change');
     })
-    async function obtenerSolicitud(){
-        let datos = new FormData(document.getElementById('frm_filtros_soli'));
-        let response = await general.obtenerSolicitud(datos);
-        tablaSoli.innerHTML =  response;
-        for (const e of document.querySelectorAll('.change-estado')) {
-            e.addEventListener('change',function(){
-                let datos = new FormData();
-                datos.append('id_solicitud',this.dataset.idSolicitud);
-                datos.append('estado_soli',this.value);
-                general.funcfetch('recojos/modificar-estados',datos).then(data => {
-                    if(data.error){
-                        alertify.alert('Error',data.error);
-                        return 
-                    }
-                    alertify.success(data.success);
-                }).catch(error => {
-                    alertify.alert('Error',error.message);
-                    console.error(error);
-                });
-            });
-        }
-    }
-    obtenerSolicitud();
     document.getElementById('id_estado_cli').addEventListener('change',()=>{
-        obtenerSolicitud();
+        datatableSoli.draw();
     })
-    $('#id_clientes').on('select2:select',function(event){
-        obtenerSolicitud();
-    });
 }
 
 window.addEventListener('DOMContentLoaded',loadPage);

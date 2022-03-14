@@ -80,6 +80,7 @@ table thead tr th{
     position: relative;
     white-space: nowrap;
     overflow-x: hidden;
+    width: 100%;
 }
 .navegacion ul li a{
     color: var(--color-secundario);
@@ -100,7 +101,7 @@ table thead tr th{
     width: calc(100% - 50px);
 }
 .navegacion ul li a .icono{
-    font-size: 20px;
+    font-size: 18px;
     width: 35px;
 }
 .navegacion .menu{
@@ -190,6 +191,46 @@ table thead tr th{
     margin-left: 300px;
     transform-origin: right;
     transition: all .5s ease-in-out;
+}
+@media screen and (max-width: 600px){
+    .panel{
+        width: 100%;
+        margin-left: 0;
+    }
+    .navegacion {
+        position: fixed;
+        left: -300px;
+    }
+    .cuerpo-panel {
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+    .menu-small {
+        width: 90%;
+        max-width: 300px;
+        left: 0;
+        z-index: 9999;
+    }
+    .menu-small+.panel,
+    .menu-small~.cuerpo-panel {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+    .menu-small .menu-desplegable:hover{
+        background: initial !important;
+    }
+    .menu-small .menu-desplegable:hover a{
+        color: var(--color-secundario) !important;
+    }
+    .activeli{
+        background: var(--color-secundario) !important;
+    }
+    .menu-small .menu .sub-menu .activeli a {
+        color: var(--color-principal) !important;
+    }
+    .menu-small .menu .sub-menu a {
+        color: var(--color-secundario) !important;
+    }
 }
 .sub-menu {
     margin-left: 15px;

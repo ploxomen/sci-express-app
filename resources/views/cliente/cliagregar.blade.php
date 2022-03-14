@@ -78,7 +78,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_dpto_so">Departamento</label>
-                    <select name="dpto_so" id="id_dpto_so" class="form-control departamentos cb-ubigeo" data-consulta="provincia" data-info="id_prov_so" data-info-distrito="id_dist_so">
+                    <select name="dpto_so" id="id_dpto_so" class="form-control cb-ubigeo" data-consulta="provincia" data-info="id_prov_so" data-info-distrito="id_dist_so">
                         <option value=""></option>
                         @foreach ($dep as $d)
                             <option value="{{$d->id_ubigeo}}">{{$d->nombre_ubigeo}}</option>
@@ -182,23 +182,6 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_dpto_so">Departamento</label>
-                    <select name="dpto_so" id="id_dpto_so" class="form-control departamentos cb-ubigeo" data-consulta="provincia" data-info="id_prov_so" data-info-distrito="id_dist_so">
-                        <option value=""></option>
-                        @foreach ($dep as $d)
-                            <option value="{{$d->id_ubigeo}}">{{$d->nombre_ubigeo}}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_prov_so">Provincia</label>
-                    <select name="prov_so" id="id_prov_so" class="form-control cb-ubigeo" data-consulta="distrito" data-info="id_dist_so"></select>
-                </div>
-                <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_dist_so">Distrito</label>
-                    <select name="dist_so" id="id_dist_so" class="form-control cb-ubigeo"></select>
-                </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_nro_doc_op">N° documento</label>
                     <input type="text" name="nro_doc_op" id="id_nro_doc_op" class="form-control">
@@ -254,56 +237,56 @@
             <fieldset class="bg-white px-3 border">
                 <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add text-info">PROVEEDORES</legend>
                 <div class="form-group text-right">
-                    <button type="button" class="btn btn-primary"><i class="fas fa-plus"></i></button>
+                    <button type="button" id="btn-add-prov" class="btn btn-primary"><i class="fas fa-plus"></i></button>
                 </div>
-                <ol class="ml-4" id="list-proveedores">
-                    <li>
+                <ol class="ml-4" id="list-proveedores" data-time="{{$id_new_prov}}">
+                    <li data-tipo="nuevo" hidden>
                         <div class="form-row">
                             <div class="form-group col-12 col-md-6 col-lg-4">
-                                <label for="id_doc_ident_op">Tipo documento</label>
-                                <select name="doc_ident_op" id="id_doc_ident_op" class="form-control">
+                                <label for="id_tipo_docu_prov_{{$id_new_prov}}" data-selected="true">Tipo documento</label>
+                                <select disabled data-name="tipo_docu_prov" required id="id_tipo_docu_prov_{{$id_new_prov}}" class="form-control form-control-sm" data-selected="true">
+                                    <option value="" hidden>Seleccione una opción</option>
                                     @foreach ($tipo_documentos as $tipo_docu)
                                         <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            
                             <div class="form-group col-12 col-md-6 col-lg-4">
-                                <label for="id_nro_doc_op">N° documento</label>
-                                <input type="text" name="nro_doc_op" id="id_nro_doc_op" class="form-control">
+                                <label for="id_nro_docu_prov_{{$id_new_prov}}" data-selected="true">N° documento</label>
+                                <input disabled type="text" data-name="nro_docu_prov" required id="id_nro_docu_prov_{{$id_new_prov}}" class="form-control form-control-sm" data-selected="true">
                             </div>
                             <div class="form-group col-12 col-lg-4">
-                                <label for="id_nom_op">Nombres</label>
-                                <input type="text" name="nom_op" id="id_nom_op" class="form-control">
+                                <label for="id_nomb_prov_{{$id_new_prov}}" data-selected="true">Nombres</label>
+                                <input disabled type="text" data-name="nomb_prov" required id="id_nomb_prov_{{$id_new_prov}}" class="form-control form-control-sm" data-selected="true">
                             </div>
-                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-2">
-                                <label for="id_dpto_so">Departamento</label>
-                                <select name="dpto_so" id="id_dpto_so" class="form-control departamentos cb-ubigeo" data-consulta="provincia" data-info="id_prov_so" data-info-distrito="id_dist_so">
+                            <div class="form-group col-12 col-md-6 col-lg-4">
+                                <label for="id_depa_prov_{{$id_new_prov}}" data-selected="true">Departamento</label>
+                                <select disabled data-name="depa_prov" id="id_depa_prov_{{$id_new_prov}}" required data-selected="true" class="form-control form-control-sm cb-ubigeo" data-consulta="provincia" data-info="id_prov_prov_{{$id_new_prov}}" data-info-distrito="id_dist_prov_{{$id_new_prov}}">
                                     <option value=""></option>
                                     @foreach ($dep as $d)
                                         <option value="{{$d->id_ubigeo}}">{{$d->nombre_ubigeo}}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-2">
-                                <label for="id_prov_so">Provincia</label>
-                                <select name="prov_so" id="id_prov_so" class="form-control cb-ubigeo" data-consulta="distrito" data-info="id_dist_so"></select>
+                            <div class="form-group col-12 col-md-6 col-lg-4">
+                                <label for="id_prov_prov_{{$id_new_prov}}" data-selected="true">Provincia</label>
+                                <select disabled class="form-control form-control-sm cb-ubigeo" required data-selected="true" data-name="prov_prov" id="id_prov_prov_{{$id_new_prov}}" data-consulta="distrito" data-info="id_dist_prov_{{$id_new_prov}}"></select>
                             </div>
-                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-2">
-                                <label for="id_dist_so">Distrito</label>
-                                <select name="dist_so" id="id_dist_so" class="form-control cb-ubigeo"></select>
+                            <div class="form-group col-12 col-md-6 col-lg-4">
+                                <label for="id_dist_prov_{{$id_new_prov}}" data-selected="true">Distrito</label>
+                                <select disabled class="form-control form-control-sm cb-ubigeo" required data-selected="true" data-name="dist_prov" id="id_dist_prov_{{$id_new_prov}}"></select>
                             </div>
-                            <div class="form-group col-12 col-md-6 col-lg-3 col-xl-2">
-                                <label for="id_tlf_anex_op">Teléfono</label>
-                                <input type="tel" name="tlf_anex_op" id="id_tlf_anex_op" class="form-control">
+                            <div class="form-group col-12">
+                                <label for="id_dire_prov_{{$id_new_prov}}" data-selected="true">Dirección</label>
+                                <input disabled type="text" data-name="dire_prov" required id="id_dire_prov_{{$id_new_prov}}" data-selected="true" class="form-control form-control-sm">
                             </div>
-                            <div class="form-group col-12 col-md-6 col-lg-3 col-xl-2">
-                                <label for="id_cel_op">Celular</label>
-                                <input type="tel" name="cel_op" id="id_cel_op" class="form-control">
+                            <div class="form-group col-12 col-md-6 col-lg-6">
+                                <label for="id_tele_prov_{{$id_new_prov}}" data-selected="true">Contactos</label>
+                                <select disabled data-name="tele_prov" id="id_tele_prov_{{$id_new_prov}}" data-selected="true" class="form-control from-control-sm cb-mult-nuevo" multiple></select>
                             </div>
-                            <div class="form-group col-12 col-md-6 col-lg-4 col-xl-2">
-                                <label for="id_email_op">Correo</label>
-                                <input type="email" name="email_op" id="id_email_op" class="form-control">
+                            <div class="form-group col-12 col-md-6 col-lg-6">
+                                <label for="id_email_prov_{{$id_new_prov}}" data-selected="true">Correos</label>
+                                <select disabled data-name="email_prov" id="id_email_prov_{{$id_new_prov}}" data-selected="true" class="form-control from-control-sm cb-mult-nuevo" multiple></select>
                             </div>
                             <div class="form-group col-12 col-md-6 col-lg-2 col-xl-12 d-flex justify-content-end align-items-center">
                                 <button type="button" class="btn btn-danger btn-delete-proveedor"><i class="fas fa-trash-alt"></i></button>

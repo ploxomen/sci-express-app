@@ -1,78 +1,55 @@
 function loadedPage(){
-    let frmFiltroCli = document.getElementById('frm_filtros');
-    let tblCli = document.getElementById('data-clientes');
     let general = new General();
-    function obtenerClientes(){
-        $('[data-toggle="tooltip"]').tooltip('dispose');
-        let datos = new FormData(frmFiltroCli);
-        $('#pagination-cliente').pagination({
-            pageSize : 25,
-            dataSource: function(done){
-                $.ajax({
-                    url: "obtener?tipo=total",
-                    type : "POST",
-                    data : datos,
-                    processData: false,
-                    contentType: false,
-                    headers: {
-                        'X-CSRF-TOKEN': general.token
-                    },
-                    dataType:"JSON",
-                }).done(function(data){
-                    let result = []
-                    if(data.total != 0){
-                        for (let i = 1; i <= parseInt(data.total); i++) {
-                            result.push(i)
-                        }
+    let tableCli = document.getElementById('table-cliente');
+    let datatableCli = $('#tabla-clientes').DataTable({
+        ajax : {
+            url: 'obtener?tipo=info',
+            method: 'POST',
+            headers: general.jsonToken,
+            data : function(d){d.estadoDoc = $('#id_estado_doc_cli').val()}
+        },
+        columns: [
+            {data: null},
+            {data: 'nom_cli', name: 'nom_cli'},
+            {data: 'dir_sede_adr', name: 'dir_sede_adr'},
+            {data: 'nom_rl', name: 'nom_rl'},
+            {data: 'cel_rl', name: 'cel_rl'},
+            {data: 'email_rl', name: 'email_rl'},
+            {data: 'estado_doc', name: 'estado_doc', render : function(data){return `<span class="${data == 0 ? 'text-danger' : 'text-success'}">${data == 0 ? 'PENDIENTE' : 'COMPLETO'}</span>` }},
+            {data: 'estado', name: 'estado', render : function(data,type,full,meta){return `<span class="${data == 0 ? 'text-danger' : 'text-success'}">${data == 0 ? 'INACTIVO' : 'ACTIVO'}</span>` }},
+            {data: 'id', searchable: false, orderable: false, name: 'id', render: function(data){return`<div class="d-flex justify-content-center flex-wrap" style="gap:5px;"><a href="agregar-modificar?nro_doc=${data}" class="btn btn-sm btn-primary" data-toggle="tooltip" title="Editar cliente"><i class="fas fa-user-edit"></i></a><button data-toggle="tooltip" title="Eliminar cliente" data-cliente="${data}" class="btn btn-sm btn-danger delete-cliente"><i class="fas fa-user-times"></i></button></div>`}}
+        ],
+    });
+    tableCli.addEventListener('click',function(event){
+        if(event.target.classList.contains('delete-cliente')){
+            let nameCli = event.target.parentElement.parentElement.parentElement.children[1].textContent;
+
+            alertify.confirm('Mensaje','¿Deseas eliminar al cliente <b>' + nameCli + '</b>?',async ()=>{
+                try {
+                    let datos = new FormData();
+                    datos.append('id_cliente',event.target.dataset.cliente);
+                    let response = await general.funcfetch('eliminar',datos);
+                    if(response.success){
+                        datatableCli.draw();
+                        alertify.success(response.success);
+                        return
                     }
-                    done(result)
-                })
-            },
-            callback : function(data,pagination){
-                if(!pagination.totalNumber){
-                    tblCli.innerHTML = `<tr><td colspan="9">Sin clientes para mostrar</td></tr>`;
-                }else{
-                    datos.append('inicio',(pagination.pageNumber - 1) * pagination.pageSize);
-                    datos.append('fin',pagination.pageSize);
-                    obtenerInfoCli(datos)
+                    alertify.alert('Error',response.error);
+                } catch (error) {
+                    console.log(error);
                 }
-            },
-            header : function(currentPage, totalPage, totalNumber){
-                return "<div class='pagination-header'>Total:&nbsp;<p class='mdl-typography--body-2 m-0 p-1 main-content rounded border'>" +
-                totalNumber +
-                "</p></div>";
-            }
-        })
-
-    }
-    async function obtenerInfoCli(datos) {  
-        try {
-            let response = await general.funcfetch('obtener?tipo=info',datos);
-            let template = ``;
-            let indice = parseInt(datos.get('inicio'));
-            response.clientes.forEach(cli => {
-                indice++;
-                template +=`<tr>
-                    <td>${indice}</td>
-                    <td>${cli.nom_cli}</td>
-                    <td>${cli.dir_sede_adr}</td>
-                    <td>${cli.nom_rl}</td>
-                    <td>${cli.cel_rl}</td>
-                    <td>${cli.email_rl}</td>
-                    <td class="${cli.est_doc == 'PENDIENTE' ? 'text-danger' : 'text-success'}">${cli.est_doc}</td>
-                    <td class="${cli.estado_text == 'INACTIVO' ? 'text-danger' : 'text-success'}">${cli.estado_text}</td>
-                    <td><div class="d-flex justify-content-center flex-wrap" style="gap:5px;"><a href="agregar-modificar?nro_doc=${cli.id}" class="btn btn-sm btn-primary" data-toggle="tooltip" title="Editar cliente"><i class="fas fa-user-edit"></i></a><button data-toggle="tooltip" title="Desactivar cliente" class="btn btn-sm btn-danger"><i class="fas fa-user-times"></i></button></div></td>
-                </tr>`
-            });
-            tblCli.innerHTML = template;
-            $('[data-toggle="tooltip"]').tooltip()
-        } catch (error) {
-            alertify.alert('Error',error.message);
-            return error;
+            },()=>{});
+            
         }
-    }
-    obtenerClientes();
-
-
+    });
+    datatableCli.on('draw.dt', function () {
+        let info = datatableCli.page.info();
+        datatableCli.column(0, { search: 'applied', order: 'applied', page: 'applied' }).nodes().each(function (cell, i) {
+            cell.innerHTML = i + 1 + info.start;
+        });
+    });
+    $('.cb-filter').change(function(){
+        datatableCli.draw();
+    });
 }
 window.addEventListener('DOMContentLoaded',loadedPage);

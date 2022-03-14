@@ -2,6 +2,7 @@ function loadPage(){
     let $navegacion = document.getElementById('navegacion');
     let general = new General();
     $navegacion.addEventListener('click',function(e){
+        e.stopPropagation();
         let element = e.target;
         if(element.classList.contains('active-panel')){
             element.classList.toggle('active-menu');
@@ -9,11 +10,13 @@ function loadPage(){
     })
     let btnMenu = document.getElementById('btn-menu');
     btnMenu.addEventListener('click',function(e){
+        e.stopPropagation();
         $navegacion.classList.toggle('menu-small');
         let verif = $navegacion.classList.contains('menu-small');
         localStorage.setItem('active_small_menu',verif);
         let liActive = document.querySelector('.activeli');
         for (const element of document.querySelectorAll('.active-menu')) {
+            console.log(element);
             element.classList.remove('active-menu');
         }
         if(!verif){
@@ -24,7 +27,7 @@ function loadPage(){
     let subMenuSmall = document.getElementById('contenido-submenu');
     for (const element of liSubMenu) {
         element.addEventListener('click',function (e) {
-            if($navegacion.classList.contains('menu-small')){
+            if($navegacion.classList.contains('menu-small') && window.innerWidth > 600){
                 e.stopImmediatePropagation();
                 let position = element.getBoundingClientRect();
                 let coneUl = element.children[1].cloneNode(true);
@@ -37,9 +40,12 @@ function loadPage(){
     }
     document.body.addEventListener('click',function(e){
         subMenuSmall.classList.add('d-none');
+        if($navegacion.classList.contains('menu-small')&& window.innerWidth <= 600){
+            $navegacion.classList.remove('menu-small')
+        }
     });
     let active_menu = localStorage.getItem('active_small_menu');
-    if(active_menu !== null && active_menu == 'true'){
+    if(active_menu !== null && active_menu == 'true' && window.innerWidth > 600){
         $navegacion.classList.add('menu-small');
         for (const element of document.querySelectorAll('.active-menu')) {
             element.classList.remove('active-menu');
@@ -76,7 +82,16 @@ function loadPage(){
         theme: 'bootstrap',
         width: '100%',
         placeholder: 'Seleccione una opción'
+    });
+    $('.cb-mult-nuevo').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        tags: true
+    });
+    $('.simple-select2').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: 'Seleccione una opción'
     })
-
 }
 window.addEventListener('DOMContentLoaded',loadPage);

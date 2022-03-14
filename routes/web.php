@@ -18,6 +18,8 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
         Route::get('archivos',[Clientes::class,'viewArchivos'])->name('cliArchi');
         Route::get('mostrar', [Clientes::class, 'misClientes'])->name('viewMisClientes');
         Route::post('agregar',[Clientes::class,'agregarCli']);
+        Route::post('eliminar', [Clientes::class, 'eliminarCli']);
+        Route::post('eliminar-proveedor', [Clientes::class, 'eliminarProveedor']);
         Route::post('obtener', [Clientes::class, 'obtenerClientes']);
         Route::post('obtener-editar', [Clientes::class, 'obtenerCliEdit']);
         Route::post('get-archivos', [Clientes::class, 'obtenerArchivosCli']);
@@ -45,6 +47,8 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
     Route::prefix('pedidos')->group(function(){
         Route::prefix('recojos')->group(function () {
             Route::get('/', [Recojo::class, 'viewPediReco'])->name('pedidoRecojo');
+            Route::get('pendientes', [Recojo::class, 'recojoPendiente'])->name('recojoPendiTraba');
+            Route::post('actualizar-trabajador', [Recojo::class, 'actualizarRecoTra']);
             Route::post('obtener', [Recojo::class, 'obtenerRecojo']);
             Route::post('agregar', [Recojo::class, 'agregarRecojo']);
             Route::post('modificar', [Recojo::class, 'modificarRecojo']);
@@ -59,9 +63,15 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
         Route::post('agregar-guia', [Gias::class, 'addGuia']);
     });
     Route::prefix('solicitud')->group(function () {
+        Route::post('ver-proveedor', [Solicitud::class, 'obtenerProveedor']);
         Route::post('obtener-cliente', [Solicitud::class, 'obtenerDetalleCli']);
         Route::post('obtener', [Solicitud::class, 'obtenerSolicitud']);
+        Route::post('asignar-personal', [Solicitud::class, 'asignarPersonal']);
+        Route::post('ver-detalle', [Solicitud::class, 'verDetalleSoli']);
+        Route::post('cambiar-estado', [Solicitud::class, 'cambiarEstadoSoli']);
+        Route::post('eliminar-solicitud', [Solicitud::class, 'deleteSolicitud']);
         Route::post('nuevo', [Solicitud::class, 'insertarNuevaSoli']);
+        Route::get('mostrar', [Solicitud::class, 'mostrarSolicitud'])->name('misSolicitudes');
         Route::get('agregar', [Solicitud::class, 'viewSolicitud'])->name('solicitud');
     });
     Route::get('inicio',[Usuario::class,'viewHome'])->name('home');

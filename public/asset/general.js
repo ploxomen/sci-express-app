@@ -12,6 +12,47 @@ class General{
         })
         return response.json();
     }
+    selectUbigeoCli(element){
+        let $cbUbigeos = element.querySelectorAll('.cb-ubigeo');
+        for (const element of $cbUbigeos) {
+            $(element).on('select2:select',async (e)=>{
+                let cbUbigeo = document.getElementById(e.target.dataset.info);
+                if(!cbUbigeo){
+                    return
+                }
+                let consulta = e.target.dataset.consulta;
+                if(consulta == 'provincia'){
+                    document.getElementById(e.target.dataset.infoDistrito).innerHTML = '';
+                }
+                try {
+                    let response = consulta == 'provincia' ? await this.getProvincias($(element).val()) : await this.getDistritos($(element).val());
+                    this.transforData(response,cbUbigeo);
+                } catch (error) {
+                    console.error(error);
+                    alertify.alert('Error','Error al cargar los datos');
+                }
+            })
+        }
+    }
+    primerProveedor(boleano,element){
+        element.children[0].hidden = boleano;
+        for (const ele of element.children[0].querySelectorAll(`[data-selected="true"]`)) {
+            if(ele.tagName == 'SELECT' || ele.tagName == 'INPUT'){
+                ele.value = "";
+                ele.disabled = boleano;
+                if(ele.classList.contains('cb-ubigeo') || ele.classList.contains('cb-mult-nuevo')){
+                    $(ele).trigger('change');
+                }
+            }
+        }
+    }
+    transforData(data,cbUbigeo){
+        let template = `<option value=""></option>`;
+        data.forEach(e => {
+            template += `<option value="${e.id_ubigeo}">${e.nombre_ubigeo}</option>`;
+        });
+        cbUbigeo.innerHTML = template;
+    }
     getDepartamentos(){
         return this.funcfetch(window.location.origin + '/intranet/ubigeo/departamentos',null);
     }
@@ -38,46 +79,13 @@ class General{
         }
         return true;
     }
-    async obtenerSolicitud(datos){
-        let template = ``;
-        await this.funcfetch(window.location.origin + '/intranet/solicitud/obtener',datos).then(data => {
-            if(!data.solicitudes.length){
-                template = `<tr><td colspan="11" class="text-center">Sin registros para mostrar</td></tr>`;
-            }else{
-                data.solicitudes.forEach(e => {
-                    let cbEstados = document.createElement('select');
-                    cbEstados.classList.add('form-control','form-control-sm','change-estado');
-                    cbEstados.dataset.idSolicitud = e.id;
-                    let tmpEst = ``;
-                    data.estados.forEach(est => {
-                        tmpEst += `<option value="${est.id}" ${est.id == e.estado ? 'selected' : ''}>${est.estado}</option>`;
-                    });
-                    cbEstados.innerHTML = tmpEst;
-                    template += `<tr>
-                    <td>${e.id.toString().padStart(5,'0')}</td>
-                    <td>${e.fecha_soli}</td>
-                    <td>${e.hr_estimado}</td>
-                    <td>${e.nom_cli}</td>
-                    <td>${e.direccion_cli}</td>
-                    <td>${cbEstados.outerHTML}</td>
-                    <td>${e.cant_bulto}</td>
-                    <td>${e.nom_soli}</td>
-                    <td>${e.tipo}</td>
-                    <td>${e.dia_recojo}</td>
-                    <td><button class='btn btn-primary btn-sm btn_editar' title="Editar recojo" data-idsolicitud="${e.id}"><i class="fas fa-edit"></i></button></td>
-                    </tr>`
-                });
-            }
-        });
-        return template;
-    }
     tempSeleCli(cliente) {
         if (!cliente.id) {
             return cliente.text;
         }
         let span = document.createElement('span');
         span.style.fontSize = '13px';
-        let template = `<b>${cliente.id}</b><br><span>${cliente.text}</span>`;
+        let template = `<b>${cliente.element.dataset.nro}</b><br><span>${cliente.text}</span>`;
         span.innerHTML = template;
         return span;
     }
