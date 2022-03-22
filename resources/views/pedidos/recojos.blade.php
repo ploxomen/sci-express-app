@@ -43,18 +43,27 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group col-12 col-lg-6">
+                    <div class="form-group col-12" hidden>
+                        <label for="id_id_cluster">Cluster Disponibles</label>
+                        <select disabled required class="form-control simple-select2" id="id_id_cluster" name="id_cluster">
+                            <option></option>
+                            @foreach ($vehiculos as $v)
+                                <option value="{{$v->id}}">{{$v->placa}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group col-12 col-lg-6" hidden>
                         <label for="id_conductor">Nombre driver</label>
-                         <select required class="form-control simple-select2" id="id_id_conductor" name="id_conductor">
+                         <select disabled required class="form-control simple-select2" id="id_id_conductor" name="id_conductor">
                             <option></option>
                             @foreach ($conductores as $c)
                                 <option value="{{$c->id}}">{{$c->name}} {{$c->last_name}}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group col-12 col-lg-6">
+                    <div class="form-group col-12 col-lg-6" hidden>
                         <label for="id_nom_dealer">Nombre dealer</label>
-                        <select required class="form-control simple-select2" id="id_id_dealer" name="id_dealer">
+                        <select disabled required class="form-control simple-select2" id="id_id_dealer" name="id_dealer">
                             <option></option>
                             @foreach ($dealers as $de)
                                 <option value="{{$de->id}}">{{$de->name}} {{$de->last_name}}</option>
@@ -142,6 +151,7 @@
                     <th>Dia Reco</th>
                     <th>Hr Reco</th>
                     <th>Nomb Soli</th>
+                    <th>N° Doc Cli</th>
                     <th>Nomb Cliente</th>
                     <th>Trayecto</th>
                     <th>Direc Reco</th>

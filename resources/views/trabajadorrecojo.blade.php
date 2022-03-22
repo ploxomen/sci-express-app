@@ -121,7 +121,7 @@
                                         Marcar Hr Llegada
                                         @else
                                             @if ($re->format_hr_despacho == 'Sin definir')
-                                                Marcar Hr Descacho
+                                                Marcar Hr Despacho
                                             @else
                                                 @if ($re->format_hr_salida == 'Sin definir')
                                                 Marcar Hr Salida

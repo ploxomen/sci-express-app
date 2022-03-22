@@ -30,9 +30,18 @@ class Clientes extends Model
     {
         return DB::table('clientes')->insertGetId($datos);
     }
+    public static function obtenerCliConProvee()
+    {
+        $clientes = DB::table('clientes')->select('id', 'nom_cli')->where(['estado' => 1])->get();
+        foreach ($clientes as $cli) {
+            $proveedores = DB::table('proveedor_clientes AS pc')->select('pc.id', 'pc.nomb_prov')->join('relacion_cliente_proveedor AS rc', 'pc.id', '=', 'rc.id_proveedor')->where(['pc.activo' => 1, 'rc.id_cliente' => $cli->id])->get();
+            $cli->proveedores = !$proveedores->isEmpty() ? $proveedores : null;
+        }
+        return $clientes;
+    }
     public static function obtenerProveedoresSoli($id_cliente)
     {
-        return DB::table('proveedor_clientes')->where(['activo' => 1, 'id_cliente' => $id_cliente])->get();
+        return DB::table('proveedor_clientes AS pc')->leftJoin('relacion_cliente_proveedor AS rc','pc.id','=','rc.id_proveedor')->where(['pc.activo' => 1, 'rc.id_cliente' => $id_cliente])->get();
     }
     public static function obtenerProveedores($id_cliente)
     {
@@ -50,26 +59,27 @@ class Clientes extends Model
         try {
             if (!empty($add)) {
                 for ($i = 0; $i < count($add); $i++) {
-                    $add[$i]['id_cliente'] = $id;
                     $add[$i]['id_user_create'] = $user_id;
                 }
-                DB::table('proveedor_clientes')->insert($add);
+                $id_prov = DB::table('proveedor_clientes')->insertGetId($add[0]);
+                DB::table('relacion_cliente_proveedor')->insert(['id_cliente' => $id,'id_proveedor' => $id_prov]);
+
             }
             if (!empty($update)) {
                 foreach ($update as $up) {
                     $date = date('Y-m-d H:i:s');
-                    DB::table('proveedor_clientes')->where(['id' => $up['id_prove'], 'id_cliente' => $id])->update([
-                        'tipo_docu_prov' => $up['tipo_docu_prov'],
-                        'nro_docu_prov' => $up['nro_docu_prov'],
-                        'nomb_prov' => $up['nomb_prov'],
-                        'depa_prov' => $up['depa_prov'],
-                        'dist_prov' => $up['dist_prov'],
-                        'tele_prov' => $up['tele_prov'],
-                        'prov_prov' => $up['prov_prov'],
-                        'dire_prov' => $up['dire_prov'],
-                        'email_prov' => $up['email_prov'],
-                        'fecha_last_update' => $date,
-                        'id_user_last_modifi' => $user_id,
+                    DB::table('proveedor_clientes AS pc')->join('relacion_cliente_proveedor AS rc','pc.id', '=','rc.id_proveedor')->where(['pc.id' => $up['id_prove'],'rc.id_cliente' => $id])->update([
+                        'pc.tipo_docu_prov' => $up['tipo_docu_prov'],
+                        'pc.nro_docu_prov' => $up['nro_docu_prov'],
+                        'pc.nomb_prov' => $up['nomb_prov'],
+                        'pc.depa_prov' => $up['depa_prov'],
+                        'pc.dist_prov' => $up['dist_prov'],
+                        'pc.tele_prov' => $up['tele_prov'],
+                        'pc.prov_prov' => $up['prov_prov'],
+                        'pc.dire_prov' => $up['dire_prov'],
+                        'pc.email_prov' => $up['email_prov'],
+                        'pc.fecha_last_update' => $date,
+                        'pc.id_user_last_modifi' => $user_id,
                     ]);
                 }
             }
@@ -77,7 +87,6 @@ class Clientes extends Model
         } catch (Exception $ex) {
             DB::rollBack();
         }
-        
     }
     public static function updateEstusFile($datos,$nro_doc)
     {
@@ -97,6 +106,26 @@ class Clientes extends Model
     {
         return DB::select('CALL sp_obtener_clientes_filtros(?)', [$datos['estadoDoc']]);
 
+    }
+    public static function obtenerProveedor($id_proveedor)
+    {
+        $proveedor = DB::table('proveedor_clientes')->where(['activo' => 1, 'id' => $id_proveedor])->first();
+        if (!empty($proveedor)) {
+            $proveedor->listProv = (new Ubigeo)->getProvinciasCliente($proveedor->depa_prov);
+            $proveedor->listDist = (new Ubigeo)->getDistritosCliente($proveedor->prov_prov);
+        } else {
+            $proveedor = false;
+        }
+
+        return $proveedor;
+    }
+    public static function obtenerCliDeCli($id_cliente)
+    {
+        return DB::table('clientes_de_clientes AS cli')->leftJoin('relacion_cliente_cliente AS cc', 'cli.id', '=', 'cc.id_cliente_de_cliente')->where(['cli.activo' => 1, 'cc.id_cliente' => $id_cliente])->get();
+    }
+    public static function detalleCliDeCli($id_cli)
+    {
+        return DB::table('clientes_de_clientes')->where(['id' => $id_cli, 'activo' => 1])->first();
     }
 
 }

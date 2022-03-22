@@ -10,4 +10,8 @@ class Vehiculos extends Model
     protected $table = 'vehiculos';
     public $timestamps = false;
     
+    public static function obtenerVehiculos()
+    {
+        return Vehiculos::where(['activo' => 1])->orderBy('placa')->get();
+    }
 }

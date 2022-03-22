@@ -30,6 +30,7 @@
             <thead>
                 <tr>
                     <th>N°</th>
+                    <th>N° Doc</th>
                     <th>Cliente</th>
                     <th>Direccion</th>
                     <th>Representante</th>

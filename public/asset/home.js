@@ -88,10 +88,16 @@ function loadPage(){
         width: '100%',
         tags: true
     });
+    $('.cb-select2-tags').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder : 'Seleccione o agregue una opción',
+        tags: true
+    });
     $('.simple-select2').select2({
         theme: 'bootstrap',
         width: '100%',
         placeholder: 'Seleccione una opción'
-    })
+    });
 }
 window.addEventListener('DOMContentLoaded',loadPage);

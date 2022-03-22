@@ -111,6 +111,11 @@
                 <span id="id_text_direccion_cli"></span>
                 <input hidden name="direccion_cli" id="id_direccion_cli" type="text" class="form-control form-control-sm">
             </div>
+             <div class="form-group col-12">
+                <label for="id_id_cluster">Cluster</label>
+                <span id="id_text_nomcluster"></span>
+                <input hidden name="id_cluster" id="id_id_cluster" type="text" class="form-control form-control-sm">
+            </div>
              <div class="form-group col-12 col-lg-6">
                 <label for="id_id_conductor">Conductor</label>
                 <span id="id_text_nom_conductor"></span>

@@ -39,6 +39,7 @@
                 <th>Fecha Soli</th>
                 <th>Día Recojo</th>
                 <th>Hr Reco</th>
+                <th>N° Doc</th>
                 <th>Nom Cliente</th>
                 <th>Direc Recojo</th>
                 <th>Bulto</th>

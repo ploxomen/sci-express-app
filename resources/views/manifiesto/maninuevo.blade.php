@@ -12,21 +12,18 @@
             </div>
             <h3 class="text-primary text-center">Nuevo manifiesto</h3>
         </div>
-        <div class="form-group col-12 col-md-6 col-lg-3">
-            <label for="id_fech_mani">Fecha maniesto</label>
-            <input type="date" class="form-control" name="fech_mani" id="id_fech_mani" value="{{$hoy}}">
-        </div>
-        <div class="form-group col-12 col-md-6 col-lg-3">
+        
+        <div class="form-group col-12 col-md-6 col-lg-4">
             <label for="id_trayecto">Trayecto</label>
-            <select name="trayecto" id="id_trayecto" class="form-control">
+            <select name="trayecto" id="id_trayecto" class="form-control" required>
                 @foreach ($trayectos as $trayecto)
                     <option value="{{$trayecto->id}}">{{$trayecto->tipo}}</option>
                 @endforeach
             </select>
         </div>
-        <div class="form-group col-12 col-md-6 col-lg-3">
+        <div class="form-group col-12 col-md-6 col-lg-4">
             <label for="id_prov_orig">Provincia Origen</label>
-            <select name="prov_orig" id="id_prov_orig" class="form-control cb-prov">
+            <select name="prov_orig" id="id_prov_orig" class="form-control cb-prov" required>
                 <option></option>
                 @foreach ($departamentoProv as $depart)
                     <optgroup label="{{$depart['nom_ubigeo_dep']}}">
@@ -37,9 +34,9 @@
                 @endforeach
             </select>
         </div>
-        <div class="form-group col-12 col-md-6 col-lg-3">
+        <div class="form-group col-12 col-md-6 col-lg-4">
             <label for="id_prov_dest">Provincia Destino</label>
-            <select name="prov_dest" id="id_prov_dest" class="form-control cb-prov">
+            <select name="prov_dest" id="id_prov_dest" class="form-control cb-prov" required>
                 <option></option>
                 @foreach ($departamentoProv as $depart)
                     <optgroup label="{{$depart['nom_ubigeo_dep']}}">
@@ -47,15 +44,6 @@
                             <option value="{{$prov->id_ubigeo}}">{{$prov->nombre_ubigeo}}</option>
                         @endforeach
                     </optgroup>
-                @endforeach
-            </select>
-        </div>
-        <div class="form-group col-12 col-md-6 col-lg-3">
-            <label for="id_cluster">Cluster</label>
-            <select name="cluster" id="id_cluster" class="form-control cb-prov">
-                <option></option>
-                @foreach ($clusters as $clu)
-                    <option value="{{$clu->id}}">{{$clu->nombres}}</option>
                 @endforeach
             </select>
         </div>
@@ -85,6 +73,7 @@
                         </th>
                         <th>N°</th>
                         <th>Fch Emisión</th>
+                        <th>Prov Orig</th>
                         <th>Prov Dest</th>
                         <th>N° Ord Comp</th>
                         <th>Venc Ord Comp</th>
@@ -98,4 +87,5 @@
             </table>
         </div>
     </section>
+@include('modal.nuevomanifiesto')
 @endsection

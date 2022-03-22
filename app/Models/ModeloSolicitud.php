@@ -60,24 +60,22 @@ class ModeloSolicitud extends Model
         $datos['user_create'] = $user;
         $id_proveedor = 0;
         if($datos['nuevo_prov'] == 'true' && isset($datos['agregar_prov'])){
+            $proveedor = [
+                'tipo_docu_prov' => $datos['doc_iden_soli'],
+                'nro_docu_prov' => $datos['nro_doc_soli'],
+                'nomb_prov' => $datos['id_soli'],
+                'depa_prov' => $datos['depar_cli'],
+                'prov_prov' => $datos['ciudad_cli'],
+                'dist_prov' => $datos['distrito_cli'],
+                'dire_prov' => $datos['direccion_cli']
+            ];
+            $id_proveedor = DB::table('proveedor_clientes')->insertGetId($proveedor);
             if($datos['agregar_prov'] == 'true'){
-                $proveedor = [
-                    'id_cliente' => $datos['id_cliente'],
-                    'tipo_docu_prov' => $datos['doc_iden_soli'],
-                    'nro_docu_prov' => $datos['nro_doc_soli'],
-                    'nomb_prov' => $datos['id_soli'],
-                    'depa_prov' => $datos['depar_cli'],
-                    'prov_prov' => $datos['ciudad_cli'],
-                    'dist_prov' => $datos['distrito_cli'],
-                    'dire_prov' => $datos['direccion_cli']
-                ];
-                $id_proveedor = DB::table('proveedor_clientes')->insertGetId($proveedor);
+               DB::table('relacion_cliente_proveedor')->insert(['id_cliente' => $datos['id_cliente'], 'id_proveedor' => $id_proveedor]);
             }
-            $datos['nom_soli'] = $datos['id_soli'];
         }
         if(!is_null($datos['id_soli']) && $datos['nuevo_prov'] == 'false'){
             $id_proveedor = intval($datos['id_soli']) === 0 ? 0 : $datos['id_soli'];
-            $datos['nom_soli'] = (DB::table('proveedor_clientes')->select('nomb_prov')->where(['activo' => 1 , 'id' => $datos['id_soli']])->first())->nomb_prov;
         }
         $datos['id_soli'] = $id_proveedor;
         if (isset($datos['nuevo_prov'])) {
@@ -91,16 +89,5 @@ class ModeloSolicitud extends Model
         return true;
         
     }
-    public static function obtenerProveedor($id_proveedor)
-    {
-        $proveedor = DB::table('proveedor_clientes')->where(['activo' => 1, 'id' => $id_proveedor])->first();
-        if(!empty($proveedor)){
-            $proveedor->listProv = (new Ubigeo)->getProvinciasCliente($proveedor->depa_prov);
-            $proveedor->listDist = (new Ubigeo)->getDistritosCliente($proveedor->prov_prov);
-        }else{
-            $proveedor = false;
-        }
-        
-        return $proveedor;
-    }
+    
 }

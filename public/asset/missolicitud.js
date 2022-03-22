@@ -12,10 +12,11 @@ function loadPage(){
             {data: 'fecha_soli', name: 'fecha_soli'},
             {data: 'dia_recojo', name: 'dia_recojo'},
             {data: 'hr_estimado', name: 'hr_estimado'},
+            {data: 'nro_doc', name : 'nro_doc'},
             {data: 'nom_cli', name: 'nom_cli'},
             {data: 'direccion_cli', name: 'direccion_cli'},
             {data: 'cant_bulto', name: 'cant_bulto'},
-            {data: 'nom_soli', name: 'nom_soli'},
+            {data: 'nomb_prov', name: 'nomb_prov'},
             {data: 'tipo', name: 'tipo'},
             {data: 'id_user', searchable: false, render: function(data,type,full){
                 let tempUsu = `<option></option>`;
@@ -65,9 +66,15 @@ function loadPage(){
             });
         }
     });
+    function verifTrayectoSoli(elements,disabled){
+        elements.forEach(e => {
+            document.getElementById(e).parentElement.hidden = disabled;  
+        });
+    }
     let tablaSoli = document.getElementById('tabla-solicitudes');
     tablaSoli.addEventListener('click',async function(e){
         if(e.target.classList.contains('view-solicitud')){
+            verifTrayectoSoli(['id_text_nomcluster','id_text_nom_conductor','id_text_nom_dealer'],true);
             let datos = new FormData();
             datos.append('id_solicitud',e.target.dataset.solicitud);
             let response = await general.funcfetch('ver-detalle',datos);
@@ -88,6 +95,11 @@ function loadPage(){
                     }
                     dom.textContent = valor;
                 }
+            }
+            if(response.success.trayecto === 4 || response.success.trayecto === 2){
+                verifTrayectoSoli(['id_text_nomcluster'],false);
+            }else{
+                verifTrayectoSoli(['id_text_nom_conductor','id_text_nom_dealer'],false);
             }
             $('#detalle-solicitud').modal('show');
         }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Clientes;
 use App\Models\EstadoSolicitud;
+use App\Models\ModeloCluster;
 use App\Models\ModeloRecojo;
 use App\Models\ModeloSolicitud;
 use App\Models\User;
@@ -21,7 +22,7 @@ class Recojo extends Controller
         $estados_solicitud = EstadoSolicitud::where(['activado' => 1])->get();
         $conductores = Usuario::obtenerUsuarioRol(5);
         $dealers = Usuario::obtenerUsuarioRol(4);
-        $vehiculos = Vehiculos::where(['activo' => 1])->orderBy('placa')->get();
+        $vehiculos = Vehiculos::obtenerVehiculos();
         return view('pedidos.recojos',compact('vehiculos','conductores', 'dealers','clientes','estados_solicitud','modulos'));
     }
     public function recojoPendiente(Request $request)
@@ -48,7 +49,7 @@ class Recojo extends Controller
     public function agregarRecojo(Request $request)
     {
         try {
-            $datos = $request->only('id_solicitud', 'id_vehiculo', 'id_conductor', 'id_dealer', 'hr_llegada', 'hr_despacho', 'hr_salida', 'doc_recojo', 'nro_guias_conso');
+            $datos = $request->only('id_solicitud', 'id_cluster','id_vehiculo', 'id_conductor', 'id_dealer', 'hr_llegada', 'hr_despacho', 'hr_salida', 'doc_recojo', 'nro_guias_conso');
             ModeloRecojo::insert($datos);
             $estadoReco = $this->filterStadoSoli($request->all());
             ModeloSolicitud::where(['id' => $request->id_solicitud])->update(['estado' => $estadoReco, 'dia_recojo' => $request->dia_recojo, 'cant_bultos' => $request->cant_bulto]);
@@ -60,7 +61,7 @@ class Recojo extends Controller
     public function filterStadoSoli($datos)
     {
         $estado = 1;
-        if(!empty($datos['dia_recojo']) && !empty($datos['id_vehiculo']) && !empty($datos['id_conductor']) && !empty($datos['id_dealer'])){
+        if(!empty($datos['dia_recojo']) && !empty($datos['id_vehiculo']) && ((!empty($datos['id_conductor']) && !empty($datos['id_dealer'])) ||  !empty($datos['id_cluster']))){
             $estado = 2;
             if(!empty($datos['hr_llegada']) || !empty($datos['hr_despacho']) || !empty($datos['hr_salida'])){
                 $estado = 3;
@@ -84,7 +85,7 @@ class Recojo extends Controller
     public function modificarRecojo(Request $request)
     {
         try {
-            $datos = $request->only('id_vehiculo', 'id_dealer', 'id_conductor', 'hr_llegada', 'hr_despacho', 'hr_salida', 'doc_recojo', 'nro_guias_conso');
+            $datos = $request->only('id_vehiculo', 'id_cluster', 'id_dealer', 'id_conductor', 'hr_llegada', 'hr_despacho', 'hr_salida', 'doc_recojo', 'nro_guias_conso');
             ModeloRecojo::where(['id' => $request->id_recojo])->update($datos);
             $estadoReco = $this->filterStadoSoli($request->all());
             ModeloSolicitud::where(['id' => $request->id_solicitud])->update(['estado' => $estadoReco, 'dia_recojo' => $request->dia_recojo, 'cant_bulto' => $request->cant_bulto]);
@@ -97,7 +98,11 @@ class Recojo extends Controller
     {
         try {
             $recojos = ModeloRecojo::getRecojos($request->id_solicitud);
-            return response()->json(['recojos' => $recojos]);
+            $clusters = null;
+            if(!is_null($recojos) && ($recojos->trayecto == 2 || $recojos->trayecto == 4)){
+                $clusters = ModeloCluster::obtenerClusterProvincia($recojos->ciudad_cli);
+            }
+            return response()->json(['recojos' => $recojos,'clusters' => $clusters]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }

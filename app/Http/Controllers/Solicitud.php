@@ -48,7 +48,7 @@ class Solicitud extends Controller
     {
         try {
             if ($request->ajax()) {
-                $proovedor = ModeloSolicitud::obtenerProveedor($request->id_proveedor);
+                $proovedor = Clientes::obtenerProveedor($request->id_proveedor);
                 return response()->json(['proveedor' => $proovedor]);
             }
         } catch (Exception $ex) {

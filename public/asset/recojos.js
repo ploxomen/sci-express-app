@@ -6,13 +6,16 @@ function loadPage(){
     let btnCancel = document.getElementById('btn-cancelar');
     let datosGlobales = {
         id_recojo : null,
-        id_solicitud : null
+        id_solicitud : null,
+        cluster: false
     };
     bodySoli.addEventListener('click',async function(event) {
         if(event.target.classList.contains('btn_editar')){
+            verifTrayecto(['id_id_cluster','id_id_conductor','id_id_dealer'],true);
             frmSoli.reset();
             datosGlobales.id_recojo = null;
             datosGlobales.id_solicitud = null;
+            datosGlobales.cluster = false;
             let datos = new FormData();
             datos.append('id_solicitud',event.target.dataset.idsolicitud);
             let response = await general.funcfetch('recojos/obtener',datos);
@@ -26,6 +29,13 @@ function loadPage(){
                 changeEstadoInput(false,'Agregar');
                 $('.simple-select2').val('').trigger('change');
             }else{
+                if(response.clusters){
+                    let tempClu = `<option></option>`;
+                    response.clusters.forEach(c => {
+                        tempClu += `<option value="${c.id}">${c.nom}</option>`;
+                    });
+                    document.getElementById('id_id_cluster').innerHTML = tempClu;
+                }
                 for (const key in response.recojos) {
                     if (Object.hasOwnProperty.call(response.recojos, key)) {
                         const valor = response.recojos[key];
@@ -44,6 +54,12 @@ function loadPage(){
                         dom.value = valor;
                     }
                 }
+                if(response.recojos.trayecto === 4 || response.recojos.trayecto === 2){
+                    verifTrayecto(['id_id_cluster'],false);
+                    datosGlobales.cluster = true;
+                }else{
+                    verifTrayecto(['id_id_conductor','id_id_dealer'],false);
+                }
                 changeEstadoInput(false,'Actualizar');
                 if(response.recojos.estado_soli == 4){
                     datosGlobales.id_recojo = false;
@@ -56,6 +72,12 @@ function loadPage(){
             }
         }
     });
+    function verifTrayecto(elements,disabled){
+        elements.forEach(e => {
+            document.getElementById(e).disabled = disabled;
+            document.getElementById(e).parentElement.hidden = disabled;  
+        });
+    }
     let datatableSoli = $('#tabla-solicitud').DataTable({
         ajax : {
             url: './../solicitud/obtener?recojos=true',
@@ -68,7 +90,8 @@ function loadPage(){
             {data: 'fecha_soli', name: 'fecha_soli'},
             {data: 'dia_recojo', name: 'dia_recojo'},
             {data: 'hr_estimado', name: 'hr_estimado'},
-            {data: 'nom_soli', name: 'nom_soli'},
+            {data: 'nomb_prov', name: 'nomb_prov'},
+            {data: 'nro_doc', name: 'nro_doc'},
             {data: 'nom_cli', name: 'nom_cli'},
             {data: 'tipo', name: 'tipo'},
             {data: 'direccion_cli', name: 'direccion_cli'},
@@ -109,6 +132,12 @@ function loadPage(){
         datos.append('id_solicitud',datosGlobales.id_solicitud);
         if(datosGlobales.id_recojo){
             datos.append('id_recojo',datosGlobales.id_recojo);
+        }
+        if(datosGlobales.cluster){
+            datos.set('id_conductor',"");
+            datos.set('id_dealer',"");
+        }else{
+            datos.set('id_cluster',"");
         }
         let response = await general.funcfetch(url,datos);
         if(response.error){

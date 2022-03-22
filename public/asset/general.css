@@ -200,6 +200,7 @@ table thead tr th{
     .navegacion {
         position: fixed;
         left: -300px;
+        z-index: 99999;
     }
     .cuerpo-panel {
         width: 100% !important;
@@ -209,7 +210,6 @@ table thead tr th{
         width: 90%;
         max-width: 300px;
         left: 0;
-        z-index: 9999;
     }
     .menu-small+.panel,
     .menu-small~.cuerpo-panel {
@@ -225,6 +225,7 @@ table thead tr th{
     .activeli{
         background: var(--color-secundario) !important;
     }
+    .menu-small .menu .menu-desplegable .sub-menu .hover-menu:hover a,
     .menu-small .menu .sub-menu .activeli a {
         color: var(--color-principal) !important;
     }

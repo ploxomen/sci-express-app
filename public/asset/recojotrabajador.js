@@ -8,9 +8,15 @@ function loadPage(){
         newDatos.append('id_recojo',id);
         if(cantBulto){
             newDatos.append('cant_bulto',cantBulto.value);
+            if(!cantBulto.value){
+                return false
+            }
         }
         if(nroGuias){
             newDatos.append('nro_guias_conso',nroGuias.value);
+            if(!nroGuias.value){
+                return false
+            }
         }
         if(selectRadio){
             for (const radio of selectRadio) {
@@ -27,6 +33,10 @@ function loadPage(){
             event.preventDefault();
             const idRecojo = this.dataset.recojo;
             const ndatos = datos(idRecojo);
+            if(ndatos === false){
+                alertify.alert('Mensaje','Por favor asegurate que los campos de documento recojo, N° de guías consolidadas y cantida de bultos esten llenadas correctamente');
+                return
+            }
             try {
                 let response = await general.funcfetch('actualizar-trabajador',ndatos);
                 if(response.error){

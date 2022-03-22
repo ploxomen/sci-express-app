@@ -33,7 +33,6 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
     Route::prefix('manifiesto')->group(function () {
         Route::get('ver', [Manifiesto::class, 'viewManifiesto'])->name('viewManifi');
         Route::get('nuevo', [Manifiesto::class, 'viewNuevoManifiesto'])->name('viewNuevoManif');
-        Route::get('programar-embarque', [Manifiesto::class, 'viewProgEmba'])->name('viewProgEmba');
         Route::post('ver-guias', [Manifiesto::class, 'viewGuias']);
         Route::post('agregar', [Manifiesto::class, 'agregarManifiesto']);
     });
@@ -43,6 +42,9 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
         Route::post('modificar',[Usuario::class,'modificar']);
         Route::get('lista',[Usuario::class,'viewLista'])->name('usuLista');
         Route::get('logout',[Usuario::class,'cerrarSesion'])->name('closeSesion');
+    });
+    Route::prefix('cluster')->group(function () {
+        Route::post('obtener-provincia', [Manifiesto::class, 'obtenerClusterProv']);
     });
     Route::prefix('pedidos')->group(function(){
         Route::prefix('recojos')->group(function () {
@@ -54,13 +56,32 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
             Route::post('modificar', [Recojo::class, 'modificarRecojo']);
             Route::post('modificar-estados', [Recojo::class, 'modificarEstados']);
         });
-        Route::get('lista-embaque',[Embarque::class,'viewListEmba'])->name('pedidoListEmbar');
-        Route::get('llegada',[Llegada::class,'viewLlegada'])->name('pedidoLlegada');
+        Route::prefix('embarque')->group(function () {
+            Route::get('pendientes', [Embarque::class, 'viewListEmba'])->name('pedidoListEmbar');
+            Route::post('manifiesto/pendientes', [Embarque::class, 'obtenerManiPend']);
+            Route::post('manifiesto/embarcar', [Embarque::class, 'embarcarMani']);
+            Route::get('transporte', [Embarque::class, 'transporteEmbarque'])->name('embarqueTrabajo');
+            Route::post('actualizar-estado', [Embarque::class, 'actualizarEmbarque']);
+            Route::get('informe', [Manifiesto::class, 'viewProgEmba'])->name('viewProgEmba');
+            Route::post('obtener-informe', [Embarque::class, 'obtenerInformeEmbarque']);
+            Route::post('obtener-informe-detalle', [Embarque::class, 'obtenerInfoEmbDeta']);
+            Route::post('agregar-informe', [Embarque::class, 'agregarInforme']);
+        });
+        Route::prefix('llegada')->group(function () {
+            Route::get('/', [Llegada::class, 'viewLlegada'])->name('pedidoLlegada');
+            Route::post('embarques/arribar',[Llegada::class,'obtenerEmbarqueArribar']);
+            Route::post('arribar-guias', [Llegada::class, 'actualizarGuiasLlegada']);
+
+        });
         Route::get('entrega',[Entrega::class,'viewEntrega'])->name('pedidoEntrega');
     });
     Route::prefix('comprobante')->group(function(){
-        Route::get('guias',[Gias::class,'viewGuias'])->name('compGuias');
-        Route::post('agregar-guia', [Gias::class, 'addGuia']);
+        Route::prefix('guias')->group(function () {
+            Route::get('/', [Gias::class, 'viewGuias'])->name('compGuias');
+            Route::post('obtener-clipro', [Gias::class, 'obtenerCliOrProvDeta']);
+            Route::post('detalle-cli-de-cli', [Gias::class, 'detalleCliDeCli']);
+            Route::post('agregar-guia', [Gias::class, 'addGuia']);
+        });
     });
     Route::prefix('solicitud')->group(function () {
         Route::post('ver-proveedor', [Solicitud::class, 'obtenerProveedor']);

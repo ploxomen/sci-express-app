@@ -10,6 +10,7 @@ function loadedPage(){
         },
         columns: [
             {data: null},
+            {data: 'nro_doc', name: 'nro_doc'},
             {data: 'nom_cli', name: 'nom_cli'},
             {data: 'dir_sede_adr', name: 'dir_sede_adr'},
             {data: 'nom_rl', name: 'nom_rl'},
