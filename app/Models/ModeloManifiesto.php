@@ -73,9 +73,9 @@ class ModeloManifiesto extends Model
         }
         
     }
-    public static function obtenerEmbarcar($provincia)
+    public static function obtenerEmbarcar($provincia,$id_usuario)
     {
-        $manifiestos = DB::select('call sp_obtener_manifiesto_embarcar(?)',[$provincia]);
+        $manifiestos = DB::select('call sp_obtener_manifiesto_embarcar(?,?)',[$provincia, $id_usuario]);
         foreach ($manifiestos as $m) {
             $m->prov_orig = (new Ubigeo)->getNameProvincia($m->prov_orig);
             $m->prov_dest = (new Ubigeo)->getNameProvincia($m->prov_dest);

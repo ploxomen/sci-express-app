@@ -1,10 +1,5 @@
 $(document).ready(function(){
     $.extend(true,$.fn.dataTable.defaults,{
-        columnDefs: [ {
-            "searchable": false,
-            "orderable": false,
-            "targets": 0
-        } ],
         responsive: true,
         autoWidth: false,
         processing: true,

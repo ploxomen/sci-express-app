@@ -17,14 +17,64 @@ class Gias extends Controller
     public function viewGuias()
     {
         $modulos = User::getModulos(Auth::id());
-        $comprobantes = InformacionAdicional::obtenerComprobantes();
         $via_envios = InformacionAdicional::viaEnvio();
         $tipo_documentos = Documentos::where('estado','1')->get();
         $departamentos = (new Ubigeo)->getDepartamentosClientes();
         $trayecto = TrayectoEnvio::where(['estado' => 1])->get();
         $clientes = Clientes::obtenerCliConProvee();
+        $cli_cli = Clientes::obtenerCliDeCli();
         $hoy = date('Y-m-d');
-        return view('comprobante.guias',compact('clientes','departamentos','hoy','trayecto','comprobantes','via_envios','tipo_documentos','modulos'));
+        return view('comprobante.guias',compact('cli_cli','clientes','departamentos','hoy','trayecto','via_envios','tipo_documentos','modulos'));
+    }
+    public function detalleMisGuias(Request $request)
+    {
+        try {
+            return response()->json(['datos' => ModeloGuias::obtenerDetalleMisGuias($request->guia)]);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function misGuias()
+    {
+        $modulos = User::getModulos(Auth::id());
+        $estado_guias = InformacionAdicional::situacionEstado();
+        $nro_por_asignar = ModeloGuias::guiaPorAsignar();
+        return view('comprobante.misguias',compact('modulos', 'estado_guias', 'nro_por_asignar'));
+    }
+    public function anularGuia(Request $request)
+    {
+        try {
+            ModeloGuias::anularGuias($request->id_guia);
+            return response()->json(['success' => 'Guia anulada correctamente']);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function cambiarEstadoGuia(Request $request)
+    {
+        try {
+            ModeloGuias::cambioEstadoGuia($request->id_guia, $request->estado);
+            return response()->json(['success' => 'Estado de guia cambiada con éxito']);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function asignarUsuario(Request $request)
+    {
+        try {
+            $total = ModeloGuias::asignarPersona($request->id_user,$request->id_guia);
+            $resta = isset($total[0]->total) ? $total[0]->total : 0;
+            return response()->json(['success' => 'Guia asignada correctamente','procesar' => $resta]);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function obtenerMisGuias(Request $request)
+    {
+        if($request->ajax()){
+            $guias = ModeloGuias::mostrarTodasGuias($request->estado,$request->tipo);
+            return datatables()->of($guias)->toJson();
+        }
     }
     public function addGuia(Request $request)
     {
@@ -53,8 +103,6 @@ class Gias extends Controller
         try {
             $provincias = [];
             $distritos = [];
-            $id_cli_cli = $request->has('idcliente') ? $request->idcliente : $request->id;
-            $cli_cli = Clientes::obtenerCliDeCli($id_cli_cli);
             if($request->tipo == 'cliente'){
                 $datos = Clientes::getDetalleSoliCli($request->id);
                 $provincias = Ubigeo::getProvinciasCliente($datos->dpto_so);
@@ -64,7 +112,7 @@ class Gias extends Controller
                 $provincias = $datos->listProv;
                 $distritos = $datos->listDist;
             }
-            return response()->json(['datos' => $datos, 'prov' => $provincias, 'dist' => $distritos,'cli' => $cli_cli]);
+            return response()->json(['datos' => $datos, 'prov' => $provincias, 'dist' => $distritos]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }

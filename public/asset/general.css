@@ -271,6 +271,14 @@ table thead tr th{
     transform-origin: right;
     transition: all .5s ease-in-out;
 }
+.cuadro {
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+}
+.form-control{
+    text-transform: uppercase;
+}
 .legend-add{
     font-size: 17px;
 }

@@ -1,6 +1,6 @@
 @extends('general.index')
 @section('head')
-    <title>Agregar o modificar usuarios</title>
+    <title>Agregar usuarios</title>
     <script src="{{asset('asset/auth/crear_usuario.js')}}"></script>
 @endsection
 @section('body')
@@ -8,43 +8,44 @@
         <div class="baner-modulo">
             <img src="{{asset('asset/img/intranet/add-user.png')}}" alt="Imagen de clientes">
         </div>
-        <h3 class="text-primary text-center">Agregar o modificar usuario</h3>
+        <h3 class="text-primary text-center">Agregar usuarios</h3>
     </div>
     <section class="bg-white p-2">
         <form id="frm-add-user">
             <fieldset class="px-3 border mb-2 row">
                 <legend class="d-inline-block w-auto px-2 border shadow-sm text-left legend-add">Datos personales</legend>
                 <div class="form-group col-12 col-md-6">
-                    <label for="type_document">Tipo de documento:</label>
-                    <select name="type_document" id="type_document" class="form-control">
+                    <label for="type_document">Tipo de documento: <small class="text-danger">*</small> </label>
+                    <select name="type_document" id="type_document" class="form-control" required>
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6">
-                    <label for="n_document">N° de documento:</label>
-                    <input type="text" name="n_document" id="n_document" class="form-control">
+                    <label for="n_document">N° de documento: <small class="text-danger">*</small></label>
+                    <input type="text" name="n_document" id="n_document" class="form-control" required>
                 </div>
                 <div class="form-group col-12 col-md-6">
-                    <label for="name">Nombres:</label>
-                    <input type="text" name="name" id="name" class="form-control">
+                    <label for="name">Nombres: <small class="text-danger">*</small></label>
+                    <input type="text" name="name" id="name" class="form-control" required>
                 </div>
                 <div class="form-group col-12 col-md-6">
-                    <label for="last_name">Apellidos:</label>
-                    <input type="text" name="last_name" id="last_name" class="form-control">
+                    <label for="last_name">Apellidos: <small class="text-danger">*</small></label>
+                    <input type="text" name="last_name" id="last_name" class="form-control" required>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3 col-xl-4">
-                    <label for="email">Correo:</label> 
-                    <input type="email" class="form-control" name="email" id="email">
+                    <label for="email">Correo: <small class="text-danger">*</small></label>
+                    <input type="email" class="form-control" name="email" id="email" required>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3 col-xl-3">
-                    <label for="phone">Celular:</label> 
-                    <input type="tel" class="form-control" name="phone" id="phone">
+                    <label for="phone">Celular: <small class="text-danger">*</small></label> 
+                    <input type="tel" maxlength="9" minlength="9" class="form-control" name="phone" id="phone" required>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3 col-xl-2">
                     <label for="id_sexo">Sexo:</label> 
                     <select name="sexo" id="id_sexo" class="form-control">
+                        <option value="" hidden>Selecione una opción</option>
                         <option value="H">Hombre</option>
                         <option value="M">Mujer</option>
                     </select>
@@ -62,8 +63,8 @@
                 <legend class="d-inline-block w-auto px-2 border shadow-sm text-left legend-add">Datos del sistema</legend>
                 <div class="row">
                     <div class="form-group col-12 col-md-6 col-lg-4">
-                        <label for="areas">Área:</label>
-                        <select name="id_area" class="form-control" id="areas">
+                        <label for="areas">Área: <small class="text-danger">*</small></label>
+                        <select name="id_area" class="form-control" id="areas" required>
                             <option></option>
                             @foreach ($areas as $area)
                                 <option value="{{$area->id}}">{{$area->area}}</option>
@@ -71,8 +72,8 @@
                         </select>
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-4">
-                        <label for="roles">Roles:</label>
-                        <select name="roles[]" class="form-control" multiple id="roles">
+                        <label for="roles">Roles: <small class="text-danger">*</small></label>
+                        <select name="roles[]" class="form-control" multiple id="roles" required>
                             <option></option>
                             @foreach ($roles as $rol)
                                 <option value="{{$rol->id}}">{{$rol->rol}}</option>
@@ -80,8 +81,8 @@
                         </select>
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-4">
-                        <label for="">Contraseña temporal:</label>
-                        <input type="password" class="form-control">
+                        <label for="password-temp">Contraseña temporal: <small class="text-danger">*</small></label>
+                        <input name="password" required type="text" id="password-temp" class="form-control" value="{{env('PASSWORD_DEFAULT') . date('Y') . '@'}}">
                     </div>
                 </div>
                 

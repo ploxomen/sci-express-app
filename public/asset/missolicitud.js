@@ -21,7 +21,7 @@ function loadPage(){
             {data: 'id_user', searchable: false, render: function(data,type,full){
                 let tempUsu = `<option></option>`;
                 for (let i = 0; i < full.listUsu.length; i++) {
-                    tempUsu += `<option value="${full.listUsu[i].id}" ${data == full.listUsu[i].id ? 'selected' : ''}>${full.listUsu[i].name} ${full.listUsu[i].last_name}</option>`;
+                    tempUsu += `<option ${full.listUsu[i].status != 1 ? 'disabled' : ''} value="${full.listUsu[i].id}" ${data == full.listUsu[i].id ? 'selected' : ''}>${full.listUsu[i].name} ${full.listUsu[i].last_name}</option>`;
                 }
                 return `<select data-solicitud="${full.id}" class="form-control form-control-sm cb-usuarios">${tempUsu}</select>`;
             }},

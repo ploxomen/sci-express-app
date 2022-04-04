@@ -22,7 +22,7 @@
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_estado">Estado</label>
+                    <label for="id_estado">Tipo</label>
                     <select name="estado" id="id_estado" class="form-control">
                         <option value="1">ACTIVA</option>
                         <option value="2">ANULADA</option>
@@ -44,9 +44,11 @@
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_comp_clie">Comprobantes</label>
                     <select name="comp_clie[]" id="id_comp_clie" class="form-control" multiple>
-                        @foreach ($comprobantes as $comp)
-                            <option value="{{$comp->id}}">{{$comp->comprobantes}}</option>
-                        @endforeach
+                        <option value="BOLETA">BOLETA</option>
+                        <option value="FACTURA">FACTURA</option>
+                        <option value="GUIA">GUIA</option>
+                        <option value="GUIA INTERNAMIENTO">GUIA INTERNAMIENTO</option>
+                        <option value="ORDEN COMPRA">ORDEN COMPRA</option>
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
@@ -159,6 +161,9 @@
                     <label for="id_dest_nomb">Nombres</label>
                     <select class="form-control cb-select2-tags" name="id_destinatario" id="id_dest_nomb">
                         <option></option>
+                        @foreach ($cli_cli as $c)
+                            <option value="{{$c->id}}">{{$c->nombres}}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="form-group col-12 col-lg-6">
@@ -205,7 +210,7 @@
                     <input type="text" class="form-control" name="dias_tran" id="id_dias_tran">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="">Cst_Mest_Env</label>
+                    <label for="">Costo Estimado Envio</label>
                     <input type="text" class="form-control" name="cst_mest_env" id="id_cst_mest_env">
                 </div>
             </div>
@@ -225,10 +230,10 @@
                             <th style="width: 200px;">Embase o <br> Embalaje</th>
                             <th style="width: 100px;">Cantida</th>
                             <th style="width: 100px;">Kg</th>
-                            <th style="width: 100px;">Lar</th>
-                            <th style="width: 100px;">Anc</th>
-                            <th style="width: 100px;">Alt</th>
-                            <th style="width: 100px;">Vol</th>
+                            <th style="width: 100px;">Lar / m</th>
+                            <th style="width: 100px;">Anc / m</th>
+                            <th style="width: 100px;">Alt / m</th>
+                            <th style="width: 100px;">Vol / m<sup>3</sup></th>
                         </tr>
                     </thead>
                     <tbody id="tabla-detalle">

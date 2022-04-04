@@ -34,6 +34,14 @@ class General{
             })
         }
     }
+    totalBultos(domtotal){
+        let total = 0;
+        for (const element of document.querySelectorAll(domtotal)) {
+            const valor = parseInt(element.value);
+            total += isNaN(valor) ? 0 : valor;
+        }
+        return total;
+    }
     primerProveedor(boleano,element){
         element.children[0].hidden = boleano;
         for (const ele of element.children[0].querySelectorAll(`[data-selected="true"]`)) {

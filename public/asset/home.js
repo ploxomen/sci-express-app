@@ -16,7 +16,6 @@ function loadPage(){
         localStorage.setItem('active_small_menu',verif);
         let liActive = document.querySelector('.activeli');
         for (const element of document.querySelectorAll('.active-menu')) {
-            console.log(element);
             element.classList.remove('active-menu');
         }
         if(!verif){

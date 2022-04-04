@@ -99,16 +99,8 @@ function loadPage(){
     }
     for (const e of document.querySelectorAll('.calc-total')) {
         e.addEventListener('change',function(e){
-            document.getElementById('total_bultos').value = totalBultos();
+            document.getElementById('total_bultos').value = general.totalBultos('.calc-total');
         });
-    }
-    function totalBultos(){
-        let total = 0;
-        for (const element of document.querySelectorAll('.calc-total')) {
-            const valor = parseInt(element.value);
-            total += isNaN(valor) ? 0 : valor;
-        }
-        return total;
     }
 }
 window.addEventListener('DOMContentLoaded',loadPage);

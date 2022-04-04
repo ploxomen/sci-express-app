@@ -90,11 +90,65 @@ class ModeloEmbarque extends Model
                     $mani->dest_dist = (new Ubigeo)->getNameDistrito($mani->dest_dist);
                     $mani->detalles_guias = DB::table('detalle_guias')->where(['id_guia' => $mani->id])->get();
                 }
+            break;
+            
         }
         return $result;
+    }
+    public static function devolucionCargo($guia,$tipo,$usuario)
+    {
+        $result = DB::select('CALL sp_retorno_cargo(?,?,?)',[$guia,$usuario,$tipo]);
+        if($tipo == 'ver-cargos-pendientes'){
+            foreach ($result as $guia) {
+                $guia->remi_prov = (new Ubigeo)->getNameProvincia($guia->remi_prov);
+                $guia->dest_prov = (new Ubigeo)->getNameProvincia($guia->dest_prov);
+            }
+        }
+        return $result;
+    }
+    public static function actualizarDevolucionCargo($nuevo_retorno,$guias,$usuario)
+    {
+        DB::beginTransaction();
+        try {
+            $id_retorno = DB::table('retorno_cargo')->insertGetId($nuevo_retorno);
+            for ($i=0; $i < count($guias) ; $i++) {
+                $guias[$i]['id_retorno_cargo'] = $id_retorno;
+                DB::select('CALL sp_retorno_cargo(?,?,?)', [$guias[$i]['id_guia'], $usuario, 'actualizar-guia']);
+            }
+            DB::table('detalle_retorno_cargo')->insert($guias);
+            DB::commit();
+            return ['success' => 'Información agregada correctamente'];
+        } catch (Exception $ex) {
+            return ['error' => $ex->getMessage()];
+            DB::rollBack();
+        }
     }
     public static function actualizarGuiaLlegadas($id_embarque,$id_manifiesto,$id_guia,$estado, $texto)
     {
         return DB::select('CALL sp_actualizar_llegadas_guias(?,?,?,?,?)',[$id_embarque, $id_manifiesto,$id_guia,$estado,$texto]);
+    }
+    public static function entregaGuias($id_usuario)
+    {
+        $result = DB::select('CALL sp_obtener_guias_entregar(?)',[$id_usuario]);
+        foreach ($result as $mani) {
+            $mani->remi_depa = (new Ubigeo)->getNameDepartamento($mani->remi_depa);
+            $mani->remi_prov = (new Ubigeo)->getNameProvincia($mani->remi_prov);
+            $mani->remi_dist = (new Ubigeo)->getNameDistrito($mani->remi_dist);
+            $mani->dest_depa = (new Ubigeo)->getNameDepartamento($mani->dest_depa);
+            $mani->dest_prov = (new Ubigeo)->getNameProvincia($mani->dest_prov);
+            $mani->dest_dist = (new Ubigeo)->getNameDistrito($mani->dest_dist);
+        }
+        return $result;
+    }
+    public static function confirmarEntregaGuias($id_guia,$usuario,$archivos)
+    {
+        DB::beginTransaction();
+        try {
+            DB::select('CALL sp_actualizar_entrega_guia(?,?)',[$usuario, $id_guia]);
+            DB::table('imagenes_guia')->insert($archivos);
+            DB::commit();
+        } catch (Exception $ex) {
+            DB::rollBack();
+        }
     }
 }

@@ -11,13 +11,6 @@
     <title>Recojos</title>
 @endsection
 @section('body')
-<style>
-    .cuadro{
-        width: 15px;
-        height: 15px;
-        display: inline-block;
-    }
-</style>
 <section class="p-2">
     <form id="frm_recojo" class="mb-4" >
         <div class="my-4">
@@ -57,7 +50,7 @@
                          <select disabled required class="form-control simple-select2" id="id_id_conductor" name="id_conductor">
                             <option></option>
                             @foreach ($conductores as $c)
-                                <option value="{{$c->id}}">{{$c->name}} {{$c->last_name}}</option>
+                                <option {{$c->status != 1 ? 'disabled' : ''}} value="{{$c->id}}">{{$c->name}} {{$c->last_name}}</option>
                             @endforeach
                         </select>
                     </div>
@@ -66,7 +59,7 @@
                         <select disabled required class="form-control simple-select2" id="id_id_dealer" name="id_dealer">
                             <option></option>
                             @foreach ($dealers as $de)
-                                <option value="{{$de->id}}">{{$de->name}} {{$de->last_name}}</option>
+                                <option {{$de->status != 1 ? 'disabled' : ''}} value="{{$de->id}}">{{$de->name}} {{$de->last_name}}</option>
                             @endforeach
                         </select>
                     </div>

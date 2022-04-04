@@ -6,6 +6,7 @@ use App\Models\Area;
 use App\Models\Rol;
 use App\Models\Tipos\Documentos;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,10 +18,6 @@ class Usuario extends Controller
     {
         $modulos = User::getModulos(Auth::id());
         return view('users.home',compact('modulos'));
-    }
-    public static function obtenerUsuarioRol($id_rol)
-    {
-        return DB::select('CALL sp_obtener_usuarios_rol(?)', [$id_rol]);
     }
     public function viewLista()
     {
@@ -58,17 +55,34 @@ class Usuario extends Controller
             return response()->json($message);
         }
     }
+    public function misUsuarios()
+    {
+        try {
+            $misUsuarios = User::misUsuarios(Auth::id());
+            return datatables()->of($misUsuarios)->toJson();
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    } 
     public function viewLogin()
     {
         return view('users.login');
     }
     public function agregar(Request $request)
     {
-        if($request->ajax()){
-            $datos = $request->all();
-            $datos['password'] = Hash::make(env('PASSWORD_DEFAULT'));
-            $result = User::addUser($datos);
-            return response()->json($result);
+        try {
+            if ($request->ajax()) {
+                $datos = $request->all();
+                $repetidos = User::where(['type_document' => $datos['type_document'], 'n_document' => $datos['n_document']])->count();
+                if ($repetidos > 0) {
+                    return response()->json(['alerta' => 'Se encontró ' . $repetidos . ' coincidencia en el tipo y número de documento, para continuar por favor cambie el tipo o número de documento']);
+                }
+                $datos['password'] = Hash::make($datos['password']);
+                $result = User::addUser($datos);
+                return response()->json($result);
+            }
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
         }
     }
     public function getArea(Request $request)

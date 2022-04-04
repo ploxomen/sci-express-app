@@ -33,13 +33,6 @@ function pageLoaded(){
             if(response.dist.length > 0){
                 addCbUbigeo(response.dist,'id_remi_dist');
             }
-            let tempCli = "<option></option>";
-            if(response.cli.length > 0){
-                response.cli.forEach(c => {
-                    tempCli += `<option value="${c.id}">${c.nombres}</option>`;
-                });
-            }
-            document.getElementById('id_dest_nomb').innerHTML = tempCli;
             for (const key in response.datos) {
                 if (Object.hasOwnProperty.call(response.datos, key)) {
                     const valor = response.datos[key];
@@ -66,7 +59,7 @@ function pageLoaded(){
         let detalles = new Array();
         for (const e of tablaDetalle.children) {
             let objeto = new Object();
-            let deta = e.querySelectorAll('input, select');
+            let deta = e.querySelectorAll('input, select, textarea');
             for (const ele2 of deta) {
                 if(ele2.value && ele2.value != '0.00'){
                     objeto[ele2.dataset.name] = ele2.value;

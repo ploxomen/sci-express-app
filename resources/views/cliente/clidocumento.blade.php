@@ -18,7 +18,7 @@
                 <select name="nro_doc" id="id_documento" class="form-control">
                     <option></option>
                     @foreach ($clientes as $k => $cliente)
-                        <option value="{{$cliente->nro_doc}}" {{$k === 0 ? 'selected' : ''}}>{{$cliente->nom_cli}}</option>
+                        <option value="{{$cliente->nro_doc}}" data-nro="{{$cliente->nro_doc}}" {{$k === 0 ? 'selected' : ''}}>{{$cliente->nom_cli}}</option>
                     @endforeach
                 </select>
             </div>

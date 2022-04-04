@@ -91,7 +91,7 @@
                 <textarea name="detalle_otro" maxlength="255" id="id_detalle_otro" class="form-control"></textarea>
             </div>
         </fieldset>
-        <fieldset class="bg-white px-3 border mb-2 form-row">
+        {{-- <fieldset class="bg-white px-3 border mb-2 form-row">
             <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add text-info">ADICIONAL</legend>
             <div class="form-group col-12 col-md-6 col-lg-3">
                 <label for="id_embarque_flet_esti">Flete estimado</label>
@@ -101,7 +101,7 @@
                 <label for="id_contribucion_marginal">Contribución marginal</label>
                 <input type="text" name="contribucion_marginal" id="id_contribucion_marginal" class="form-control" required>
             </div>
-        </fieldset>
+        </fieldset> --}}
         <div class="form-group">
             <button class="btn btn-primary" type="submit" id="btn_enviar_informe" hidden>Actualizar</button>
             <button class="btn btn-secondary" type="reset" id="btn_clear_informe" hidden>Cancelar</button>

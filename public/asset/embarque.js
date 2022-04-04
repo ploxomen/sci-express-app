@@ -13,7 +13,7 @@ function loadPage() {
         columns: [
             {data: 'id',searchable: false,orderable: false, render : function(data,type,full){
                 return `<div class="custom-control custom-checkbox">
-                    <input type="checkbox" data-manifiesto="${data}" data-bulto="${full.totBulto}" class="custom-control-input check-embarque" id="check_manifiesto_${data}">
+                    <input type="checkbox" data-manifiesto="${data}" data-bulto="${full.totBulto}" class="custom-control-input ${full.id_asignado ? 'check-embarque' : 'disabled'}" ${!full.id_asignado ? 'disabled' : ''} id="check_manifiesto_${data}">
                     <label class="custom-control-label" for="check_manifiesto_${data}"></label>
                 </div>`
             }},
@@ -25,7 +25,11 @@ function loadPage() {
             {data: 'nom_cluster'},
             {data: 'totBulto'},
             {data: 'totguias'}
-        ]
+        ],
+        createdRow : function(row,data){
+            let bgTable = !data.id_asignado ? 'table-warning' : 'table-success';
+            $(row).addClass(bgTable);
+        }
     });
     $('#id_prov_dest').on('select2:select',function(){
         dataTableMani.draw();
@@ -33,9 +37,9 @@ function loadPage() {
     cbSelectAll.addEventListener("change",function () {  
         const activo = this.checked;
         for (const tr of tblMani.children) {
-            if(tr.querySelector(`input[type="checkbox"]`)){
-                tr.querySelector(`input[type="checkbox"]`).checked = activo;
-                obtenerBulto(tr.querySelector(`input[type="checkbox"]`));
+            if(tr.querySelector(`.check-embarque`)){
+                tr.querySelector(`.check-embarque`).checked = activo;
+                obtenerBulto(tr.querySelector(`.check-embarque`));
             }
         }
     });

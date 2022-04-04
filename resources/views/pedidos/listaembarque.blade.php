@@ -28,7 +28,7 @@
             <select name="id_cond" id="id_id_cond" class="form-control simple-select2" required>
                 <option></option>
                 @foreach ($conductores as $c)
-                    <option value="{{$c->id}}">{{$c->name}} {{$c->last_name}}</option>
+                    <option {{$c->status != 1 ? 'disabled' : ''}} value="{{$c->id}}">{{$c->name}} {{$c->last_name}}</option>
                 @endforeach
             </select>
         </div>
@@ -37,7 +37,7 @@
             <select name="id_deal" id="id_id_deal" class="form-control simple-select2" required>
                 <option></option>
                 @foreach ($dealers as $de)
-                    <option value="{{$de->id}}">{{$de->name}} {{$de->last_name}}</option>
+                    <option {{$de->status != 1 ? 'disabled' : ''}} value="{{$de->id}}">{{$de->name}} {{$de->last_name}}</option>
                 @endforeach
             </select>
         </div>
@@ -46,7 +46,7 @@
             <select name="id_deal2" id="id_id_deal2" class="form-control simple-select2">
                 <option></option>
                 @foreach ($dealers as $de)
-                    <option value="{{$de->id}}">{{$de->name}} {{$de->last_name}}</option>
+                    <option {{$de->status != 1 ? 'disabled' : ''}} value="{{$de->id}}">{{$de->name}} {{$de->last_name}}</option>
                 @endforeach
             </select>
         </div>
@@ -99,6 +99,7 @@
             <button type="reset" class="btn btn-danger">Cancelar</button>
         </div>
     </form>
+    
     <div class="form-group form-row">
         <div class="form-group col-12">
             <h4 class="text-primary"><i class="fas fa-caret-right"></i> Manifiestos para embarcar</h4>
@@ -117,6 +118,16 @@
             </select>
         </div>
     </div>
+    <div class="d-flex mb-3" style="gap: 10px;">
+            <div>
+                <div class="cuadro table-success"></div>
+                <span>Asignados</span>
+            </div>
+            <div>
+                <div class="cuadro table-warning"></div>
+                <span>Sin asignar</span>
+            </div>
+        </div>
     <div class="table-responsive">
         <table class="table table-sm table-hover table-bordered" id="tabla-embarque">
             <thead>

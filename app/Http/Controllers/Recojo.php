@@ -20,8 +20,8 @@ class Recojo extends Controller
         $modulos = User::getModulos(Auth::id());
         $clientes = Clientes::getClientesFiles();
         $estados_solicitud = EstadoSolicitud::where(['activado' => 1])->get();
-        $conductores = Usuario::obtenerUsuarioRol(5);
-        $dealers = Usuario::obtenerUsuarioRol(4);
+        $conductores = User::obtenerUsuarioRol(6);
+        $dealers = User::obtenerUsuarioRol(7);
         $vehiculos = Vehiculos::obtenerVehiculos();
         return view('pedidos.recojos',compact('vehiculos','conductores', 'dealers','clientes','estados_solicitud','modulos'));
     }

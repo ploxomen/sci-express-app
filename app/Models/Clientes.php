@@ -119,9 +119,9 @@ class Clientes extends Model
 
         return $proveedor;
     }
-    public static function obtenerCliDeCli($id_cliente)
+    public static function obtenerCliDeCli()
     {
-        return DB::table('clientes_de_clientes AS cli')->leftJoin('relacion_cliente_cliente AS cc', 'cli.id', '=', 'cc.id_cliente_de_cliente')->where(['cli.activo' => 1, 'cc.id_cliente' => $id_cliente])->get();
+        return DB::table('clientes_de_clientes')->where(['activo' => 1])->get();
     }
     public static function detalleCliDeCli($id_cli)
     {

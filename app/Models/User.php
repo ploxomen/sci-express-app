@@ -67,6 +67,10 @@ class User extends Authenticatable
             return ['error' => $error->getMessage()];
         }
     }
+    public static function misUsuarios($id_usuario)
+    {
+        return DB::table('usuarios AS u')->select('u.id','u.n_document', 'u.name', 'u.last_name', 'u.email', 'u.phone', 'u.status','a.area')->leftJoin('area AS a','u.id_area','=','a.id')->where('u.id','!=',$id_usuario)->get();
+    }
     public static function getModulos($id_user)
     {
         return DB::select('CALL sp_obtener_modulos(?)',[$id_user]);
@@ -74,5 +78,9 @@ class User extends Authenticatable
     public function getRoles($id_user)
     {
         return false;
+    }
+    public static function obtenerUsuarioRol($id_rol)
+    {
+        return DB::select('CALL sp_obtener_usuarios_rol(?)', [$id_rol]);
     }
 }

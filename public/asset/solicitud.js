@@ -60,7 +60,6 @@ function loadPage(){
         }
     }
     $(cbProveedores).on('select2:select',async function(event){
-        console.log(event);
         let datos = new FormData();
         datos.append('id_proveedor',$(this).val());
         try {

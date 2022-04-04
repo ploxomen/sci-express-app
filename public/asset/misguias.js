@@ -1,0 +1,160 @@
+function loadPage(){
+    let general = new General();
+    const tblDetalleGuia = document.getElementById('tabla-detalle-guias');
+    let tablaGuias = $('#tabla-guias').DataTable({
+        ajax : {
+            url: 'mis-guias',
+            method: 'POST',
+            headers: general.jsonToken,
+            data : function(d){d.estado = $('#estado_guias').val(); d.tipo = $('#id_tipo').val()}
+        },
+        columns: [
+            {data: 'nro_guia'},
+            {data: 'fecha_emision'},
+            {data: 'fecha_traslado'},
+            {data: 'remi_prov'},
+            {data: 'dest_prov'},
+            {data: 'nom_remi'},
+            {data: 'remi_nro_docu'},
+            {data: 'nom_dest'},
+            {data: 'dest_nro_docu'},
+            {data: 'id_asignado', searchable: false, render: function(data,type,full){
+                if(full.guia_tipo == 'INACTIVA' || full.guia_tipo == 'ANULADA'){
+                    return '<span class="text-danger">Sin acciones</span>'
+                }
+                let tempUsu = `<option></option>`;
+                for (let i = 0; i < full.listUsu.length; i++) {
+                    tempUsu += `<option value="${full.listUsu[i].id}" ${full.listUsu[i].status != 1 ? 'disabled' : ''} ${data == full.listUsu[i].id ? 'selected' : ''}>${full.listUsu[i].name} ${full.listUsu[i].last_name}</option>`;
+                }
+                return `<select data-guia="${full.id}" class="form-control form-control-sm cb-usuarios">${tempUsu}</select>`;
+            }},
+            {data: 'situ',searchable: false, orderable: false, render: function(data,type,full){
+                if(full.guia_tipo == 'INACTIVA' || full.guia_tipo == 'ANULADA'){
+                    return '<span class="text-danger">Sin acciones</span>'
+                }
+                let template = ``;
+                full.listSoli.forEach(sol => {
+                    template += `<option value="${sol.id}" ${data == sol.id ? 'selected' : ''}>${sol.tipo}</option>`;
+                });
+                return `<select data-guia="${full.id}" class="form-control form-control-sm cb-estado-change">${template}</select>`;
+            }},
+            {data: 'guia_tipo'},
+            {data: 'id', searchable: false, orderable: false, name: 'id', render: function(data,type,full){
+                let temButtons = `<div class="d-flex justify-content-center flex-wrap" style="gap:5px;"><button data-toggle="tooltip" title="Visualizar solicitud" data-guia="${data}" class="btn btn-sm btn-primary view-guia"><i class="far fa-eye"></i></button>`;
+                if(full.guia_tipo != 'ANULADA'){
+                    temButtons += `<button data-toggle="tooltip" title="Anular guia" data-guia="${data}" class="btn btn-sm btn-danger delete-guia"><i class="fas fa-trash-alt"></i></button></div>`;
+                }else{
+                    temButtons += '</div>';
+                }
+                return temButtons;
+            }}
+        ],
+        createdRow : function(row,data){
+            let bgTable = !data.id_asignado && data.guia_tipo == 'ACTIVA' ? 'table-warning' : '';
+            $(row).addClass(bgTable);
+        }
+    });
+    tblDetalleGuia.addEventListener('click',async function(e){
+        if(e.target.classList.contains('delete-guia')){
+            const guia = e.target.dataset.guia;
+            alertify.confirm('Mensaje','¿Deseas anular la guia N° - <b>' + guia.padStart(5,'0') +'</b>?',async ()=>{
+                let datos = new FormData();
+                datos.append('id_guia',guia);
+                let response = await general.funcfetch('anular-guia',datos);
+                if(response.error){
+                    alertify.alert('Error',response.error);
+                    return 
+                }
+                alertify.success(response.success);
+                tablaGuias.draw();
+            },()=>{});
+        }
+        if(e.target.classList.contains('view-guia')){
+            let datos = new FormData();
+            datos.append('guia',e.target.dataset.guia);
+            let response = await general.funcfetch('obtener-detalles',datos);
+            if(response.error){
+                alertify.alert('Error',response.error);
+                return 
+            }
+            verDetalleGuia(response.datos);
+        }
+    });
+    function verDetalleGuia(data) {
+        if(!data){
+            return
+        }
+        for (const key in data) {
+            if (Object.hasOwnProperty.call(data, key)) {
+                const value = data[key];
+                const dom = document.getElementById('id_' + key);
+                if(!dom){
+                    continue;
+                }
+                dom.textContent = value;
+            }
+        }
+        let template = '';
+        if(data.detalles_guias){
+            data.detalles_guias.forEach(dg => {
+                template += `
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Grupo Envio</b>${dg.grupo_envio}</div>
+                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Tipo Envio</b>${dg.tipo_envio}</div>
+                            <div class="col-12 col-lg-4"><b class="d-block text-secondary">Embase o Embalaje</b>${dg.embase_embalaje}</div>
+                            <div class="col-12"><b class="d-block text-secondary">Descripción</b>${!dg.descripcion ? 'No definido' : dg.descripcion}</div>
+                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Cantidad</b>${dg.cantidad}</div>
+                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Kg</b>${dg.kg}</div>
+                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Largo</b>${dg.largo}</div>
+                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Ancho</b>${dg.ancho}</div>
+                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Altura</b>${dg.altura}</div>
+                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Volumen</b>${dg.volumen}</div>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('detalle_guias').innerHTML = template;
+        }
+        $('#detalle-guias-todo').modal('show');
+    }
+    tablaGuias.on('draw.dt', function () {
+        $('.cb-usuarios').select2({
+            theme : 'bootstrap',
+            width: '100%',
+            placeholder : 'Seleccione una opción'
+        }).on('select2:select',async function(event){
+            let datos = new FormData();
+            datos.append('id_guia',event.target.dataset.guia);
+            datos.append('id_user',$(this).val());
+            let response  = await general.funcfetch('asignar-personal',datos);
+            if(response.error){
+                alertify.alert('Mensaje',response.error);
+                return
+            }
+            document.getElementById('total-por-procesar-guias').textContent = response.procesar;
+            alertify.success(response.success);
+        });
+        for (const cbos of document.querySelectorAll('.cb-estado-change')) {
+            cbos.addEventListener('change',async function(event){
+                let datos = new FormData();
+                datos.append('id_guia',this.dataset.guia);
+                datos.append('estado',this.value);
+                let response = await general.funcfetch('cambiar-estado',datos);
+                if(response.error){
+                    alertify.alert('Error',response.error);
+                    return 
+                }
+                alertify.success(response.success);
+            });
+        }
+    });
+    for (const filtros of document.querySelectorAll('.cb-filtros')) {
+        filtros.addEventListener('change',function(){
+            tablaGuias.draw();
+        })
+    }
+
+}
+window.addEventListener('DOMContentLoaded',loadPage);

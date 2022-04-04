@@ -59,6 +59,16 @@
         </div>
         </div>
     </form>
+    <div class="d-flex mb-3" style="gap: 10px;">
+        <div>
+            <div class="cuadro table-success"></div>
+            <span>Asignados</span>
+        </div>
+        <div>
+            <div class="cuadro table-warning"></div>
+            <span>Sin asignar</span>
+        </div>
+    </div>
     <section class="p-3 bg-white">
         <h4 class="text-primary"><i class="far fa-newspaper"></i> Guías pendientes</h4>
         <div class="table-responsive">

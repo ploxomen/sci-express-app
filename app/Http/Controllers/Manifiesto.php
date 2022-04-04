@@ -54,7 +54,7 @@ class Manifiesto extends Controller
     {
         try {
             $datos = $request->all();
-            $guias = ModeloGuias::obtenerGuias($datos);
+            $guias = ModeloGuias::obtenerGuias($datos,Auth::id());
             return response()->json(['success' => $guias]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);

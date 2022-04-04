@@ -20,10 +20,10 @@ function loadPage() {
             let template = ``;
             if(response.success.length){
                 response.success.forEach(ele => {
-                    template += `<tr>
+                    template += `<tr class="${ele.id_asignado ? 'table-success' : 'table-warning'}">
                     <td>
                         <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="id_check_${ele.id}" data-id="${ele.id}">
+                            <input type="checkbox" class="custom-control-input ${ele.id_asignado ? 'select-guias' : 'disabled'}" ${!ele.id_asignado ? 'disabled' : ''} id="id_check_${ele.id}" data-id="${ele.id}">
                             <label class="custom-control-label" for="id_check_${ele.id}"></label>
                         </div>
                     </td>
@@ -56,7 +56,7 @@ function loadPage() {
     frmMani.addEventListener('submit',async function(e){
         e.preventDefault();
         let arrGuias = new Array();
-        let trGuias = tblGuias.querySelectorAll('.custom-control-input');
+        let trGuias = tblGuias.querySelectorAll('.select-guias');
         for (const element of trGuias) {
             if(element.checked){
                 arrGuias.push({id_guia: element.dataset.id});
@@ -102,7 +102,7 @@ function loadPage() {
         let datos = new FormData(frmMani);
         datos.append("fech_mani",document.getElementById("id_fech_mani").value);
         let arrGuias = new Array();
-        let trGuias = tblGuias.querySelectorAll('.custom-control-input');
+        let trGuias = tblGuias.querySelectorAll('.select-guias');
         for (const element of trGuias) {
             if(element.checked){
                 arrGuias.push({id_guia: element.dataset.id});
@@ -162,8 +162,8 @@ function loadPage() {
     cbSelectAll.addEventListener("change",function () {  
         const activo = this.checked;
         for (const tr of tblGuias.children) {
-            if(tr.querySelector(`input[type="checkbox"]`)){
-                tr.querySelector(`input[type="checkbox"]`).checked = activo;
+            if(tr.querySelector(`.select-guias`)){
+                tr.querySelector(`.select-guias`).checked = activo;
             }
         }
     });

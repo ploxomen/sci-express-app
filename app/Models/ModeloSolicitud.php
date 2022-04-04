@@ -27,7 +27,7 @@ class ModeloSolicitud extends Model
         $solicitudes = DB::select('CALL sp_obtener_solicitudes(?,?)',[$estado, $id_user]);
         if(!empty($solicitudes)){
             $estados_solicitud = EstadoSolicitud::where(['activado' => 1])->get();
-            $usuarios = DB::select('CALL sp_obtener_usuarios_rol(?)',[3]);
+            $usuarios = User::obtenerUsuarioRol(3);
             foreach ($solicitudes as $soli) {
                 $soli->listSoli = $estados_solicitud;
                 $soli->listUsu = $usuarios;

@@ -34,6 +34,10 @@ return [
             'driver' => 'local',
             'root' => storage_path('app'),
         ],
+        'guias-img' => [
+            'driver' => 'local',
+            'root' => storage_path('app/entrega-guias')
+        ],
 
         'public' => [
             'driver' => 'local',
