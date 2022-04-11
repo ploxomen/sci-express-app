@@ -48,12 +48,22 @@
                 <form id="frm_transporte" class="form-row">
                     <input type="hidden" id="empresa_id">
                     <div class="form-group col-12">
+                        <label for="id_nro_ruc">RUC</label>
+                        <input type="text" required class="form-control" id="id_nro_ruc" name="nro_ruc">
+                    </div>
+                    <div class="form-group col-12">
                         <label for="id_empresa">Empresa</label>
                         <input type="text" required class="form-control" id="id_empresa" name="empresa">
                     </div>
                     <div class="form-group col-12">
                         <label for="id_direccion">Dirección</label>
                         <textarea required class="form-control" id="id_direccion" name="direccion"></textarea>
+                    </div>
+                    <div class="form-group col-12">
+                        <label for="id_ciudades_atencion">Ciudades de atención</label>
+                        <select name="ciudades_atencion" id="id_ciudades_atencion" required multiple class="simple-select2">
+                            
+                        </select>
                     </div>
                     <div class="form-group col-12">
                         <label for="id_nro_contacto">N° de Contactos</label>

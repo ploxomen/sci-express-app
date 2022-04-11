@@ -37,6 +37,12 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
         Route::post('ver-guias', [Manifiesto::class, 'viewGuias']);
         Route::post('agregar', [Manifiesto::class, 'agregarManifiesto']);
     });
+    Route::prefix('vehiculos')->group(function () {
+        Route::get('todos', [Embarque::class, 'viewVehiculos'])->name('viewVehiculos');
+        Route::get('obtener', [Embarque::class, 'viewNuevoManifiesto']);
+        Route::post('ver-guias', [Embarque::class, 'viewGuias']);
+        Route::post('agregar', [Embarque::class, 'agregarManifiesto']);
+    });
     Route::prefix('usuarios')->group(function(){
         Route::get('agregar-modificar',[Usuario::class,'viewCrearModificar'])->name('usuAgreMod');
         Route::post('agregar',[Usuario::class,'agregar']);

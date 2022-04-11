@@ -174,4 +174,9 @@ class Embarque extends Controller
             return response()->json(['error' => $ex->getMessage()]);
         }
     }
+    public function viewVehiculos(Request $request)
+    {
+        $modulos = User::getModulos(Auth::id());
+        return view('vehiculos',compact('modulos'));
+    }
 }

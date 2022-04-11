@@ -59,7 +59,10 @@ function loadPage(){
             }
             let consulta = e.target.dataset.consulta;
             if(consulta == 'provincia'){
-                document.getElementById(e.target.dataset.infoDistrito).innerHTML = '';
+                const cbDistrito = document.getElementById(e.target.dataset.infoDistrito);
+                if(cbDistrito){
+                    cbDistrito.innerHTML = '';
+                }
             }
             try {
                 let response = consulta == 'provincia' ? await general.getProvincias(this.value) : await general.getDistritos(this.value);
