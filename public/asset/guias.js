@@ -10,10 +10,23 @@ function pageLoaded(){
         theme : 'bootstrap',
         width: '100%',
         tags: true
-    })
+    });
+    $('#id_dest_dist').on('select2:select',async function(e){
+        let datosn = new FormData();
+        datosn.append('distrito',$(this).val());
+        let response = await general.funcfetch(window.location.origin + '/intranet/ubigeo/ciudades',datosn);
+        let template = `<option></option>`;
+        response.ciudades.forEach(c => {
+            template += `<option value="${c.id}">${c.nombre_ciudad}</option>`;
+        });
+        document.querySelector($(this).attr('data-ciudades')).innerHTML = template;
+    });
+    $('#id_nro_comp_cli').on('change.select2',function(e){
+        $('#id_cant_comp').val($(this).val().length);
+    });
     $('#id_remi_nomb').on('select2:select',async function(event){
-        newCliCli = false;
-        clearCliDeCli();
+        // newCliCli = false;
+        // clearCliDeCli();
         let datos = new FormData();
         tipoCbRemi = this.selectedOptions[0].getAttribute('data-type');
         datos.append('tipo',tipoCbRemi);
@@ -78,12 +91,45 @@ function pageLoaded(){
             },()=>{
                 datos.append('add_cli_bool',false);
                 addGuia(datos);
-            }).set('labels',{ok : 'SI', cancel: 'NO'});
+            }).set({
+                'invokeOnCloseOff': true,
+                'closable': false,
+                'labels': {ok:'Si', cancel:'No'}
+            });
         }else{
             addGuia(datos);
         }
-        
     });
+    $('.calculo-dia').on('select2:select',async function(){
+        let datos = new FormData();
+        datos.append('departamento_origen',$('#id_remi_depa').find("option:selected").text());
+        datos.append('departamento_destino',$('#id_dest_depa').find("option:selected").text());
+        datos.append('provincia_destino',$('#id_dest_prov').find("option:selected").text());
+        datos.append('ciudad_final',$(this).find("option:selected").text());
+        let response  = await general.funcfetch('guias/obtener-dias',datos);
+        if(response.error){
+            alertify.alert('Error',response.error);
+            return
+        }
+        if(!response.dias){
+            document.getElementById('id_dias_tran').value = "";
+            alertify.error('no se encontró los dias de transito para este destino');
+            return
+        }
+        let diasEnvio = 0;
+        switch ($('#id_via_envi').val()) {
+            case '1':
+                diasEnvio = Math.ceil(response.dias.total_hr_origen_destino / 24);
+            break;
+            case '2':
+                diasEnvio = Math.ceil(response.dias.total_origen_base_hr_aereo / 24);
+            break;
+            case '5':
+                diasEnvio = Math.ceil(response.dias.total_origen_base_hr_aereo / 24);
+            break;
+        }
+        document.getElementById('id_dias_tran').value = diasEnvio;
+    })
     async function addGuia(datos) {
         try {
             let response  = await general.funcfetch('guias/agregar-guia',datos);
@@ -91,8 +137,14 @@ function pageLoaded(){
                 alertify.alert('Error',response.error);
                 return
             }
+            if(response.alerta){
+                alertify.alert('Alerta',response.alerta);
+                return
+            }
             newCliCli = false;
-            alertify.alert('Mensaje',response.success,()=>{window.location.reload()});
+            alertify.alert('Mensaje',response.success,()=>{
+                // window.location.reload();
+            });
         } catch (error) {
             console.error(error);
             alertify.alert('Error',error.message);
@@ -117,6 +169,7 @@ function pageLoaded(){
     $('#id_dest_nomb').on('select2:select',async function(event){
         let datos = new FormData();
         datos.append('id',$(this).val());
+        // datos.append('departamento_orgingen',$('#id_remi_depa').find("option:selected").text())
         try {
             let response  = await general.funcfetch('guias/detalle-cli-de-cli',datos);
             if(response.error){
@@ -145,6 +198,8 @@ function pageLoaded(){
                 }
             }
             $('#id_dest_depa').trigger('change');
+            // $('#id_dest_dist').trigger('change');
+
         } catch (error) {
             console.error(error);
             alertify.alert('Error',error.message);
@@ -157,6 +212,7 @@ function pageLoaded(){
         $('.cb-dest').val("").trigger("change");
         $('#id_dest_prov').html("");
         $('#id_dest_dist').html("");
+        $('#id_ciudad_destino_final').html("");
     }
     function addCbUbigeo(listUbigeo,dom){
         let template = "<option></option>";
@@ -176,7 +232,7 @@ function calcVolumen(event){
     for (let i = 6; i < 9; i++) {
         total = total * parseFloat(fila.children[i].children[0].value);
     }
-    fila.children[9].children[0].value = total.toFixed(2);
+    fila.children[9].children[0].value = (total / 6000).toFixed(2);
     const e = new Event("change");
     fila.children[9].children[0].dispatchEvent(e);
 }

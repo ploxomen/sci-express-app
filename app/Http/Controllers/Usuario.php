@@ -9,7 +9,6 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class Usuario extends Controller
@@ -17,12 +16,148 @@ class Usuario extends Controller
     public function viewHome()
     {
         $modulos = User::getModulos(Auth::id());
-        return view('users.home',compact('modulos'));
+        $rol_user = User::obtenerRolActivo(Auth::id());
+        // dd($rol_user);
+        switch ($rol_user->id_rol) {
+            case '1':
+                $datos = [
+                    'nsaguias' => User::obtenerDatosHome(null, 1),
+                    'nsamanifiesto' => User::obtenerDatosHome(null, 2),
+                    'nsembarque' => User::obtenerDatosHome(null, 3),
+                    'nsasolicitud' => User::obtenerDatosHome(null, 4),
+                ];
+            break;
+            case '2':
+                $datos = [
+                    'recojodeldia' => User::obtenerDatosHome(null, 24),
+                    'recoprogramado' => User::obtenerDatosHome(null, 25),
+                    'recoefectuado' => User::obtenerDatosHome(null, 26),
+                    'manipendienteguia' => User::obtenerDatosHome(null, 2),
+                    'guiahoymanifestar' => User::obtenerDatosHome(null, 27),
+                    'manifiestoembarcar' => User::obtenerDatosHome(null, 3),
+                    'embarquependiente' => User::obtenerDatosHome(null, 28),
+                    'embarqueefectuados' => User::obtenerDatosHome(null, 29),
+                    'embarqueporinformar' => User::obtenerDatosHome(null, 30),
+                ];
+            break;
+            case '3':
+                $datos = [
+                    'guiasembarquependiente' => User::obtenerDatosHome(null, 17),
+                    'guiasmanifestar' => User::obtenerDatosHome(Auth::id(), 18),
+                    'maniembarque' => User::obtenerDatosHome(Auth::id(), 19)
+                ];
+            break;
+            case '4':
+                $datos = [
+                    'recojodeldia' => User::obtenerDatosHome(null, 24),
+                    'recoprogramado' => User::obtenerDatosHome(null, 25),
+                    'recoefectuado' => User::obtenerDatosHome(null, 26),
+                    'manipendienteguia' => User::obtenerDatosHome(null, 2),
+                    'guiahoymanifestar' => User::obtenerDatosHome(null, 27),
+                    'manifiestoembarcar' => User::obtenerDatosHome(null, 3),
+                    'embarquependiente' => User::obtenerDatosHome(null, 28),
+                    'embarqueefectuados' => User::obtenerDatosHome(null, 29),
+                    'embarqueporinformar' => User::obtenerDatosHome(null, 30),
+                    'guiaporconfirmar' => User::obtenerDatosHome(null, 21),
+                    'guiasenreparto' => User::obtenerDatosHome(null, 22),
+                    'guiasentregadas' => User::obtenerDatosHome(null, 31),
+                    'guiasretornar' => User::obtenerDatosHome(null, 23),
+                ];
+                break;
+            case '5':
+                $datos = [
+                    'solicitudpendiente' => User::obtenerDatosHome(null, 20),
+                    'guiaporconfirmar' => User::obtenerDatosHome(null, 21),
+                    'guiasenreparto' => User::obtenerDatosHome(null, 22),
+                    'guiasentregadas' => User::obtenerDatosHome(null, 31),
+                    'guiasretornar' => User::obtenerDatosHome(null, 23),
+                ];
+                break;
+            case '6':
+                $datos = [
+                    'rhoy' => User::obtenerDatosHome(Auth::id(), 5),
+                    'recojostotal' => User::obtenerDatosHome(Auth::id(), 8),
+                    'ehoy' => User::obtenerDatosHome(Auth::id(), 9),
+                    'embarquetotal' => User::obtenerDatosHome(Auth::id(), 11),
+                    'informespendientes' => User::obtenerDatosHome(Auth::id(), 13)
+                ];
+                break;
+            case '7':
+                $datos = [
+                    'rhoy' => User::obtenerDatosHome(Auth::id(), 6),
+                    'recojostotal' => User::obtenerDatosHome(Auth::id(), 7),
+                    'ehoy' => User::obtenerDatosHome(Auth::id(), 10),
+                    'embarquetotal' => User::obtenerDatosHome(Auth::id(), 12),
+                    'informespendientes' => User::obtenerDatosHome(Auth::id(), 13)
+                ];
+                break;
+            case '8':
+                $datos = [
+                    'arriboconfirmar' => User::obtenerDatosHome(Auth::id(), 14),
+                    'entregaspendientes' => User::obtenerDatosHome(Auth::id(), 15),
+                    'cargosretornar' => User::obtenerDatosHome(Auth::id(), 16),
+                    'guiasentregadas' => User::obtenerDatosHome(null, 32),
+                ];
+                break;
+            default:
+                $datos = [];
+            break;
+        }
+        // dd($datos,$rol_user);
+        return view('users.home',compact('modulos', 'datos', 'rol_user'));
     }
     public function viewLista()
     {
         $modulos = User::getModulos(Auth::id());
-        return view('users.lista',compact('modulos'));
+        $year = date('Y');
+        $tipo_documentos = Documentos::where('estado', '1')->get();
+        $areas = Area::get();
+        $roles = Rol::get();
+        return view('users.lista',compact('modulos','year', 'tipo_documentos', 'areas', 'roles'));
+    }
+    public function miPerfilModificar(Request $request)
+    {
+        try {
+            if(!$request->ajax()){
+                return response()->json(['error' => 'Consulta invalida']);
+            }
+            switch ($request->tipo) {
+                case 'obtener':
+                    return response()->json(['usuario' => User::obtenerUnUsuario(Auth::id())]);
+                break;
+                case 'actualizar':
+                    $datos = $request->all();
+                    if(isset($datos['tipo'])){
+                        unset($datos['tipo']);
+                    }
+                    if (isset($datos['id_usuario'])) {
+                        unset($datos['id_usuario']);
+                    }
+                    User::where(['id' => $request->id_usuario])->update($datos);
+                    return response()->json(['success' => 'datos actualizados de forma correcta']);
+                break;
+            }
+        } catch (Exception $ex) {
+           return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function miPerfil(Request $request)
+    {
+        $modulos = User::getModulos(Auth::id());
+        $tipo_documentos = Documentos::where('estado', '1')->get();
+        return view('users.miperfil', compact('modulos', 'tipo_documentos'));
+    }
+    public function obtenerRoles(Request $request)
+    {
+        try {
+            if ($request->ajax() && Auth::check()) {
+                return response()->json(['roles' => User::getRoles(Auth::id()), 'area' => User::miArea(Auth::id())]);
+            }
+            return response()->json(['error' => 'No se encontró al usuario']);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+        
     }
     public function cerrarSesion(Request $request)
     {
@@ -30,6 +165,58 @@ class Usuario extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect(route('login'));
+    }
+    public function cambiarRol($id)
+    {
+        $cambioRol = User::cambiarRol(Auth::id(),$id);
+        if(!$cambioRol){
+            return abort(404,'Este rol no se a asignado a tú usuario');
+        }
+        
+        return redirect(route('home'));
+        
+    }
+    public function modificarUsuarios(Request $request)
+    {
+        try {
+            if(!$request->ajax()){
+                return ;
+            }
+            $message = ['error' => 'no se encontró el proceso'];
+            switch ($request->accion) {
+                case 'eliminar':
+                    User::where(['id' => $request->id_usuario])->update(['status' => 0]);
+                    $message = ['success' => 'usuario eliminado'];
+                break;
+                case 'mostrar_editar':
+                    $message = ['success' => User::select('id', 'type_document', 'n_document', 'name', 'last_name', 'email', 'phone', 'sexo', 'nacimiento', 'direction', 'id_area')->where(['id' => $request->id_usuario])->first()];
+                break;
+                case 'mostrar_roles':
+                    $message = ['success' => ['usuario' => $request->id_usuario, 'roles' => Rol::obtenerRolesUsuario($request->id_usuario)]];
+                break;
+                case 'actualizar':
+                    $datos = $request->all();
+                    if(isset($datos['id_usuario'])){
+                        unset($datos['id_usuario']);
+                    }
+                    if (isset($datos['accion'])) {
+                        unset($datos['accion']);
+                    }
+                    User::where(['id' => $request->id_usuario])->update($datos);
+                    $message = ['success' => 'usuario modificado correctamente'];
+                break;
+                case 'restaurar' :
+                    User::where(['id' => $request->id_usuario])->update(['password' => Hash::make($request->password),'status' => 2]);
+                    $message = ['success' => 'Contraseña restaurada, recuerda que la contraseña temporal es: <strong>' . $request->password . '</strong>'];
+                break;
+                case 'actualizar_rol':
+                    $message = Rol::modificarUsuarioRol($request->id_usuario,json_decode($request->roles,true));
+                break;
+            }
+            return response()->json($message);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
     }
     
     public function viewCrearModificar()
@@ -40,10 +227,51 @@ class Usuario extends Controller
         $modulos = User::getModulos(Auth::id());
         return view('users.crear',compact('tipo_documentos','areas','roles','modulos'));
     }
+    public function restablecerUsuario(Request $request)
+    {
+        if(!isset($_COOKIE['login_first'])){
+            return response()->json(['not_cookie' => true]);
+        }
+        $user = User::select("password","id")->where(['email' => $_COOKIE['login_first'], 'status' => 2])->first();
+        if (!empty($user)) {
+            if (Hash::check($request->password_temp, $user->password)) {
+                User::where(['id' => $user->id])->update(['password' => Hash::make($request->password), 'status' => 1]);
+                Auth::attempt(['email' => $_COOKIE['login_first'], 'password' => $request->password, 'status' => 1], true);
+                if(isset($_COOKIE['login_first'])){
+                    unset($_COOKIE['login_first']);
+                    setcookie("login_first", null, -1 ,"/");
+                }
+                $request->session()->regenerate();
+                return response()->json(['success' => true]);
+            }else{
+                return response()->json(['error' => 'Contraseña temporal incorrecta']);
+            }
+        }
+        return response()->json(['error' => 'No se procedio a encontrar el usuario']);
+    }
+    public function restablecerUsuarioCancelar(Request $request)
+    {
+        if (isset($_COOKIE['login_first'])) {
+            unset($_COOKIE['login_first']);
+            setcookie("login_first",null,-1,"/");
+        }
+        return response()->json(['success' => true]);
+    }
     public function autenticacion(Request $request)
     {
         if($request->ajax()){
-            $credenciales = $request->only('n_document','password');
+            $user = User::select("password")->where(['email' => $request->email,'status' => 2])->first();
+            if(!empty($user)){
+                if(Hash::check($request->password,$user->password)){
+                    // dd('sii');
+                    setcookie('login_first', $request->email,time() + 3600, '/');
+                    $message = ['success' => true];
+                    return response()->json($message);
+                }
+            }
+            $credenciales = $request->only('email','password');
+            $credenciales['status'] = 1;
+
             $remember = $request->has('remember');
             $message = [];
             if(Auth::attempt($credenciales,$remember)){
@@ -66,6 +294,10 @@ class Usuario extends Controller
     } 
     public function viewLogin()
     {
+        // dd($_COOKIE);
+        if(isset($_COOKIE['login_first'])){
+            return view('users.restore');
+        }
         return view('users.login');
     }
     public function agregar(Request $request)

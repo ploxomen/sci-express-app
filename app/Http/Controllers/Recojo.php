@@ -30,6 +30,7 @@ class Recojo extends Controller
         $id_trabajor = Auth::id();
         $modulos = User::getModulos($id_trabajor);
         $recojos_pend = ModeloRecojo::getRecojosDriDea($id_trabajor);
+        // dd($recojos_pend);
         return view('trabajadorrecojo',compact('modulos', 'recojos_pend', 'id_trabajor'));
 
     }

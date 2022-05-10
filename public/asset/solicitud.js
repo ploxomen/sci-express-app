@@ -32,9 +32,12 @@ function loadPage(){
             cbDistritos.innerHTML = template;
             template = `<option value=""><option>`;
             if(response.proveedores.length){
+                $('.limitar-proveedor').prop('required',true);
                 response.proveedores.forEach(prov => {
                     template += `<option value="${prov.id}">${prov.nomb_prov}</option>`;
                 });
+            }else{
+                $('.limitar-proveedor').prop('required',false);
             }
             cbProveedores.innerHTML = template;
             template = '';
@@ -49,6 +52,8 @@ function loadPage(){
                 }
             }
             $('#id_depar_cli').trigger('change');
+            $('.cb-tipo-doc').trigger('change');
+            general.validarMinMaxTipoDocumento($('#id_doc_iden_cli').data('input'),$('#id_doc_iden_cli').val());
         } catch (error) {
             console.error(error);
             alertify.alert('Error',error.message);
@@ -109,7 +114,9 @@ function loadPage(){
                     }
                 }
                 $('#id_depar_cli').trigger('change');
+                general.validarMinMaxTipoDocumento($('#id_doc_iden_soli').data('input'),$('#id_doc_iden_soli').val());
             },()=>{});
+            $('.cb-tipo-doc').trigger('change');
 
         } catch (error) {
             alertify.alert('Error',error.message);

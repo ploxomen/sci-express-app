@@ -65,9 +65,9 @@
                 <input type="text" class="form-control" name="nro_cuenta_clu" id="id_nro_cuenta_clu">
             </div>
             <div class="col-12 form-group">
-                <label for="id_nro_cuenta_clu">Consignados</label>
-                <select name="consignados" id="id_consignados" multiple class="cb-mult-nuevo"></select>
-                <small class="text-info">Recuerda el campo multiple se componde de: N°D.N.I - Nombres y Apellidos</small>
+                <label for="id_nro_cuenta_clu">Consignados <small class="text-danger">*</small></label>
+                <select name="consignados" id="id_consignados" required multiple class="cb-mult-nuevo"></select>
+                <small class="text-info">Recuerda que este campo se compone de: N° D.N.I - Nombres y Apellidos</small>
             </div>
             <div class="col-12 form-group col-md-6 col-lg-3 col-xl-4">
                 <label for="id_departamento_clu">Departamento <small class="text-danger">*</small></label>
@@ -82,12 +82,8 @@
                 <label for="id_provincia_clu">Provincia <small class="text-danger">*</small></label>
                 <select class="form-control cb-ubigeo" id="id_provincia_clu" name="provincia_clu" data-consulta="distrito" data-info="id_distrito_clu_1" required></select>
             </div>
-            {{-- <div class="col-12 form-group">
-                <label for="id_direccion_clu">Dirección <small class="text-danger">*</small></label>
-                <textarea class="form-control" name="direccion_clu" id="id_direccion_clu" required></textarea>
-            </div> --}}
             <div class="from-group col-12">
-                <button class="btn btn-success" type="submit">Agregar</button>
+                <button class="btn btn-success" type="submit">Siguiente</button>
                 <button class="btn btn-danger" type="reset">Limpiar</button>
             </div>
         </form>

@@ -15,7 +15,7 @@
     <h3 class="text-primary"><i class="fas fa-caret-right"></i> Mis guias</h3>
     <form class="row mb-4">
         <div class="form-group col-12 col-md-6 col-lg-3">
-            <label for="estado_guias">Estado</label>
+            <label for="estado_guias">Status</label>
             <select class="form-control cb-filtros" id="estado_guias">
                 <option value="0" selected>TODOS</option>
                 @foreach ($estado_guias as $estado)
@@ -46,12 +46,12 @@
                 <th>N° Guia</th>
                 <th>Fecha Emis</th>
                 <th>Fecha Tras</th>
-                <th>Prov Orig</th>
-                <th>Prov Dest</th>
+                <th>Días Trans</th>
                 <th>Nom Remi</th>
-                <th>N° Docu Remi</th>
-                <th>Nom Dest</th>
-                <th>N° Docu Dest</th>
+                <th>Nom Consig</th>
+                <th>Ciudad Base</th>
+                <th>Ciudad Final</th>
+                <th>Clusters</th>
                 <th>Responsable</th>
                 <th>Estado</th>
                 <th>Tipo</th>

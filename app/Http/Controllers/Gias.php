@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Clientes;
 use App\Models\InformacionAdicional;
+use App\Models\ModeloCluster;
 use App\Models\ModeloGuias;
 use App\Models\Tipos\Documentos;
 use App\Models\TrayectoEnvio;
@@ -23,8 +24,52 @@ class Gias extends Controller
         $trayecto = TrayectoEnvio::where(['estado' => 1])->get();
         $clientes = Clientes::obtenerCliConProvee();
         $cli_cli = Clientes::obtenerCliDeCli();
+        $nro_guia = ModeloGuias::select('prefijo','nro_guia')->orderBy('nro_guia', 'desc')->first();
+        $nro_guia_result = '001-0000001';
+        if(!empty($nro_guia)){
+            if($nro_guia->nro_guia == 9999999){
+                $nro_guia_result = str_pad((intval($nro_guia->prefijo) + 1),3,'0',STR_PAD_LEFT) . '-' . '0000001';
+            }
+            if($nro_guia->nro_guia < 9999999){
+                $nro_guia_result = str_pad((intval($nro_guia->prefijo)), 3, '0', STR_PAD_LEFT) . '-' . str_pad((intval($nro_guia->nro_guia) + 1), 7, '0', STR_PAD_LEFT);
+            }
+        }
         $hoy = date('Y-m-d');
-        return view('comprobante.guias',compact('cli_cli','clientes','departamentos','hoy','trayecto','via_envios','tipo_documentos','modulos'));
+        return view('comprobante.guias',compact('nro_guia_result','cli_cli','clientes','departamentos','hoy','trayecto','via_envios','tipo_documentos','modulos'));
+    }
+    public function obtenerDiasTransito(Request $request)
+    {
+        try {
+            return response()->json(['dias' => InformacionAdicional::obtenerDiasTransito($request->departamento_origen,$request->departamento_destino,$request->provincia_destino,$request->ciudad_final)]);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function viewGuiasRetornadas()
+    {
+        $modulos = User::getModulos(Auth::id());
+        $clusters = ModeloCluster::obtenerTodosClusters();
+        return view('retornos.retornosguiasencargado',compact('modulos','clusters'));
+    }
+    public function guiasRetornadas(Request $request)
+    {
+        if($request->ajax()){
+            try {
+                $id_usuario = $request->has('cluster') ? $request->cluster : Auth::id();
+                switch ($request->tipo) {
+                    case 'mostrar-guias':
+                        return datatables()->of(ModeloGuias::mostrarRetornoGuias($request->tipo,$id_usuario))->toJson();
+                    break;
+                    case 'cambio-estado':
+                        ModeloGuias::cambiarEstadoRetornoGuia($request->cluster, $request->guia, $request->estado);
+                        return response()->json(['success' => 'se cambio el status de la guia de manera correcta']);
+                    break;
+                }
+
+            } catch (Exception $ex) {
+                return response()->json(['error' => $ex->getMessage()]);
+            }
+        }
     }
     public function detalleMisGuias(Request $request)
     {
@@ -76,6 +121,13 @@ class Gias extends Controller
             return datatables()->of($guias)->toJson();
         }
     }
+    public function cambiarCluster(Request $request)
+    {
+        if ($request->ajax()) {
+            ModeloGuias::where(['id' => $request->id_guia,'activo' => 1])->update(['id_cluster' => $request->id_cluster]);
+            return response()->json(['success' => 'Se cambió correctamente el cluster']);
+        }
+    }
     public function addGuia(Request $request)
     {
         try {
@@ -123,11 +175,15 @@ class Gias extends Controller
             $datos = Clientes::detalleCliDeCli($request->id);
             $provincias = [];
             $distritos = [];
+            $dias = null;
             if(!empty($datos)){
                 $provincias = Ubigeo::getProvinciasCliente($datos->departamento);
                 $distritos = Ubigeo::getDistritosCliente($datos->provincia);
+                // $nombre_dep = (new Ubigeo)->getNameDepartamento($datos);
+                // $nombre_prov = (new Ubigeo)->getNameProvincia($datos);
+                // $dias = InformacionAdicional::obtenerDiasTransito($datos->departamento_orgingen, $datos->departamento_destino, $request->provincia_destino, $request->ciudad_final)
             }           
-            return response()->json(['datos' => $datos, 'prov' => $provincias, 'dist' => $distritos]);
+            return response()->json(['datos' => $datos, 'prov' => $provincias,'dias' => $dias ,'dist' => $distritos]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }

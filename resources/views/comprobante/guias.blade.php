@@ -15,35 +15,32 @@
         <div class="col-12 p-0 px-lg-2 mb-4">
             <div class="bg-white p-3 form-row">
                 <div class="form-group col-12 col-md-6 col-lg-3">
+                    <label for="">N° Guía</label>
+                    <input type="text" pattern="[0-9]{3}[-][0-9]{7}" required name="nro_guia" maxlength="11" class="form-control" value="{{$nro_guia_result}}">
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_resp_pago">Responsable del pago</label>
-                    <select name="resp_pago" id="id_resp_pago" class="form-control">
+                    <select name="resp_pago" id="id_resp_pago" class="form-control" required>
                         <option value="REMITENTE">REMITENTE</option>
                         <option value="DESTINATARIO">DESTINATARIO</option>
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_estado">Tipo</label>
-                    <select name="estado" id="id_estado" class="form-control">
+                    <select name="estado" id="id_estado" class="form-control" required>
+                        <option value="" hidden>Seleccione una opción</option>
                         <option value="1">ACTIVA</option>
                         <option value="2">ANULADA</option>
                         <option value="3">INACTIVA</option>
                     </select>
                 </div>
-                {{-- <div class="form-group d-none col-12 col-md-6 col-lg-3">
-                    <label for="id_situ">Situación</label>
-                    <select name="situ" id="id_situ" disabled class="form-control">
-                        @foreach ($situacion as $docu)
-                            <option value="{{$docu->id}}">{{$docu->tipo}}</option>
-                        @endforeach
-                    </select>
-                </div> --}}
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_fech_emis">Fecha Emisión</label>
-                    <input type="date" class="form-control" value="{{$hoy}}" max="{{$hoy}}" name="fech_emis" id="id_fech_emis">
+                    <input type="date" class="form-control" value="{{$hoy}}" required max="{{$hoy}}" name="fech_emis" id="id_fech_emis">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_comp_clie">Comprobantes</label>
-                    <select name="comp_clie[]" id="id_comp_clie" class="form-control" multiple>
+                    <select name="comp_clie[]" id="id_comp_clie" required class="form-control" multiple>
                         <option value="BOLETA">BOLETA</option>
                         <option value="FACTURA">FACTURA</option>
                         <option value="GUIA">GUIA</option>
@@ -53,11 +50,11 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_nro_comp_cli">N° comprobante</label>
-                    <select name="nro_comp_cli[]" id="id_nro_comp_cli" class="form-control" multiple></select>
+                    <select name="nro_comp_cli[]" id="id_nro_comp_cli" required class="form-control" multiple></select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_cant_comp">Cantidad Comprobante</label>
-                    <input type="text" class="form-control" name="cant_comp" id="id_cant_comp">
+                    <input type="text" class="form-control" value="0" name="cant_comp" required id="id_cant_comp">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_orde_comp">Orden de compra</label>
@@ -69,11 +66,11 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_fech_tras">Fecha Traslado</label>
-                    <input type="date" class="form-control" min="{{$hoy}}" name="fech_tras" id="id_fech_tras">
+                    <input type="date" class="form-control" min="{{$hoy}}" required name="fech_tras" id="id_fech_tras">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_tray_env">Trayecto Envio</label>
-                    <select name="tray_env" id="id_tray_env" class="form-control">
+                    <select name="tray_env" id="id_tray_env" class="form-control" required>
                         @foreach ($trayecto as $tra)
                             <option value="{{$tra->id}}">{{$tra->tipo}}</option>
                         @endforeach
@@ -81,7 +78,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_nro_manifiesto">Vía Envío</label>
-                    <select name="via_envi" id="id_via_envi" class="form-control">
+                    <select name="via_envi" id="id_via_envi" class="form-control" required>
                         @foreach ($via_envios as $via)
                             <option value="{{$via->id}}">{{$via->envio}}</option>
                         @endforeach
@@ -89,7 +86,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_via_tras">Via Traslado</label>
-                    <select name="via_tras" id="id_via_tras" class="form-control">
+                    <select name="via_tras" id="id_via_tras" class="form-control" required>
                         @foreach ($via_envios as $via)
                             <option value="{{$via->id}}">{{$via->envio}}</option>
                         @endforeach
@@ -102,7 +99,7 @@
                 <legend class="d-inline-block bg-white w-auto px-2 border shadow-sm text-left legend-add text-info">REMITENTE</legend>
                 <div class="form-group col-12">
                     <label for="id_remi_nomb">Nombres</label>
-                    <select class="form-control simple-select2" name="id_remitente" id="id_remi_nomb">
+                    <select class="form-control simple-select2" name="id_remitente" id="id_remi_nomb" required>
                         <option></option>
                         @foreach ($clientes as $cli)
                             <option data-type="cliente" value="{{$cli->id}}">{{$cli->nom_cli}}</option>
@@ -119,7 +116,7 @@
                 </div>
                 <div class="form-group col-12 col-lg-6">
                     <label for="id_remi_tipo_docu">Tipo documento</label>
-                    <select name="remi_tipo_docu" id="id_remi_tipo_docu" class="form-control" data-valor-cliente="doc_ident" data-valor-proveedor="tipo_docu_prov">
+                    <select name="remi_tipo_docu" id="id_remi_tipo_docu" required class="form-control" data-valor-cliente="doc_ident" data-valor-proveedor="tipo_docu_prov">
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
                         @endforeach
@@ -127,15 +124,15 @@
                 </div>
                 <div class="form-group col-12 col-lg-6">
                     <label for="id_remi_nro_docu">N° documento</label>
-                    <input type="text" class="form-control" name="remi_nro_docu" id="id_remi_nro_docu" data-valor-cliente="nro_doc" data-valor-proveedor="nro_docu_prov">
+                    <input type="text" class="form-control" name="remi_nro_docu" required id="id_remi_nro_docu" data-valor-cliente="nro_doc" data-valor-proveedor="nro_docu_prov">
                 </div>
                 <div class="form-group col-12">
                     <label for="id_remi_dire">Dirección</label>
-                    <input type="text" class="form-control" name="remi_dire" id="id_remi_dire" data-valor-cliente="dir_sede_so" data-valor-proveedor="dire_prov">
+                    <input type="text" class="form-control" name="remi_dire" required id="id_remi_dire" data-valor-cliente="dir_sede_so" data-valor-proveedor="dire_prov">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_remi_depa">Departamento</label>
-                    <select class="form-control cb-ubigeo" name="remi_depa" id="id_remi_depa" data-consulta="provincia" data-info="id_remi_prov" data-valor-proveedor="depa_prov" data-info-distrito="id_remi_dist" data-valor-cliente="dpto_so">
+                    <select class="form-control cb-ubigeo" name="remi_depa" required id="id_remi_depa" data-consulta="provincia" data-info="id_remi_prov" data-valor-proveedor="depa_prov" data-info-distrito="id_remi_dist" data-valor-cliente="dpto_so">
                         <option value="" hidden>Seleccione un departamento</option>
                         @foreach ($departamentos as $depar)
                             <option value="{{$depar->id_ubigeo}}">{{$depar->nombre_ubigeo}}</option>
@@ -144,12 +141,12 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_remi_prov">Provincia</label>
-                    <select class="form-control cb-ubigeo" name="remi_prov" id="id_remi_prov" data-consulta="distrito" data-info="id_remi_dist" data-valor-proveedor="prov_prov" data-valor-cliente="prov_so">
+                    <select class="form-control cb-ubigeo" name="remi_prov" required id="id_remi_prov" data-consulta="distrito" data-info="id_remi_dist" data-valor-proveedor="prov_prov" data-valor-cliente="prov_so">
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="">Distrito</label>
-                    <select class="form-control cb-ubigeo" name="remi_dist" id="id_remi_dist" data-valor-cliente="dist_so" data-valor-proveedor="dist_prov">
+                    <select class="form-control cb-ubigeo" name="remi_dist" required id="id_remi_dist" data-valor-cliente="dist_so" data-valor-proveedor="dist_prov">
                     </select>
                 </div>
             </fieldset>
@@ -159,7 +156,7 @@
                 <legend class="d-inline-block bg-white w-auto px-2 border shadow-sm text-left legend-add text-info">DESTINATARIO</legend>
                 <div class="form-group col-12">
                     <label for="id_dest_nomb">Nombres</label>
-                    <select class="form-control cb-select2-tags" name="id_destinatario" id="id_dest_nomb">
+                    <select class="form-control cb-select2-tags" required name="id_destinatario" id="id_dest_nomb">
                         <option></option>
                         @foreach ($cli_cli as $c)
                             <option value="{{$c->id}}">{{$c->nombres}}</option>
@@ -168,7 +165,7 @@
                 </div>
                 <div class="form-group col-12 col-lg-6">
                     <label for="id_dest_tipo_docu">Tipo documento</label>
-                    <select name="dest_tipo_docu" id="id_dest_tipo_docu" class="form-control" data-cli-cli="tipo_doc">
+                    <select name="dest_tipo_docu" id="id_dest_tipo_docu" required class="form-control" data-cli-cli="tipo_doc">
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
                         @endforeach
@@ -176,16 +173,16 @@
                 </div>
                 <div class="form-group col-12 col-lg-6">
                     <label for="id_dest_nro_docu">N° documento</label>
-                    <input type="text" class="form-control" name="dest_nro_docu" id="id_dest_nro_docu" data-cli-cli="nro_doc">
+                    <input type="text" class="form-control" name="dest_nro_docu" required id="id_dest_nro_docu" data-cli-cli="nro_doc">
                 </div>
                 
                 <div class="form-group col-12">
                     <label for="id_dest_dire">Dirección</label>
-                    <input type="text" class="form-control" name="dest_dire" id="id_dest_dire" data-cli-cli="direccion">
+                    <input type="text" class="form-control" name="dest_dire" required id="id_dest_dire" data-cli-cli="direccion">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_dest_depa">Departamento</label>
-                    <select name="dest_depa" id="id_dest_depa" class="form-control cb-ubigeo cb-dest" data-cli-cli="departamento" data-consulta="provincia" data-info="id_dest_prov" data-info-distrito="id_dest_dist">
+                    <select name="dest_depa" id="id_dest_depa" required class="form-control cb-ubigeo cb-dest" data-cli-cli="departamento" data-consulta="provincia" data-info="id_dest_prov" data-info-distrito="id_dest_dist">
                         <option value="" hidden>Seleccione un departamento</option>
                         @foreach ($departamentos as $depar)
                             <option value="{{$depar->id_ubigeo}}">{{$depar->nombre_ubigeo}}</option>
@@ -194,11 +191,16 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_dest_prov">Provincia</label>
-                    <select name="dest_prov" id="id_dest_prov" class="form-control cb-ubigeo cb-dest" data-cli-cli="provincia" data-consulta="distrito" data-info="id_dest_dist"></select>
+                    <select name="dest_prov" id="id_dest_prov" required class="form-control cb-ubigeo cb-dest" data-cli-cli="provincia" data-consulta="distrito" data-info="id_dest_dist"></select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_dest_dist">Distrito</label>
-                    <select name="dest_dist" id="id_dest_dist" class="form-control cb-ubigeo cb-dest" data-cli-cli="distrito">
+                    <select name="dest_dist" id="id_dest_dist" required class="form-control cb-ubigeo cb-dest calculo-dia" data-ciudades="#id_ciudad_destino_final" data-cli-cli="distrito">
+                    </select>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4">
+                    <label for="id_ciudad_destino_final">Ciudad Final</label>
+                    <select name="ciudad_destino_final" id="id_ciudad_destino_final" class="form-control simple-select2 cb-dest calculo-dia">
                     </select>
                 </div>
             </fieldset>
@@ -207,14 +209,9 @@
             <div class="bg-white p-3 form-row">
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_dias_tran">Días de tránsito</label>
-                    <input type="text" class="form-control" name="dias_tran" id="id_dias_tran">
-                </div>
-                <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="">Costo Estimado Envio</label>
-                    <input type="text" class="form-control" name="cst_mest_env" id="id_cst_mest_env">
+                    <input type="number" min="1" class="form-control" required name="dias_tran" id="id_dias_tran">
                 </div>
             </div>
-            
         </div>
         <div class="col-12 p-0 px-lg-2 form-group">
             <div class="form-group text-right">
@@ -230,10 +227,10 @@
                             <th style="width: 200px;">Embase o <br> Embalaje</th>
                             <th style="width: 100px;">Cantida</th>
                             <th style="width: 100px;">Kg</th>
-                            <th style="width: 100px;">Lar / m</th>
-                            <th style="width: 100px;">Anc / m</th>
-                            <th style="width: 100px;">Alt / m</th>
-                            <th style="width: 100px;">Vol / m<sup>3</sup></th>
+                            <th style="width: 100px;">Lar / cm</th>
+                            <th style="width: 100px;">Anc / cm</th>
+                            <th style="width: 100px;">Alt / cm</th>
+                            <th style="width: 100px;">Peso Vol / cm<sup>3</sup></th>
                         </tr>
                     </thead>
                     <tbody id="tabla-detalle">

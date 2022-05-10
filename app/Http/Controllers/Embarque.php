@@ -18,13 +18,12 @@ class Embarque extends Controller
     {
         $hoy = date('Y-m-d');
         $modulos = User::getModulos(Auth::id());
-        $departamentoProv = (new Manifiesto)->arrayDepartamentosProvincias();
+        $ciudadesBase = InformacionAdicional::obtenerCiudadesBase();
         $dealers = User::obtenerUsuarioRol(7);
         $conductores = User::obtenerUsuarioRol(6);
         $vehiculos = Vehiculos::obtenerVehiculos();
         $transportes = EmpresaTransporte::obtenerTransportes();
-
-        return view('pedidos.listaembarque',compact('dealers', 'conductores','departamentoProv', 'vehiculos', 'transportes','hoy','modulos'));
+        return view('pedidos.listaembarque',compact('dealers', 'conductores', 'ciudadesBase', 'vehiculos', 'transportes','hoy','modulos'));
     }
     public function obtenerDevolucionGuias(Request $request)
     {
@@ -97,7 +96,32 @@ class Embarque extends Controller
                 $guias = json_decode($request->guias, true);
                 unset($datos['guias']);
             }
-            return response()->json(ModeloEmbarque::actualizarDevolucionCargo($datos, $guias, Auth::id()));
+            $result = [];
+            switch ($request->tipo) {
+                case 'guardar_guias':
+                    $result = ModeloEmbarque::guardarDevolucion($guias,Auth::id());
+                break;
+                case 'consultas_guias':
+                    $result = ModeloEmbarque::obtenerEmbarquesGuardados(Auth::id());
+                break;
+                case 'retornar_guias':
+                    $guias_nuevas = [];
+                    $guias_guardadas = [];
+                    unset($datos['tipo']);
+                    if($request->has('guias_guardadas')){
+                        unset($datos['guias_guardadas']);
+                        $guias_guardadas = json_decode($request->guias_guardadas, true);
+                    }
+                    if ($request->has('guias_nuevas')) {
+                        unset($datos['guias_nuevas']);
+                        $guias_nuevas = json_decode($request->guias_nuevas,true);
+                    }
+                    // dd($datos,$guias_guardadas,$guias_nuevas);
+                    $result = ModeloEmbarque::actualizarDevolucionCargo($datos, $guias_nuevas,$guias_guardadas, Auth::id());
+                break;
+                
+            }
+            return response()->json($result);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
@@ -114,7 +138,8 @@ class Embarque extends Controller
     public function obtenerManiPend(Request $request)
     {
         try {
-            $manifiestos = ModeloManifiesto::obtenerEmbarcar($request->provincia,Auth::id());
+            // dd($request->ciudad_base,$request->tipo);
+            $manifiestos = ModeloManifiesto::obtenerEmbarcar($request->ciudad_base,$request->tipo,Auth::id());
             return datatables()->of($manifiestos)->toJson();
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
@@ -154,6 +179,31 @@ class Embarque extends Controller
             return response()->json(['error' => $ex->getMessage()]);
         }
     }
+    public function obtenerFletes(Request $request)
+    {
+        try {
+            return response()->json(['fletes' => InformacionAdicional::obtenerFletes()]);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function verCiudadesFlestes(Request $request)
+    {
+        try {
+            $manifiestos = implode(',', json_decode($request->lista_manifiestos, true));
+            return response()->json(['ciudades' => ModeloEmbarque::obtenerCiudadesBaseFlete($manifiestos,Auth::id())]);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function obtenerGuiasEmbarque(Request $request)
+    {
+        try {
+            return response()->json(['ciudades' => ModeloEmbarque::obtenerGuiasEmbarqueInsertar($request->id_embarque, Auth::id())]);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
     public function embarcarMani(Request $request)
     {
         try {
@@ -168,8 +218,7 @@ class Embarque extends Controller
     {
         try {
             $datos = $request->all();
-            ModeloEmbarque::agregarInformeEmbarque($datos,Auth::id());
-            return response()->json(['success' => 'Informe agregado con éxito']);
+            return response()->json(ModeloEmbarque::agregarInformeEmbarque($datos, Auth::id()));
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
@@ -178,5 +227,51 @@ class Embarque extends Controller
     {
         $modulos = User::getModulos(Auth::id());
         return view('vehiculos',compact('modulos'));
+    }
+    public function obtenerVehiculosTransporte(Request $request)
+    {
+        try {
+            if ($request->has('vehiculo_id')) {
+                return response()->json(['vehiculo' => Vehiculos::where(['activo' => 1,'id' => $request->vehiculo_id])->first()]);
+            } else {
+                $vehiculos = Vehiculos::obtenerVehiculos();
+                return datatables()->of($vehiculos)->toJson();
+            }
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function eliminarVehiculoTransporte(Request $request)
+    {
+        try {
+            Vehiculos::where(['activo' => 1, 'id' => $request->vehiculo_id])->update(['activo' => 0]);
+            return response()->json(['success' => 'Vehículo eliminado correctamente']);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function agregarVehiculoTransporte(Request $request)
+    {
+        try {
+            $datos = $request->all();
+            Vehiculos::insert($datos);
+            return response()->json(['success' => true]);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function actualizarVehiculoTransporte(Request $request)
+    {
+        try {
+            $id = $request->id_vehiculo;
+            $datos = $request->all();
+            if (isset($datos['id_vehiculo'])) {
+                unset($datos['id_vehiculo']);
+            }
+            Vehiculos::where(['activo' => 1, 'id' => $id])->update($datos);
+            return response()->json(['success' => true]);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
     }
 }

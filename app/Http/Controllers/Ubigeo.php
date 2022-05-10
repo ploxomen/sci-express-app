@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class Ubigeo extends Controller
 {
@@ -13,6 +14,11 @@ class Ubigeo extends Controller
             $departamentos = file_get_contents($url);
             return response(json_decode($departamentos));
         }
+    }
+    public function dbCiudades(Request $request)
+    {
+        $ciudades = DB::table('ciudades')->select('id', 'nombre_ciudad')->where(['ubigeo_distrito' => $request->distrito])->get();
+        return response()->json(['ciudades' => $ciudades]);
     }
     public function getNameDepartamento($ubigeo)
     {

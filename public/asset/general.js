@@ -34,9 +34,9 @@ class General{
             })
         }
     }
-    totalBultos(domtotal){
+    totalBultos(domparent,domtotal){
         let total = 0;
-        for (const element of document.querySelectorAll(domtotal)) {
+        for (const element of domparent.querySelectorAll(domtotal)) {
             const valor = parseInt(element.value);
             total += isNaN(valor) ? 0 : valor;
         }
@@ -96,5 +96,25 @@ class General{
         let template = `<b>${cliente.element.dataset.nro}</b><br><span>${cliente.text}</span>`;
         span.innerHTML = template;
         return span;
+    }
+    validarMinMaxTipoDocumento(text_data_input,valor){
+        const nro = document.getElementById(text_data_input);
+        let minMax = 15;
+        switch (valor) {
+            case '1':
+                minMax = 12;
+            break;
+            case '3':
+                minMax = 8;
+            break;
+            case '4':
+                minMax = 11;
+            break;
+             case '5':
+                minMax = 12;
+            break;
+        }
+        nro.setAttribute('minlength',minMax);
+        nro.setAttribute('maxlength',minMax);
     }
 }

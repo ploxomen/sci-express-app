@@ -98,18 +98,22 @@
                     <button type="button" id="btn-menu" class="btn-info-menu">
                         <i class="fas fa-bars"></i>                    
                     </button>
-                    <button class="btn-info-menu">
-                        <i class="fas fa-search"></i>
-                    </button>
                 </div>
                 <div class="box-my">
                     <span class="text-primary">{{Auth::user()->name}}</span>
-                    <button class="btn-info-menu">
-                        <i class="fas fa-user-circle"></i>
-                    </button>
-                    <button class="btn-info-menu">
-                        <i class="fas fa-bell"></i>
-                    </button>
+                    <div class="btn-group">
+                        <button class="btn-info-menu dropdown-toggle"  data-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <span class="dropdown-item-text"><span class="text-primary">Área:</span><br><span id="text_area_index"></span></span>
+                            <div class="dropdown-divider"></div>
+                            <h6 class="dropdown-header" id="lista_roles_index">Roles</h6>
+                            <h6 class="dropdown-header">Otros</h6>
+                            <a class="dropdown-item" href="{{route('miPerfil')}}">Mi perfil</a>
+                            <a href="{{route('closeSesion')}}" class="dropdown-item">Cerrar sesión</a>
+                        </div>
+                    </div>
                     
                 </div>
                

@@ -23,7 +23,8 @@
                 <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add text-info">DATOS DEL CLIENTE</legend>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_doc_ident">Tipo documento</label>
-                    <select name="doc_ident" id="id_doc_ident" class="form-control" required>
+                    <select name="doc_ident" id="id_doc_ident" class="form-control simple-select2 cb-tipo-doc" data-input="id_nro_doc" required>
+                        <option></option>
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
                         @endforeach
@@ -44,11 +45,11 @@
                 <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add text-info">SEDE ADMINISTRATIVA</legend>
                 <div class="form-group col-12">
                     <label for="id_dir_sede_adr">Dirección</label>
-                    <input type="text" name="dir_sede_adr" id="id_dir_sede_adr" class="form-control" required>
+                    <input type="text" name="dir_sede_adr" id="id_dir_sede_adr" class="form-control clone-value" data-clone="#id_dir_sede_so" required>
                 </div>
-                <div class="form-group col-12 col-md-4 col-lg-3">
+                <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_dpto_sa">Departamento</label>
-                    <select name="dpto_sa" id="id_dpto_sa" class="form-control departamentos cb-ubigeo" required data-consulta="provincia" data-info="id_prov_sa" data-info-distrito="id_dist_sa">
+                    <select name="dpto_sa" id="id_dpto_sa" class="form-control cb-ubigeo selected-two" data-selected-two="id_dpto_so" required data-consulta="provincia" data-segunda-info="id_prov_so" data-info="id_prov_sa" data-info-distrito="id_dist_sa" data-info-segundo-distrito="id_dist_so">
                         <option value=""></option>
                         @foreach ($dep as $d)
                             <option value="{{$d->id_ubigeo}}">{{$d->nombre_ubigeo}}</option>
@@ -57,15 +58,15 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_prov_sa">Provincia</label>
-                    <select name="prov_sa" id="id_prov_sa" class="form-control cb-ubigeo" required data-consulta="distrito" data-info="id_dist_sa"></select>
+                    <select name="prov_sa" id="id_prov_sa" class="form-control cb-ubigeo selected-two" data-selected-two="id_prov_so" required data-consulta="distrito" data-segunda-info="id_dist_so" data-info="id_dist_sa"></select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_dist_sa">Distrito</label>
-                    <select name="dist_sa" id="id_dist_sa" class="form-control cb-ubigeo" required></select>
+                    <select name="dist_sa" id="id_dist_sa" class="form-control cb-ubigeo selected-two" data-selected-two="id_dist_so" required></select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_ctii_sa">CTLF</label>
-                    <input type="text" name="ctii_sa" id="id_ctii_sa" class="form-control" required>
+                    <input type="text" name="ctii_sa" id="id_ctii_sa" minlength="7" maxlength="7" class="form-control clone-value" data-clone="#id_ctii_so" required>
                 </div>
             </fieldset>
         </div>
@@ -95,7 +96,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_ctii_so">CTLF</label>
-                    <input type="text" name="ctii_so" id="id_ctii_so" class="form-control" required>
+                    <input type="text" name="ctii_so" id="id_ctii_so" minlength="7" maxlength="7" class="form-control">
                 </div>
             </fieldset>
         </div>
@@ -108,8 +109,8 @@
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_doc_ident_rl">Tipo documento</label>
-                    <select name="doc_ident_rl" id="id_doc_ident_rl" class="form-control" required>
-                        <option value=""></option>
+                    <select name="doc_ident_rl" id="id_doc_ident_rl" class="form-control simple-select2 cb-tipo-doc" data-input="id_nro_doc_rl" required>
+                        <option></option>
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
                         @endforeach
@@ -121,15 +122,15 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_tlf_anex_rl">Teléfono</label>
-                    <input type="tel" name="tlf_anex_rl" id="id_tlf_anex_rl" class="form-control" required>
+                    <input type="tel" name="tlf_anex_rl" id="id_tlf_anex_rl" minlength="7" maxlength="7" class="form-control">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_cel_rl">Celular</label>
-                    <input type="tel" name="cel_rl" id="id_cel_rl" class="form-control" required>
+                    <input type="tel" name="cel_rl" id="id_cel_rl" minlength="9" maxlength="9" class="form-control">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_email_rl">Correo</label>
-                    <input type="email" name="email_rl" id="id_email_rl" class="form-control" required>
+                    <input type="email" name="email_rl" id="id_email_rl" class="form-control">
                 </div>
             </fieldset>
         </div>
@@ -142,8 +143,8 @@
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_doc_ident_ad">Tipo documento</label>
-                    <select name="doc_ident_ad" id="id_doc_ident_ad" class="form-control" required>
-                        <option value=""></option>
+                    <select name="doc_ident_ad" id="id_doc_ident_ad" class="form-control simple-select2 cb-tipo-doc" data-input="id_nro_doc_ad" required>
+                        <option></option>
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
                         @endforeach
@@ -155,15 +156,15 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_tlf_anex_ad">Teléfono</label>
-                    <input type="tel" name="tlf_anex_ad" id="id_tlf_anex_ad" class="form-control" required>
+                    <input type="tel" name="tlf_anex_ad" id="id_tlf_anex_ad" minlength="7" maxlength="7" class="form-control">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_cel_ad">Celular</label>
-                    <input type="tel" name="cel_ad" id="id_cel_ad" class="form-control" required>
+                    <input type="tel" name="cel_ad" id="id_cel_ad" minlength="9" maxlength="9" class="form-control">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_email_ad">Correo</label>
-                    <input type="email" name="email_ad" id="id_email_ad" class="form-control" required>
+                    <input type="email" name="email_ad" id="id_email_ad" class="form-control">
                 </div>
             </fieldset>
         </div>
@@ -176,7 +177,8 @@
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_doc_ident_op">Tipo documento</label>
-                    <select name="doc_ident_op" id="id_doc_ident_op" class="form-control" required>
+                    <select name="doc_ident_op" id="id_doc_ident_op" class="form-control simple-select2 cb-tipo-doc" data-input="id_nro_doc_op" required>
+                        <option></option>
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
                         @endforeach
@@ -188,15 +190,15 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_tlf_anex_op">Teléfono</label>
-                    <input type="tel" name="tlf_anex_op" id="id_tlf_anex_op" class="form-control" required>
+                    <input type="tel" name="tlf_anex_op" id="id_tlf_anex_op" minlength="7" maxlength="7" class="form-control">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_cel_op">Celular</label>
-                    <input type="tel" name="cel_op" id="id_cel_op" class="form-control" required>
+                    <input type="tel" name="cel_op" id="id_cel_op" minlength="9" maxlength="9" class="form-control">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_email_op">Correo</label>
-                    <input type="email" name="email_op" id="id_email_op" class="form-control" required>
+                    <input type="email" name="email_op" id="id_email_op" class="form-control">
                 </div>
             </fieldset>
         </div>
@@ -209,7 +211,8 @@
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_doc_ident_pg">Tipo documento</label>
-                    <select name="doc_ident_pg" id="id_doc_ident_pg" class="form-control" required>
+                    <select name="doc_ident_pg" id="id_doc_ident_pg" class="form-control simple-select2 cb-tipo-doc" data-input="id_nro_doc_pg" required>
+                        <option></option>
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
                         @endforeach
@@ -221,15 +224,15 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_tlf_anex_pg">Teléfono</label>
-                    <input type="tel" name="tlf_anex_pg" id="id_tlf_anex_pg" class="form-control" required>
+                    <input type="tel" name="tlf_anex_pg" id="id_tlf_anex_pg" minlength="7" maxlength="7" class="form-control">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_cel_pg">Celular</label>
-                    <input type="tel" name="cel_pg" id="id_cel_pg" class="form-control" required>
+                    <input type="tel" name="cel_pg" id="id_cel_pg" minlength="9" maxlength="9" class="form-control">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_email_pg">Correo</label>
-                    <input type="email" name="email_pg" id="id_email_pg" class="form-control" required>
+                    <input type="email" name="email_pg" id="id_email_pg" class="form-control">
                 </div>
             </fieldset>
         </div>
@@ -253,7 +256,7 @@
                             </div>
                             <div class="form-group col-12 col-md-6 col-lg-4">
                                 <label for="id_nro_docu_prov_{{$id_new_prov}}" data-selected="true">N° documento</label>
-                                <input accept="" disabled type="text" data-name="nro_docu_prov" required id="id_nro_docu_prov_{{$id_new_prov}}" class="form-control form-control-sm" data-selected="true">
+                                <input disabled type="text" data-name="nro_docu_prov" required id="id_nro_docu_prov_{{$id_new_prov}}" class="form-control form-control-sm" data-selected="true">
                             </div>
                             <div class="form-group col-12 col-lg-4">
                                 <label for="id_nomb_prov_{{$id_new_prov}}" data-selected="true">Nombres</label>
@@ -282,7 +285,7 @@
                             </div>
                             <div class="form-group col-12 col-md-6 col-lg-6">
                                 <label for="id_tele_prov_{{$id_new_prov}}" data-selected="true">Contactos</label>
-                                <select disabled data-name="tele_prov" id="id_tele_prov_{{$id_new_prov}}" data-selected="true" required class="form-control from-control-sm cb-mult-nuevo" multiple></select>
+                                <select disabled data-name="tele_prov" required id="id_tele_prov_{{$id_new_prov}}" data-selected="true" required class="form-control from-control-sm cb-mult-nuevo" multiple></select>
                             </div>
                             <div class="form-group col-12 col-md-6 col-lg-6">
                                 <label for="id_email_prov_{{$id_new_prov}}" data-selected="true">Correos</label>
@@ -317,24 +320,6 @@
                         <option value="CREDITO">CREDITO</option>
                     </select>
                 </div>
-                {{-- @if (!$agregar)
-                    <div class="form-group col-12">
-                        <div class="d-flex flex-wrap" style="gap: 10px;">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input change-doc" name="aprob_file" id="id_aprob_file" data-type="checkbox" data-doc="estado_cliente_file">
-                                <label class="custom-control-label" for="id_aprob_file">Aprobación documento</label>
-                            </div>
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input change-doc" name="aprob_cred" id="id_aprob_cred" data-type="checkbox" data-doc="estado_cliente_file">
-                                <label class="custom-control-label" for="id_aprob_cred">Aprobación crédito</label>
-                            </div>
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input change-doc" name="alta_clien" id="id_alta_clien" data-type="checkbox" data-doc="estado_cliente_file">
-                                <label class="custom-control-label" for="id_alta_clien">Alta cliente</label>
-                            </div>
-                        </div>
-                    </div>  
-                @endif --}}
             </fieldset>
         </div>
         <div class="form-group col-12">

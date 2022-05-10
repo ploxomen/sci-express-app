@@ -1,30 +1,36 @@
 function loadPage(){
     let general = new General();
-    let selectRadio = document.querySelectorAll('.select-doc');
-    let cantBulto = document.getElementById('id_cant_bulto');
-    let nroGuias = document.getElementById('id_nro_guias_conso');
     function datos(id){
         let newDatos = new FormData();
         newDatos.append('id_recojo',id);
+        const cantBulto = document.getElementById('id_cant_bulto_'+id);
+        const nro_guias_conso = $('#id_nro_guias_conso_' + id);
+        const una_guia = document.getElementById('id_una_guia_' + id);
+        const varias_guias = document.getElementById('id_varias_guias_' + id);
+
         if(cantBulto){
             newDatos.append('cant_bulto',cantBulto.value);
             if(!cantBulto.value){
                 return false
             }
         }
-        if(nroGuias){
-            newDatos.append('nro_guias_conso',nroGuias.value);
-            if(!nroGuias.value){
+        console.log(nro_guias_conso.val());
+        // return false;
+        if(nro_guias_conso.length > 0){
+            if(nro_guias_conso.val() == null){
                 return false
             }
+            newDatos.append('nro_guias_conso',nro_guias_conso.val().join(';'));
+            
         }
-        if(selectRadio){
-            for (const radio of selectRadio) {
-                if(radio.checked){
-                    newDatos.append('doc_recojo',radio.value);
-                    break;
-                }
-            }
+        if(una_guia && una_guia.checked){
+            newDatos.append('doc_recojo',una_guia.value);
+        }
+        if(varias_guias && varias_guias.checked){
+            newDatos.append('doc_recojo',varias_guias.value);
+        }
+        if(una_guia && varias_guias && !una_guia.checked && !varias_guias.checked){
+            return false;
         }
         return newDatos;
     }

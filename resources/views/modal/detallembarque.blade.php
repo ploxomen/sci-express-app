@@ -11,31 +11,31 @@
           <div class="row form-group">
             <div class="form-group col-6">
                 <b class="d-block text-info">Cajas</b>
-                <span id="id_modal_nro_cajas"></span>
+                <span id="id_modal_nro_cajas" class="clear-text"></span>
             </div>
             <div class="form-group col-6">
                 <b class="d-block text-info">Jabas</b>
-                <span id="id_modal_nro_jabas"></span>
+                <span id="id_modal_nro_jabas" class="clear-text"></span>
             </div>
             <div class="form-group col-6">
                 <b class="d-block text-info">Cajones</b>
-                <span id="id_modal_nro_cajones"></span>
+                <span id="id_modal_nro_cajones" class="clear-text"></span>
             </div>
              <div class="form-group col-6">
                 <b class="d-block text-info">Sobres</b>
-                <span id="id_modal_nro_sobres"></span>
+                <span id="id_modal_nro_sobres" class="clear-text"></span>
             </div>
             <div class="form-group col-6">
                 <b class="d-block text-info">Paquetes</b>
-                <span id="id_modal_nro_paquetes"></span>
+                <span id="id_modal_nro_paquetes" class="clear-text"></span>
             </div>
             <div class="form-group col-6">
                 <b class="d-block text-info">Otros</b>
-                <span id="id_modal_num_otros"></span>
+                <span id="id_modal_num_otros" class="clear-text"></span>
             </div>
             <div class="form-group col-12">
                 <b class="d-block text-info">Detalle Otros</b>
-                <p id="id_modal_detalle_otro" style="white-space: pre-wrap;"></p>
+                <p id="id_modal_detalle_otro" class="clear-text" style="white-space: pre-wrap;"></p>
             </div>
           </div>
       </div>

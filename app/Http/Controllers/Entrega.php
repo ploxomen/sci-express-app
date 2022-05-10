@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\EmpresaTransporte;
+use App\Models\ModeloCluster;
 use App\Models\ModeloEmbarque;
 use App\Models\User;
 use Exception;
@@ -16,7 +17,37 @@ class Entrega extends Controller
    public function viewEntrega()
    {
         $modulos = User::getModulos(Auth::id());
-        return view('pedidos.entregas',compact('modulos'));
+        $clusters = ModeloCluster::obtenerTodosClusters();
+        $nro_pendients = User::obtenerDatosHome(null,22);
+        return view('pedidos.entregas',compact('modulos','clusters', 'nro_pendients'));
+   }
+   public function listaEntregas(Request $request)
+   {
+      if($request->ajax()){
+         switch ($request->tipo) {
+            case 'consulta':
+               $fecha_confirmacion = $request->fecha_confirmacion == null ? "" : $request->fecha_confirmacion;
+               $fecha_reparto = $request->fecha_reparto == null ? "" : $request->fecha_reparto;
+               $cluster = $request->has('nombre_cluster') ? $request->nombre_cluster : 0;
+               if(!$request->has('nombre_cluster')){
+                  $cluster = (ModeloCluster::getCodigoCluster(Auth::id()))->id;
+               }
+               $ciudad_final = $request->has('ciudad_final') ? $request->ciudad_final : "todos";
+               $tipo_ciudad = $request->has('tipo_ciudad') ? $request->tipo_ciudad : "";
+               $query = ModeloEmbarque::obtenerGuiasRepartoConfirmado($fecha_confirmacion, $fecha_reparto, $request->estado_guia, $cluster,$ciudad_final,$tipo_ciudad);
+               return datatables()->of($query)->toJson();               
+            break;
+            case 'kpi':
+               $kpi = ModeloEmbarque::calculoKpi($request->id_cluster);
+               return response()->json(['success' => $kpi]);
+            break;
+            case 'consulta-detalle':
+               $id_cluster = $request->cluster;
+               $id_guia = $request->guia;
+               return response()->json(ModeloEmbarque::obtenerDetalleGuiaEditarEmbarque($id_guia,$id_cluster));
+            break;
+         }
+      }
    }
    public function entregaGuias(Request $request)
    {
@@ -48,8 +79,9 @@ class Entrega extends Controller
                'type' => $file->extension()
             ];
          }
-         ModeloEmbarque::confirmarEntregaGuias($request->guia,Auth::id(),$filesDb);
-         return response(['success' => 'La Guia N° - <b>' . str_pad($request->guia,5,'0',STR_PAD_LEFT) .'</b> modificada con exito']);
+
+         ModeloEmbarque::confirmarEntregaGuias($request->guia,json_decode($request->datos_adicionales,true),Auth::id(),$filesDb);
+         return response(['success' => 'La Guía N° <b>' . $request->nro_guia .'</b> modificada con exito']);
       } catch (Exception $ex) {
          return response()->json(['error' => $ex->getMessage()]);
       }

@@ -8,7 +8,8 @@
     <script src="{{asset('library/datatable/datatable-responsive.min.js')}}"></script>
     <script src="{{asset('library/datatable/responsive-bootstrap.min.js')}}"></script>
     <script src="{{asset('asset/llegada.js')}}"></script>
-    <title>Llegada</title>
+    <script src="{{asset('asset/llegadacluster.js')}}"></script>
+    <title>Embarques por arribar</title>
 @endsection
 @section('body')
 <style>
@@ -49,11 +50,13 @@
                         <thead>
                             <tr>
                                 <th>N° Embarque</th>
+                                <th>Fecha Embarque</th>
                                 <th>Empresa</th>
-                                <th>Fecha Llegada</th>
-                                <th>Hr Llegada</th>
+                                <th>Fecha y Hr Llegada</th>
+                                <th>Cluster</th>
+                                <th>Comprobantes</th>
+                                <th>N° Comp</th>
                                 <th>Total Bulto</th>
-                                <th>Total Manif</th>
                                 <th>Acciónes</th>
                             </tr>
                         </thead>
@@ -80,12 +83,13 @@
                                 <th>Total Guías</th>
                                 <th>Estado</th>
                                 <th>N° Guía</th>
+                                <th>Fecha Reparto</th>
                                 <th>Acción</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-mani">
                             <tr>
-                                <td colspan="8" class="text-center">Seleccione un embarque</td>
+                                <td colspan="9" class="text-center">Seleccione un embarque</td>
                             </tr>
                         </tbody>
                     </table>

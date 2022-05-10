@@ -15,14 +15,11 @@
             align-items: center;
             overflow: hidden;
         }
-        .carta::before{
-            content: "";
-            display: block;
+        .carta .line{
             width: 6px;
             height: 100%;
             position: absolute;
             left: 0;
-            background: #9295ff;
         }
         .carta .principal .tipo{
             font-size: 15px;
@@ -45,92 +42,36 @@
     </style>
     <h5>Panel de inicio</h5>
     <div class="p-3">
-        <section class="row mb-4">
-            <div class="form-group col-12 col-sm-6 col-lg-3">
-                <div class="carta">
-                    <div class="principal">
-                        <span class="tipo">Ingreso del día</span>
-                        <span class="valor">S/ 155.00</span>
-                    </div>
-                    <div class="icono">
-                        <i class="fas fa-cash-register material-icons"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group col-12 col-sm-6 col-lg-3">
-                <div class="carta">
-                    <div class="principal">
-                        <span class="tipo">Ventas del mes</span>
-                        <span class="valor">5</span>
-                    </div>
-                    <div class="icono">
-                        <i class="fas fa-money-bill-wave material-icons"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group col-12 col-sm-6 col-lg-3">
-                <div class="carta">
-                    <div class="principal">
-                        <span class="tipo">Ventas pendientes</span>
-                        <span class="valor">S/ 155.00</span>
-                    </div>
-                    <div class="icono">
-                        <i class="fas fa-shopping-cart material-icons"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group col-12 col-sm-6 col-lg-3">
-                <div class="carta">
-                    <div class="principal">
-                        <span class="tipo">Clientes activos</span>
-                        <span class="valor">150</span>
-                    </div>
-                    <div class="icono">
-                        <i class="fas fa-users material-icons"></i>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <section class="bg-white p-3 mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="title">
-                    <h6 class="mb-0">Ventas del año</h6>
-                </div>
-                <div class="control d-flex align-items-center">
-                    <button class="rounded-circle btn btn-sm btn-primary mr-3">
-                        <i class="fas fa-arrow-down"></i>                    
-                    </button>
-                    <select class="form-control form-control-sm" style="width: 100px;">
-                        <option value="2022">2022</option>
-                        <option value="2022">2021</option>
-                    </select>
-                </div>
-            </div>
-            <div class="ventas-mes-grafico">
-                <canvas class="graficos" id="grafico-1"></canvas>
-            </div>
-        </section>
-        <section class="p-3 mb-4">
-            <div class="row">
-                <div class="col-12 col-md-6">
-                    <div class="bg-white p-3 ventas-semanales">
-                        <div>
-                            <h6>Ventas de la semana</h6>
-                        </div>
-                        <div>
-                            <canvas id="grafico-2" width="100%"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="bg-white p-3 ultima-notificacion">
-
-                    </div>
-                </div>
-            </div>
-        </section>
-        
+        @switch($rol_user->id_rol)
+            @case(1)
+                @include('home.manager')
+            @break
+            @case(2)
+                @include('home.supervisor')
+            @break
+            @case(3)
+                @include('home.digitador')
+            @break
+            @case(4)
+                @include('home.boss')
+            @break
+            @case(5)
+                @include('home.sectorista')
+            @break
+            @case(6)
+                @include('home.conductordealer')
+            @break
+            @case(7)
+                @include('home.conductordealer')
+            @break
+            @case(8)
+                @include('home.cluster')
+            @break
+            @default
+                @include('home.default')
+        @endswitch
     </div>
+    {{-- @if ($rol_user->id_rol == 1 || $rol_user->id_rol == 4 || $rol_user->id_rol == 6 || $rol_user->id_rol == 7)
     <script>
         const labels = [
             'Ene',
@@ -168,31 +109,7 @@
             document.getElementById('grafico-1').getContext('2d'),
             config
         );
-        const data2 = {
-        labels: [
-            'Red',
-            'Blue',
-            'Yellow'
-        ],
-        datasets: [{
-            label: 'My First Dataset',
-            data: [300, 50, 100],
-            backgroundColor: [
-            'rgb(255, 99, 132)',
-            'rgb(54, 162, 235)',
-            'rgb(255, 205, 86)'
-            ],
-            hoverOffset: 4
-        }]
-        };
-        const config2 = {
-            type: 'doughnut',
-            data: data2,
-        };
-        const myChart2 = new Chart(
-            document.getElementById('grafico-2').getContext('2d'),
-            config2
-        );
-    </script>
-
+    </script>  
+    @endif --}}
+    
 @endsection

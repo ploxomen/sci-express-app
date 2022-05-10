@@ -20,7 +20,6 @@ class ModeloSolicitud extends Model
     public static function obtenerTotalPorProcesar()
     {
         return DB::select('call sp_obtener_solicitudes_por_procesar()');
-
     }
     public static function getSolicitud($estado,$id_user = 0)
     {
@@ -28,9 +27,11 @@ class ModeloSolicitud extends Model
         if(!empty($solicitudes)){
             $estados_solicitud = EstadoSolicitud::where(['activado' => 1])->get();
             $usuarios = User::obtenerUsuarioRol(3);
+            $usuarios2 = User::obtenerUsuarioRol(5);
+            // dd($usuarios2, $usuarios);
             foreach ($solicitudes as $soli) {
                 $soli->listSoli = $estados_solicitud;
-                $soli->listUsu = $usuarios;
+                $soli->listUsu = array_merge($usuarios,$usuarios2);
             }
         }
         return $solicitudes;

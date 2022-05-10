@@ -276,7 +276,11 @@ table thead tr th{
     height: 15px;
     display: inline-block;
 }
-.form-control{
+.text-minuscula{
+    text-transform: lowercase !important;
+}
+
+input[type = "text"]{
     text-transform: uppercase;
 }
 .legend-add{
@@ -291,4 +295,10 @@ i{
     display: block;
     margin: auto;
     object-fit: cover;
+}
+.list-two-columns{
+    list-style: none !important;
+    columns: 2; 
+    -webkit-columns: 2; 
+    -moz-columns: 2; 
 }

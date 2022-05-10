@@ -12,12 +12,20 @@ function loadPage(){
             {data: 'nro_guia'},
             {data: 'fecha_emision'},
             {data: 'fecha_traslado'},
-            {data: 'remi_prov'},
-            {data: 'dest_prov'},
+            {data: 'dias_tran'},
             {data: 'nom_remi'},
-            {data: 'remi_nro_docu'},
             {data: 'nom_dest'},
-            {data: 'dest_nro_docu'},
+            {data: 'ciudad_base_cluster'},
+            {data: 'ciudad_final'},
+            {data: 'listClusters',render : function(data,type,row){
+                let tempClust = `<option></option>`;
+                if(data){
+                    data.forEach(c => {
+                        tempClust += `<option value="${c.id_cluster}" ${row.id_cluster == c.id_cluster ? 'selected' : ''}>${c.nombres_completos}</option>`;
+                    });
+                }
+                return `<select data-guia="${row.id}" class="form-control form-control-sm cb-clustes">${tempClust}</select>`;
+            }},
             {data: 'id_asignado', searchable: false, render: function(data,type,full){
                 if(full.guia_tipo == 'INACTIVA' || full.guia_tipo == 'ANULADA'){
                     return '<span class="text-danger">Sin acciones</span>'
@@ -57,7 +65,7 @@ function loadPage(){
     tblDetalleGuia.addEventListener('click',async function(e){
         if(e.target.classList.contains('delete-guia')){
             const guia = e.target.dataset.guia;
-            alertify.confirm('Mensaje','¿Deseas anular la guia N° - <b>' + guia.padStart(5,'0') +'</b>?',async ()=>{
+            alertify.confirm('Mensaje','¿Deseas anular esta guía?',async ()=>{
                 let datos = new FormData();
                 datos.append('id_guia',guia);
                 let response = await general.funcfetch('anular-guia',datos);
@@ -136,19 +144,36 @@ function loadPage(){
             document.getElementById('total-por-procesar-guias').textContent = response.procesar;
             alertify.success(response.success);
         });
-        for (const cbos of document.querySelectorAll('.cb-estado-change')) {
-            cbos.addEventListener('change',async function(event){
-                let datos = new FormData();
-                datos.append('id_guia',this.dataset.guia);
-                datos.append('estado',this.value);
-                let response = await general.funcfetch('cambiar-estado',datos);
-                if(response.error){
-                    alertify.alert('Error',response.error);
-                    return 
-                }
-                alertify.success(response.success);
-            });
-        }
+        $('.cb-clustes').select2({
+            theme : 'bootstrap',
+            width: '100%',
+            placeholder : 'Seleccione una opción'
+        }).on('select2:select',async function(event){
+            let datos = new FormData();
+            datos.append('id_guia',$(this).attr('data-guia'));
+            datos.append('id_cluster',$(this).val());
+            let response = await general.funcfetch('cambiar-cluster',datos);
+            if(response.error){
+                alertify.alert('Error',response.error);
+                return 
+            }
+            alertify.success(response.success);
+        });
+        $('.cb-estado-change').select2({
+            theme : 'bootstrap',
+            width: '100%',
+            placeholder : 'Seleccione una opción'
+        }).on('select2:select',async function(event){
+            let datos = new FormData();
+            datos.append('id_guia',$(this).attr('data-guia'));
+            datos.append('estado',$(this).val());
+            let response = await general.funcfetch('cambiar-estado',datos);
+            if(response.error){
+                alertify.alert('Error',response.error);
+                return 
+            }
+            alertify.success(response.success);
+        });
     });
     for (const filtros of document.querySelectorAll('.cb-filtros')) {
         filtros.addEventListener('change',function(){
