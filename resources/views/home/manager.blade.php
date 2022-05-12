@@ -1,65 +1,109 @@
-<section class="row mb-4">
-    <div class="form-group col-12 col-sm-6 col-lg-3">
-        <div class="carta">
-            <div class="principal">
-                <span class="tipo">N° Solicitudes por asignar</span>
-                <span class="valor">{{$datos['nsasolicitud']}}</span>
-            </div>
-            <div class="icono">
-                <i class="fas fa-cash-register material-icons"></i>
-            </div>
+<section class="mb-4">
+    <div class="container p-1">
+        <div class="form-group p-1">
+            <h5 class="text-primary">Recojos</h5>
+            @php
+                $porcentaje = 0;
+                $bg = 'bg-danger';
+                if($datos['totalrecojo'] > 0){
+                    $porcentaje = round((100 * $datos['recojoconcretado']) / $datos['totalrecojo']);
+                }
+                if ($porcentaje >= 25 && $porcentaje < 50) {
+                    $bg = 'bg-warning';
+                }
+                if ($porcentaje >= 50 && $porcentaje < 75) {
+                    $bg = 'bg-info';
+                }
+                if ($porcentaje >= 75) {
+                    $bg = 'bg-success';
+                }
+            @endphp
+            @if ($datos['totalrecojo'] > 0)
+                <div class="progress">
+                    <div class="progress-bar {{$bg}} progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="{{$porcentaje}}" aria-valuemin="0" aria-valuemax="100" style="width: {{$porcentaje}}%">{{$porcentaje}}%</div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <b>{{$datos['recojoconcretado']}}</b>
+                    </div>
+                    <div>
+                        <b>{{$datos['totalrecojo']}}</b>
+                    </div>
+                </div>
+            @else   
+                <h6>No se encontraron recojos programados</h6>
+            @endif
+            
         </div>
-    </div>
-    <div class="form-group col-12 col-sm-6 col-lg-3">
-        <div class="carta">
-            <div class="principal">
-                <span class="tipo">N° guias por asignar</span>
-                <span class="valor">{{$datos['nsaguias']}}</span>
-            </div>
-            <div class="icono">
-                <i class="fas fa-money-bill-wave material-icons"></i>
-            </div>
+        <div class="form-group p-1">
+            <h5 class="text-primary">Embarques</h5>
+             @php
+                $porcentaje = 0;
+                $bg = 'bg-danger';
+                if($datos['totalembarque'] > 0){
+                    $porcentaje = round((100 * $datos['embarqueconcretado']) / $datos['totalembarque']);
+                }
+                if ($porcentaje >= 25 && $porcentaje < 50) {
+                    $bg = 'bg-warning';
+                }
+                if ($porcentaje >= 50 && $porcentaje < 75) {
+                    $bg = 'bg-info';
+                }
+                if ($porcentaje >= 75) {
+                    $bg = 'bg-success';
+                }
+            @endphp
+            @if ($datos['totalembarque'] > 0)
+                <div class="progress">
+                    <div class="progress-bar {{$bg}} progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="{{$porcentaje}}" aria-valuemin="0" aria-valuemax="100" style="width: {{$porcentaje}}%">{{$porcentaje}}%</div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <b>{{$datos['embarqueconcretado']}}</b>
+                    </div>
+                    <div>
+                        <b>{{$datos['totalembarque']}}</b>
+                    </div>
+                </div>
+            @else
+                <h6>No se encontraron embarques programados</h6>
+            @endif
+            
         </div>
-    </div>
-    <div class="form-group col-12 col-sm-6 col-lg-3">
-        <div class="carta">
-            <div class="principal">
-                <span class="tipo">N° Manifiesto por asignar</span>
-                <span class="valor">{{$datos['nsamanifiesto']}}</span>
-            </div>
-            <div class="icono">
-                <i class="fas fa-shopping-cart material-icons"></i>
-            </div>
+        <div class="form-group p-1">
+            <h5 class="text-primary">Entregas</h5>
+             @php
+                $porcentaje = 0;
+                $bg = 'bg-danger';
+                if($datos['totalentregas'] > 0){
+                    $porcentaje = round((100 * $datos['entregasconcretadas']) / $datos['totalentregas']);
+                }
+                if ($porcentaje >= 25 && $porcentaje < 50) {
+                    $bg = 'bg-warning';
+                }
+                if ($porcentaje >= 50 && $porcentaje < 75) {
+                    $bg = 'bg-info';
+                }
+                if ($porcentaje >= 75) {
+                    $bg = 'bg-success';
+                }
+            @endphp
+            @if ($datos['totalentregas'] > 0)
+                <div class="progress">
+                    <div class="progress-bar {{$bg}} progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="{{$porcentaje}}" aria-valuemin="0" aria-valuemax="100" style="width: {{$porcentaje}}%">{{$porcentaje}}%</div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <b>{{$datos['entregasconcretadas']}}</b>
+                    </div>
+                    <div>
+                        <b>{{$datos['totalentregas']}}</b>
+                    </div>
+                </div>
+            @else
+                <h6>No se encontraron entregas programadas</h6>
+            @endif
+            
         </div>
-    </div>
-    <div class="form-group col-12 col-sm-6 col-lg-3">
-        <div class="carta">
-            <div class="principal">
-                <span class="tipo">Embarques pendientes</span>
-                <span class="valor">{{$datos['nsembarque']}}</span>
-            </div>
-            <div class="icono">
-                <i class="fas fa-users material-icons"></i>
-            </div>
-        </div>
-    </div>
-</section>
-<section class="bg-white p-3 mb-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="title">
-            <h6 class="mb-0">N° Guias por año</h6>
-        </div>
-        <div class="control d-flex align-items-center">
-            <button class="rounded-circle btn btn-sm btn-primary mr-3">
-                <i class="fas fa-arrow-down"></i>                    
-            </button>
-            <select class="form-control form-control-sm" style="width: 100px;">
-                <option value="2022">2022</option>
-                <option value="2022">2021</option>
-            </select>
-        </div>
-    </div>
-    <div class="ventas-mes-grafico">
-        <canvas class="graficos" id="grafico-1"></canvas>
     </div>
 </section>

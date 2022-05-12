@@ -94,8 +94,27 @@ function loadPage(){
             tablaRetorno.draw();
         });
         tablaRetorno.on('draw',function(){
-            for (const estados of document.querySelectorAll('.cambio-estado')) {
-                estados.addEventListener('change',async function(){
+            $('.cambio-estado').off('change');
+            $('.cambio-estado').on('change',async function(e){
+                let datos = new FormData();
+                datos.append('cluster',this.dataset.cluster);
+                datos.append('estado',this.value);
+                datos.append('tipo','cambio-estado');
+                datos.append('guia',this.dataset.guia);
+                let response = await general.funcfetch(window.location.origin + '/intranet/comprobante/guias/retornadas',datos);
+                if(response.error){
+                    alertify.alert('Error',response.error);
+                    return
+                }
+                alertify.success(response.success);
+            })
+        });
+        tablaRetorno.on('responsive-display', function ( e, datatable, row, showHide, update ) {
+            const tabla = e.target.children[0].children[0];
+            if(tabla.children[8].style.display == 'none'){
+                $('.cambio-estado').off('change');
+                $('.cambio-estado').attr('data-responsive','true');
+                $('.cambio-estado').on('change',async function(e){
                     let datos = new FormData();
                     datos.append('cluster',this.dataset.cluster);
                     datos.append('estado',this.value);
@@ -107,7 +126,13 @@ function loadPage(){
                         return
                     }
                     alertify.success(response.success);
-                });
+                })
+            }
+        });
+        tablaGuias.on('responsive-resize', function ( e, datatable, columns ) {
+            if(columns[8] && $('.cambio-estado').attr('data-responsive') == 'true'){
+                $('.cambio-estado').off('change');
+                $('.cambio-estado').attr('data-responsive','false');
             }
         });
     }

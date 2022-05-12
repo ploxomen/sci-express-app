@@ -28,6 +28,9 @@ class Cluster extends Controller
     {
         $modulos = User::getModulos(Auth::id());
         $id_cluster = ModeloCluster::getCodigoCluster(Auth::id());
+        if(empty($id_cluster)){
+            return abort(404);
+        }
         $ciudadesFinales = ModeloCluster::obtenerCiudadesFinales($id_cluster->id);
         $nro_pendients = 0;
         $kpis = ModeloEmbarque::calculoKpi($id_cluster->id);

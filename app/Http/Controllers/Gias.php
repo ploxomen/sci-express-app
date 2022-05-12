@@ -144,7 +144,7 @@ class Gias extends Controller
                 unset($datos['detalle_guia']);
             }
             $detalles = json_decode($request->detalle_guia,true);
-            $response = ModeloGuias::agregar($datos,$detalles, $add_cli, $add_cli_bool);
+            $response = ModeloGuias::agregar($datos,$detalles, $add_cli, $add_cli_bool,Auth::id());
             return response()->json($response);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);

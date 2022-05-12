@@ -21,10 +21,12 @@ class Usuario extends Controller
         switch ($rol_user->id_rol) {
             case '1':
                 $datos = [
-                    'nsaguias' => User::obtenerDatosHome(null, 1),
-                    'nsamanifiesto' => User::obtenerDatosHome(null, 2),
-                    'nsembarque' => User::obtenerDatosHome(null, 3),
-                    'nsasolicitud' => User::obtenerDatosHome(null, 4),
+                    'totalrecojo' => User::obtenerDatosHome(null, 33),
+                    'recojoconcretado' => User::obtenerDatosHome(null, 34),
+                    'totalembarque' => User::obtenerDatosHome(null, 35),
+                    'embarqueconcretado' => User::obtenerDatosHome(null, 36),
+                    'totalentregas' => User::obtenerDatosHome(null, 37),
+                    'entregasconcretadas' => User::obtenerDatosHome(null, 38)
                 ];
             break;
             case '2':

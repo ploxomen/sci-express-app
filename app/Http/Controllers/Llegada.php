@@ -66,7 +66,7 @@ class Llegada extends Controller
     public function actualizarGuiasLlegada(Request $request)
     {
         try {
-            ModeloEmbarque::actualizarGuiaLlegadas($request->embarque,$request->manifiesto,$request->guia,$request->conforme,$request->texto,$request->situacion,$request->incidencia);
+            ModeloEmbarque::actualizarGuiaLlegadas($request->embarque,$request->manifiesto,$request->guia,$request->conforme,$request->texto,$request->situacion,$request->incidencia,Auth::id());
             return response()->json(['success' => 'El estado de la guía se cambio con éxito']);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);

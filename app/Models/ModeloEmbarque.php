@@ -212,9 +212,9 @@ class ModeloEmbarque extends Model
             DB::rollBack();
         }
     }
-    public static function actualizarGuiaLlegadas($id_embarque,$id_manifiesto,$id_guia,$estado, $texto,$situacion,$incidencia)
+    public static function actualizarGuiaLlegadas($id_embarque,$id_manifiesto,$id_guia,$estado, $texto,$situacion,$incidencia,$usuario)
     {
-        return DB::select('CALL sp_actualizar_llegadas_guias(?,?,?,?,?,?,?)',[$id_embarque, $id_manifiesto,$id_guia,$estado,$texto, $situacion, $incidencia]);
+        return DB::select('CALL sp_actualizar_llegadas_guias(?,?,?,?,?,?,?,?)',[$id_embarque, $id_manifiesto,$id_guia,$estado,$texto, $situacion, $incidencia, $usuario]);
     }
     public static function obtenerGuiasRepartoConfirmado($fecha_confirmado,$fecha_reparto,$esto_guia,$cluster, $ciudad_final, $tipo_ciudad)
     {
@@ -281,6 +281,7 @@ class ModeloEmbarque extends Model
             DB::table('imagenes_guia')->insert($archivos);
             $estados['fecha_hr_entregado'] = date('Y-m-d H:i:s');
             DB::table('guias AS g')->join('cluster AS c','g.id_cluster','=','c.id')->where(['c.id_usuario' => $usuario, 'g.id' => $id_guia , 'g.situ' => 8, 'g.activo' => 1])->update($estados);
+            DB::table('procesos_guia')->insert(['id_guia' => $id_guia,'situacion' => 8,'id_user' => $usuario]);
             DB::commit();
         } catch (Exception $ex) {
             DB::rollBack();

@@ -72,10 +72,6 @@ function loadPage() {
             alertify.error('seleccione uno o más manifiestos');
             return
         }
-        // if(general.totalBultos() === 0){
-        //     alertify.error('el total de bultos debe de ser mayor que 0');
-        //     return
-        // }
         datos.append('lista_manifiestos',JSON.stringify(arrMani));
         let response = await general.funcfetch('manifiesto/embarcar-fletes',datos);
         if(response.error){
@@ -168,9 +164,7 @@ function loadPage() {
                 total += parseFloat(valor);
             });
             $('#id_flet_esti').val(total.toFixed(2));
-        });
-        // datos.append('total_bultos_paquete',general.totalBultos());
-       
+        });       
     });
     frmEmbarque.addEventListener('reset',function(){
         $('.simple-select2').val("").trigger('change');

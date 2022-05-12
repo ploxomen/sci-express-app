@@ -127,6 +127,56 @@ function loadPage(){
         }
         $('#detalle-guias-todo').modal('show');
     }
+    
+    tablaGuias.on('responsive-display', function ( e, datatable, row, showHide, update ) {
+        const tabla = e.target.children[0].children[0];
+        if(tabla.children[8].style.display == 'none'){
+            $('.cb-clustes').off('change');
+            $('.cb-clustes').attr('data-responsive','true');
+            $('.cb-clustes').on('change',async function(){
+                let datos = new FormData();
+                datos.append('id_guia',$(this).attr('data-guia'));
+                datos.append('id_cluster',$(this).val());
+                let response = await general.funcfetch('cambiar-cluster',datos);
+                if(response.error){
+                    alertify.alert('Error',response.error);
+                    return 
+                }
+                alertify.success(response.success);
+            });
+        }
+        if(tabla.children[9].style.display == 'none'){
+            $('.cb-usuarios').off('change');
+            $('.cb-usuarios').attr('data-responsive','true');
+            $('.cb-usuarios').on('change',async function(event){
+                let datos = new FormData();
+                datos.append('id_guia',event.target.dataset.guia);
+                datos.append('id_user',$(this).val());
+                let response  = await general.funcfetch('asignar-personal',datos);
+                if(response.error){
+                    alertify.alert('Mensaje',response.error);
+                    return
+                }
+                document.getElementById('total-por-procesar-guias').textContent = response.procesar;
+                alertify.success(response.success);
+            });
+        }
+        if(tabla.children[10].style.display == 'none'){
+            $('.cb-estado-change').off('change');
+            $('.cb-estado-change').attr('data-responsive','true');
+            $('.cb-estado-change').on('change',async function(){
+                let datos = new FormData();
+                datos.append('id_guia',$(this).attr('data-guia'));
+                datos.append('estado',$(this).val());
+                let response = await general.funcfetch('cambiar-estado',datos);
+                if(response.error){
+                    alertify.alert('Error',response.error);
+                    return 
+                }
+                alertify.success(response.success);
+            })
+        }
+    });
     tablaGuias.on('draw.dt', function () {
         $('.cb-usuarios').select2({
             theme : 'bootstrap',
@@ -175,10 +225,24 @@ function loadPage(){
             alertify.success(response.success);
         });
     });
+    tablaGuias.on('responsive-resize', function ( e, datatable, columns ) {
+        if(columns[8] && $('.cb-clustes').attr('data-responsive') == 'true'){
+            $('.cb-clustes').off('change');
+            $('.cb-clustes').attr('data-responsive','false');
+        }
+        if(columns[9] && $('.cb-usuarios').attr('data-responsive') == 'true'){
+            $('.cb-usuarios').off('change');
+            $('.cb-usuarios').attr('data-responsive','false');
+        }
+        if(columns[10] && $('.cb-estado-change').attr('data-responsive') == 'true'){
+            $('.cb-estado-change').off('change');
+            $('.cb-estado-change').attr('data-responsive','false');
+        }
+    });
     for (const filtros of document.querySelectorAll('.cb-filtros')) {
         filtros.addEventListener('change',function(){
             tablaGuias.draw();
-        })
+        });
     }
 
 }

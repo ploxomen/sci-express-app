@@ -28,7 +28,6 @@ class ModeloSolicitud extends Model
             $estados_solicitud = EstadoSolicitud::where(['activado' => 1])->get();
             $usuarios = User::obtenerUsuarioRol(3);
             $usuarios2 = User::obtenerUsuarioRol(5);
-            // dd($usuarios2, $usuarios);
             foreach ($solicitudes as $soli) {
                 $soli->listSoli = $estados_solicitud;
                 $soli->listUsu = array_merge($usuarios,$usuarios2);

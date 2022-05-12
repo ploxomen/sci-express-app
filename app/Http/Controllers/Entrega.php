@@ -79,7 +79,6 @@ class Entrega extends Controller
                'type' => $file->extension()
             ];
          }
-
          ModeloEmbarque::confirmarEntregaGuias($request->guia,json_decode($request->datos_adicionales,true),Auth::id(),$filesDb);
          return response(['success' => 'La Guía N° <b>' . $request->nro_guia .'</b> modificada con exito']);
       } catch (Exception $ex) {

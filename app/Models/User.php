@@ -210,8 +210,8 @@ class User extends Authenticatable
             break;
             case 21:
                 //TODAS LAS GUIAS POR CONFIRMAR ARRIBO SECTORISTA
-                $query = "SELECT COUNT(*) AS total FROM relacion_guias_embarque rg LEFT JOIN guias g ON rg.id_guia = g.id LEFT JOIN embarque e ON rg.id_embarque = e.id WHERE g.estado = 1 AND e.activo = 1 AND g.situ = 5 AND g.activo = 1 AND CONVERT(CONCAT(e.fecha_llegada,' ',e.hr_llegada),DATETIME) < ?";
-                $resultado = DB::select($query,[date('Y-m-d').' 23:59:59']);
+                $query = "SELECT COUNT(*) AS total FROM relacion_guias_embarque rg LEFT JOIN guias g ON rg.id_guia = g.id LEFT JOIN embarque e ON rg.id_embarque = e.id WHERE g.estado = 1 AND e.activo = 1 AND g.situ = 5 AND g.activo = 1";
+                $resultado = DB::select($query);
                 $resultado = $resultado[0]->total;
             break;
             case 22:
@@ -274,6 +274,42 @@ class User extends Authenticatable
                 $resultado = DB::select($query,[$id_user]);
                 $resultado = $resultado[0]->total;
             break;
+            case 33:
+                //TODOS LOS RECOJOS DE HOY MANAGER
+                $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE s.estado IN(2,3,4) AND s.activo = 1 AND s.dia_recojo = ?";
+                $resultado = DB::select($query,[date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+            break;
+            case 34:
+                //TODOS LOS RECOJOS CONCRETADOS DE HOY MANAGER
+                $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE s.estado = 4 AND s.activo = 1 AND s.dia_recojo = ?";
+                $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+            break;
+            case 35:
+                //TODOS LOS EMBARQUES DE HOY MANAGER
+                $query = "SELECT COUNT(*) AS total FROM embarque WHERE estado IN(1,2,3,4) AND activo = 1 AND fch_emba = ?";
+                $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+            break;
+            case 36:
+                //TODOS LOS EMBARQUES CONCRETADOS DE HOY MANAGER
+                $query = "SELECT COUNT(*) AS total FROM embarque WHERE estado = 4 AND activo = 1 AND fch_emba = ?";
+                $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+            break;
+            case 37:
+                //TODAS LAS ENTREGAS DE HOY MANAGER
+                $query = "SELECT COUNT(*) AS total FROM guias WHERE situ IN(7,8) AND activo = 1 AND estado = 1 AND fecha_reparto = ?";
+                $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+                break;
+            case 38:
+                //TODAS LAS ENTREGAS CONCRETADAS DE HOY MANAGER
+                $query = "SELECT COUNT(*) AS total FROM guias WHERE situ = 8 AND activo = 1 AND estado = 1 AND DATE_FORMAT(fecha_hr_entregado,'%Y-%m-%d') <= ?";
+                $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+                break;
         }
         return $resultado;
     }

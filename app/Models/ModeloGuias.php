@@ -12,7 +12,7 @@ class ModeloGuias extends Model
     protected $table = 'guias';
     public $timestamps = false;
 
-    public static function agregar($guia,$detalles,$cli,$cli_bool)
+    public static function agregar($guia,$detalles,$cli,$cli_bool,$user)
     {
         DB::beginTransaction();
         try {
@@ -86,6 +86,7 @@ class ModeloGuias extends Model
             }
             DB::table('detalle_guias')->insert($detalles);
             DB::table('guias')->where(['id' => $id_guia])->update(['tot_cant' => $tot_cant, 'tot_kg' => $tot_kg, 'tot_vol' => $tot_vol]);
+            DB::table('procesos_guia')->insert(['id_guia' => $id_guia,'situacion' => 1,'id_user' => $user]);
             DB::commit();
             return ['success' => 'La guía fue creada correctamente'];
         } catch (Exception $ex) {

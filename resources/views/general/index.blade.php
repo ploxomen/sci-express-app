@@ -24,6 +24,8 @@
     <script src="{{asset('library/pagination/pagination.js')}}"></script>
     <script src="{{asset('asset/general.js')}}"></script>
     <script src="{{asset('asset/home.js')}}"></script>
+    <link rel="icon" href="{{asset('asset/img/icono.png')}}">
+    <meta name="theme-color" content="#2e405e">
     @yield('head')
     <title>@yield('title')</title>
 </head>
@@ -34,6 +36,7 @@
     <div class="contenedor">
         <div class="navegacion" id="navegacion">
             <div class="mi-logo">
+                <img class="d-block img-fluid m-auto" src="{{asset('asset/img/icono.png')}}" alt="" width="120px">
             </div>
             <ul class="menu">
                 <li class="hover-menu {{$url_actual == route('home') ? 'activeli' : ''}}">
