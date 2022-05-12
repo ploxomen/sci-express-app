@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Http\Controllers\Ubigeo;
 use Exception;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -50,7 +49,14 @@ class ModeloManifiesto extends Model
                 unset($datos['lista_manifiestos']);
             }
             $datos['user_create'] = $id_user;
+            $fletes_cluster = json_decode($datos['flestes_cluster'],true);
+            unset($datos['flestes_cluster']);
+
             $id_embarque = DB::table('embarque')->insertGetId($datos);
+            for ($i=0; $i < count($fletes_cluster); $i++) {
+                $fletes_cluster[$i]['id_embarque'] = $id_embarque;
+            }
+            DB::table('fletes_embarque')->insert($fletes_cluster);
             if (!empty($transportes)) {
                 $newTrasn = [];
                 for ($i = 0; $i < count($transportes); $i++) {
@@ -71,14 +77,16 @@ class ModeloManifiesto extends Model
             DB::rollBack();
             return ['error' => $ex->getMessage()];
         }
-        
     }
-    public static function obtenerEmbarcar($provincia,$id_usuario)
+    public static function obtenerEmbarcar($ciudad_base,$tipo,$id_usuario)
     {
-        $manifiestos = DB::select('call sp_obtener_manifiesto_embarcar(?,?)',[$provincia, $id_usuario]);
+        $manifiestos = DB::select('call sp_obtener_manifiesto_embarcar(?,?,?)',[$ciudad_base,$tipo, $id_usuario]);
         foreach ($manifiestos as $m) {
             $m->prov_orig = (new Ubigeo)->getNameProvincia($m->prov_orig);
             $m->prov_dest = (new Ubigeo)->getNameProvincia($m->prov_dest);
+            if($m->tipo_base == 'distrito'){
+                $m->nombre_ciudad_base = (new Ubigeo)->getNameDistrito($m->nombre_ciudad_base);
+            }
         }
         return $manifiestos;
     }

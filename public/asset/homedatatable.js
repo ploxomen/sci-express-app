@@ -4,6 +4,7 @@ $(document).ready(function(){
         autoWidth: false,
         processing: true,
         serverSide: true,
+        pageLength: 25,
         language: {
             "processing": "Procesando...",
             "lengthMenu": "Mostrar _MENU_ registros",

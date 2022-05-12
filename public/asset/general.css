@@ -1,5 +1,5 @@
 :root{
-    --color-principal:#246DE3;
+    --color-principal:#2e405e;
     --color-secundario: #ffff;
     --color-panel: #F3F4F8;
     --color-letra-parrafo: #B3A6AD;
@@ -69,7 +69,7 @@ table thead tr th{
 	background-color: rgb(211, 211, 211);
 }
 .navegacion .mi-logo{
-    height: 50px;
+    /* height: 50px; */
 }
 .navegacion ul{
     list-style: none; 
@@ -276,7 +276,11 @@ table thead tr th{
     height: 15px;
     display: inline-block;
 }
-.form-control{
+.text-minuscula{
+    text-transform: lowercase !important;
+}
+
+input[type = "text"]{
     text-transform: uppercase;
 }
 .legend-add{
@@ -291,4 +295,10 @@ i{
     display: block;
     margin: auto;
     object-fit: cover;
+}
+.list-two-columns{
+    list-style: none !important;
+    columns: 2; 
+    -webkit-columns: 2; 
+    -moz-columns: 2; 
 }

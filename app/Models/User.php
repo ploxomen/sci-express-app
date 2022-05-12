@@ -69,18 +69,248 @@ class User extends Authenticatable
     }
     public static function misUsuarios($id_usuario)
     {
-        return DB::table('usuarios AS u')->select('u.id','u.n_document', 'u.name', 'u.last_name', 'u.email', 'u.phone', 'u.status','a.area')->leftJoin('area AS a','u.id_area','=','a.id')->where('u.id','!=',$id_usuario)->get();
+        return DB::table('usuarios AS u')->select('u.id','u.n_document', 'u.name', 'u.last_name', 'u.email', 'u.phone', 'u.status','a.area')
+        ->leftJoin('area AS a','u.id_area','=','a.id')
+        ->where('u.status', '!=', 0)->get();
     }
     public static function getModulos($id_user)
     {
         return DB::select('CALL sp_obtener_modulos(?)',[$id_user]);
     }
-    public function getRoles($id_user)
+    public static function cambiarRol($id_user,$id_rol)
     {
-        return false;
+        $usuario = DB::table('usuario_rol')->where(['id_usuario' => $id_user,'id_rol' => $id_rol])->first();
+        if(empty($usuario)){
+            return false;
+        }
+        DB::table('usuario_rol')->where(['id_usuario' => $id_user])->update(['active' => 0]);
+        DB::table('usuario_rol')->where(['id_usuario' => $id_user, 'id_rol' => $id_rol])->update(['active' => 1]);
+        return true;
+    }
+    public static function miArea($id_user)
+    {
+        return DB::table('usuarios AS u')->select('a.area')->join('area AS a','u.id_area','=','a.id')->where(['u.id' => $id_user])->first();
+    }
+    public static function getRoles($id_user)
+    {
+        return DB::table('usuario_rol AS ur')->select('r.id','r.rol','ur.active')->join('roles AS r','ur.id_rol','=','r.id')->where(['ur.id_usuario' => $id_user])->get();
     }
     public static function obtenerUsuarioRol($id_rol)
     {
         return DB::select('CALL sp_obtener_usuarios_rol(?)', [$id_rol]);
+    }
+    public static function obtenerRolActivo($id_user)
+    {
+        return DB::table('usuario_rol')->select('id_rol')->where(['id_usuario' => $id_user,'active' => 1])->first();
+    }
+    public static function obtenerUnUsuario($id_usuario)
+    {
+        return DB::table('usuarios')->select("id","type_document","n_document","name","last_name","email","phone","direction","nacimiento","sexo")->where(['id' => $id_usuario])->first();
+    }
+    public static function obtenerDatosHome($id_user, $tipo)
+    {
+        $resultado = 1;
+        switch ($tipo) {
+            case 1:
+                //Número de guias sin asignar
+                $resultado = DB::table('guias')->where(['activo' => 1, 'estado' => 1, 'id_asignado' => null])->count();
+                break;
+            case 2:
+                //Número de guias sin manifestar
+                $resultado = DB::table('guias')->where(['activo' => 1, 'estado' => 1,'situ' => 1])->count();
+            break;
+            case 3:
+                //Número de manifiestos sin embarcar
+                $resultado = DB::table('manifiesto')->where(['estado' => 1, 'activo' => 1])->count();
+            break;
+            case 4:
+                //Número de solicitudes sin asignar
+                $resultado = DB::table('solicitud AS s')->leftJoin('asignar_solicitud AS as','s.id','=','as.id_solicitud')->where(['s.activo' => 1,'as.id_user' => null])->count();
+            break;
+            case 5:
+                //RECOJOS PARA HOY CONDUCTOR 
+                $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE r.id_conductor = ? AND s.dia_recojo = ? AND s.estado IN(2,3)";
+                $resultado = DB::select($query,[$id_user,date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+            break;
+            case 6:
+                //RECOJOS PARA HOY DEALER 
+                $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE r.id_dealer = ? AND s.dia_recojo = ? AND s.estado IN(2,3)";
+                $resultado = DB::select($query, [$id_user, date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+            break;
+            case 7:
+                //TOTAL RECOJOS DEALER 
+                $resultado = DB::table('solicitud AS s')->leftJoin('recojo AS r', 's.id', '=', 'r.id_solicitud')->where(['r.id_dealer' => $id_user])->count();
+            break;
+            case 8:
+                //TOTAL RECOJOS CONDUCTOR 
+                $resultado = DB::table('solicitud AS s')->leftJoin('recojo AS r', 's.id', '=', 'r.id_solicitud')->where(['r.id_conductor' => $id_user])->count();
+                break;
+            case 9:
+                //EMBARQUE PARA HOY CONDUCTOR 
+                $resultado = DB::table('embarque')->where(['id_cond' => $id_user,'estado' => 2, 'fch_emba' => date('Y-m-d'), 'activo' => 1])->count();
+            break;
+            case 10:
+                //EMBARQUE PARA HOY DEALER 
+                $n = DB::select('CALL sp_obtener_embarques_cluster(?,?,?)',[$id_user,date('Y-m-d'),1]);
+                $resultado = $n[0]->total;
+            break;
+            case 11:
+                //EMBARQUEs ASIGNADOS CONDUCTOR 
+                $resultado = DB::table('embarque')->where(['id_cond' => $id_user,'activo' => 1])->count();
+            break;
+            case 12:
+                //EMBARQUEs asignados delaer 
+                $n = DB::select('CALL sp_obtener_embarques_cluster(?,?,?)', [$id_user, date('Y-m-d'), 2]);
+                $resultado = $n[0]->total;            
+            break;
+            case 13:
+                //INFORMES PENDIENTES SOLO PARA DEALER
+                $n = DB::select('CALL sp_obtener_informes_pendientes(?)',[$id_user]);
+                $resultado = $n[0]->total;
+            break;
+            case 14:
+                //GUIAS POR ARRIBAR PARA CONFIRMAR CLUSTER
+                $query = "SELECT COUNT(*) AS total FROM guias g LEFT JOIN cluster c ON g.id_cluster = c.id WHERE c.id_usuario = ? AND g.estado = 1 AND g.situ = 5 AND g.activo = 1";
+                $resultado = DB::select($query, [$id_user]);
+                $resultado = $resultado[0]->total;
+            break;
+            case 15:
+                //GUIAS POR ENTREGAR CLUSTER
+                $query = "SELECT COUNT(*) AS total FROM guias g LEFT JOIN cluster c ON g.id_cluster = c.id WHERE c.id_usuario = ? AND g.estado = 1 AND g.situ IN(6,7) AND g.activo = 1";
+                $resultado = DB::select($query, [$id_user]);
+                $resultado = $resultado[0]->total;
+                break;
+            case 16:
+                //GUIAS POR RETORNAR CLUSTER
+                $query = "SELECT COUNT(*) AS total FROM guias g LEFT JOIN cluster c ON g.id_cluster = c.id WHERE c.id_usuario = ? AND g.estado = 1 AND g.situ IN(8,9) AND g.activo = 1";
+                $resultado = DB::select($query, [$id_user]);
+                $resultado = $resultado[0]->total;
+            break;
+            case 17:
+                //GUIAS EMBARQUE PENDIENTES DIGITADOR
+                $query = "SELECT COUNT(DISTINCT rge.prefijo_guia_embarque,rge.nro_guia_embarque) AS total FROM relacion_guias_embarque rge LEFT JOIN guias g ON rge.nro_guia_embarque = g.nro_guia AND rge.prefijo_guia_embarque = g.prefijo WHERE g.id IS NULL";
+                $resultado = DB::select($query);
+                $resultado = $resultado[0]->total;
+            break;
+            case 18:
+                //GUIAS ASIGNADAS POR MANIFESTAR DIGITADOR
+                $resultado = DB::table('guias')->where(['situ' => 1,'id_asignado' => $id_user, 'activo' => 1 , 'estado' => 1])->count();
+            break;
+            case 19:
+                //MANIFIESTOS PARA EMBARCAR DIGITADOR
+                $resultado = DB::table('manifiesto')->where(['activo' => 1, 'id_responsable' => $id_user,'estado' => 1])->count();
+            break;
+            case 20:
+                //SOLICITUD PENDIENTE PARA PROGRAMAR RECOJO SECTORISTA
+                $query = "SELECT COUNT(*) AS total FROM asignar_solicitud asig INNER JOIN solicitud so ON asig.id_solicitud = so.id WHERE so.estado = 1 AND asig.id_user = ?";
+                $resultado = DB::select($query,[$id_user]);
+                $resultado = $resultado[0]->total;
+            break;
+            case 21:
+                //TODAS LAS GUIAS POR CONFIRMAR ARRIBO SECTORISTA
+                $query = "SELECT COUNT(*) AS total FROM relacion_guias_embarque rg LEFT JOIN guias g ON rg.id_guia = g.id LEFT JOIN embarque e ON rg.id_embarque = e.id WHERE g.estado = 1 AND e.activo = 1 AND g.situ = 5 AND g.activo = 1";
+                $resultado = DB::select($query);
+                $resultado = $resultado[0]->total;
+            break;
+            case 22:
+                //TODAS LAS GUIAS EN REPARTO SECTORISTA
+                $query = "SELECT COUNT(*) AS total FROM guias g WHERE g.estado = 1 AND g.situ IN(6,7) AND g.activo = 1";
+                $resultado = DB::select($query);
+                $resultado = $resultado[0]->total;
+            break;
+            case 23:
+                //TODAS LAS GUIAS POR RETORNAR
+                $query = "SELECT COUNT(*) AS total FROM guias g WHERE g.estado = 1 AND g.situ IN(8,9) AND g.activo = 1";
+                $resultado = DB::select($query, [$id_user]);
+                $resultado = $resultado[0]->total;
+            break;
+            case 24:
+                //RECOJOS DEL DIA PROGRAMADOS 
+                $query = "SELECT COUNT(*) AS total FROM solicitud WHERE dia_recojo = ? AND activo = 1 AND estado IN(1,2)";
+                $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+                break;
+            case 25:
+                //RECOJOS PROGRAMADOS 
+                $query = "SELECT COUNT(*) AS total FROM solicitud WHERE activo = 1 AND estado IN(2,3)";
+                $resultado = DB::select($query);
+                $resultado = $resultado[0]->total;
+                break;
+            case 26:
+                //RECOJOS EFECTUADOS 
+                $query = "SELECT COUNT(*) AS total FROM solicitud WHERE activo = 1 AND estado = 4";
+                $resultado = DB::select($query);
+                $resultado = $resultado[0]->total;
+            break;
+            case 27:
+                //GUIAS EMITIDAS HOY PENDIENTES PARA MANIFESTAR
+                $resultado = DB::table('guias')->where(['situ' => 1,'fech_emis' => date('Y-m-d'),'activo' => 1, 'estado' => 1])->count();
+            break;
+            case 28:
+                //EMBARQUES PENDIENTES
+                $resultado = DB::table('embarque')->where(['activo' => 1, 'estado' => 1])->count();
+            break;
+            case 29:
+                //EMBARQUES EFECTUADOS
+                $query = "SELECT COUNT(*) AS total FROM embarque WHERE activo = 1 AND estado IN(3,4,5,6)";
+                $resultado = DB::select($query);
+                $resultado = $resultado[0]->total;            
+            break;
+            case 30:
+                //EMBARQUES POR INFORMAR
+                $resultado = DB::table('embarque')->where(['activo' => 1, 'estado' => 3])->count();
+            break;
+            case 31:
+                //TODAS LAS GUIAS ENTREGADAS EN DESTINO FINAL
+                $query = "SELECT COUNT(*) AS total FROM guias g WHERE g.estado = 1 AND g.situ >= 9 AND g.situ != 14 AND g.activo = 1";
+                $resultado = DB::select($query);
+                $resultado = $resultado[0]->total;
+            break;
+            case 32:
+                //TODAS LAS GUIAS ENTREGADAS EN DESTINO FINAL CLUSTER
+                $query = "SELECT COUNT(*) AS total FROM guias g WHERE g.estado = 1 AND g.id_cluster = ? AND g.situ >= 9 AND g.situ != 14 AND g.activo = 1";
+                $resultado = DB::select($query,[$id_user]);
+                $resultado = $resultado[0]->total;
+            break;
+            case 33:
+                //TODOS LOS RECOJOS DE HOY MANAGER
+                $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE s.estado IN(2,3,4) AND s.activo = 1 AND s.dia_recojo = ?";
+                $resultado = DB::select($query,[date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+            break;
+            case 34:
+                //TODOS LOS RECOJOS CONCRETADOS DE HOY MANAGER
+                $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE s.estado = 4 AND s.activo = 1 AND s.dia_recojo = ?";
+                $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+            break;
+            case 35:
+                //TODOS LOS EMBARQUES DE HOY MANAGER
+                $query = "SELECT COUNT(*) AS total FROM embarque WHERE estado IN(1,2,3,4) AND activo = 1 AND fch_emba = ?";
+                $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+            break;
+            case 36:
+                //TODOS LOS EMBARQUES CONCRETADOS DE HOY MANAGER
+                $query = "SELECT COUNT(*) AS total FROM embarque WHERE estado = 4 AND activo = 1 AND fch_emba = ?";
+                $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+            break;
+            case 37:
+                //TODAS LAS ENTREGAS DE HOY MANAGER
+                $query = "SELECT COUNT(*) AS total FROM guias WHERE situ IN(7,8) AND activo = 1 AND estado = 1 AND fecha_reparto = ?";
+                $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+                break;
+            case 38:
+                //TODAS LAS ENTREGAS CONCRETADAS DE HOY MANAGER
+                $query = "SELECT COUNT(*) AS total FROM guias WHERE situ = 8 AND activo = 1 AND estado = 1 AND DATE_FORMAT(fecha_hr_entregado,'%Y-%m-%d') <= ?";
+                $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+                break;
+        }
+        return $resultado;
     }
 }

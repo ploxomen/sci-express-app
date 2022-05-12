@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Http\Controllers\Ubigeo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -20,10 +19,10 @@ class ModeloRecojo extends Model
     public static function getRecojosDriDea($id_trabajor)
     {
         $solicitudes = DB::select('CALL sp_obtener_solicitudes_trabajador(?)',[$id_trabajor]);
-        if (isset($solicitudes[0])) {
-            $solicitudes[0]->depar_cli = (new Ubigeo)->getNameDepartamento($solicitudes[0]->depar_cli);
-            $solicitudes[0]->ciudad_cli = (new Ubigeo)->getNameProvincia($solicitudes[0]->ciudad_cli);
-            $solicitudes[0]->distrito_cli = (new Ubigeo)->getNameDistrito($solicitudes[0]->distrito_cli);
+        foreach ($solicitudes as $soli) {
+            $soli->depar_cli = (new Ubigeo)->getNameDepartamento($soli->depar_cli);
+            $soli->ciudad_cli = (new Ubigeo)->getNameProvincia($soli->ciudad_cli);
+            $soli->distrito_cli = (new Ubigeo)->getNameDistrito($soli->distrito_cli);
         }
         return $solicitudes;
     }

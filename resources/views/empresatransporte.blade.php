@@ -25,9 +25,10 @@
             <thead>
                 <tr>
                     <th>N°</th>
+                    <th>RUC</th>
                     <th>Empresa</th>
                     <th>Contactos</th>
-                    <th>Correos</th>
+                    <th>Ciudades de atención</th>
                     <th>Dirección</th>
                     <th>Acciones</th>
                 </tr>
@@ -61,9 +62,7 @@
                     </div>
                     <div class="form-group col-12">
                         <label for="id_ciudades_atencion">Ciudades de atención</label>
-                        <select name="ciudades_atencion" id="id_ciudades_atencion" required multiple class="simple-select2">
-                            
-                        </select>
+                        <select name="ciudades_atencion" id="id_ciudades_atencion" required multiple class="cb-mult-nuevo"></select>
                     </div>
                     <div class="form-group col-12">
                         <label for="id_nro_contacto">N° de Contactos</label>

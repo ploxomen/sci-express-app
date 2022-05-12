@@ -39,8 +39,8 @@
                     <input type="email" class="form-control" name="email" id="email" required>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3 col-xl-3">
-                    <label for="phone">Celular: <small class="text-danger">*</small></label> 
-                    <input type="tel" maxlength="9" minlength="9" class="form-control" name="phone" id="phone" required>
+                    <label for="phone">Celular:</label> 
+                    <input type="tel" maxlength="9" minlength="9" class="form-control" name="phone" id="phone">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3 col-xl-2">
                     <label for="id_sexo">Sexo:</label> 

@@ -31,7 +31,7 @@
                 <h1 class="title">Inicar sesión</h1>
                 <div class="box-input">
                     <div class="input-file">
-                        <input type="text" name="n_document" required placeholder="Usuario">
+                        <input type="text" name="email" class="text-minuscula" required placeholder="Usuario">
                         <i class="fas fa-user"></i>                    
                     </div>
                     <div class="input-file">

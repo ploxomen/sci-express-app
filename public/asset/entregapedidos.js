@@ -12,13 +12,55 @@ function loadPage(){
             if(!formulario){
                 return
             }
-            if(!files.files.length){
-                alertify.alert('Mensaje','Debe de agregar como mínimo una imagen de referencia');
+            const situacionReparto = '#'+this.dataset.situacionReparto;
+            const estadoEntrega = '#'+this.dataset.estadoEntrega;
+            const incidenciaReparto = '#'+this.dataset.situacionIncidencia;
+            const detalleIncidencia = '#'+this.dataset.situacionDetalle;
+            const nroEntrega = '#'+this.dataset.nroVisitas;
+            const motivoNoEntregado = '#'+this.dataset.motivoNoentregado;
+            console.log(situacionReparto);
+            if($(situacionReparto).val() == ""){
+                alertify.error('por favor selecione la situacion del reparto');
                 return
             }
-            alertify.confirm('Mensaje','Al continuar usted está afirmando que el pedido ya se entregó.',async ()=>{
+            if($(situacionReparto).val() == "INCIDENCIA" && $(incidenciaReparto).val() == ""){
+                alertify.error('por favor selecione la incidencia del reparto');
+                return
+            }
+            if($(situacionReparto).val() == "INCIDENCIA" && $(detalleIncidencia).val() == ""){
+                alertify.error('por favor detalle la incidencia del reparto');
+                return
+            }
+            if($(estadoEntrega).val() == "" && $(situacionReparto).val() == "CONFORME"){
+                alertify.error('por favor selecione el status de la entrega');
+                return
+            }
+            if($(estadoEntrega).val() == "ENTREGADO" && $(nroEntrega).val() == ""){
+                alertify.error('por favor selecione el numero de visitas');
+                return
+            }
+            if($(estadoEntrega).val() == "NO ENTREGADO" && $(motivoNoEntregado).val() == ""){
+                alertify.error('por favor selecione el motivo por el cual no se efectuo la entrega');
+                return
+            }
+
+            if(!files.files.length || files.files.length > 5){
+                alertify.alert('Mensaje','Debe de agregar como mínimo una imagen y como máximo cinco imagenes de referencia');
+                return
+            }
+            alertify.confirm('Mensaje','¿Estas seguro de completar esta entrega?',async ()=>{
                 let datos = new FormData(formulario);
+                let datos_adicionales = {
+                    motivo_no_ent : $(motivoNoEntregado).val(),
+                    nro_visitas_reparto : $(nroEntrega).val(),
+                    estado_entregado: $(estadoEntrega).val(),
+                    text_durante_disconforme: $(detalleIncidencia).val(),
+                    situacion_durante_envio: $(situacionReparto).val(),
+                    incidencia_durante_envio: $(incidenciaReparto).val()
+                }
                 datos.append('guia',this.dataset.guia);
+                datos.append('datos_adicionales',JSON.stringify(datos_adicionales));
+                datos.append('nro_guia',this.dataset.nroguia);
                 let response = await general.funcfetch('modificar-pedidos',datos);
                 if(response.error){
                     alertify.alert('Error',response.error);
@@ -28,6 +70,49 @@ function loadPage(){
             },()=>{});
         })
     }
+    $('.situacion-reparto').on('select2:select',function(e){
+        if($(this).val() == "INCIDENCIA"){
+            $($(this).attr("data-status")).val("").trigger("change");
+            $($(this).attr("data-status")).prop("disabled",true);
+            $($(this).attr("data-incidencia")).prop("disabled",false);
+            $($(this).attr("data-detalle")).prop("disabled",false);
+        }else{
+            $($(this).attr("data-status")).prop("disabled",false);
+            $($(this).attr("data-incidencia")).val("").trigger("change");
+            $($(this).attr("data-detalle")).val("");
+            $($(this).attr("data-incidencia")).prop("disabled",true);
+            $($(this).attr("data-detalle")).prop("disabled",true);
+        }
+    });
+    $('.situacion-incidencia').on('select2:select',function(e){
+        if($(this).val() == "DAÑO PARCIAL" || $(this).val() == "PERDIDA PARCIAL"){
+            $($(this).attr("data-estado")).val("").trigger("change");
+            $($(this).attr("data-estado")).prop("disabled",false);
+        }else{
+            $($(this).attr("data-estado")).prop("disabled",true);
+        }
+    });
+    $('.status-entrega').on('change',function(e){
+        const nroEntregas = $(this).attr("data-visitas");
+        const noEntregado = $(this).attr("data-noentregado");
+        console.log(nroEntregas,noEntregado);
+        if($(this).val() == ""){
+            $(nroEntregas).prop('disabled',true);
+            $(nroEntregas).val('').trigger("change");
+            $(noEntregado).prop('disabled',true);
+            $(noEntregado).val('').trigger("change");
+        }
+        if($(this).val() == 'ENTREGADO'){
+            $(nroEntregas).prop('disabled',false);
+            $(noEntregado).val('').trigger("change");
+            $(noEntregado).prop('disabled',true);
+        }
+        if($(this).val() == 'NO ENTREGADO'){
+            $(nroEntregas).prop('disabled',true);
+            $(nroEntregas).val('').trigger("change");
+            $(noEntregado).prop('disabled',false);
+        }
+    });
     for (const btn of btnsAddImg) {
         btn.addEventListener('click',function(event){
             event.preventDefault();

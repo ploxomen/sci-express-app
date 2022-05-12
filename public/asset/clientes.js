@@ -16,7 +16,11 @@ function loadPage(){
             let newObj = new Object();
             for (const ele of li.querySelectorAll(`[data-selected="true"]`)) {
                 if(ele.tagName == 'SELECT' || ele.tagName == 'INPUT'){
-                    newObj[ele.dataset.name] = ele.multiple ? $(ele).val().join(';') : ele.value;
+                    if(ele.multiple && $(ele).val() != null && $(ele).val().length > 0){
+                        newObj[ele.dataset.name] = $(ele).val().join(';');
+                    }else{
+                        newObj[ele.dataset.name] = ele.value;
+                    }
                 }
             }
             if(li.dataset.tipo == 'nuevo'){
@@ -118,5 +122,15 @@ function loadPage(){
         });
         alertify.success('se agregó un nuevo proveedor');
     }
+    for (const element of document.querySelectorAll('.clone-value')) {
+        element.addEventListener('input',function(e){
+            const clone = this.dataset.clone;
+            document.querySelector(clone).value = this.value;
+        });
+    }
+    $('.selected-two').on('select2:select',function(e){
+        const idCb = $(this).data('selected-two');
+        $('#' + idCb).val($(this).val()).trigger("change");
+    });
 }
 window.addEventListener('DOMContentLoaded',loadPage);

@@ -32,9 +32,12 @@
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody id="lista-usuarios"></tbody>
             </table>
         </div>
     </div>
 </section>
+@extends('modal.cambiarpassword')
+@extends('modal.editarusuario')
+@extends('modal.editarroles')
 @endsection

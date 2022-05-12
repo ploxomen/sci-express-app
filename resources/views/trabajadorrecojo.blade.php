@@ -4,16 +4,11 @@
     <title>Recojos pendientes</title>
 @endsection
 @section('body')
-<style>
-    .card-body b{
-        display: block;
-    }
-</style>
 <section class="p-2">
    <div class="row">
        @if (!empty($recojos_pend))
             @foreach ($recojos_pend as $re)
-                <div class="form-group col-12 col-lg-6 col-xl-4">
+                <div class="form-group col-12 col-lg-6">
                     <div class="card">
                         <h5 class="card-header">N° Solicitud - {{str_pad($re->id, 5, "0", STR_PAD_LEFT)}}</h5>
                         <div class="card-body">
@@ -98,21 +93,21 @@
                                     <div class="form-group col-12">
                                         <label><b>Doc Recojo</b></label><br>
                                         <div class="custom-control custom-radio d-inline mr-3">
-                                            <input required type="radio"  name="doc_reco" class="custom-control-input select-doc" id="id_una_guia" value="UNA GUIA">
-                                            <label class="custom-control-label" for="id_una_guia">UNA GUIA</label>
+                                            <input required type="radio"  name="doc_reco" class="custom-control-input select-doc" id="id_una_guia_{{$re->id_recojo}}" value="UNA GUIA">
+                                            <label class="custom-control-label" for="id_una_guia_{{$re->id_recojo}}">UNA GUIA</label>
                                         </div>
                                         <div class="custom-control custom-radio d-inline">
-                                            <input required type="radio" name="doc_reco" class="custom-control-input select-doc" id="id_varias_guias" value="VARIAS GUIAS">
-                                            <label class="custom-control-label" for="id_varias_guias">VARIAS GUIAS</label>
+                                            <input required type="radio" name="doc_reco" class="custom-control-input select-doc" id="id_varias_guias_{{$re->id_recojo}}" value="VARIAS GUIAS">
+                                            <label class="custom-control-label" for="id_varias_guias_{{$re->id_recojo}}">VARIAS GUIAS</label>
                                         </div>
                                     </div>
                                     <div class="form-group col-12 col-lg-6">
-                                        <label for="id_nro_guias_conso">N° Guías Cons</label>
-                                        <input required type="number" class="form-control" id="id_nro_guias_conso">
+                                        <label for="id_nro_guias_conso_{{$re->id_recojo}}">N° Guías Cons</label>
+                                        <select multiple class="form-control cb-mult-nuevo" required id="id_nro_guias_conso_{{$re->id_recojo}}"></select>
                                     </div>
                                     <div class="form-group col-12 col-lg-6">
-                                        <label for="id_cant_bulto">Cant Bultos</label>
-                                        <input required type="number" class="form-control" value="{{$re->cant_bulto}}" step="0.01" id="id_cant_bulto">
+                                        <label for="id_cant_bulto_{{$re->id_recojo}}">Cant Bultos</label>
+                                        <input required type="number" class="form-control" value="{{$re->cant_bulto}}" step="0.01" id="id_cant_bulto_{{$re->id_recojo}}">
                                     </div>
                                 @endif
                                 <div class="form-grouo col-12 text-center">

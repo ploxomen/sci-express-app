@@ -1,4 +1,4 @@
-<div class="modal fade" id="manifestar-guias" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="manifestar-guias" data-backdrop="static" data-keyboard="false" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -21,12 +21,12 @@
                 <label for="prov_view_destino">Prov Destino</label>
                 <input type="text" class="form-control" id="prov_view_destino" disabled>
             </div>
+            <div class="form-group col-12">
+                <label for="id_cluster_modal">Cluster</label>
+                <input type="text" class="form-control" id="id_cluster_modal" disabled>
+            </div>
              <div class="form-group col-12">
                  <span class="text-danger">N° de guías seleccionadas: <span id="nro_selecionadas"></span></span>
-            </div>
-            <div class="form-group col-12">
-                <label for="id_cluster">Cluster</label>
-                <select name="cluster" id="id_cluster" class="form-control simple-select2"></select>
             </div>
           </div>
       </div>

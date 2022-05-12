@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\InformacionAdicional;
+use App\Models\ModeloCluster;
 use App\Models\ModeloEmbarque;
 use App\Models\ModeloGuias;
 use App\Models\User;
@@ -18,12 +19,19 @@ class Llegada extends Controller
         $estado_guias = InformacionAdicional::situacionGuiaCluster();
         return view('pedidos.llegada',compact('modulos', 'estado_guias'));
     }
+    public function viewLlegadaManual()
+    {
+        $modulos = User::getModulos(Auth::id());
+        $clusters = ModeloCluster::obtenerTodosClusters();
+        return view('pedidos.duplicadoarribo', compact('modulos', 'clusters'));
+    }
     public function obtenerEmbarqueArribar(Request $request)
     {
         try {
             $id_embarque = $request->has('embarque') ? $request->embarque : 0;
             $id_guia = $request->has('guia') ? $request->guia : 0;
-            return response()->json(['resultados' => ModeloEmbarque::obtenerEmbarqueArribado($id_embarque,$id_guia, Auth::id(),$request->tipo)]);
+            $id_usuario = $request->has('id_cluster') ? $request->id_cluster : Auth::id();
+            return response()->json(['resultados' => ModeloEmbarque::obtenerEmbarqueArribado($id_embarque,$id_guia, $id_usuario,$request->tipo)]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
@@ -58,7 +66,7 @@ class Llegada extends Controller
     public function actualizarGuiasLlegada(Request $request)
     {
         try {
-            ModeloEmbarque::actualizarGuiaLlegadas($request->embarque,$request->manifiesto,$request->guia,$request->conforme,$request->texto);
+            ModeloEmbarque::actualizarGuiaLlegadas($request->embarque,$request->manifiesto,$request->guia,$request->conforme,$request->texto,$request->situacion,$request->incidencia,Auth::id());
             return response()->json(['success' => 'El estado de la guía se cambio con éxito']);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);

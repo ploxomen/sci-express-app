@@ -74,6 +74,7 @@ class Manifiesto extends Controller
                 unset($datos['guias']);
             }
             $guias = json_decode($request->guias,true);
+            $datos['id_responsable'] = Auth::id();
             $response = ModeloManifiesto::agregarManifiesto($datos,$guias);
             return response()->json($response);
         } catch (Exception $ex) {

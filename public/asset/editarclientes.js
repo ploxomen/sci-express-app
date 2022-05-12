@@ -95,6 +95,10 @@ function loadPage(){
                 dom.value = element;
             }
         }
+        $('.simple-select2').trigger('change');
+        for (const el of document.querySelectorAll('.cb-tipo-doc')) {
+            general.validarMinMaxTipoDocumento(el.dataset.input,$(el).val());
+        }
     }).catch( error => {
         console.error(error);
         alertify.alert('Error',error.message);

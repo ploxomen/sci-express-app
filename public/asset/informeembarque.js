@@ -50,6 +50,7 @@ function loadPage(){
                         }
                     }
                 }
+                alertify.success('seleccionado correctamente');
             } catch (error) {
                 embarque = null;
                 alertify.alert('Error',error.message);
@@ -67,27 +68,78 @@ function loadPage(){
             return
         }
         let datos = new FormData(this);
-        if(totalBultos() === 0){
-            alertify.error('el total de bultos debe de ser mayor que 0');
-            return
-        }
-        datos.append('total_bultos_paquete',totalBultos());
         datos.append('id_embarque',embarque);
         try {
-            let response = await general.funcfetch('agregar-informe',datos);
+            let response = await general.funcfetch('obtener-guias-embarque-informe',datos);
             if(response.error){
                 alertify.alert('Error',response.error);
                 return
             }
-            alertify.alert('Mensaje',response.success,()=>{
-                resetForm();
-                viewButtons(true);
-                tablaEmbarquesPendi.draw();
+            let template = ``;
+            response.ciudades.forEach(c => {
+                template += `
+                    <li>
+                      <div class="d-flex justify-content-between">
+                        <div class="form-group">
+                            <span><b>Ciudad Base:</b> ${c.nombreciudad}</span>
+                        </div>
+                        <div class="form group">
+                            <input type="text" pattern="[0-9]{3}[-][0-9]{7}" maxlength="11" class="form-control form-control-sm informe-embarque" required placeholder="N° guía embarque">
+                        </div>
+                      </div>
+                      <h6 class="text-primary">Guías embarcadas</h6>
+                      <div class="form-row">`
+                c.n_guias.forEach(g => {
+                    template += `
+                    <div class="form-group col-12 col-md-6 mis-guias-relacionadas" data-info="${g.id_guia}">
+                        N° ${g.nro_guia}
+                    </div>
+                    `
+                });
+                template += `</div></li>`
             });
+            document.getElementById('lista-guias-embarque').innerHTML = template;
+            $('#insertar-guias-embarque').modal("show");
         } catch (error) {
             alertify.alert('Error',error.message);
             console.error(error);
         }
+    });
+    document.getElementById('frm-lista-guias-embarque').addEventListener('submit',async function(e){
+        e.preventDefault();
+        if(!embarque){
+            return
+        }
+        let datos = new FormData(frmEmbarque);
+        datos.append('id_embarque',embarque);
+        let informe = new Array();
+        for (const e of this.querySelector('#lista-guias-embarque').children) {
+            for (const misGuias of e.querySelectorAll('.mis-guias-relacionadas')) {
+                informe.push({
+                    nro_guia_embarque : e.querySelector('.informe-embarque').value.trim(),
+                    id_guia : misGuias.getAttribute('data-info')
+                });
+            }
+            
+        }
+        datos.append('guias_embarque',JSON.stringify(informe));
+        let response = await general.funcfetch('agregar-informe',datos);
+        if(response.error){
+            alertify.alert('Error',response.error);
+            return
+        }
+        alertify.alert('Mensaje',response.success,()=>{
+            $('#insertar-guias-embarque').modal("hide");
+            resetForm();
+            viewButtons(true);
+            tablaEmbarquesPendi.draw();
+        });
+    });
+    document.getElementById('btn-generar-informe').onclick = ()=>{
+        document.getElementById('enviar-informe').click();
+    }
+    $('#insertar-guias-embarque').on('hidden.bs.modal', function (e) {
+        document.getElementById('lista-guias-embarque').innerHTML = "";
     })
     function viewButtons(hidden){
         document.getElementById('btn_enviar_informe').hidden = hidden;
@@ -96,11 +148,6 @@ function loadPage(){
     function resetForm(){
         frmEmbarque.reset();
         $('.simple-select2').val('').trigger("change");
-    }
-    for (const e of document.querySelectorAll('.calc-total')) {
-        e.addEventListener('change',function(e){
-            document.getElementById('total_bultos').value = general.totalBultos('.calc-total');
-        });
     }
 }
 window.addEventListener('DOMContentLoaded',loadPage);

@@ -52,8 +52,44 @@ function loadPage(){
             document.getElementById('total-por-procesar').textContent = response.procesar;
             alertify.success(response.success);
         });
-        for (const cbos of document.querySelectorAll('.cb-estado-change')) {
-            cbos.addEventListener('change',async function(event){
+        $('.cb-estado-change').select2({
+            theme : 'bootstrap',
+            width: '100%',
+            placeholder : 'Seleccione una opción'
+        }).on('select2:select',async function(e){
+            let datos = new FormData();
+            datos.append('id_solicitud',this.dataset.solicitud);
+            datos.append('estado',this.value);
+            let response = await general.funcfetch('cambiar-estado',datos);
+            if(response.error){
+                alertify.alert('Error',response.error);
+                return 
+            }
+            alertify.success(response.success);
+        });
+    });
+    datatableSoli.on('responsive-display', function ( e, datatable, row, showHide, update ) {
+        const tabla = e.target.children[0].children[0];
+        if(tabla.children[10].style.display == 'none'){
+            $('.cb-usuarios').off('change');
+            $('.cb-usuarios').attr('data-responsive','true');
+            $('.cb-usuarios').on('change',async function(event){
+                let datos = new FormData();
+                datos.append('id_solicitud',event.target.dataset.solicitud);
+                datos.append('id_user',$(this).val());
+                let response  = await general.funcfetch('asignar-personal',datos);
+                if(response.error){
+                    alertify.alert('Mensaje',response.error);
+                    return
+                }
+                document.getElementById('total-por-procesar').textContent = response.procesar;
+                alertify.success(response.success);
+            });
+        }
+        if(tabla.children[11].style.display == 'none'){
+            $('.cb-estado-change').off('change');
+            $('.cb-estado-change').attr('data-responsive','true');
+            $('.cb-estado-change').on('change',async function(e){
                 let datos = new FormData();
                 datos.append('id_solicitud',this.dataset.solicitud);
                 datos.append('estado',this.value);
@@ -64,6 +100,16 @@ function loadPage(){
                 }
                 alertify.success(response.success);
             });
+        }
+    });
+    datatableSoli.on('responsive-resize', function ( e, datatable, columns ) {
+        if(columns[10] && $('.cb-usuarios').attr('data-responsive') == 'true'){
+            $('.cb-usuarios').off('change');
+            $('.cb-usuarios').attr('data-responsive','false');
+        }
+        if(columns[11] && $('.cb-estado-change').attr('data-responsive') == 'true'){
+            $('.cb-estado-change').off('change');
+            $('.cb-estado-change').attr('data-responsive','false');
         }
     });
     function verifTrayectoSoli(elements,disabled){

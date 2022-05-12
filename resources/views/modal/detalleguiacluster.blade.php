@@ -2,20 +2,24 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="staticBackdropLabel">Guía N° - <span id="id_modal2_nro_guia"></span></h5>
+        <h5 class="modal-title" id="staticBackdropLabel">Guía N° <span id="id_modal2_nro_guia"></span></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
         <div class="form-row form-info">
-            <div class="form-group col-12 col-md-6">
+            <div class="form-group col-12 col-md-6 col-lg-4">
                 <b class="d-block text-secondary">Responsable Pago</b>
                 <span id="id_modal2_resp_pago"></span>
             </div>
-            <div class="form-group col-12 col-md-6">
+            <div class="form-group col-12 col-md-6 col-lg-4">
                 <b class="text-secondary d-block">Fecha Emisión</b>
                 <span id="id_modal2_fecha_emision"></span>
+            </div>
+             <div class="form-group col-12 col-md-6 col-lg-4">
+                <b class="text-secondary d-block">Fecha Reparto</b>
+                <span id="id_modal2_fecha_reparto"></span>
             </div>
             <div class="form-group form-group col-12">
                 <h5 class="text-info">Remitente</h5>
@@ -78,6 +82,51 @@
             <div class="form-group col-12">
                 <b class="text-secondary d-block">Dirección</b>
                 <span id="id_modal2_dest_dire"></span>
+            </div>
+            <div class="form-group col-12">
+                <h5 class="text-info">ENVIO</h5>
+            </div>
+            <div class="form-group col-12 col-md-6">
+                <b class="text-secondary d-block">Situación</b>
+                <span id="id_modal2_situacion_envio"></span>
+            </div>
+            <div class="form-group col-12 col-md-6">
+                <b class="text-secondary d-block">Incidencia</b>
+                <span id="id_modal2_incidencia_envio"></span>
+            </div>
+            <div class="form-group col-12 col-md-6">
+                <b class="text-secondary d-block">Detalle Incidencia</b>
+                <span id="id_modal2_text_disconforme"></span>
+            </div>
+            <div class="form-group col-12">
+                <h5 class="text-info">DURANTE REPARTO</h5>
+            </div>
+            <div class="form-group col-12 col-md-6">
+                <b class="text-secondary d-block">Situación</b>
+                <span id="id_modal2_situacion_durante_envio"></span>
+            </div>
+            <div class="form-group col-12 col-md-6">
+                <b class="text-secondary d-block">Incidencia</b>
+                <span id="id_modal2_incidencia_durante_envio"></span>
+            </div>
+            <div class="form-group col-12 col-md-6">
+                <b class="text-secondary d-block">Detalle Incidencia</b>
+                <span id="id_modal2_text_durante_disconforme"></span>
+            </div>
+            <div class="form-group col-12">
+                <h5 class="text-info">ENTREGA</h5>
+            </div>
+            <div class="form-group col-12 col-md-6 col-lg-4">
+                <b class="text-secondary d-block">Status</b>
+                <span id="id_modal2_estado_entregado"></span>
+            </div>
+            <div class="form-group col-12 col-md-6 col-lg-4">
+                <b class="text-secondary d-block">N° visitas</b>
+                <span id="id_modal2_nro_visitas_reparto"></span>
+            </div>
+            <div class="form-group col-12 col-md-6 col-lg-4">
+                <b class="text-secondary d-block">Motivo no Ent</b>
+                <span id="id_modal2_motivo_no_ent"></span>
             </div>
             <div class="form-group col-12">
                 <h5 class="text-info">DETALLES</h5>

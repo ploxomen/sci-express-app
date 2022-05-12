@@ -30,6 +30,7 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
         Route::post('departamentos',[Ubigeo::class,'getDepartamentos']);
         Route::post('provincias', [Ubigeo::class, 'getProvincias']);
         Route::post('distritos', [Ubigeo::class, 'getDistritos']);
+        Route::post('ciudades', [Ubigeo::class, 'dbCiudades']);
     });
     Route::prefix('manifiesto')->group(function () {
         Route::get('ver', [Manifiesto::class, 'viewManifiesto'])->name('viewManifi');
@@ -39,21 +40,29 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
     });
     Route::prefix('vehiculos')->group(function () {
         Route::get('todos', [Embarque::class, 'viewVehiculos'])->name('viewVehiculos');
-        Route::get('obtener', [Embarque::class, 'viewNuevoManifiesto']);
+        Route::post('obtener', [Embarque::class, 'obtenerVehiculosTransporte']);
+        Route::post('nuevo', [Embarque::class, 'agregarVehiculoTransporte']);
+        Route::post('actualizar', [Embarque::class, 'actualizarVehiculoTransporte']);
+        Route::post('eliminar', [Embarque::class, 'eliminarVehiculoTransporte']);
         Route::post('ver-guias', [Embarque::class, 'viewGuias']);
         Route::post('agregar', [Embarque::class, 'agregarManifiesto']);
     });
     Route::prefix('usuarios')->group(function(){
         Route::get('agregar-modificar',[Usuario::class,'viewCrearModificar'])->name('usuAgreMod');
+        Route::get('cambiar/rol/{id}', [Usuario::class, 'cambiarRol'])->name('cambiarRol');
+        Route::get('miperfil', [Usuario::class, 'miPerfil'])->name('miPerfil');
         Route::post('agregar',[Usuario::class,'agregar']);
+        Route::post('miperfil/modificar', [Usuario::class, 'miPerfilModificar']);
         Route::post('obtener', [Usuario::class, 'misUsuarios']);
-        Route::post('modificar',[Usuario::class,'modificar']);
+        Route::post('obtener/roles', [Usuario::class, 'obtenerRoles']);
+        Route::post('modificar',[Usuario::class,'modificarUsuarios']);
         Route::get('lista',[Usuario::class,'viewLista'])->name('usuLista');
         Route::get('logout',[Usuario::class,'cerrarSesion'])->name('closeSesion');
     });
     Route::prefix('cluster')->group(function () {
         Route::get('nuevo', [Cluster::class, 'crearCluster'])->name('crearCluster');
         Route::get('mostrar', [Cluster::class, 'mostrarClusters'])->name('mostrarClusters');
+        Route::get('entregas', [Cluster::class, 'entregasClusters'])->name('verEntregaCluster');
         Route::post('agregar', [Cluster::class, 'agregarNuevoCluster']);
         Route::post('obtener', [Cluster::class, 'mostrarCluster']);
         Route::post('update', [Cluster::class, 'actualizarCluster']);
@@ -88,30 +97,41 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
             Route::get('pendientes', [Embarque::class, 'viewListEmba'])->name('pedidoListEmbar');
             Route::post('manifiesto/pendientes', [Embarque::class, 'obtenerManiPend']);
             Route::post('manifiesto/embarcar', [Embarque::class, 'embarcarMani']);
+            Route::post('manifiesto/embarcar-fletes', [Embarque::class, 'verCiudadesFlestes']);
             Route::get('transporte', [Embarque::class, 'transporteEmbarque'])->name('embarqueTrabajo');
+            Route::post('obtener-fletes', [Embarque::class, 'obtenerFletes']);
             Route::post('actualizar-estado', [Embarque::class, 'actualizarEmbarque']);
             Route::get('informe', [Manifiesto::class, 'viewProgEmba'])->name('viewProgEmba');
             Route::post('obtener-informe', [Embarque::class, 'obtenerInformeEmbarque']);
             Route::post('obtener-informe-detalle', [Embarque::class, 'obtenerInfoEmbDeta']);
             Route::post('agregar-informe', [Embarque::class, 'agregarInforme']);
+            Route::post('obtener-guias-embarque-informe', [Embarque::class, 'obtenerGuiasEmbarque']);
         });
         Route::prefix('llegada')->group(function () {
             Route::get('/', [Llegada::class, 'viewLlegada'])->name('pedidoLlegada');
+            Route::get('manual', [Llegada::class, 'viewLlegadaManual'])->name('embarquePorArribarManual');
             Route::post('embarques/arribar',[Llegada::class,'obtenerEmbarqueArribar']);
             Route::post('arribar-guias', [Llegada::class, 'actualizarGuiasLlegada']);
             Route::post('mis-guias', [Llegada::class, 'clusterMisGuias']);
             Route::post('cambiar-estado-guias', [Llegada::class, 'changeEstadoGuias']);
             Route::post('guia-detalle-cluster', [Llegada::class, 'detalleMisGuias']);
         });
-        Route::get('entrega',[Entrega::class,'viewEntrega'])->name('pedidoEntrega');
+        Route::prefix('entrega')->group(function () {
+            Route::get('/', [Entrega::class, 'viewEntrega'])->name('pedidoEntrega');
+            Route::post('lista', [Entrega::class, 'listaEntregas']);
+        });
     });
     Route::prefix('comprobante')->group(function(){
         Route::prefix('guias')->group(function () {
             Route::get('/', [Gias::class, 'viewGuias'])->name('compGuias');
             Route::get('obtener-todos', [Gias::class, 'misGuias'])->name('misGuiasTotal');
+            Route::get('view-retornadas', [Gias::class, 'viewGuiasRetornadas'])->name('verGuiasRetornadas');
+            Route::post('retornadas', [Gias::class, 'guiasRetornadas']);
             Route::post('obtener-detalles', [Gias::class, 'detalleMisGuias']);
+            Route::post('obtener-dias', [Gias::class, 'obtenerDiasTransito']);
             Route::post('asignar-personal', [Gias::class, 'asignarUsuario']);
             Route::post('cambiar-estado', [Gias::class, 'cambiarEstadoGuia']);
+            Route::post('cambiar-cluster', [Gias::class, 'cambiarCluster']);
             Route::post('anular-guia', [Gias::class, 'anularGuia']);
             Route::post('mis-guias', [Gias::class, 'obtenerMisGuias']);
             Route::post('obtener-clipro', [Gias::class, 'obtenerCliOrProvDeta']);
@@ -135,6 +155,8 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
 });
 Route::middleware(['guest'])->prefix('intranet')->group(function(){
     Route::get('login',[Usuario::class,'viewLogin'])->name('login');
+    Route::post('/login/restore', [Usuario::class, 'restablecerUsuario']);
+    Route::post('/login/restore-cancelar', [Usuario::class, 'restablecerUsuarioCancelar']);
     Route::post('usuarios/autenticacion',[Usuario::class,'autenticacion']);
 });
 Route::get('consulta/guia')

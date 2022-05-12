@@ -9,9 +9,14 @@ function loadPage() {
         },
         columns: [
             {data: null,searchable: false, orderable: false,},
+            {data: 'nro_ruc'},
             {data: 'empresa'},
-            {data: 'nro_contacto'},
-            {data: 'correos'},
+            {data: 'nro_contacto',render : function(data){
+                return data ? data.replace(/;/gi,'/') : 'No definido';
+            }},
+            {data: 'ciudades_atencion',render : function(data){
+                return data ? data.replace(/;/gi,'/') : 'No definido';
+            }},
             {data: 'direccion'},
             {data: 'id', searchable: false, orderable: false, name: 'id', 
             render: function(data){
@@ -98,6 +103,6 @@ function loadPage() {
         document.getElementById('empresa_id').value = "";
         document.getElementById('frm_transporte').reset();
         $('.cb-mult-nuevo').val("").trigger("change");
-    })
+    });
 }
 window.addEventListener('DOMContentLoaded',loadPage);

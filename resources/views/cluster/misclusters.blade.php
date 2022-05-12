@@ -23,8 +23,7 @@
                     <th>Razón Social</th>
                     <th>Departamento</th>
                     <th>Provincia</th>
-                    <th>Distrito</th>
-                    <th>Dirección</th>
+                    <th>Ciudad<br>Base</th>
                     <th>Acciones</th>
                 </tr>
             </thead>

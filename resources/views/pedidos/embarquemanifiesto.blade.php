@@ -129,7 +129,7 @@
                                     </div>
                                 @endif
                                 <div class="col-12 text-center">
-                                    <button class="btn btn-primary marcar-embarque" data-embarque="{{$emb->id}}" {{$hoy != strtotime($emb->fch_emba) ? 'disabled' : ''}}>Marcar Hr {{empty($emb->hr_ini_emba) ? 'Inicio' : 'Fin'}}</button>
+                                    <button class="btn btn-primary marcar-embarque" data-embarque="{{$emb->id}}">Marcar Hr {{empty($emb->hr_ini_emba) ? 'Inicio' : 'Fin'}}</button>
                                 </div>
                             </div>
                         </div>

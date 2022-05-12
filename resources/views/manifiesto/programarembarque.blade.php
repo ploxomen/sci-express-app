@@ -32,7 +32,7 @@
                 </select>
             </div>
             <div class="form-group col-12 col-md-6 col-lg-3">
-                <label for="id_nro_comprobantes">N°</label>
+                <label for="id_nro_comprobantes">N° Comprobantes</label>
                 <select name="nro_comprobantes[]" id="id_nro_comprobantes" multiple class="form-control cb-select2-tags"></select>
             </div>
             <div class="form-group col-12 col-md-6 col-lg-3">
@@ -56,39 +56,39 @@
             </div>
         </fieldset>
         <fieldset class="bg-white px-3 border mb-2 form-row">
-            <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add text-info">BULTOS</legend>
+            <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add text-info">BULTOS TOTAL</legend>
             <div class="form-group col-12">
                 <div style="max-width: 150px; margin-left: auto;">
-                    <input type="number" id="total_bultos" min="0" class="form-control" readonly>
+                    <input type="number" id="id_embarque_total_bultos_paquete" min="1" class="form-control" readonly>
                 </div>
             </div>
             <div class="form-group col-12 col-md-3 col-lg-2">
                 <label for="id_nro_cajas">Cajas</label>
-                <input type="number" name="nro_cajas" id="id_nro_cajas" class="form-control calc-total" min="0">
+                <input type="number" disabled id="id_embarque_nro_cajas" class="form-control calc-total" min="0">
             </div>
             <div class="form-group col-12 col-md-3 col-lg-2">
                 <label for="id_nro_jabas">Jabas</label>
-                <input type="number" name="nro_jabas" id="id_nro_jabas" class="form-control calc-total" min="0">
+                <input type="number" disabled id="id_embarque_nro_jabas" class="form-control calc-total" min="0">
             </div>
             <div class="form-group col-12 col-md-3 col-lg-2">
                 <label for="id_nro_cajones">Cajones</label>
-                <input type="number" name="nro_cajones" id="id_nro_cajones" class="form-control calc-total" min="0">
+                <input type="number" disabled id="id_embarque_nro_cajones" class="form-control calc-total" min="0">
             </div>
             <div class="form-group col-12 col-md-3 col-lg-2">
                 <label for="id_nro_sobres">Sobres</label>
-                <input type="number" name="nro_sobres" id="id_nro_sobres" class="form-control calc-total" min="0">
+                <input type="number" disabled id="id_embarque_nro_sobres" class="form-control calc-total" min="0">
             </div>
             <div class="form-group col-12 col-md-3 col-lg-2">
                 <label for="id_nro_paquetes">Paquetes</label>
-                <input type="number" name="nro_paquetes" id="id_nro_paquetes" class="form-control calc-total" min="0">
+                <input type="number" disabled id="id_embarque_nro_paquetes" class="form-control calc-total" min="0">
             </div>
             <div class="form-group col-12 col-md-3 col-lg-2">
                 <label for="id_num_otros">Otros</label>
-                <input type="number" name="num_otros" id="id_num_otros" class="form-control calc-total" min="0">
+                <input type="number" disabled id="id_embarque_num_otros" class="form-control calc-total" min="0">
             </div>
             <div class="form-group col-12">
                 <label for="id_detalle_otro">Detallar otro</label>
-                <textarea name="detalle_otro" maxlength="255" id="id_detalle_otro" class="form-control"></textarea>
+                <textarea disabled maxlength="255" id="id_embarque_detalle_otro" class="form-control"></textarea>
             </div>
         </fieldset>
         {{-- <fieldset class="bg-white px-3 border mb-2 form-row">
@@ -103,7 +103,7 @@
             </div>
         </fieldset> --}}
         <div class="form-group">
-            <button class="btn btn-primary" type="submit" id="btn_enviar_informe" hidden>Actualizar</button>
+            <button class="btn btn-primary" type="submit" id="btn_enviar_informe" hidden>Siguiente</button>
             <button class="btn btn-secondary" type="reset" id="btn_clear_informe" hidden>Cancelar</button>
         </div>
     </form>
@@ -132,4 +132,5 @@
             </table>
         </div>
     </section>
+    @include('modal.insertarguiasembarque')
 @endsection

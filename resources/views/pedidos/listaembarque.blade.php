@@ -67,7 +67,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-12 col-md-6 col-lg-4 col-xl-6 form-group">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-group">
             <label for="id_id_empr_tran">Empresas Transporte</label>
             <select name="id_empr_tran[]" id="id_id_empr_tran" class="form-control simple-select2" multiple required>
                 <option></option>
@@ -76,17 +76,9 @@
                 @endforeach
             </select>
         </div>
-        <div class="form-group col-12 col-md-6 col-lg-4">
+        <div class="form-group col-12 col-md-6 col-lg-3">
             <label for="id_hr_fin_esti_emba">Fin Est Embarque</label>
             <input type="time" name="hr_fin_esti_emba" id="id_hr_fin_esti_emba" class="form-control" required>
-        </div>
-        <div class="form-group col-12 col-md-6 col-lg-4">
-            <label for="id_tota_bult">Bultos</label>
-            <input type="number" name="tota_bult" id="id_tota_bult" min="0" class="form-control" step="0.01" required>
-        </div>
-        <div class="form-group col-12 col-md-6 col-lg-4">
-            <label for="id_flet_esti">Flete estimado</label>
-            <input type="number" name="flet_esti" id="id_flet_esti" class="form-control" step="0.01" required>
         </div>
         <div class="form-group col-12">
             <div class="custom-control custom-checkbox">
@@ -95,7 +87,7 @@
             </div>
         </div>
         <div class="form-group col-12">
-            <button type="submit" class="btn btn-primary">Programar</button>
+            <button type="submit" class="btn btn-primary">Siguiente</button>
             <button type="reset" class="btn btn-danger">Cancelar</button>
         </div>
     </form>
@@ -105,16 +97,12 @@
             <h4 class="text-primary"><i class="fas fa-caret-right"></i> Manifiestos para embarcar</h4>
         </div>
         <div class="form-group col-12 col-md-6 col-lg-3">
-            <label for="id_prov_dest">Provincia Destino</label>
+            <label for="id_prov_dest">Ciudades o distritos base</label>
             <select name="prov_dest" id="id_prov_dest" class="form-control simple-select2">
                 <option value="todos">Todos</option>
-                @foreach ($departamentoProv as $depart)
-                    <optgroup label="{{$depart['nom_ubigeo_dep']}}">
-                        @foreach ($depart['provincias'] as $prov)
-                            <option value="{{$prov->id_ubigeo}}">{{$prov->nombre_ubigeo}}</option>
-                        @endforeach
-                    </optgroup>
-                @endforeach
+                    @foreach ($ciudadesBase as $ciudad)
+                        <option value="{{$ciudad->value}}" data-tipo="{{$ciudad->tipo_base}}">{{$ciudad->nombre}}</option>
+                    @endforeach
             </select>
         </div>
     </div>
@@ -143,6 +131,7 @@
                     <th>Trayecto</th>
                     <th>Prov Orig</th>
                     <th>Prov Dest</th>
+                    <th>Ciudad Base</th>
                     <th>Cluster</th>
                     <th>Bulto</th>
                     <th>N° Guías</th>
@@ -152,4 +141,5 @@
         </table>
     </div>
 </section>
+@include('modal.definirfletes')
 @endsection
