@@ -137,6 +137,7 @@ Route::middleware(['guest'])->prefix('intranet')->group(function(){
     Route::get('login',[Usuario::class,'viewLogin'])->name('login');
     Route::post('usuarios/autenticacion',[Usuario::class,'autenticacion']);
 });
+Route::get('consulta/guia')
 Route::get('/',function(){
     return redirect(route('login'));
 });
