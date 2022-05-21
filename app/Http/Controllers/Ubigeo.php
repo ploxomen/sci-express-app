@@ -112,6 +112,10 @@ class Ubigeo extends Controller
         }
         return $response;
     }
+    public static function getCiudadesClientes($distrito)
+    {
+        return DB::table('ciudades')->select('id', 'nombre_ciudad')->where(['ubigeo_distrito' => $distrito])->get();
+    }
     public function getDistritos(Request $request)
     {
         if ($request->ajax()) {

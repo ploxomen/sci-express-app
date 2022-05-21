@@ -20,7 +20,7 @@ function loadPage(){
             {data: 'kpi'},
             {data: 'flet_esti'},
             {data: 'tot_mani'},
-            {data: 'id', searchable: false, orderable: false, name: 'id', render: function(data){return`<button class="btn btn-danger obtener-detalle" title="Agregar informe del embarque" data-embarque="${data}"><i class="fas fa-edit"></i></button>`}}
+            {data: 'id', searchable: false, orderable: false, name: 'id', render: function(data){return`<button class="btn btn-danger btn-sm obtener-detalle" title="Agregar informe del embarque" data-embarque="${data}"><i class="fas fa-edit"></i></button>`}}
         ],
     });
     listaEmbarque.addEventListener('click',async function(event){

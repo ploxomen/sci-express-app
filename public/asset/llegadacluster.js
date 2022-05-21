@@ -60,5 +60,39 @@ function loadPage(){
             });
         }
     });
+    function verDetalleGuiaCluster(data) {
+        if(!data.resultados[0]){
+            return
+        }
+        for (const key in data.resultados[0]) {
+            if (Object.hasOwnProperty.call(data.resultados[0], key)) {
+                const value = data.resultados[0][key];
+                const dom = document.getElementById('id_modal2_' + key);
+                if(!dom){
+                    continue;
+                }
+                dom.textContent = value;
+            }
+        }
+        let template = '';
+        if(data.resultados[0].detalles_guias){
+            data.resultados[0].detalles_guias.forEach(dg => {
+                template += `
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="col-6 col-lg-3"><b class="d-block text-secondary">Grupo Envio</b><span>${dg.grupo_envio}</span></div>
+                            <div class="col-6 col-lg-3"><b class="d-block text-secondary">Tipo Envio</b><span>${dg.tipo_envio}</span></div>
+                            <div class="col-6 col-lg-3"><b class="d-block text-secondary">Embase o Embalaje</b><span>${dg.embase_embalaje}</span></div>
+                            <div class="col-6 col-lg-3"><b class="d-block text-secondary">Cantidad</b><span>${dg.cantidad}</span></div>
+                            <div class="col-12"><b class="d-block text-secondary">Descripción</b><span>${!dg.descripcion ? 'No definido' : dg.descripcion}</span></div>
+                        </div>
+                    </div>
+                </div>`
+            });
+            document.getElementById('id_modal2_detalle_guias').innerHTML = template;
+        }
+        $('#detalle-guias-llegada-cluster').modal('show');
+    }
 }
 window.addEventListener('DOMContentLoaded',loadPage);

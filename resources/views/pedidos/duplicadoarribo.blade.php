@@ -1,7 +1,7 @@
 @extends('general.index')
 @section('head')
     <script src="{{asset('asset/llegada.js')}}"></script>
-    <title>Embarques por arribar (M)</title>
+    <title>Embarques por arribar</title>
 @endsection
 @section('body')
 <style>
@@ -21,10 +21,10 @@
     </div>
     <div class="bg-white p-2 mb-3">
         <div class="row">
-            <div class="form-group col-12 col-lg-5 col-xl-6">
+            <div class="form-group col-12 col-sm-6 col-lg-5 col-xl-5">
                 <h5 class="text-primary">De Embarques</h5>
             </div>
-            <div class="form-group col-12 col-lg-4 col-xl-5">
+            <div class="form-group col-6 col-sm-3 col-lg-5 col-xl-5">
                 <div class="ml-lg-auto" style="width: 100%; max-width: 350px;">
                     <label for="cb-clusters">Clusters</label>
                     <select id="cb-clusters" class="simple-select2">
@@ -35,7 +35,7 @@
                     </select>
                 </div>
             </div>
-            <div class="form-group col-12 col-lg-3 col-xl-1">
+            <div class="form-group col-6 col-sm-3 col-lg-2 col-xl-2">
                 <div class="mr-auto" style="width: 100%; max-width: 150px;">
                     <label for="" class="mr-3">A confirmar</label>
                     <input type="text" readonly class="form-control" value="0" id="valor-embarques">
@@ -94,6 +94,5 @@
     </div>
 </section>
 @include('modal.detalleguia')
-@include('modal.detalleguiacluster')
 @include('modal.detallembarque')
 @endsection

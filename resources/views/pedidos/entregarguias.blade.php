@@ -57,44 +57,12 @@
                                 <b>Nombres: </b>
                                 <span>{{$g->nom_prov}}</span>
                             </div>
-                            <div class="form-group col-6">
-                                <b>Tipo Doc: </b>
-                                <span>{{$g->remi_tipo_doc}}</span>
-                            </div>
-                            <div class="form-group col-6">
-                                <b>N° Doc: </b>
-                                <span>{{$g->remi_nro_docu}}</span>
-                            </div>
-                            <div class="form-group col-12 col-md-6">
-                                <b>Departamento: </b>
-                                <span>{{$g->remi_depa}}</span>
-                            </div>
-                            <div class="form-group col-12 col-md-6">
-                                <b>Provincia: </b>
-                                <span>{{$g->remi_prov}}</span>
-                            </div>
-                            {{-- <div class="form-group col-12 col-md-6 col-lg-4">
-                                <b class="d-block">Distrito</b>
-                                <span>{{$g->remi_dist}}</span>
-                            </div>
-                            <div class="form-group col-12">
-                                <b class="d-block">Dirección</b>
-                                <span>{{$g->remi_dire}}</span>
-                            </div> --}}
                             <div class="col-12">
                                 <h6 class="text-primary"><i class="fas fa-caret-right"></i> Destinatario</h6>
                             </div>
                             <div class="form-group col-12">
                                 <b>Nombres: </b>
                                 <span>{{$g->nom_dest}}</span>
-                            </div>
-                            <div class="form-group col-6">
-                                <b>Tipo Doc: </b>
-                                <span>{{$g->dest_tipo_docu}}</span>
-                            </div>
-                            <div class="form-group col-6">
-                                <b>N° Doc: </b>
-                                <span>{{$g->dest_nro_docu}}</span>
                             </div>
                             <div class="form-group col-12 col-md-6 col-lg-4">
                                 <b>Departamento: </b>

@@ -175,15 +175,21 @@ class Gias extends Controller
             $datos = Clientes::detalleCliDeCli($request->id);
             $provincias = [];
             $distritos = [];
+            $ciudades = [];
             $dias = null;
             if(!empty($datos)){
                 $provincias = Ubigeo::getProvinciasCliente($datos->departamento);
                 $distritos = Ubigeo::getDistritosCliente($datos->provincia);
-                // $nombre_dep = (new Ubigeo)->getNameDepartamento($datos);
-                // $nombre_prov = (new Ubigeo)->getNameProvincia($datos);
-                // $dias = InformacionAdicional::obtenerDiasTransito($datos->departamento_orgingen, $datos->departamento_destino, $request->provincia_destino, $request->ciudad_final)
+                $ciudades = Ubigeo::getCiudadesClientes($datos->distrito);
+                $infoDepDest = (new Ubigeo)->getNameDepartamento($datos->departamento);
+                $infoProvDest = (new Ubigeo)->getNameProvincia($datos->provincia);
+                $infoCiudDest = (new Ubigeo)->getNameDistrito($datos->distrito);
+                if(!empty($datos->id_ciudad_final)){
+                    $infoCiudDest = Clientes::obtenerNombreCliDest($datos->id_ciudad_final);
+                }
+                $dias = InformacionAdicional::obtenerDiasTransito($request->departamentoOrigen, $infoDepDest, $infoProvDest, $infoCiudDest);
             }           
-            return response()->json(['datos' => $datos, 'prov' => $provincias,'dias' => $dias ,'dist' => $distritos]);
+            return response()->json(['datos' => $datos, 'prov' => $provincias,'dias' => $dias ,'dist' => $distritos, 'ciudades' => $ciudades]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }

@@ -23,8 +23,8 @@
                         </div>
                         <div class="card-body">
                             <div class="form-row">
-                                <div class="form-group col-12 col-md-6">
-                                    <b class="d-block">Fecha Embarque</b>
+                                <div class="form-group col-12">
+                                    <b>Fecha Embarque: </b>
                                     <span>{{$emb->format_embarque}}</span>
                                 </div>
                                 <div class="col-12">
@@ -56,6 +56,17 @@
                                 <div class="form-group col-12 col-md-6">
                                     <b class="d-block">Vehículo Embarque</b>
                                     <span>{{$emb->placa}}</span>
+                                </div>
+                                <div class="col-12">
+                                    <h6 class="text-primary"><i class="fas fa-caret-right"></i> Información</h6>
+                                </div>
+                                <div class="form-group col-12 col-md-6 col-lg-8">
+                                    <b>Flete Estimado:</b>
+                                    <span>S/ {{$emb->flet_esti}}</span>
+                                </div>
+                                 <div class="form-group col-12 col-md-6 col-lg-4">
+                                    <b>Tot. Bultos:</b>
+                                    <span>{{$emb->total_bultos_paquete}}</span>
                                 </div>
                                 <div class="col-12">
                                     <h6 class="text-primary"><i class="fas fa-caret-right"></i> Hr Embarque</h6>

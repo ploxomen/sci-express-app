@@ -13,8 +13,8 @@
         </div>
         <form id="frm_cluster" class="py-3 bg-white row">
             <div class="col-12 form-group col-md-6 col-lg-3 col-xl-4">
-                <label for="id_n_document">N° D.N.I <small class="text-danger">*</small></label>
-                <input type="text" class="form-control" id="id_n_document" required name="n_document" minlength="8" maxlength="8">
+                <label for="id_n_document">N° D.N.I</label>
+                <input type="text" class="form-control" id="id_n_document" name="n_document" minlength="8" maxlength="8">
             </div>
             <div class="col-12 form-group col-md-6 col-lg-3 col-xl-4">
                 <label for="id_name">Nombres <small class="text-danger">*</small></label>
@@ -62,7 +62,7 @@
             </div>
             <div class="col-12 form-group col-md-6 col-lg-3 col-xl-4">
                 <label for="id_nro_cuenta_clu">N° Cuenta</label>
-                <input type="text" class="form-control" name="nro_cuenta_clu" id="id_nro_cuenta_clu">
+                <input type="text" class="form-control" maxlength="30" name="nro_cuenta_clu" id="id_nro_cuenta_clu">
             </div>
             <div class="col-12 form-group">
                 <label for="id_nro_cuenta_clu">Consignados <small class="text-danger">*</small></label>

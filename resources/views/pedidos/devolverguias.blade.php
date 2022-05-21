@@ -72,9 +72,10 @@
                     <thead>
                         <tr>
                             <th>N° Embarque</th>
-                            <th>Fecha Embarque</th>
+                           <th>Fecha Emb</th>
                             <th>Empresa</th>
-                            <th>Fecha y Hr Llegada</th>
+                            <th>Fecha y Hr Lle</th>
+                            <th>Import Fact</th>
                             <th>Comprobantes</th>
                             <th>N° Comp</th>
                             <th>N° Guías</th>

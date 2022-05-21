@@ -119,6 +119,7 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
         Route::prefix('entrega')->group(function () {
             Route::get('/', [Entrega::class, 'viewEntrega'])->name('pedidoEntrega');
             Route::post('lista', [Entrega::class, 'listaEntregas']);
+            Route::post('actualizar', [Entrega::class, 'actualizarEntrega']);
         });
     });
     Route::prefix('comprobante')->group(function(){
@@ -151,6 +152,7 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
         Route::get('mostrar', [Solicitud::class, 'mostrarSolicitud'])->name('misSolicitudes');
         Route::get('agregar', [Solicitud::class, 'viewSolicitud'])->name('solicitud');
     });
+    Route::get('storage/img/entrega/{filename}', [Entrega::class, 'obtenerImg'])->name('obtenerImgEntregas');
     Route::get('inicio',[Usuario::class,'viewHome'])->name('home');
 });
 Route::middleware(['guest'])->prefix('intranet')->group(function(){

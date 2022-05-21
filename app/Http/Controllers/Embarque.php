@@ -23,7 +23,8 @@ class Embarque extends Controller
         $conductores = User::obtenerUsuarioRol(6);
         $vehiculos = Vehiculos::obtenerVehiculos();
         $transportes = EmpresaTransporte::obtenerTransportes();
-        return view('pedidos.listaembarque',compact('dealers', 'conductores', 'ciudadesBase', 'vehiculos', 'transportes','hoy','modulos'));
+        $diasAtras = date('Y-m-d',strtotime(date('Y-m-d') . "- 2 days"));
+        return view('pedidos.listaembarque',compact('diasAtras','dealers', 'conductores', 'ciudadesBase', 'vehiculos', 'transportes','hoy','modulos'));
     }
     public function obtenerDevolucionGuias(Request $request)
     {
@@ -150,6 +151,7 @@ class Embarque extends Controller
         $embarques = ModeloEmbarque::embarcarTrabajador(Auth::id());
         $modulos = User::getModulos(Auth::id());
         $hoy = strtotime(date('Y-m-d'));
+        // dd($embarques);
         return view('pedidos.embarquemanifiesto',compact('hoy','modulos','embarques'));
     }
     public function actualizarEmbarque(Request $request)

@@ -107,7 +107,7 @@ function loadPage(){
         width: '100%',
         placeholder: 'Seleccione una opción'
     });
-    $('.cb-tipo-doc').on('select2:select',function(e){
+    $('.cb-tipo-doc').on('change.select2',function(e){
         general.validarMinMaxTipoDocumento($(this).data('input'),$(this).val());
     });
     async function obtenerRoles() {  

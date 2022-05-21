@@ -127,5 +127,14 @@ class Clientes extends Model
     {
         return DB::table('clientes_de_clientes')->where(['id' => $id_cli, 'activo' => 1])->first();
     }
+    public static function obtenerNombreCliDest($id_ciudad)
+    {
+        $ciudad = DB::table('ciudades')->select('id')->where(['id' => $id_ciudad])->first();
+        if(empty($ciudad)){
+            return '';
+        }else{
+            return $ciudad->id;
+        }
+    }
 
 }

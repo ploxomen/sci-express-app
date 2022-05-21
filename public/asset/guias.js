@@ -57,6 +57,7 @@ function pageLoaded(){
                 }
             }
             $('#id_remi_depa').trigger('change');
+            $('#id_remi_tipo_docu').trigger('change');
         } catch (error) {
             console.log(error);
             alertify.alert('Error',error.message);
@@ -81,6 +82,10 @@ function pageLoaded(){
             if(!general.isObjEmpty(objeto)){
                 detalles.push(objeto);
             }
+        }
+        if(!detalles.length){
+            alertify.alert('Mensaje','Por favor agregue detalles a la guía');
+            return
         }
         datos.append('detalle_guia',JSON.stringify(detalles));
         if(newCliCli){
@@ -116,20 +121,24 @@ function pageLoaded(){
             alertify.error('no se encontró los dias de transito para este destino');
             return
         }
+        calcularDiasTransito('id_dias_tran',response.dias.total_origen_base_hr_aereo,response.dias.total_hr_origen_destino);
+        
+    });
+    function calcularDiasTransito(domId,aereo,terrestre){
         let diasEnvio = 0;
         switch ($('#id_via_envi').val()) {
             case '1':
-                diasEnvio = Math.ceil(response.dias.total_hr_origen_destino / 24);
+                diasEnvio = Math.ceil(terrestre / 24);
             break;
             case '2':
-                diasEnvio = Math.ceil(response.dias.total_origen_base_hr_aereo / 24);
+                diasEnvio = Math.ceil(aereo / 24);
             break;
             case '5':
-                diasEnvio = Math.ceil(response.dias.total_origen_base_hr_aereo / 24);
+                diasEnvio = Math.ceil(aereo / 24);
             break;
         }
-        document.getElementById('id_dias_tran').value = diasEnvio;
-    })
+        document.getElementById(domId).value = diasEnvio;
+    }
     async function addGuia(datos) {
         try {
             let response  = await general.funcfetch('guias/agregar-guia',datos);
@@ -143,7 +152,7 @@ function pageLoaded(){
             }
             newCliCli = false;
             alertify.alert('Mensaje',response.success,()=>{
-                // window.location.reload();
+                window.location.reload();
             });
         } catch (error) {
             console.error(error);
@@ -169,7 +178,7 @@ function pageLoaded(){
     $('#id_dest_nomb').on('select2:select',async function(event){
         let datos = new FormData();
         datos.append('id',$(this).val());
-        // datos.append('departamento_orgingen',$('#id_remi_depa').find("option:selected").text())
+        datos.append('departamentoOrigen',$('#id_remi_depa').find("option:selected").text());
         try {
             let response  = await general.funcfetch('guias/detalle-cli-de-cli',datos);
             if(response.error){
@@ -187,6 +196,13 @@ function pageLoaded(){
             if(response.dist.length > 0){
                 addCbUbigeo(response.dist,'id_dest_dist');
             }
+            if(response.ciudades.length > 0){
+                let template2 = "<option></option>";
+                response.ciudades.forEach(c => {
+                    template2 += `<option value="${c.id}">${c.nombre_ciudad}</option>`;
+                });
+                document.getElementById('id_ciudad_destino_final').innerHTML = template2;
+            }
             for (const key in response.datos) {
                 if (Object.hasOwnProperty.call(response.datos, key)) {
                     const valor = response.datos[key];
@@ -198,8 +214,14 @@ function pageLoaded(){
                 }
             }
             $('#id_dest_depa').trigger('change');
-            // $('#id_dest_dist').trigger('change');
-
+            $('#id_dest_tipo_docu').trigger('change');
+            $('#id_ciudad_destino_final').trigger('change');
+            if(!response.dias){
+                document.getElementById('id_dias_tran').value = "";
+                alertify.error('no se encontró los dias de transito para este destino');
+                return
+            }
+            calcularDiasTransito('id_dias_tran',response.dias.total_origen_base_hr_aereo,response.dias.total_hr_origen_destino);
         } catch (error) {
             console.error(error);
             alertify.alert('Error',error.message);
@@ -210,6 +232,7 @@ function pageLoaded(){
             e.value = "";
         }
         $('.cb-dest').val("").trigger("change");
+        $('#id_dest_tipo_docu').val("").trigger("change");
         $('#id_dest_prov').html("");
         $('#id_dest_dist').html("");
         $('#id_ciudad_destino_final').html("");

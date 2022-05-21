@@ -234,8 +234,8 @@ class ModeloEmbarque extends Model
         $confirmadasTotal = DB::select('SELECT COUNT(*) AS total FROM guias WHERE situ IN(5,7,6) AND activo = 1 AND estado = 1 AND id_cluster = ?',[$id_cluster]);
         $confirmadas = DB::select('SELECT COUNT(*) AS total FROM guias WHERE situ IN(6,7) AND activo = 1 AND estado = 1 AND id_cluster = ?', [$id_cluster]);
         $entregadoTotal = DB::select('SELECT COUNT(*) AS total FROM guias WHERE situ IN(7,8,14) AND activo = 1 AND estado = 1 AND id_cluster = ?',[$id_cluster]);
-        $entregado = DB::select('SELECT COUNT(*) AS total FROM guias WHERE situ = 8 AND activo = 1 AND estado = 1 AND id_cluster = ?', [$id_cluster]);
-        $atiempo = DB::select("SELECT COUNT(*) AS total FROM guias WHERE situ = 8 AND activo = 1 AND estado = 1 AND DATE_FORMAT(fecha_hr_entregado,'%Y-%m-%d') <= fecha_reparto AND id_cluster = ?",[$id_cluster]);
+        $entregado = DB::select('SELECT COUNT(*) AS total FROM guias WHERE situ IN (8,14) AND activo = 1 AND estado = 1 AND id_cluster = ?', [$id_cluster]);
+        $atiempo = DB::select("SELECT COUNT(*) AS total FROM guias WHERE situ IN (8,14) AND activo = 1 AND estado = 1 AND DATE_FORMAT(fecha_hr_entregado,'%Y-%m-%d') <= fecha_reparto AND id_cluster = ?",[$id_cluster]);
         $incidencias = DB::select("SELECT COUNT(*) AS total FROM guias WHERE activo = 1 AND estado = 1 AND (situacion_durante_envio = 'INCIDENCIA' OR incidencia_durante_envio = 'PERDIDA TOTAL' OR incidencia_durante_envio = 'DAÑO TOTAL') AND estado_entregado = 'NO ENTREGADO' AND id_cluster = ?",[$id_cluster]);
         return [
             'Confirmadas' => [
@@ -277,11 +277,13 @@ class ModeloEmbarque extends Model
     {
         DB::beginTransaction();
         try {
-            DB::select('CALL sp_actualizar_entrega_guia(?,?)',[$usuario, $id_guia]);
+            // dd($estados);
+            $situacion = $estados['estado_entregado'] == 'NO ENTREGADO' ? 14 : 8;
+            DB::select('CALL sp_actualizar_entrega_guia(?,?,?)',[$usuario, $id_guia, $situacion]);
             DB::table('imagenes_guia')->insert($archivos);
             $estados['fecha_hr_entregado'] = date('Y-m-d H:i:s');
-            DB::table('guias AS g')->join('cluster AS c','g.id_cluster','=','c.id')->where(['c.id_usuario' => $usuario, 'g.id' => $id_guia , 'g.situ' => 8, 'g.activo' => 1])->update($estados);
-            DB::table('procesos_guia')->insert(['id_guia' => $id_guia,'situacion' => 8,'id_user' => $usuario]);
+            DB::table('guias AS g')->join('cluster AS c','g.id_cluster','=','c.id')->where(['c.id_usuario' => $usuario, 'g.id' => $id_guia , 'g.situ' => $situacion, 'g.activo' => 1])->update($estados);
+            DB::table('procesos_guia')->insert(['id_guia' => $id_guia,'situacion' => $situacion,'id_user' => $usuario]);
             DB::commit();
         } catch (Exception $ex) {
             DB::rollBack();

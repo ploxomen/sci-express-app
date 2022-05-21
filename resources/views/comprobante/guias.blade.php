@@ -8,25 +8,26 @@
     <form id="frm_guia" class="mb-4 row">
         <div class="my-4 col-12">
             <div class="baner-modulo">
-                <img src="{{asset('asset/img/intranet/bill.png')}}" alt="Imagen de clientes">
+                <img src="{{asset('asset/img/intranet/bill.png')}}" alt="Imagen de guia">
             </div>
             <h3 class="text-primary text-center">Guías</h3>
         </div>
         <div class="col-12 p-0 px-lg-2 mb-4">
             <div class="bg-white p-3 form-row">
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="">N° Guía</label>
-                    <input type="text" pattern="[0-9]{3}[-][0-9]{7}" required name="nro_guia" maxlength="11" class="form-control" value="{{$nro_guia_result}}">
+                    <label for="id_nro_guia">N° Guía <small class="text-danger">*</small></label>
+                    <input type="text" id="id_nro_guia" pattern="[0-9]{3}[-][0-9]{7}" required name="nro_guia" maxlength="11" class="form-control" value="{{$nro_guia_result}}">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_resp_pago">Responsable del pago</label>
+                    <label for="id_resp_pago">Responsable del pago <small class="text-danger">*</small></label>
                     <select name="resp_pago" id="id_resp_pago" class="form-control" required>
+                        <option value="" hidden>Seleccione una opción</option>
                         <option value="REMITENTE">REMITENTE</option>
                         <option value="DESTINATARIO">DESTINATARIO</option>
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_estado">Tipo</label>
+                    <label for="id_estado">Tipo <small class="text-danger">*</small></label>
                     <select name="estado" id="id_estado" class="form-control" required>
                         <option value="" hidden>Seleccione una opción</option>
                         <option value="1">ACTIVA</option>
@@ -35,11 +36,11 @@
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_fech_emis">Fecha Emisión</label>
+                    <label for="id_fech_emis">Fecha Emisión <small class="text-danger">*</small></label>
                     <input type="date" class="form-control" value="{{$hoy}}" required max="{{$hoy}}" name="fech_emis" id="id_fech_emis">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_comp_clie">Comprobantes</label>
+                    <label for="id_comp_clie">Comprobantes <small class="text-danger">*</small></label>
                     <select name="comp_clie[]" id="id_comp_clie" required class="form-control" multiple>
                         <option value="BOLETA">BOLETA</option>
                         <option value="FACTURA">FACTURA</option>
@@ -49,11 +50,11 @@
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_nro_comp_cli">N° comprobante</label>
+                    <label for="id_nro_comp_cli">N° comprobante <small class="text-danger">*</small></label>
                     <select name="nro_comp_cli[]" id="id_nro_comp_cli" required class="form-control" multiple></select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_cant_comp">Cantidad Comprobante</label>
+                    <label for="id_cant_comp">Cantidad Comprobante <small class="text-danger">*</small></label>
                     <input type="text" class="form-control" value="0" name="cant_comp" required id="id_cant_comp">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
@@ -65,11 +66,11 @@
                     <input type="date" class="form-control" name="fech_venc_orde_comp" id="id_fech_venc_orde_comp">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_fech_tras">Fecha Traslado</label>
+                    <label for="id_fech_tras">Fecha Traslado <small class="text-danger">*</small></label>
                     <input type="date" class="form-control" min="{{$hoy}}" required name="fech_tras" id="id_fech_tras">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_tray_env">Trayecto Envio</label>
+                    <label for="id_tray_env">Trayecto Envio <small class="text-danger">*</small></label>
                     <select name="tray_env" id="id_tray_env" class="form-control" required>
                         @foreach ($trayecto as $tra)
                             <option value="{{$tra->id}}">{{$tra->tipo}}</option>
@@ -77,7 +78,7 @@
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_nro_manifiesto">Vía Envío</label>
+                    <label for="id_nro_manifiesto">Vía Envío <small class="text-danger">*</small></label>
                     <select name="via_envi" id="id_via_envi" class="form-control" required>
                         @foreach ($via_envios as $via)
                             <option value="{{$via->id}}">{{$via->envio}}</option>
@@ -85,7 +86,7 @@
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_via_tras">Via Traslado</label>
+                    <label for="id_via_tras">Via Traslado(Facturación) <small class="text-danger">*</small></label>
                     <select name="via_tras" id="id_via_tras" class="form-control" required>
                         @foreach ($via_envios as $via)
                             <option value="{{$via->id}}">{{$via->envio}}</option>
@@ -98,7 +99,7 @@
             <fieldset class="px-3 bg-white border form-row">
                 <legend class="d-inline-block bg-white w-auto px-2 border shadow-sm text-left legend-add text-info">REMITENTE</legend>
                 <div class="form-group col-12">
-                    <label for="id_remi_nomb">Nombres</label>
+                    <label for="id_remi_nomb">Nombres <small class="text-danger">*</small></label>
                     <select class="form-control simple-select2" name="id_remitente" id="id_remi_nomb" required>
                         <option></option>
                         @foreach ($clientes as $cli)
@@ -115,23 +116,24 @@
                     </select>
                 </div>
                 <div class="form-group col-12 col-lg-6">
-                    <label for="id_remi_tipo_docu">Tipo documento</label>
-                    <select name="remi_tipo_docu" id="id_remi_tipo_docu" required class="form-control" data-valor-cliente="doc_ident" data-valor-proveedor="tipo_docu_prov">
+                    <label for="id_remi_tipo_docu">Tipo documento <small class="text-danger">*</small></label>
+                    <select name="remi_tipo_docu" id="id_remi_tipo_docu" required class="form-control simple-select2 cb-tipo-doc" data-input="id_remi_nro_docu" data-valor-cliente="doc_ident" data-valor-proveedor="tipo_docu_prov">
+                        <option></option>
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="form-group col-12 col-lg-6">
-                    <label for="id_remi_nro_docu">N° documento</label>
+                    <label for="id_remi_nro_docu">N° documento <small class="text-danger">*</small></label>
                     <input type="text" class="form-control" name="remi_nro_docu" required id="id_remi_nro_docu" data-valor-cliente="nro_doc" data-valor-proveedor="nro_docu_prov">
                 </div>
                 <div class="form-group col-12">
-                    <label for="id_remi_dire">Dirección</label>
+                    <label for="id_remi_dire">Dirección <small class="text-danger">*</small></label>
                     <input type="text" class="form-control" name="remi_dire" required id="id_remi_dire" data-valor-cliente="dir_sede_so" data-valor-proveedor="dire_prov">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
-                    <label for="id_remi_depa">Departamento</label>
+                    <label for="id_remi_depa">Departamento <small class="text-danger">*</small></label>
                     <select class="form-control cb-ubigeo" name="remi_depa" required id="id_remi_depa" data-consulta="provincia" data-info="id_remi_prov" data-valor-proveedor="depa_prov" data-info-distrito="id_remi_dist" data-valor-cliente="dpto_so">
                         <option value="" hidden>Seleccione un departamento</option>
                         @foreach ($departamentos as $depar)
@@ -140,12 +142,12 @@
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
-                    <label for="id_remi_prov">Provincia</label>
+                    <label for="id_remi_prov">Provincia <small class="text-danger">*</small></label>
                     <select class="form-control cb-ubigeo" name="remi_prov" required id="id_remi_prov" data-consulta="distrito" data-info="id_remi_dist" data-valor-proveedor="prov_prov" data-valor-cliente="prov_so">
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
-                    <label for="">Distrito</label>
+                    <label for="">Distrito <small class="text-danger">*</small></label>
                     <select class="form-control cb-ubigeo" name="remi_dist" required id="id_remi_dist" data-valor-cliente="dist_so" data-valor-proveedor="dist_prov">
                     </select>
                 </div>
@@ -155,7 +157,7 @@
             <fieldset class="px-3 bg-white border form-row">
                 <legend class="d-inline-block bg-white w-auto px-2 border shadow-sm text-left legend-add text-info">DESTINATARIO</legend>
                 <div class="form-group col-12">
-                    <label for="id_dest_nomb">Nombres</label>
+                    <label for="id_dest_nomb">Nombres <small class="text-danger">*</small></label>
                     <select class="form-control cb-select2-tags" required name="id_destinatario" id="id_dest_nomb">
                         <option></option>
                         @foreach ($cli_cli as $c)
@@ -164,24 +166,25 @@
                     </select>
                 </div>
                 <div class="form-group col-12 col-lg-6">
-                    <label for="id_dest_tipo_docu">Tipo documento</label>
-                    <select name="dest_tipo_docu" id="id_dest_tipo_docu" required class="form-control" data-cli-cli="tipo_doc">
+                    <label for="id_dest_tipo_docu">Tipo documento <small class="text-danger">*</small></label>
+                    <select name="dest_tipo_docu" id="id_dest_tipo_docu" required class="form-control simple-select2 cb-tipo-doc" data-input="id_dest_nro_docu" data-cli-cli="tipo_doc">
+                        <option></option>                        
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="form-group col-12 col-lg-6">
-                    <label for="id_dest_nro_docu">N° documento</label>
+                    <label for="id_dest_nro_docu">N° documento <small class="text-danger">*</small></label>
                     <input type="text" class="form-control" name="dest_nro_docu" required id="id_dest_nro_docu" data-cli-cli="nro_doc">
                 </div>
                 
                 <div class="form-group col-12">
-                    <label for="id_dest_dire">Dirección</label>
+                    <label for="id_dest_dire">Dirección <small class="text-danger">*</small></label>
                     <input type="text" class="form-control" name="dest_dire" required id="id_dest_dire" data-cli-cli="direccion">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
-                    <label for="id_dest_depa">Departamento</label>
+                    <label for="id_dest_depa">Departamento <small class="text-danger">*</small></label>
                     <select name="dest_depa" id="id_dest_depa" required class="form-control cb-ubigeo cb-dest" data-cli-cli="departamento" data-consulta="provincia" data-info="id_dest_prov" data-info-distrito="id_dest_dist">
                         <option value="" hidden>Seleccione un departamento</option>
                         @foreach ($departamentos as $depar)
@@ -190,17 +193,17 @@
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
-                    <label for="id_dest_prov">Provincia</label>
+                    <label for="id_dest_prov">Provincia <small class="text-danger">*</small></label>
                     <select name="dest_prov" id="id_dest_prov" required class="form-control cb-ubigeo cb-dest" data-cli-cli="provincia" data-consulta="distrito" data-info="id_dest_dist"></select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
-                    <label for="id_dest_dist">Distrito</label>
+                    <label for="id_dest_dist">Distrito <small class="text-danger">*</small></label>
                     <select name="dest_dist" id="id_dest_dist" required class="form-control cb-ubigeo cb-dest calculo-dia" data-ciudades="#id_ciudad_destino_final" data-cli-cli="distrito">
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_ciudad_destino_final">Ciudad Final</label>
-                    <select name="ciudad_destino_final" id="id_ciudad_destino_final" class="form-control simple-select2 cb-dest calculo-dia">
+                    <select name="id_ciudad_final" id="id_ciudad_destino_final" data-cli-cli="id_ciudad_final" class="form-control simple-select2 cb-dest calculo-dia">
                     </select>
                 </div>
             </fieldset>
@@ -208,7 +211,7 @@
         <div class="col-12 p-0 px-lg-2 mb-4">
             <div class="bg-white p-3 form-row">
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_dias_tran">Días de tránsito</label>
+                    <label for="id_dias_tran">Días de tránsito <small class="text-danger">*</small></label>
                     <input type="number" min="1" class="form-control" required name="dias_tran" id="id_dias_tran">
                 </div>
             </div>
@@ -234,7 +237,7 @@
                         </tr>
                     </thead>
                     <tbody id="tabla-detalle">
-                            @for ($i = 0; $i < 6; $i++)
+                            @for ($i = 0; $i < 1; $i++)
                             <tr>
                                 <td>
                                     <select data-name="grupo_envio" class="form-control form-control-sm simple-select2">

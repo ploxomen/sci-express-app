@@ -98,7 +98,7 @@ class Usuario extends Controller
                     'arriboconfirmar' => User::obtenerDatosHome(Auth::id(), 14),
                     'entregaspendientes' => User::obtenerDatosHome(Auth::id(), 15),
                     'cargosretornar' => User::obtenerDatosHome(Auth::id(), 16),
-                    'guiasentregadas' => User::obtenerDatosHome(null, 32),
+                    'guiasentregadas' => User::obtenerDatosHome(Auth::id(), 32),
                 ];
                 break;
             default:

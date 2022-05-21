@@ -90,11 +90,11 @@ function loadPage() {
                             <b>Cluster:</b><span> ${c.nom_cluster}</span>
                         </div>
                         <div class="form-group col-6 col-lg-3">
-                            <label for="total_bultos_${c.id_cluster}">Sub Cant</label>
+                            <label for="total_bultos_${c.id_cluster}">Sub Cant <small class="text-danger">*</small></label>
                             <input type="number" id="total_bultos_${c.id_cluster}" min="1" class="form-control form-control-sm sub-total" readonly required>
                         </div>
                         <div class="form-group col-6 col-lg-3">
-                            <label for="sub_feletes_${c.id_cluster}">Sub Flete</label>
+                            <label for="sub_feletes_${c.id_cluster}">Sub Flete <small class="text-danger">*</small></label>
                             <input type="number" step="0.01" id="sub_feletes_${c.id_cluster}" min="1" class="form-control form-control-sm sub-flete" required>
                         </div>
                         <div class="col-12"></div>

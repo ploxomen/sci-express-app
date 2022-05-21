@@ -143,7 +143,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_doc_ident_ad">Tipo documento</label>
-                    <select name="doc_ident_ad" id="id_doc_ident_ad" class="form-control simple-select2 cb-tipo-doc" data-input="id_nro_doc_ad" required>
+                    <select name="doc_ident_ad" id="id_doc_ident_ad" class="form-control simple-select2 cb-tipo-doc" data-input="id_nro_doc_ad">
                         <option></option>
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
@@ -152,7 +152,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_nro_doc_ad">N° documento</label>
-                    <input type="text" name="nro_doc_ad" id="id_nro_doc_ad" class="form-control" required>
+                    <input type="text" name="nro_doc_ad" id="id_nro_doc_ad" class="form-control">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_tlf_anex_ad">Teléfono</label>
@@ -177,7 +177,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_doc_ident_op">Tipo documento</label>
-                    <select name="doc_ident_op" id="id_doc_ident_op" class="form-control simple-select2 cb-tipo-doc" data-input="id_nro_doc_op" required>
+                    <select name="doc_ident_op" id="id_doc_ident_op" class="form-control simple-select2 cb-tipo-doc" data-input="id_nro_doc_op">
                         <option></option>
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
@@ -186,7 +186,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_nro_doc_op">N° documento</label>
-                    <input type="text" name="nro_doc_op" id="id_nro_doc_op" class="form-control" required>
+                    <input type="text" name="nro_doc_op" id="id_nro_doc_op" class="form-control">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_tlf_anex_op">Teléfono</label>
@@ -211,7 +211,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_doc_ident_pg">Tipo documento</label>
-                    <select name="doc_ident_pg" id="id_doc_ident_pg" class="form-control simple-select2 cb-tipo-doc" data-input="id_nro_doc_pg" required>
+                    <select name="doc_ident_pg" id="id_doc_ident_pg" class="form-control simple-select2 cb-tipo-doc" data-input="id_nro_doc_pg">
                         <option></option>
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
@@ -220,7 +220,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_nro_doc_pg">N° documento</label>
-                    <input type="text" name="nro_doc_pg" id="id_nro_doc_pg" class="form-control" required>
+                    <input type="text" name="nro_doc_pg" id="id_nro_doc_pg" class="form-control">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_tlf_anex_pg">Teléfono</label>

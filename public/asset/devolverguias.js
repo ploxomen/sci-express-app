@@ -163,16 +163,16 @@ function loadPage(){
         }
         datos.append('tipo','retornar_guias');
         datos.append('guias_guardadas',JSON.stringify(guiasGuardadas));
+        datos.append('total_bultos',general.totalBultos(this,'.calc-total'));
         datos.append('guias_nuevas',JSON.stringify(guiasNuevas));
         let response = await general.funcfetch('retornar',datos);
         if(response.error){
             alertify.alert('Error',response.error);
             return
         }
-        alertify.success(response.success);
-        this.reset();
         $('#guardar-detalles-nuevo').modal("hide");
+        alertify.success(response.success);
         window.location.reload();
-    })
+    });
 }
 window.addEventListener('DOMContentLoaded',loadPage);

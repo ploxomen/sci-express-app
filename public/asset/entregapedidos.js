@@ -18,7 +18,6 @@ function loadPage(){
             const detalleIncidencia = '#'+this.dataset.situacionDetalle;
             const nroEntrega = '#'+this.dataset.nroVisitas;
             const motivoNoEntregado = '#'+this.dataset.motivoNoentregado;
-            console.log(situacionReparto);
             if($(situacionReparto).val() == ""){
                 alertify.error('por favor selecione la situacion del reparto');
                 return
@@ -44,8 +43,8 @@ function loadPage(){
                 return
             }
 
-            if(!files.files.length || files.files.length > 5){
-                alertify.alert('Mensaje','Debe de agregar como mínimo una imagen y como máximo cinco imagenes de referencia');
+            if(files.files.length > 5){
+                alertify.alert('Mensaje','El límite de imagenes es cinco, por favor elimine las restantes');
                 return
             }
             alertify.confirm('Mensaje','¿Estas seguro de completar esta entrega?',async ()=>{
@@ -95,7 +94,6 @@ function loadPage(){
     $('.status-entrega').on('change',function(e){
         const nroEntregas = $(this).attr("data-visitas");
         const noEntregado = $(this).attr("data-noentregado");
-        console.log(nroEntregas,noEntregado);
         if($(this).val() == ""){
             $(nroEntregas).prop('disabled',true);
             $(nroEntregas).val('').trigger("change");
@@ -197,8 +195,5 @@ function loadPage(){
             alertify.success('imagen eliminada');
         }
     }
-
-    
-
 }
 window.addEventListener('DOMContentLoaded',loadPage);

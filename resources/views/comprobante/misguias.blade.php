@@ -7,8 +7,10 @@
     <script src="{{asset('library/datatable/datatable-bootstrap4.min.js')}}"></script>
     <script src="{{asset('library/datatable/datatable-responsive.min.js')}}"></script>
     <script src="{{asset('library/datatable/responsive-bootstrap.min.js')}}"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nanogallery2/3.0.5/css/nanogallery2.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nanogallery2/3.0.5/jquery.nanogallery2.min.js"></script>
     <script src="{{asset('asset/misguias.js')}}"></script>
-    <title>Mis guias</title>
+    <title>Mis guías</title>
 @endsection
 @section('body')
 <section class="p-2 bg-white">
@@ -52,7 +54,7 @@
                 <th>Ciudad Base</th>
                 <th>Ciudad Final</th>
                 <th>Clusters</th>
-                <th>Responsable</th>
+                <th>Resp Embar</th>
                 <th>Estado</th>
                 <th>Tipo</th>
                 <th>Acciones</th>

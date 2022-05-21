@@ -164,16 +164,11 @@ function loadPage(){
                 <div class="card mb-2">
                     <div class="card-body">
                         <div class="form-row">
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Grupo Envio</b>${dg.grupo_envio}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Tipo Envio</b>${dg.tipo_envio}</div>
-                            <div class="col-12 col-lg-4"><b class="d-block text-secondary">Embase o Embalaje</b>${dg.embase_embalaje}</div>
-                            <div class="col-12"><b class="d-block text-secondary">Descripción</b>${!dg.descripcion ? 'No definido' : dg.descripcion}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Cantidad</b>${dg.cantidad}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Kg</b>${dg.kg}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Largo</b>${dg.largo}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Ancho</b>${dg.ancho}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Altura</b>${dg.altura}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Volumen</b>${dg.volumen}</div>
+                            <div class="col-6 col-lg-3"><b class="d-block text-secondary">Grupo Envio</b><span>${dg.grupo_envio}</span></div>
+                            <div class="col-6 col-lg-3"><b class="d-block text-secondary">Tipo Envio</b><span>${dg.tipo_envio}</span></div>
+                            <div class="col-6 col-lg-3"><b class="d-block text-secondary">Embase o Embalaje</b><span>${dg.embase_embalaje}</span></div>
+                            <div class="col-6 col-lg-3"><b class="d-block text-secondary">Cantidad</b><span>${dg.cantidad}</span></div>
+                            <div class="col-12"><b class="d-block text-secondary">Descripción</b><span>${!dg.descripcion ? 'No definido' : dg.descripcion}</span></div>
                         </div>
                     </div>
                 </div>`;
@@ -182,45 +177,6 @@ function loadPage(){
             $('.ocultar-situacion').prop('hidden',data.resultados[0].situ != 5 ? true :false);
         }
         $('#detalle-guias-llegada').modal('show');
-    }
-     function verDetalleGuiaCluster(data) {
-        if(!data.resultados[0]){
-            return
-        }
-        for (const key in data.resultados[0]) {
-            if (Object.hasOwnProperty.call(data.resultados[0], key)) {
-                const value = data.resultados[0][key];
-                const dom = document.getElementById('id_modal2_' + key);
-                if(!dom){
-                    continue;
-                }
-                dom.textContent = value;
-            }
-        }
-        let template = '';
-        if(data.resultados[0].detalles_guias){
-            data.resultados[0].detalles_guias.forEach(dg => {
-                template += `
-                <div class="card mb-2">
-                    <div class="card-body">
-                        <div class="form-row">
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Grupo Envio</b>${dg.grupo_envio}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Tipo Envio</b>${dg.tipo_envio}</div>
-                            <div class="col-12 col-lg-4"><b class="d-block text-secondary">Embase o Embalaje</b>${dg.embase_embalaje}</div>
-                            <div class="col-12"><b class="d-block text-secondary">Descripción</b>${!dg.descripcion ? 'No definido' : dg.descripcion}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Cantidad</b>${dg.cantidad}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Kg</b>${dg.kg}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Largo</b>${dg.largo}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Ancho</b>${dg.ancho}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Altura</b>${dg.altura}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Volumen</b>${dg.volumen}</div>
-                        </div>
-                    </div>
-                </div>`;
-            });
-            document.getElementById('id_modal2_detalle_guias').innerHTML = template;
-        }
-        $('#detalle-guias-llegada-cluster').modal('show');
     }
     document.getElementById('btn-guardar-guias').addEventListener('click',function (e) {  
         e.preventDefault();

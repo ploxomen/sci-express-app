@@ -1,4 +1,4 @@
- <div class="modal fade" id="modal-nueva-vehiculo" tabindex="-1" role="dialog" aria-labelledby="ModalVehiculo" aria-hidden="true">
+ <div class="modal fade" id="modal-nueva-vehiculo" role="dialog" aria-labelledby="ModalVehiculo" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
         <div class="modal-header">

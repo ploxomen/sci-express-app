@@ -24,7 +24,7 @@ function loadPage(){
                         tempClust += `<option value="${c.id_cluster}" ${row.id_cluster == c.id_cluster ? 'selected' : ''}>${c.nombres_completos}</option>`;
                     });
                 }
-                return `<select data-guia="${row.id}" class="form-control form-control-sm cb-clustes">${tempClust}</select>`;
+                return `<select data-guia="${row.id}" ${row.situ >= 5 ? 'disabled' : ''} class="form-control form-control-sm cb-clustes">${tempClust}</select>`;
             }},
             {data: 'id_asignado', searchable: false, render: function(data,type,full){
                 if(full.guia_tipo == 'INACTIVA' || full.guia_tipo == 'ANULADA'){
@@ -34,7 +34,7 @@ function loadPage(){
                 for (let i = 0; i < full.listUsu.length; i++) {
                     tempUsu += `<option value="${full.listUsu[i].id}" ${full.listUsu[i].status != 1 ? 'disabled' : ''} ${data == full.listUsu[i].id ? 'selected' : ''}>${full.listUsu[i].name} ${full.listUsu[i].last_name}</option>`;
                 }
-                return `<select data-guia="${full.id}" class="form-control form-control-sm cb-usuarios">${tempUsu}</select>`;
+                return `<select data-guia="${full.id}" ${full.situ != 1 ? 'disabled' : ''} class="form-control form-control-sm cb-usuarios">${tempUsu}</select>`;
             }},
             {data: 'situ',searchable: false, orderable: false, render: function(data,type,full){
                 if(full.guia_tipo == 'INACTIVA' || full.guia_tipo == 'ANULADA'){
@@ -42,7 +42,7 @@ function loadPage(){
                 }
                 let template = ``;
                 full.listSoli.forEach(sol => {
-                    template += `<option value="${sol.id}" ${data == sol.id ? 'selected' : ''}>${sol.tipo}</option>`;
+                    template += `<option value="${sol.id}" ${data == sol.id ? 'selected' : ''} ${sol.id < 10 ? 'disabled' : ''}>${sol.tipo}</option>`;
                 });
                 return `<select data-guia="${full.id}" class="form-control form-control-sm cb-estado-change">${template}</select>`;
             }},
@@ -88,10 +88,12 @@ function loadPage(){
             verDetalleGuia(response.datos);
         }
     });
+    let libraryGuia = null;
     function verDetalleGuia(data) {
         if(!data){
             return
         }
+        $('#detalle-guias-todo').modal('show');
         for (const key in data) {
             if (Object.hasOwnProperty.call(data, key)) {
                 const value = data[key];
@@ -101,6 +103,35 @@ function loadPage(){
                 }
                 dom.textContent = value;
             }
+        }
+        if(libraryGuia){
+            $('#galery-img').empty();
+            $('#galery-img').nanogallery2('destroy');
+        }
+        console.log(data);
+        if(data.img_list.length > 0){
+            let arrayImg = new Array();
+            data.img_list.forEach(img => {
+                arrayImg.push({
+                    src : img.nom_id_file,
+                    srct : img.nom_id_file,
+                    title : img.nom_file
+                })
+            });
+            libraryGuia = $('#galery-img').nanogallery2({
+                thumbnailHeight:100,
+                thumbnailWidth:100,
+                thumbnailAlignment: 'center',
+                thumbnailGutterWidth : 5,
+                thumbnailGutterHeight: 5,
+                thumbnailBorderHorizontal : 1,
+                thumbnailBorderVertical : 1,
+                itemsBaseURL: window.location.origin + "/intranet/storage/img/entrega/",
+                items : arrayImg,
+                thumbnailLabel: {display : false}
+            });
+        }else{
+            $('#galery-img').html(`<span class="text-danger d-block text-center">No se encontró imagenes de entrega para esta guía</span>`)
         }
         let template = '';
         if(data.detalles_guias){
@@ -125,7 +156,6 @@ function loadPage(){
             });
             document.getElementById('detalle_guias').innerHTML = template;
         }
-        $('#detalle-guias-todo').modal('show');
     }
     
     tablaGuias.on('responsive-display', function ( e, datatable, row, showHide, update ) {

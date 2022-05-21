@@ -17,7 +17,10 @@
 }
 label{
     color: var(--color-letra-title);
-    font-size: 15px;
+    font-size: 13px;
+}
+span,th,td,select,b, select option, input, textarea{
+    font-size: 13px !important;
 }
 .btn-import{
     display: flex;
@@ -69,7 +72,7 @@ table thead tr th{
 	background-color: rgb(211, 211, 211);
 }
 .navegacion .mi-logo{
-    /* height: 50px; */
+    padding: 15px 4px;
 }
 .navegacion ul{
     list-style: none; 

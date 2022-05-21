@@ -20,11 +20,11 @@
             <h3 class="text-primary text-center">Embarcar manifiestos</h3>
         </div>
         <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-group">
-            <label for="id_fch_emba">Fecha de Embarque</label>
-            <input type="date" id="id_fch_emba" name="fch_emba" required class="form-control" value="{{$hoy}}" min="{{$hoy}}">
+            <label for="id_fch_emba">Fecha de Embarque <small class="text-danger">*</small></label>
+            <input type="date" id="id_fch_emba" name="fch_emba" required class="form-control" value="{{$hoy}}" min="{{$diasAtras}}">
         </div>
         <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-group">
-            <label for="id_id_cond">Nombre del Driver</label>
+            <label for="id_id_cond">Nombre del Driver <small class="text-danger">*</small></label>
             <select name="id_cond" id="id_id_cond" class="form-control simple-select2" required>
                 <option></option>
                 @foreach ($conductores as $c)
@@ -33,7 +33,7 @@
             </select>
         </div>
         <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-group">
-            <label for="id_id_deal">Nombre del Dealer 1</label>
+            <label for="id_id_deal">Nombre del Dealer 1 <small class="text-danger">*</small></label>
             <select name="id_deal" id="id_id_deal" class="form-control simple-select2" required>
                 <option></option>
                 @foreach ($dealers as $de)
@@ -51,7 +51,7 @@
             </select>
         </div>
         <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-group">
-            <label for="id_resp_emba">Responsable Embarque</label>
+            <label for="id_resp_emba">Responsable Embarque <small class="text-danger">*</small></label>
             <select name="resp_emba" id="id_resp_emba" class="form-control" required>
                 <option value="" hidden>Seleccione un responsable</option>
                 <option value="Dealer 1">Dealer 1</option>
@@ -59,7 +59,7 @@
             </select>
         </div>
         <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-group">
-            <label for="id_id_vehi">Placa del Vehículo</label>
+            <label for="id_id_vehi">Placa del Vehículo <small class="text-danger">*</small></label>
             <select name="id_vehi" id="id_id_vehi" class="form-control simple-select2" required>
                 <option></option>
                 @foreach ($vehiculos as $v)
@@ -68,7 +68,7 @@
             </select>
         </div>
         <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-group">
-            <label for="id_id_empr_tran">Empresas Transporte</label>
+            <label for="id_id_empr_tran">Empresas Transporte <small class="text-danger">*</small></label>
             <select name="id_empr_tran[]" id="id_id_empr_tran" class="form-control simple-select2" multiple required>
                 <option></option>
                 @foreach ($transportes as $t)
@@ -77,7 +77,7 @@
             </select>
         </div>
         <div class="form-group col-12 col-md-6 col-lg-3">
-            <label for="id_hr_fin_esti_emba">Fin Est Embarque</label>
+            <label for="id_hr_fin_esti_emba">Fin Est Embarque <small class="text-danger">*</small></label>
             <input type="time" name="hr_fin_esti_emba" id="id_hr_fin_esti_emba" class="form-control" required>
         </div>
         <div class="form-group col-12">

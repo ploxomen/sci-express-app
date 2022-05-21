@@ -36,7 +36,7 @@
     <div class="contenedor">
         <div class="navegacion" id="navegacion">
             <div class="mi-logo">
-                <img class="d-block img-fluid m-auto" src="{{asset('asset/img/icono.png')}}" alt="" width="120px">
+                <img class="d-block img-fluid m-auto" src="{{asset('asset/img/favivon.png')}}" alt="Icono SCI Express" width="120px">
             </div>
             <ul class="menu">
                 <li class="hover-menu {{$url_actual == route('home') ? 'activeli' : ''}}">
