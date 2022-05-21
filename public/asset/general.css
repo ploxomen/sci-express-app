@@ -74,6 +74,10 @@ table thead tr th{
 .navegacion ul{
     list-style: none; 
 }
+table thead tr th{
+    text-align: center;
+    vertical-align: middle !important;
+}
 .navegacion ul > li {
     border-top-left-radius: 30px;
     border-bottom-left-radius: 30px;

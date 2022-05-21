@@ -159,7 +159,9 @@ Route::middleware(['guest'])->prefix('intranet')->group(function(){
     Route::post('/login/restore-cancelar', [Usuario::class, 'restablecerUsuarioCancelar']);
     Route::post('usuarios/autenticacion',[Usuario::class,'autenticacion']);
 });
-Route::get('consulta/guia')
+Route::get('consulta/guia',function(){
+    return view('comprobante.consultaguia');
+});
 Route::get('/',function(){
     return redirect(route('login'));
 });

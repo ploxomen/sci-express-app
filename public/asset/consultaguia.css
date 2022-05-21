@@ -1,0 +1,32 @@
+
+span, b, label, td, th, input{
+    font-size: 13px !important;
+}
+
+.guia{
+    max-width: 550px;
+    margin: auto;
+    padding: 20px;
+}
+.border-guia{
+    border-radius: 20px;
+    border: 2px solid rgb(57, 57, 180);
+}
+.bg-estado{
+    background: rgb(72, 72, 255);
+    max-width: 350px;
+    margin: auto;
+    color: #fff;
+    font-weight: bold;
+    border-radius: 15px;
+    padding: 10px 13px;
+}
+.table-traking thead tr{
+    background: rgb(80, 80, 218);
+}
+.table-traking thead tr th{
+    color: #fff !important;
+}
+.table-traking tbody tr td{
+   vertical-align: middle !important;
+}
