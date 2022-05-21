@@ -59,13 +59,23 @@
         <div class="form-group d-flex justify-content-between flex-wrap">
             <h3 class="text-primary">De Guías</h3>
             <div class="d-flex align-items-center">
-                <label for="" class="mr-3">A confirmar</label>
-                <input type="text" readonly class="form-control mw-100" value="{{$nro_pendients}}">
+                <label for="lista-entregas" class="mr-3">A entregar</label>
+                <input type="text" id="lista-entregas" readonly class="form-control mw-100" value="{{$nro_pendients}}">
             </div>
         </div>
-        <div class="form-group">
-            <div class="cuadro table-warning"></div>
-            <span>Por confirmar</span>
+        <div class="d-flex form-group" style="gap: 10px;">
+            <div>
+                <div class="cuadro table-warning"></div>
+                <span>Por entregar</span>
+            </div>
+            <div>
+                <div class="cuadro table-success"></div>
+                <span>Entregados</span>
+            </div>
+            <div>
+                <div class="cuadro table-danger"></div>
+                <span>No entregado al destinatario</span>
+            </div>
         </div>
         <div class="table-responsive">
             <table class="table table-bordered" id="tabla-entrega">

@@ -1,5 +1,5 @@
 <section class="row mb-4">
-    <div class="form-group col-12 col-sm-6 col-lg-3">
+    <div class="form-group col-12 col-lg-4">
         <div class="carta">
             <div class="line bg-primary"></div>
             <div class="principal">
@@ -11,19 +11,7 @@
             </div>
         </div>
     </div>
-    <div class="form-group col-12 col-sm-6 col-lg-3">
-        <div class="carta">
-            <div class="line bg-primary"></div>
-            <div class="principal">
-                <span class="tipo">Total Recojos</span>
-                <span class="valor">{{$datos['recojostotal']}}</span>
-            </div>
-            <div class="icono">
-                <i class="fas fa-money-bill-wave material-icons"></i>
-            </div>
-        </div>
-    </div>
-    <div class="form-group col-12 col-sm-6 col-lg-3">
+    <div class="form-group col-12 col-lg-4">
         <div class="carta">
             <div class="line bg-danger"></div>
             <div class="principal">
@@ -35,19 +23,7 @@
             </div>
         </div>
     </div>
-    <div class="form-group col-12 col-sm-6 col-lg-3">
-        <div class="carta">
-            <div class="line bg-danger"></div>
-            <div class="principal">
-                <span class="tipo">Total Embarques</span>
-                <span class="valor">{{$datos['embarquetotal']}}</span>
-            </div>
-            <div class="icono">
-                <i class="fas fa-users material-icons"></i>
-            </div>
-        </div>
-    </div>
-    <div class="form-group col-12 col-sm-6 col-lg-3">
+    <div class="form-group col-12 col-lg-4">
         <div class="carta">
             <div class="line bg-warning"></div>
             <div class="principal">

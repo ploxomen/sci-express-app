@@ -11,11 +11,11 @@
             <form id="frm-lista-fletes">
                 <div class="row">
                   <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_tota_bult">Bulto Total</label>
+                    <label for="id_tota_bult">Bulto Total <small class="text-danger">*</small></label>
                     <input type="number" name="tota_bult" id="id_tota_bult" min="1" class="form-control" required>
                   </div>
                   <div class="form-group col-12 col-md-6 col-lg-3">
-                      <label for="id_flet_esti">Flete Total</label>
+                      <label for="id_flet_esti">Flete Total <small class="text-danger">*</small></label>
                       <input type="number" name="flet_esti" id="id_flet_esti" min="1" class="form-control" step="0.01" required>
                   </div>
                 </div>

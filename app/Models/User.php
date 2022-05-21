@@ -172,7 +172,7 @@ class User extends Authenticatable
             break;
             case 14:
                 //GUIAS POR ARRIBAR PARA CONFIRMAR CLUSTER
-                $query = "SELECT COUNT(*) AS total FROM guias g LEFT JOIN cluster c ON g.id_cluster = c.id WHERE c.id_usuario = ? AND g.estado = 1 AND g.situ = 5 AND g.activo = 1";
+                $query = "SELECT COUNT(*) AS total FROM guias g INNER JOIN cluster c ON g.id_cluster = c.id WHERE c.id_usuario = ? AND g.estado = 1 AND g.situ = 5 AND g.activo = 1";
                 $resultado = DB::select($query, [$id_user]);
                 $resultado = $resultado[0]->total;
             break;
@@ -223,7 +223,7 @@ class User extends Authenticatable
             case 23:
                 //TODAS LAS GUIAS POR RETORNAR
                 $query = "SELECT COUNT(*) AS total FROM guias g WHERE g.estado = 1 AND g.situ IN(8,9) AND g.activo = 1";
-                $resultado = DB::select($query, [$id_user]);
+                $resultado = DB::select($query);
                 $resultado = $resultado[0]->total;
             break;
             case 24:
@@ -264,13 +264,13 @@ class User extends Authenticatable
             break;
             case 31:
                 //TODAS LAS GUIAS ENTREGADAS EN DESTINO FINAL
-                $query = "SELECT COUNT(*) AS total FROM guias g WHERE g.estado = 1 AND g.situ >= 9 AND g.situ != 14 AND g.activo = 1";
+                $query = "SELECT COUNT(*) AS total FROM guias g WHERE g.estado = 1 AND g.situ >= 8 AND g.situ != 14 AND g.activo = 1";
                 $resultado = DB::select($query);
                 $resultado = $resultado[0]->total;
             break;
             case 32:
                 //TODAS LAS GUIAS ENTREGADAS EN DESTINO FINAL CLUSTER
-                $query = "SELECT COUNT(*) AS total FROM guias g WHERE g.estado = 1 AND g.id_cluster = ? AND g.situ >= 9 AND g.situ != 14 AND g.activo = 1";
+                $query = "SELECT COUNT(*) AS total FROM guias g LEFT JOIN cluster c ON g.id_cluster = c.id WHERE g.estado = 1 AND c.id_usuario = ? AND g.situ >= 8 AND g.situ != 14 AND g.activo = 1";
                 $resultado = DB::select($query,[$id_user]);
                 $resultado = $resultado[0]->total;
             break;

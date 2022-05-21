@@ -50,6 +50,10 @@ class InformacionAdicional extends Model
             $destinos = DB::table('transito_destinos')->select('total_hr_origen_destino', 'total_origen_base_hr_aereo')
             ->where(['departamento_origen' => $dep_origen, 'departamento_destino' => $dep_destino, 'ciudad_destino' => $prov_destino])->first();
         }
+        if(empty($destinos)){
+            $destinos = DB::table('transito_destinos')->select('total_hr_origen_destino', 'total_origen_base_hr_aereo')
+            ->where(['departamento_origen' => $dep_origen, 'departamento_destino' => $dep_destino])->first();
+        }
         return $destinos;
     }
     public static function obtenerCiudadesBase()
@@ -66,5 +70,9 @@ class InformacionAdicional extends Model
     public static function obtenerFletes()
     {
         return DB::table('fletes')->select('cajas','cajones','ciudad_base','jabas','paquetes','sobres','parihuelas')->get();
+    }
+    public static function calcularTransito()
+    {
+        DB::select('CALL sp_evento_actualizar_estados_transito()');
     }
 }

@@ -8,18 +8,20 @@
           </button>
         </div>
         <div class="modal-body">
-            <form id="frm-lista-fletes">
+            <form id="frm-update-reparto">
+                <input type="hidden" name="id_cluster" id="id_modal_id_cluster">
+                <input type="hidden" name="id_guia" id="id_modal_id_guia">
                 @php
                     $disabled = isset($clusters) ? '' : 'disabled';
                 @endphp
                 <div class="form-row">
                     <div class="form-group col-12 col-md-6">
-                        <label for="id_modal_fecha_reparto">Fecha de reparto</label>
+                        <label for="id_modal_fecha_reparto">Fecha de reparto <small class="text-danger">*</small></label>
                         <input type="date" name="fecha_reparto" id="id_modal_fecha_reparto" class="form-control" required {{$disabled}} >
                     </div>
                     <div class="form-group col-12 col-md-6">
                         <label for="id_modal_fecha_entrega">Fecha de entrega</label>
-                        <input type="date" name="fecha_entrega" id="id_modal_fecha_entrega" class="form-control" {{$disabled}} >
+                        <input type="date" name="fecha_hr_entregado" id="id_modal_fecha_entrega" class="form-control" {{$disabled}} >
                     </div>
                     <div class="form-group col-12 col-md-6">
                         <label for="id_modal_situacion_durante_envio">Situación Repeparto</label>
@@ -76,10 +78,11 @@
                             <option></option>
                             <option value="7">REPARTO</option>
                             <option value="8">ENTREG Y CONF</option>
+                            <option value="14">ENTREG NO CONCRETADA</option>
                         </select>
                     </div>
                 </div>
-                <button type="submit" hidden id="enviar-fletes"></button>
+                <button type="submit" hidden id="modificar-entregas-sectorista"></button>
             </form>
         </div>
         <div class="modal-footer">

@@ -1,8 +1,8 @@
-<div class="modal fade" id="detalle-solicitud" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="detalle-solicitud" data-backdrop="static" data-keyboard="false" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="staticBackdropLabel">Detalle de la solicitud - <span id="nro_solicitud"></span></h5>
+        <span class="modal-title" id="staticBackdropLabel">Detalle de la solicitud - <span id="nro_solicitud"></span></span>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>

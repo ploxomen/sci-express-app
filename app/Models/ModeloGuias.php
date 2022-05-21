@@ -29,18 +29,20 @@ class ModeloGuias extends Model
                 }
             }
             $arrayConsulta = [];
-            if(empty($guia['ciudad_destino_final'])){
+            if(empty($guia['id_ciudad_final'])){
+                $guia['ciudad_destino_final'] = null;
                 $arrayConsulta = [
                     'ubigeo_distrito' => $guia['dest_dist'], 
                     'activo' => 1, 
                     'tipo_base' => 'distrito'
                 ];
             }else{
+                $guia['ciudad_destino_final'] = $guia['id_ciudad_final'];
                 $arrayConsulta = [
                     'ubigeo_distrito' => $guia['dest_dist'],
                     'activo' => 1,
                     'tipo_base' => 'ciudad',
-                    'id_ciudad' => $guia['ciudad_destino_final']
+                    'id_ciudad' => $guia['id_ciudad_final']
                 ];
             }
             $id_cluster = DB::table('ciudades_base_cluster')->select('id_cluster')
@@ -58,9 +60,11 @@ class ModeloGuias extends Model
                     'direccion' => $guia['dest_dire'],
                     'departamento' => $guia['dest_depa'],
                     'provincia' => $guia['dest_prov'],
-                    'distrito' => $guia['dest_dist']
+                    'distrito' => $guia['dest_dist'],
+                    'id_ciudad_final' => empty($guia['id_ciudad_final']) ? null : $guia['id_ciudad_final']
                 ]);
             }
+            unset($guia['id_ciudad_final']);
             if(isset($guia['add_cli_bool'])){
                 unset($guia['add_cli_bool']);
             }
@@ -104,6 +108,7 @@ class ModeloGuias extends Model
             $guia[0]->dest_depa = (new Ubigeo)->getNameDepartamento($guia[0]->dest_depa);
             $guia[0]->dest_prov = (new Ubigeo)->getNameProvincia($guia[0]->dest_prov);
             $guia[0]->dest_dist = (new Ubigeo)->getNameDistrito($guia[0]->dest_dist);
+            $guia[0]->img_list = DB::table('imagenes_guia')->select('nom_id_file','nom_file')->where(['id_guia' => $guia[0]->id])->get();
             $guia[0]->detalles_guias = DB::table('detalle_guias')->where(['id_guia' => $guia[0]->id])->get();
 
         }
@@ -233,5 +238,10 @@ class ModeloGuias extends Model
             $guia->listUsu = $usuarios;
         }
         return $resultado;
+    }
+    public static function actualizarEntrega($cluster,$guia,$datos)
+    {
+        DB::table('guias')->where(['id_cluster' => $cluster, 'id' => $guia,'situ' => 7])->orWhere(['situ' => 8, 'situ' => 14])->update($datos);
+        return 'Entrega actualizada con exito';
     }
 }

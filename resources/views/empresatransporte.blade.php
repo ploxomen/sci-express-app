@@ -36,7 +36,7 @@
             <tbody id="lista-empresas"></tbody>
         </table>
     </section>
-    <div class="modal fade" id="modal-nueva-empresa" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="modal-nueva-empresa" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
             <div class="modal-header">
@@ -50,7 +50,7 @@
                     <input type="hidden" id="empresa_id">
                     <div class="form-group col-12">
                         <label for="id_nro_ruc">RUC</label>
-                        <input type="text" required class="form-control" id="id_nro_ruc" name="nro_ruc">
+                        <input type="text" class="form-control" minlength="11" maxlength="11" id="id_nro_ruc" name="nro_ruc">
                     </div>
                     <div class="form-group col-12">
                         <label for="id_empresa">Empresa</label>

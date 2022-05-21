@@ -32,7 +32,7 @@ class Cluster extends Controller
             return abort(404);
         }
         $ciudadesFinales = ModeloCluster::obtenerCiudadesFinales($id_cluster->id);
-        $nro_pendients = 0;
+        $nro_pendients = User::obtenerDatosHome(Auth::id(), 15);
         $kpis = ModeloEmbarque::calculoKpi($id_cluster->id);
         return view('pedidos.entregascluster', compact('ciudadesFinales', 'modulos', 'nro_pendients', 'kpis'));
 

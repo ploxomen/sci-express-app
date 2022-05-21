@@ -22,13 +22,15 @@
         <article class="baner-log">
             <div class="system-info">
                 <h3>Sistema integrado</h3>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Necessitatibus modi pariatur unde molestias quo cumque illo et. Corrupti, eius qui quidem animi ad excepturi eveniet asperiores, sit commodi suscipit ea.</p>
+                <p>
+                    <strong>"ALMAR GROUP PERU”</strong> <br> Es una organización constituida con capitales peruanos, quien concibe y desarrolla Unidades de Producción como SCI Express, destinada a la prestación de servicios vinculados al traslado logístico de bienes dentro de nuestro país.
+                </p>
             </div>
             <img src="{{asset('asset/img/log.svg')}}" alt="">
         </article>
         <article class="baner-init">
             <form class="children" id="login">
-                <h1 class="title">Inicar sesión</h1>
+                <h1 class="title">Iniciar sesión</h1>
                 <div class="box-input">
                     <div class="input-file">
                         <input type="text" name="email" class="text-minuscula" required placeholder="Usuario">
@@ -47,9 +49,9 @@
                             <div><b>Recordarme</b></div> 
                         </label>
                     </div>
-                    <div class="input-file" style="text-align: right;">
+                    {{-- <div class="input-file" style="text-align: right;">
                         <a href="#" class="restore-pass">¿Olvidaste tu contraseña?</a>
-                    </div>
+                    </div> --}}
                     <div>
                         <button type="submit" class="button-login"><i class="fas fa-sign-in-alt"></i>Ingresar</button>
                     </div>

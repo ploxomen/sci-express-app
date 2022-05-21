@@ -32,7 +32,13 @@ function loadPage(){
             }}
         ],
         createdRow : function(row,data){
-            let bgTable = data.situ == 7 ? 'table-warning' : '';
+            let bgTable = 'table-success';
+            if(data.situ == 7){
+                bgTable = 'table-warning';
+            }
+            if(data.situ == 14){
+                bgTable = 'table-danger';
+            }
             $(row).addClass(bgTable);
         }
     });
@@ -111,6 +117,21 @@ function loadPage(){
     }
     $('.cb-filtros').on('select2:select',function(e){
         tablaEntrega.draw();
+    });
+    document.getElementById('frm-update-reparto').addEventListener('submit',async function(e){
+        e.preventDefault();
+        let datos = new FormData(this);
+        let response = await general.funcfetch(window.location.origin + '/intranet/pedidos/entrega/actualizar',datos);
+        if(response.error){
+            alertify.alert('Error',response.error);
+            return
+        }
+        alertify.success(response.success);
+        $('#modal-detalle-entregas').modal("hide");
+        tablaEntrega.draw();
+    })
+    document.getElementById('modificar-detalle-entrega').addEventListener('click',function(e){
+        document.getElementById('modificar-entregas-sectorista').click();
     });
 }
 window.addEventListener('DOMContentLoaded',loadPage);

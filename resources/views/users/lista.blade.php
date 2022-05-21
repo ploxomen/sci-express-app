@@ -37,7 +37,7 @@
         </div>
     </div>
 </section>
-@extends('modal.cambiarpassword')
-@extends('modal.editarusuario')
-@extends('modal.editarroles')
+@include('modal.cambiarpassword')
+@include('modal.editarusuario')
+@include('modal.editarroles')
 @endsection

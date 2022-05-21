@@ -21,37 +21,37 @@
         <fieldset class="bg-white px-3 border mb-2 form-row">
             <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add text-info">TRANSPORTE</legend>
             <div class="form-group col-12 col-md-6 col-lg-3">
-                <label for="id_embarque_empresa">Empresa</label>
-                <input type="text" id="id_embarque_empresa" class="form-control" disabled>
+                <label for="id_embarque_empresa">Empresa <small class="text-danger">*</small></label>
+                <input type="text" id="id_embarque_empresa" class="form-control" disabled required>
             </div>
             <div class="form-group col-12 col-md-6 col-lg-3">
-                <label for="id_comprobantes">Comprobantes</label>
+                <label for="id_comprobantes">Comprobantes <small class="text-danger">*</small></label>
                 <select name="comprobantes[]" id="id_comprobantes" class="form-control simple-select2" multiple required>
                     <option value="GUIA TRANSPORTISTA">GUIA TRANSPORTISTA</option>
                     <option value="FACTURA">FACTURA</option>
                 </select>
             </div>
             <div class="form-group col-12 col-md-6 col-lg-3">
-                <label for="id_nro_comprobantes">N° Comprobantes</label>
-                <select name="nro_comprobantes[]" id="id_nro_comprobantes" multiple class="form-control cb-select2-tags"></select>
+                <label for="id_nro_comprobantes">N° Comprobantes <small class="text-danger">*</small></label>
+                <select name="nro_comprobantes[]" id="id_nro_comprobantes" required multiple class="form-control cb-select2-tags"></select>
             </div>
             <div class="form-group col-12 col-md-6 col-lg-3">
-                <label for="id_importe_factura">Importe Factura</label>
-                <input type="number" name="importe_factura" id="id_importe_factura" class="form-control" step="0.01" min="0">
+                <label for="id_importe_factura">Importe Factura <small class="text-danger">*</small></label>
+                <input type="number" name="importe_factura" required id="id_importe_factura" class="form-control" step="0.01" min="0">
             </div>
         </fieldset>
         <fieldset class="bg-white px-3 border mb-2 form-row">
             <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add text-info">HORARIO</legend>
             <div class="form-group col-12 col-md-6 col-lg-3">
-                <label for="id_embarque_fch_emba">Fecha embarque</label>
-                <input type="date" id="id_embarque_fch_emba" class="form-control" name="fch_emba" disabled>
+                <label for="id_embarque_fch_emba">Fecha embarque <small class="text-danger">*</small></label>
+                <input type="date" id="id_embarque_fch_emba" required class="form-control" name="fch_emba" disabled>
             </div>
             <div class="form-group col-12 col-md-6 col-lg-3">
-                <label for="id_fecha_llegada">Fecha llegada</label>
+                <label for="id_fecha_llegada">Fecha llegada <small class="text-danger">*</small></label>
                 <input type="date" name="fecha_llegada" id="id_fecha_llegada" class="form-control" required>
             </div>
             <div class="form-group col-12 col-md-6 col-lg-3">
-                <label for="id_hr_llegada">Hr llegada</label>
+                <label for="id_hr_llegada">Hr llegada <small class="text-danger">*</small></label>
                 <input type="time" name="hr_llegada" id="id_hr_llegada" class="form-control" required>
             </div>
         </fieldset>
