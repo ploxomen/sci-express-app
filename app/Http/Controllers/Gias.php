@@ -169,6 +169,27 @@ class Gias extends Controller
             return response()->json(['error' => $ex->getMessage()]);
         }
     }
+    public function consultaGuia(Request $request)
+    {
+        if($request->ajax()){
+            return response()->json(['result' => ModeloGuias::consultaGuiaCliente($request->all())]);
+        }
+    }
+    public function consultaGuiaRemitentes(Request $request)
+    {
+        if($request->ajax()){
+            switch ($request->tipo) {
+                case 'remitentes':
+                    $datos = ModeloGuias::obtenerGuiasConsulta($request->remitente,$request->fecha);
+                    return datatables()->of($datos)->toJson();
+                break;
+                
+                default:
+                    # code...
+                    break;
+            }
+        }
+    }
     public function detalleCliDeCli(Request $request)
     {
         try {

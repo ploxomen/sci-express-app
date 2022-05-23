@@ -164,6 +164,11 @@ Route::middleware(['guest'])->prefix('intranet')->group(function(){
 Route::get('consulta/guia',function(){
     return view('comprobante.consultaguia');
 });
+Route::post('consulta/guia/datos',[Gias::class,'consultaGuia']);
+Route::post('consulta/guia/remitentes',[Gias::class,'consultaGuiaRemitentes']);
+Route::get('consulta/guia/remitente',function(){
+    return view('comprobante.consultaguiaremitente');
+});
 Route::get('/',function(){
     return redirect(route('login'));
 });

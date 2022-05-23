@@ -19,153 +19,132 @@
     <link rel="stylesheet" href="{{asset('asset/consultaguia.css')}}">
     <link rel="icon" href="{{asset('asset/img/icono.png')}}">
     <meta name="theme-color" content="#2e405e">
+    <script src="{{asset('asset/consultaguia.js')}}"></script>
     <title>Consultas de guías</title>
 </head>
 <body>
     <section class="container py-5">
-        <div class="guia border-guia">
+        <form class="guia border-guia" id="consulta-guia">
             <div class="logo form-group">
                 <img src="{{asset('asset/img/logo_sci_express.png')}}" alt="Logo de SCIEXPRESSPERU">
             </div>
             <div class="row px-3">
                 <div class="form-group col-12 col-md-8 d-flex align-items-center" style="gap: 10px;">
                     <div>
-                        <input class="form-check-input" type="radio" name="tipoguia" checked id="selectsciguia" value="guia">
+                        <input class="form-check-input tipo-consulta" type="radio" name="tipoguia" checked id="selectsciguia" value="guia">
                         <label for="selectsciguia"><b>GUIA SCI</b></label>
                     </div>
                     <div>
-                        <input type="text" class="form-control form-control-sm">
+                        <input required id="nro_guia_sci" type="text" class="form-control form-control-sm" name="nro_guia_sci">
                     </div>
                 </div>
                 <div class="form-group col-12 col-md-4">
-                    <input class="form-check-input" type="radio" name="tipoguia" id="selectdocremitente" value="remitente">
+                    <input class="form-check-input tipo-consulta" type="radio" name="tipoguia" id="selectdocremitente" value="remitente">
                     <label for="selectdocremitente"><b>DOC. REMITENTE</b></label>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" hidden id="seleccionar-documentos">
                 <div class="form-group col-12 col-lg-6 d-flex align-items-center" style="gap: 5px;">
                     <div style="max-width: 130px;">
                         <label for="rucdniremitenteone"><b>INGRESE RUC O DNI REMITENTE</b></label>
                     </div>
                     <div class="w-100">
-                        <input type="text" id="rucdniremitenteone" maxlength="11" class="form-control form-control-sm">
+                        <input type="text" name="documento_remitente" id="rucdniremitenteone" maxlength="15" class="form-control form-control-sm remitente-required">
                     </div>
                 </div>
                 <div class="form-group col-12 pl-lg-4 pl-5 col-lg-6 d-flex align-items-center" style="gap: 10px;">
                     <div>
                         <div>
-                            <input class="form-check-input" type="radio" name="selectguia" id="tipoguiaguia" value="guia">
+                            <input checked class="form-check-input remitente-required" type="radio" name="selectguia" id="tipoguiaguia" value="G">
                             <label for="tipoguiaguia" class="mb-0"><b>GUIA</b></label>       
                         </div>
                         <div>
-                            <input class="form-check-input" type="radio" name="selectguia" id="tipoguiafactura" value="factura">
+                            <input class="form-check-input remitente-required" type="radio" name="selectguia" id="tipoguiafactura" value="F">
                             <label for="tipoguiafactura" class="mb-0"><b>FACTURA</b></label>
                         </div>
                         <div>
-                            <input class="form-check-input" type="radio" name="selectguia" id="tipoguiboleta" value="boleta">
+                            <input class="form-check-input remitente-required" type="radio" name="selectguia" id="tipoguiboleta" value="B">
                             <label for="tipoguiboleta" class="mb-0"><b>BOLETA</b></label>
                         </div>
                     </div>
                     <div>
-                        <input type="text" class="form-control form-control-sm">
+                        <input type="text" name="nro_guia_remitente" class="form-control form-control-sm remitente-required">
                     </div>
                 </div>
             </div>
-            <div class="border-guia p-2 mb-4">
+            <div class="form-group text-center">
+                <button type="submit" title="Consultar guía" class="btn btn-primary btn-sm"><i class="fas fa-search"></i></button>
+            </div>
+            <div class="border-guia p-2 mb-4 ocultar-box" hidden>
                 <h6 class="text-center text-primary"><b>REMITENTE</b></h6>
-                <div class="form-group">
-                    <b>Nombre:</b>
+                <div class="mb-1">
+                    <b>Nombre: </b>
+                    <span id="info_nombre_remitente"></span>
                 </div>
-                <div class="form-group">
-                    <b>Dirección:</b>
-                    <span>Dpto - Prov - Dest</span>
+                <div>
+                    <b>Dirección: </b>
+                    <span id="info_direccion_remitente"></span>
+                </div>
+                <div class="mb-1">
+                    <span id="info_departamento_remitente"></span> - <span id="info_provincia_remitente"></span> - <span id="info_distrito_remitente"></span>
                 </div>
                 <h6 class="text-primary"><b>DOCUMENTOS ENVIADOS</b></h6>
+                <div class="row">
+                    <div class="mb-1 col-6 col-sm-4 text-center">
+                        <b>N° Guía: </b>
+                        <div id="info_nro_guias" class="mb-0 text-guias"></div>
+                    </div>
+                    <div class="mb-1 col-6 col-sm-4 text-center">
+                        <b>N° Factura: </b>
+                        <div id="info_nro_facturas" class="mb-0 text-guias"></div>
+                    </div>
+                    <div class="mb-1 col-12 col-sm-4 text-center">
+                        <b>N° Boleta: </b>
+                        <div id="info_nro_boletas" class="mb-0 text-guias"></div>
+                    </div>
+                </div>
             </div>
-            <div class="border-guia p-2 mb-4">
+            <div class="border-guia p-2 mb-4 ocultar-box" hidden>
                 <h6 class="text-center text-primary"><b>DESTINATARIO</b></h6>
-                <div class="form-group">
-                    <b>Nombre:</b>
+                <div class="mb-1">
+                    <b>Nombre: </b>
+                    <span id="info_nombre_destinatario"></span>
                 </div>
-                <div class="form-group">
-                    <b>Dirección:</b>
-                    <span>Dpto - Prov - Dest Final</span>
+                <div>
+                    <b>Dirección: </b>
+                    <span id="info_direccion_destinatario"></span>
+                </div>
+                <div class="mb-1">
+                    <span id="info_departamento_destinatario"></span> - <span id="info_provincia_destinatario"></span> - <span id="info_distrito_destinatario"></span>
                 </div>
             </div>
-            <div class="border-guia p-2">
+            <div class="border-guia p-2 ocultar-box" hidden>
                 <h6 class="text-center text-primary"><b>ESTADO - RASTREO</b></h6>
                 <div class="row">
-                    <div class="form-group col-12 col-lg-6">
-                        <b>Registrada el <span id="fecha-registrada"></span></b>
+                    <div class="form-group col-12 col-sm-6">
+                        <b>Registrada el <span id="info_fecha_rastreo_1" class="text-proceso"></span></b>
                     </div>
-                    <div class="form-group col-12 col-lg-6">
-                        <b>En Tránsito el <span id="fecha-transito"></span></b>
+                    <div class="form-group col-12 col-sm-6">
+                        <b>En Tránsito el <span id="info_fecha_rastreo_5" class="text-proceso"></span></b>
                     </div>
-                    <div class="form-group col-12 col-lg-6">
-                        <b>En reparto el <span id="fecha-reparto"></span></b>
+                    <div class="form-group col-12 col-sm-6">
+                        <b>En reparto el <span id="info_fecha_rastreo_7" class="text-proceso"></span></b>
                     </div>
-                    <div class="form-group col-12 col-lg-6">
-                        <b>Entregado el <span id="fecha-entregado"></span></b>
+                    <div class="form-group col-12 col-sm-6">
+                        <b>Entregado el <span id="info_fecha_rastreo_8" class="text-proceso"></span></b>
                     </div>
                     <div class="form-group col-12 text-center">
-                        <b>Cargo entregado <span id="fecha-cargo-entregado"></span></b>
+                        <b>Cargo entregado <span id="info_fecha_rastreo_13" class="text-proceso"></span></b>
                     </div>
                     <div class="form-group col-12">
                         <div class="bg-estado">
-                            <span>ESTADO ACTUAL:</span>
+                            <span>ESTADO ACTUAL: </span>
+                            <span id="info_estado_actual"></span>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="guia border-guia">
-            <div class="logo form-group">
-                <img src="{{asset('asset/img/logo_sci_express.png')}}" alt="Logo de SCIEXPRESSPERU">
-            </div>
-            <div class="row px-3">
-                <div class="form-group col-12 col-lg-6 pl-lg-0 d-flex align-items-center" style="gap: 5px;">
-                    <label for="rucdniremi" class="mb-0"><b>INGRESE RUC O DNI DEL REMITENTE</b></label>
-                    <input type="text" required class="form-control form-control-sm" id="rucdniremi" maxlength="11">
-                </div>
-                <div class="form-group col-12 col-lg-6 pr-lg-0 d-flex align-items-center" style="gap: 5px;">
-                    <label for="fechadepacho" class="mb-0"><b>FECHA DE DESPACHO</b></label>
-                    <input type="date" required class="form-control form-control-sm" id="fechadepacho">
-                </div>
-                <div class="form-group col-12">
-                    <div class="row mx-auto" style="max-width: 450px;">
-                        <label for="nameremitente" class="col-sm-3 col-form-label"><b>REMITENTE</b></label>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control form-control-sm" id="nameremitente">
-                        </div>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-sm table-bordered table-striped table-traking">
-                        <thead>
-                            <tr>
-                                <th>N°</th>
-                                <th>TIPO DE DOCUMENTO</th>
-                                <th>N° DOCUMENTO DEL REMITENTE</th>
-                                <th>N° GUIA SCI</th>
-                                <th>ACCION</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>DNI</td>
-                                <td>73700496</td>
-                                <td>001-0015123</td>
-                                <td><button class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></button></td>
-                            </tr>
-
-                        </tbody>
-                    </table>
-                </div>
-                
-            </div>
-            
-        </div>
+        </form>
     </section>
 </body>
 </html>

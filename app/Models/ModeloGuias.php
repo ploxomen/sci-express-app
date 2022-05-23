@@ -244,4 +244,70 @@ class ModeloGuias extends Model
         DB::table('guias')->where(['id_cluster' => $cluster, 'id' => $guia,'situ' => 7])->orWhere(['situ' => 8, 'situ' => 14])->update($datos);
         return 'Entrega actualizada con exito';
     }
+    public static function filterComprobantes($stringComprobante)
+    {
+        $comprobantes = explode(';',trim($stringComprobante));
+        $nuevoComprobante = [
+            'nro_guias' => [],
+            'nro_boletas' => [],
+            'nro_facturas' => [],
+            'otros' => []
+        ];
+        foreach ($comprobantes as $key => $value) {
+            $obtenerboleta = explode('/',trim($value));
+            if(count($obtenerboleta) < 2 || empty($obtenerboleta)){
+                continue;
+            }
+            $keyComprobante = 'otros';
+            if(strpos($value,'b') === 0 || strpos($value,'B') === 0){
+                $keyComprobante = 'nro_boletas';
+            }
+            if(strpos($value,'f') === 0 || strpos($value,'F') === 0){
+                $keyComprobante = 'nro_facturas';
+            }
+            if(strpos($value,'g') === 0 || strpos($value,'G') === 0){
+                $keyComprobante = 'nro_guias';
+            }
+            $nuevoComprobante[$keyComprobante][] = $obtenerboleta[1];
+        }
+        return $nuevoComprobante;
+    }
+    public static function obtenerGuiasConsulta($nro_remitente,$fecha)
+    {
+        $datos = DB::select('CALL sp_consulta_guias_remitente(?,?)',[$nro_remitente,$fecha]);
+        foreach ($datos as $key => $value) {
+            $value->nro_comp_cli = self::filterComprobantes($value->nro_comp_cli);
+        }
+        return $datos;
+     
+    }
+    public static function consultaGuiaCliente($filtros)
+    {
+        $queryEstados = "SELECT DATE_FORMAT(pg.fecha_hr_update,'%d/%m/%Y') AS fecha_cambio,se.id,se.tipo FROM procesos_guia pg LEFT JOIN situacion_estado se ON pg.situacion = se.id WHERE pg.id_guia = ?";
+        if($filtros['tipoguia'] == 'guia'){
+            $nro_guia = explode('-',trim($filtros['nro_guia_sci']));
+            if(isset($nro_guia[1])){
+                $nro_guia = trim($nro_guia[0]) . '-' . trim($nro_guia[1]);
+            }else{
+                $nro_guia = '0-0';
+            }
+            $filtros['nro_guia_sci'] = $nro_guia;
+        }
+        if($filtros['tipoguia'] == 'remitente'){
+            $filtros['nro_guia_remitente'] = $filtros['selectguia'] . '/' . $filtros['nro_guia_remitente'];
+        }
+        $consulta = DB::select('CALL sp_consulta_guia(?,?,?,?)',[$filtros['tipoguia'],$filtros['nro_guia_sci'],$filtros['documento_remitente'],$filtros['nro_guia_remitente']]);
+        if(!empty($consulta) && isset($consulta[0])){
+            $consulta[0]->seguimiento = DB::select($queryEstados,[$consulta[0]->id]);
+            $consulta[0]->departamento_destinatario = (new Ubigeo)->getNameDepartamento($consulta[0]->departamento_destinatario);
+            $consulta[0]->departamento_remitente = (new Ubigeo)->getNameDepartamento($consulta[0]->departamento_remitente);
+            $consulta[0]->provincia_destinatario = (new Ubigeo)->getNameProvincia($consulta[0]->provincia_destinatario);
+            $consulta[0]->provincia_remitente = (new Ubigeo)->getNameProvincia($consulta[0]->provincia_remitente);
+            $consulta[0]->distrito_destinatario = (new Ubigeo)->getNameDistrito($consulta[0]->distrito_destinatario);
+            $consulta[0]->distrito_remitente = (new Ubigeo)->getNameDistrito($consulta[0]->distrito_remitente);
+            $consulta[0]->comprobantes = self::filterComprobantes($consulta[0]->nro_comp_cli);
+            return $consulta[0];
+        }
+        return null;
+    }
 }
