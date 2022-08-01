@@ -63,6 +63,19 @@ function loadPage(){
                     $(dom).val(element == null ? "" : element);
                 }
             }
+            if (response.detalle && response.detalle.length){
+                let template = `<h5 class="text-primary">Historial de entregas</h5><ul class="pl-4">`
+                response.detalle.forEach(detalle => {
+                    template += `<li>
+                    <b>${detalle.visita}</b><span class="pr-3"> VISITA</span> 
+                    <b>MOTIVO:</b><span> ${detalle.motivo}</span>
+                    </li>`;
+                });
+                template += `</ul>`;
+                document.getElementById('id_detalle_entreg').innerHTML = template;
+            }else{
+                document.getElementById('id_detalle_entreg').innerHTML = "";
+            }
             $('#modal-detalle-entregas .simple-select2').trigger("change");
             $('#modal-detalle-entregas').modal("show");
         }
@@ -82,6 +95,9 @@ function loadPage(){
             for (const key in response.success) {
                 if (Object.hasOwnProperty.call(response.success, key)) {
                     const element = response.success[key];
+                    if (key == 'Confirmadas') {
+                        $('#lista-entregas').val(element.porefectuar);
+                    }
                     template += `<div class="form-group col-12 col-md-6 col-lg-3"><div class="p-1 border"><strong>${key} :</strong><div class="d-flex gap-10">`;
                     let color =  key == 'Incidencias' ? 'text-danger' : 'text-success';
                     if(element.porcentaje < 25 && key != 'Incidencias'){

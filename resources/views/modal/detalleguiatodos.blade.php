@@ -61,7 +61,7 @@
                 <span id="id_via_envio"></span>
             </div>
             <div class="form-group col-12 col-md-6 col-lg-4">
-                <b class="text-secondary">Vía Traslado: </b>
+                <b class="text-secondary d-block">Vía Traslado (Facturación): </b>
                 <span id="id_via_traslado"></span>
             </div>
             <div class="form-group col-12 col-md-6 col-lg-4">

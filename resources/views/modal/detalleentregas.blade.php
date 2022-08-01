@@ -82,6 +82,7 @@
                         </select>
                     </div>
                 </div>
+                <div id="id_detalle_entreg"></div>
                 <button type="submit" hidden id="modificar-entregas-sectorista"></button>
             </form>
         </div>

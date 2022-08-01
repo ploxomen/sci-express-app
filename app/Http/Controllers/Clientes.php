@@ -26,6 +26,14 @@ class Clientes extends Controller
         }
         return view('cliente.cliagregar',compact('id_new_prov','info_cli','agregar','dep','tipo_documentos','modulos'));
     }
+    public function viewConsultaGeneral(){
+        $modulos = User::getModulos(Auth::id());
+        return view('comprobante.consultaguia',compact('modulos'));        
+    }
+    public function viewConsultaDetallada(){
+        $modulos = User::getModulos(Auth::id());
+        return view('comprobante.consultaguiaremitente',compact('modulos'));
+    }
     public function eliminarProveedor(Request $request)
     {
         try {

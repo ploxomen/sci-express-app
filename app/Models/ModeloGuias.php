@@ -16,17 +16,33 @@ class ModeloGuias extends Model
     {
         DB::beginTransaction();
         try {
-            if(strlen(trim($guia['nro_guia'])) > 11 && strpos($guia['nro_guia'],'-') != 3){
-                return ['alerta' => 'La guía N° '.$guia['nro_guia'] . ' no está con el formato solicitado'];
-            }
-            $nro_guia = explode('-',trim($guia['nro_guia']));
-            if(DB::table('guias')->where(['nro_guia' => $nro_guia[1], 'prefijo' => $nro_guia[0]])->count() > 0){
-                return ['alerta' => 'La guía N° <b>' . $guia['nro_guia'] . '</b> ya se encuentra registrada, por favor intente con otro número'];
-            }
-            if($guia['estado'] == '1' || $guia['estado'] == '2'){
-                if (DB::table('relacion_guias_embarque')->where(['nro_guia_embarque' => $nro_guia[1], 'prefijo_guia_embarque' => $nro_guia[0]])->count() > 0) {
-                    return ['alerta' => 'Para registrar la guía N° <b>' . $guia['nro_guia'] . '</b> debe de ser una guía inactiva.'];
+            if($guia['select_comprobantes'] == 'nro_guia'){
+                if (strlen(trim($guia['nro_guia'])) > 11 && strpos($guia['nro_guia'], '-') != 3) {
+                    return ['alerta' => 'La guía N° ' . $guia['nro_guia'] . ' no está con el formato solicitado'];
                 }
+                $nro_guia = explode('-', trim($guia['nro_guia']));
+                if (DB::table('guias')->where(['nro_guia' => $nro_guia[1], 'prefijo' => $nro_guia[0]])->count() > 0) {
+                    return ['alerta' => 'La guía N° <b>' . $guia['nro_guia'] . '</b> ya se encuentra registrada, por favor intente con otro número'];
+                }
+                if ($guia['estado'] == '1' || $guia['estado'] == '2') {
+                    if (DB::table('relacion_guias_embarque')->where(['nro_guia_embarque' => $nro_guia[1], 'prefijo_guia_embarque' => $nro_guia[0]])->count() > 0) {
+                        return ['alerta' => 'Para registrar la guía N° <b>' . $guia['nro_guia'] . '</b> debe de ser una guía inactiva.'];
+                    }
+                }
+                $guia['prefijo'] = $nro_guia[0];
+                $guia['nro_guia'] = $nro_guia[1];
+                $msj = 'La guía N° <b>' . $guia['nro_guia'] . '</b> se creo de manera correcta';
+            }
+            if ($guia['select_comprobantes'] == 'nro_or') {
+                if(strlen(trim($guia['nro_guia'])) > 7) {
+                    return ['alerta' => 'La Orden de Servicio N° ' . $guia['nro_guia'] . ' no está con el formato solicitado'];
+                }
+                if (DB::table('guias')->where(['nro_guia' => intval($guia['nro_guia']), 'prefijo' => null])->count() > 0) {
+                    return ['alerta' => 'La Orden de Servicio N° <b>' . $guia['nro_guia'] . '</b> ya se encuentra registrada, por favor intente con otro número'];
+                }
+                $guia['prefijo'] = null;
+                $guia['nro_guia'] = intval($guia['nro_guia']);
+                $msj = 'La Orden de Servicio N° <b>' . $guia['nro_guia'] . '</b> se creo de manera correcta';
             }
             $arrayConsulta = [];
             if(empty($guia['id_ciudad_final'])){
@@ -45,11 +61,17 @@ class ModeloGuias extends Model
                     'id_ciudad' => $guia['id_ciudad_final']
                 ];
             }
-            $id_cluster = DB::table('ciudades_base_cluster')->select('id_cluster')
-            ->where($arrayConsulta)
-            ->first();
-            if(empty($id_cluster)){
-                return ['alerta' => 'No se encontraron clusters para la ciudad o distrito del destino final, favor de agregar en el modulo de mis cluster'];
+            if($guia['estado'] != '3'){
+                $id_cluster = DB::table('ciudades_base_cluster')->select('id_cluster')
+                ->where($arrayConsulta)
+                ->first();
+                if (empty($id_cluster)) {
+                    return ['alerta' => 'No se encontraron clusters para la ciudad o distrito del destino final, favor de agregar en el modulo de mis cluster'];
+                }
+                $guia['id_cluster'] = $id_cluster->id_cluster;
+            }else{
+                $guia['via_tras'] = null;
+                $guia['id_cluster'] = null;
             }
             $id_cli_cli = $guia['id_destinatario'];
             if(!empty($cli_bool)){
@@ -68,16 +90,13 @@ class ModeloGuias extends Model
             if(isset($guia['add_cli_bool'])){
                 unset($guia['add_cli_bool']);
             }
+            if (isset($guia['select_comprobantes'])) {
+                unset($guia['select_comprobantes']);
+            }
             if (isset($guia['add_cli_cli'])) {
                 unset($guia['add_cli_cli']);
             }
-            if (isset($guia['nro_guia'])) {
-                unset($guia['nro_guia']);
-            }
-            $guia['id_cluster'] = $id_cluster->id_cluster;
             $guia['id_destinatario'] = $id_cli_cli;
-            $guia['prefijo'] = $nro_guia[0];
-            $guia['nro_guia'] = $nro_guia[1];
             $id_guia = DB::table('guias')->insertGetId($guia);
             $tot_cant = 0;
             $tot_kg = 0;
@@ -92,7 +111,7 @@ class ModeloGuias extends Model
             DB::table('guias')->where(['id' => $id_guia])->update(['tot_cant' => $tot_cant, 'tot_kg' => $tot_kg, 'tot_vol' => $tot_vol]);
             DB::table('procesos_guia')->insert(['id_guia' => $id_guia,'situacion' => 1,'id_user' => $user]);
             DB::commit();
-            return ['success' => 'La guía fue creada correctamente'];
+            return ['success' => $msj];
         } catch (Exception $ex) {
             DB::rollBack();
             return ['error' => $ex->getMessage()];
@@ -145,7 +164,7 @@ class ModeloGuias extends Model
     }
     public static function obtenerGuias($filtros,$id_usuario)
     {
-        $guias = DB::select('CALL sp_obtener_guias(?,?,?,?)',[$filtros['prov_dest'], $filtros['prov_orig'],$filtros['cluster_id'],$id_usuario]);
+        $guias = DB::select('CALL sp_obtener_guias(?,?,?,?,?,?)',[$filtros['prov_dest'], $filtros['prov_orig'],$filtros['cluster_id'],$id_usuario,$filtros['via_traslado'],$filtros['estado_guia']]);
         for ($i=0; $i < count($guias) ; $i++) {
             if ($guias[$i]->tipo_ciudad_base_cluster == 'distrito') {
                 $guias[$i]->ciudad_base_cluster = (new Ubigeo)->getNameDistrito($guias[$i]->ciudad_base_cluster);
@@ -203,9 +222,9 @@ class ModeloGuias extends Model
     {
         return DB::select('CALL sp_actualizar_estado_guia_retorno(?,?,?)',[$id_guia,$id_usuario,$nuevo_estado]);
     }
-    public static function mostrarTodasGuias($estado,$tipo)
+    public static function mostrarTodasGuias($estado,$tipo,$fechaInicio,$fechaFin)
     {
-        $resultado = DB::select('CALL sp_obtener_guias_todos(?,?)',[$estado,$tipo]);
+        $resultado = DB::select('CALL sp_obtener_guias_todos(?,?,?,?)',[$estado,$tipo,$fechaInicio,$fechaFin]);
         $estados = InformacionAdicional::situacionEstado();
         $usuarios = User::obtenerUsuarioRol(3);
         $clusters = DB::table('cluster AS c')->select('c.id','u.name','u.last_name')->leftJoin('usuarios AS u','c.id_usuario','=','u.id')->where('u.status','!=','0')->get();
@@ -275,7 +294,7 @@ class ModeloGuias extends Model
     public static function obtenerGuiasConsulta($nro_remitente,$fecha)
     {
         $datos = DB::select('CALL sp_consulta_guias_remitente(?,?)',[$nro_remitente,$fecha]);
-        foreach ($datos as $key => $value) {
+        foreach ($datos as $value) {
             $value->nro_comp_cli = self::filterComprobantes($value->nro_comp_cli);
         }
         return $datos;

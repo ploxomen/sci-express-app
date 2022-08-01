@@ -28,7 +28,7 @@
             <select name="id_cond" id="id_id_cond" class="form-control simple-select2" required>
                 <option></option>
                 @foreach ($conductores as $c)
-                    <option {{$c->status != 1 ? 'disabled' : ''}} value="{{$c->id}}">{{$c->name}} {{$c->last_name}}</option>
+                    <option value="{{$c->id}}">{{$c->name}} {{$c->last_name}}</option>
                 @endforeach
             </select>
         </div>
@@ -37,7 +37,7 @@
             <select name="id_deal" id="id_id_deal" class="form-control simple-select2" required>
                 <option></option>
                 @foreach ($dealers as $de)
-                    <option {{$de->status != 1 ? 'disabled' : ''}} value="{{$de->id}}">{{$de->name}} {{$de->last_name}}</option>
+                    <option value="{{$de->id}}">{{$de->name}} {{$de->last_name}}</option>
                 @endforeach
             </select>
         </div>
@@ -45,17 +45,18 @@
             <label for="id_id_deal2">Nombre del Dealer 2</label>
             <select name="id_deal2" id="id_id_deal2" class="form-control simple-select2">
                 <option></option>
+                <option value="NINGUNO" selected>NINGUNO</option>
                 @foreach ($dealers as $de)
-                    <option {{$de->status != 1 ? 'disabled' : ''}} value="{{$de->id}}">{{$de->name}} {{$de->last_name}}</option>
+                    <option value="{{$de->id}}">{{$de->name}} {{$de->last_name}}</option>
                 @endforeach
             </select>
         </div>
         <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-group">
             <label for="id_resp_emba">Responsable Embarque <small class="text-danger">*</small></label>
-            <select name="resp_emba" id="id_resp_emba" class="form-control" required>
-                <option value="" hidden>Seleccione un responsable</option>
-                <option value="Dealer 1">Dealer 1</option>
-                <option value="Dealer 2">Dealer 2</option>
+            <select name="resp_emba" id="id_resp_emba" class="form-control simple-select2" required>
+                <option value="">Seleccione un responsable</option>
+                <option value="Dealer 1" selected>Dealer 1</option>
+                <option value="Dealer 2" disabled>Dealer 2</option>
             </select>
         </div>
         <div class="col-12 col-md-6 col-lg-4 col-xl-3 form-group">
@@ -129,6 +130,7 @@
                     <th>N° Manif</th>
                     <th>Fch Manif</th>
                     <th>Trayecto</th>
+                    <th>Envio</th>
                     <th>Prov Orig</th>
                     <th>Prov Dest</th>
                     <th>Ciudad Base</th>

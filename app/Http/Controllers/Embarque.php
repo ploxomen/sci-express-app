@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\EmpresaTransporte;
 use App\Models\InformacionAdicional;
 use App\Models\ModeloEmbarque;
+use App\Models\ModeloGuias;
 use App\Models\ModeloManifiesto;
 use App\Models\User;
 use App\Models\Vehiculos;
@@ -25,6 +26,71 @@ class Embarque extends Controller
         $transportes = EmpresaTransporte::obtenerTransportes();
         $diasAtras = date('Y-m-d',strtotime(date('Y-m-d') . "- 2 days"));
         return view('pedidos.listaembarque',compact('diasAtras','dealers', 'conductores', 'ciudadesBase', 'vehiculos', 'transportes','hoy','modulos'));
+    }
+    public function viewEmbarquesTodo()
+    {
+        $modulos = User::getModulos(Auth::id());
+        $fechaFiltros = InformacionAdicional::obtenerDiasFiltros();
+        $situacionManifiesto = ModeloManifiesto::obtenerSituacionManifiesto();
+        $dealers = User::obtenerUsuarioRol(7);
+        $conductores = User::obtenerUsuarioRol(6);
+        $vehiculos = Vehiculos::obtenerVehiculos();
+        return view('embarque.misEmbarques',compact('modulos', 'fechaFiltros', 'situacionManifiesto', 'dealers', 'conductores', 'vehiculos'));
+    }
+    public function agregarManifiestoEmbarque(Request $request)
+    {
+        try {
+            $manifiestos = ModeloEmbarque::agregarManifiestoEmbarque($request->embarque, $request->manifiesto);
+            return response()->json($manifiestos);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function eliminarManifiestoEmbarque(Request $request)
+    {
+        try {
+            $manifiestos = ModeloEmbarque::eliminarManifiestoEmbarque($request->embarque,$request->manifiesto);
+            return response()->json($manifiestos);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function mostrarEditarEmbarque(Request $request)
+    {
+        try {
+            $guias = ModeloEmbarque::misEmbarquesFiltros(null,null,'todos','todos','todos','todos',$request->embarque);
+            $manifiestos = ModeloManifiesto::manifiestoAgregarManual();
+            return response()->json(['success' => $guias,'manifiesto' => $manifiestos]);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function eliminarEmbarque(Request $request)
+    {
+        try {
+            $guias = ModeloEmbarque::eliminarEmbarque($request->embarque);
+            return response()->json($guias);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function mostrarEditarFletes(Request $request)
+    {
+        try {
+            $result = ModeloEmbarque::mostrarEditarFletes($request->embarque);
+            return response()->json($result);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function misEmbarques(Request $request)
+    {
+        try {
+            $guias = ModeloEmbarque::misEmbarquesFiltros($request->fechaInicio, $request->fechaFin, $request->driver, $request->dealer, $request->vehiculo, $request->estado, 'todos');
+            return datatables()->of($guias)->toJson();
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
     }
     public function obtenerDevolucionGuias(Request $request)
     {
@@ -139,7 +205,6 @@ class Embarque extends Controller
     public function obtenerManiPend(Request $request)
     {
         try {
-            // dd($request->ciudad_base,$request->tipo);
             $manifiestos = ModeloManifiesto::obtenerEmbarcar($request->ciudad_base,$request->tipo,Auth::id());
             return datatables()->of($manifiestos)->toJson();
         } catch (Exception $ex) {
@@ -151,6 +216,7 @@ class Embarque extends Controller
         $embarques = ModeloEmbarque::embarcarTrabajador(Auth::id());
         $modulos = User::getModulos(Auth::id());
         $hoy = strtotime(date('Y-m-d'));
+        // dd($embarques);
         // dd($embarques);
         return view('pedidos.embarquemanifiesto',compact('hoy','modulos','embarques'));
     }

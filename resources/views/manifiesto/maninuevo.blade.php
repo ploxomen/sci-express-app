@@ -75,9 +75,39 @@
         </div>
     </div>
     <section class="p-3 bg-white">
-        <h4 class="text-primary"><i class="far fa-newspaper"></i> Guías pendientes</h4>
+        <div class="form-group d-flex flex-wrap" style="gap: 10px 20px;" id="detalle-provincia-destino"></div>
+        <div class="row">
+            <div class="col-12 col-md-4 col-xl-8 form-group text-primary">
+                <strong>Total de guias pendientes: </strong>
+                <strong id="nro_guias_manifestar"></strong>
+            </div>
+            <div class="col-12 col-md-4 col-xl-2 form-group">
+                <label for="id_via_traslado">Vía de traslado</label>
+                <select name="via_traslado" id="id_via_traslado" class="form-control aplicar-filtro simple-select2">
+                    <option value="todos" selected>Todos</option>
+                    <option value="terrestre">Terrestre</option>
+                    <option value="aereo">Aereo</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-4 col-xl-2 form-group">
+                <label for="id_estado_guia">Estado</label>
+                <select name="estado_guia" id="id_estado_guia" class="form-control aplicar-filtro simple-select2">
+                    <option value="todos">Todos</option>
+                    <option value="pendiente" selected>Pendientes</option>
+                    <option value="concretados">Manifestados</option>
+                </select>
+            </div>
+            <div class="form-group col-12 col-md-6">
+                <h4 class="text-primary"><i class="far fa-newspaper"></i> Guías pendientes</h4>
+            </div>
+            <div class="form-group col-12 col-md-6 text-primary text-right">
+                <strong>Total Guias mostradas: </strong>
+                <strong id="total_resultamos_mostrados"></strong>
+            </div>
+        </div>
+        
         <div class="table-responsive">
-            <table class="table table-sm table-hover table-bordered">
+            <table class="table table-sm table-hover table-bordered" style="min-width: 1300px;">
                 <thead>
                     <tr>
                         <th>
@@ -88,6 +118,7 @@
                         </th>
                         <th>N°</th>
                         <th>Fch Emisión</th>
+                        <th>Vía <br>Envio</th>
                         <th>Prov Orig</th>
                         <th>Prov Dest</th>
                         <th>N° Ord Comp</th>

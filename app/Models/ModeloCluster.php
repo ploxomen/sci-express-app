@@ -27,6 +27,10 @@ class ModeloCluster extends Model
         }
         return $clusters;
     }
+    public static function obtenerUnClusterProvincia($provincia)
+    {
+        return self::select('usuarios.name', 'usuarios.last_name', 'cluster.id')->join('usuarios', 'cluster.id_usuario', '=', 'usuarios.id')->where(['cluster.activo' => 1, 'cluster.provincia_clu' => $provincia])->get();
+    }
     public static function getCodigoCluster($id_usuario)
     {
         return DB::table('cluster')->select('id')->where(['id_usuario' => $id_usuario])->first();

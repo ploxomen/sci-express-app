@@ -35,6 +35,9 @@
                     <button class="btn btn-primary btn-sm" type="button" id="embarcar_guias" title="Embarcar guías guardadas y/o seleccionadas">Embarcar</button>
                 </div>
                 <h4 class="text-primary">Guías a retornar</h4>
+                <div class="form-group d-flex">
+                    <div class="cuadro table-danger mr-1"></div><span>Incidencia en la entrega</span>
+                </div>
                 <table class="table table-sm table-bordered" id="tabla-retorno-guia">
                     <thead>
                         <tr>

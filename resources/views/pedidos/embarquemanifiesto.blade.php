@@ -92,33 +92,45 @@
                                         <div class="card">
                                             <div class="card-header p-0" id="headingOne">
                                                 <h5 class="mb-0">
-                                                    <button class="btn btn-link" data-toggle="collapse" data-target="#colapset_mani_{{$m->id}}" aria-expanded="true">
-                                                    <b>N° Manifiesto - {{str_pad($m->id,5,'0',STR_PAD_LEFT)}}</b>
+                                                    <button class="btn btn-link d-block w-100" data-toggle="collapse" data-target="#colapset_mani_{{$m->id}}" aria-expanded="true">
+                                                        <div class="d-flex justify-content-between">
+                                                            <span>
+                                                                @if ($m->via_envio == 'TERRESTRE')
+                                                                    <i class="fas fa-truck"></i>
+                                                                @else
+                                                                    <i class="fas fa-plane"></i>
+                                                                @endif 
+                                                                <b>Ciudad: {{$m->nombreciudad}}</b>
+                                                            </span>
+                                                            <b title="Bultos para la ciudad {{$m->nombreciudad}}">{{$m->subtotalbulto}}</b>
+                                                        </div>
                                                     </button>
                                                 </h5>
                                             </div>
                                             <div id="colapset_mani_{{$m->id}}" class="collapse {{$k === 0 ? 'show' : ''}}" data-parent="#accordion_{{$emb->id}}">
                                                 <div class="card-body">
-                                                    <div class="form-row">
-                                                        <div class="form-group col-12 col-md-6">
-                                                            <b class="d-block">Fecha Mani</b>
-                                                            <span>{{date('d/m/Y',strtotime($m->fech_mani))}}</span>
-                                                        </div>
-                                                        <div class="form-group col-12 col-md-6">
-                                                            <b class="d-block">Trayecto</b>
-                                                            <span>{{$m->tipo}}</span>
-                                                        </div>
-                                                        <div class="form-group col-12 col-md-6">
-                                                            <b class="d-block">Prov. Orig</b>
-                                                            <span>{{$m->prov_orig}}</span>
-                                                        </div>
-                                                        <div class="form-group col-12 col-md-6">
-                                                            <b class="d-block">Prov. Dest</b>
-                                                            <span>{{$m->prov_dest}}</span>
-                                                        </div>
+                                                    <h6 class="text-info">Manifiestos</h6>
+                                                    <div class="d-flex flex-wrap" style="gap: 8px;">
+                                                        @foreach ($m->listaManifiestos as $ma)
+                                                            <span>
+                                                                N° {{$ma}}
+                                                            </span>
+                                                        @endforeach
                                                     </div>
+                                                    @if (!empty($emb->hr_ini_emba) && empty($emb->fin_emba))
+                                                        <div>
+                                                            <label for="transpotes_select_{{$emb->id}}">Empresa de Transporte</label>
+                                                            <select class="form-control form-control-sm" id="transpotes_select_{{$emb->id}}">
+                                                                <option value="" hidden>Seleccione la empresa de trasnporte</option>
+                                                                @foreach ($emb->transportes as $trans)
+                                                                    <option value="{{$trans->id}}">{{$trans->empresa}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    @endif
                                                 </div>
                                             </div>
+                                            
                                         </div>
                                     @endforeach
                                     </div>
@@ -128,17 +140,7 @@
                                         <strong class="text-danger">Envio local</strong>
                                     </div>
                                 @endif
-                                @if (!empty($emb->hr_ini_emba) && empty($emb->fin_emba))
-                                    <div class="form-group col-12">
-                                        <label for="transpotes_select_{{$emb->id}}">Empresa de Transporte</label>
-                                        <select class="form-control form-control-sm" id="transpotes_select_{{$emb->id}}">
-                                            <option value="" hidden>Seleccione la empresa de trasnporte</option>
-                                            @foreach ($emb->transportes as $trans)
-                                                <option value="{{$trans->id}}">{{$trans->empresa}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                @endif
+                                
                                 <div class="col-12 text-center">
                                     <button class="btn btn-primary marcar-embarque" data-embarque="{{$emb->id}}">Marcar Hr {{empty($emb->hr_ini_emba) ? 'Inicio' : 'Fin'}}</button>
                                 </div>

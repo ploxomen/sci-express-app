@@ -30,7 +30,7 @@ function loadPage(){
                             template += `<span class='d-block'>` + element.join(`</span><span class="d-bock">`) + "</span>";
                         }
                     }
-                }
+                } 
                 return template;
             }},
             {data: 'nro_guia'},
@@ -46,18 +46,25 @@ function loadPage(){
     });
     tablaGuias.on('draw.dt', function () {
         let info = tablaGuias.page.info();
+        if(info.pages === 0 && $('#rucdniremi').val() != "" && $('#fechadepacho').val() != null)
+        {
+            alertify.alert('ALERTA','NO SE ENCONTRARON RESULTADOS, FAVOR VERIFICAR LA INFORMACION CON SU ALMACEN');
+            return false;
+        }
+        console.log(info);
         tablaGuias.column(0, { search: 'applied', order: 'applied', page: 'applied' }).nodes().each(function (cell, i) {
             cell.innerHTML = i + 1 + info.start;
         });
     });
     document.getElementById('from-consulta-remitentes').addEventListener('submit',function(e){
         e.preventDefault();
+        $('#nameremitente').val("");
         tablaGuias.draw();
     });
     document.getElementById('tabla-body-guias').addEventListener('click',function(e){
         if(e.target.classList.contains('btn-view-detalles')){
             for (const textos of document.querySelectorAll('.text-proceso')) {
-                textos.textContent = '..../..../....';
+                textos.textContent = '';
             }
             const datos = new FormData();
             datos.append('tipoguia','guia');
@@ -69,7 +76,7 @@ function loadPage(){
             request.onreadystatechange = function(){
                 if(request.readyState == 4 && request.status == 200){
                     if(!request.response.result){
-                        alertify.alert('Mensaje','No se encontró ninguna información de la guía, por favot asegurate de escribir bien los datos.');
+                        alertify.alert('ALERTA','NO SE ENCONTRARON RESULTADOS, FAVOR VERIFICAR LA INFORMACION CON SU ALMACEN');
                         return false;
                     }
                     for (const key in request.response.result) {

@@ -25,6 +25,10 @@ function loadPage(){
             {data: 'remi_prov'},
             {data: 'dest_prov'}
         ],
+        createdRow: function (row, data) {
+            let bgTable = data.situ == 14 ? 'table-danger' : '';
+            $(row).addClass(bgTable);
+        }
     });
     cbSelectAll.addEventListener("change",function () {  
         const activo = this.checked;

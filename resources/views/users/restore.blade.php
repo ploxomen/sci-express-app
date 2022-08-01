@@ -48,5 +48,8 @@
             </form>
         </div>
     </div>
+    <footer class="text-right">
+        <span style="font-size: 12px !important;">Desarrollado por <a href="https://gscreativas.com/" target="_blank">gscreativas.com</a></span>
+    </footer>
 </body>
 </html>

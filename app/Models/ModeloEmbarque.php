@@ -3,9 +3,7 @@
 namespace App\Models;
 
 use App\Http\Controllers\Ubigeo;
-use Carbon\Carbon;
 use Exception;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -17,18 +15,65 @@ class ModeloEmbarque extends Model
     public static function embarcarTrabajador($id_user){
         $embarques = DB::select('CALL sp_embarcar_trabajador(?)',[$id_user]);
         foreach ($embarques as $em) {
-            $em->transportes = DB::table('transporte_embarque AS te')
+            $em->transportes = DB::table('transporte_embarque AS te')->select('et.id','et.empresa','et.aereo')
             ->join('empresa_transporte AS et','te.id_empr_tran','=','et.id')->where(['te.id_list_emba' => $em->id, 'et.activo' => 1])->get();
-            $em->manfiestos = DB::table('embarque_manifiesto AS em')
-            ->select('m.id','m.fech_mani','tra.tipo','m.prov_dest','m.prov_orig')
-            ->join('manifiesto AS m','em.id_manifiesto','=','m.id')
-            ->join('tipo_trayecto_envio AS tra','m.trayecto','=','tra.id')
-            ->where(['em.id_embarque' => $em->id,'m.activo' => 1])->get();
+            $em->manfiestos = DB::select('CALL sp_embarque_embarcar_manifiesto(?)',[$em->id]);
             foreach ($em->manfiestos as $prov) {
-                $prov->prov_dest = (new Ubigeo)->getNameProvincia($prov->prov_dest);
-                $prov->prov_orig = (new Ubigeo)->getNameProvincia($prov->prov_orig);
+                $prov->listaManifiestos = explode(',',$prov->listaManifiestos);
+                if($prov->tipo_base == 'distrito'){
+                    $prov->nombreciudad = mb_strtoupper((new Ubigeo)->getNameDistrito($prov->ubigeo_distrito),'UTF-8');
+                }
             }
         }
+        return $embarques;
+    }
+    public static function eliminarEmbarque($idEmbarque)
+    {
+        DB::beginTransaction();
+        try {
+            DB::table('embarque_manifiesto AS em')->join('manifiesto AS m','em.id_manifiesto','=','m.id')
+            ->join('detalle_manifiesto AS dm', 'dm.id_manifiesto', '=', 'm.id')
+            ->join('guias AS g', 'g.id', '=', 'dm.id_guia')
+            ->where(['em.id_embarque' => $idEmbarque])->update(['m.estado' => 1 ,'g.situ' => 2]);
+            DB::table('embarque')->where(['id' => $idEmbarque])->delete();
+            DB::commit();
+            return ['success' => 'Embarque eliminado correctamente'];
+        } catch (Exception $ex) {
+            DB::rollBack();
+            return ['error' => $ex->getMessage()];
+        }
+    }
+    public static function mostrarEditarFletes($idEmbarque)
+    {
+        $fletes = DB::table('fletes_embarque AS fe')->select('fe.id','fe.via_envio','fe.id_cluster',DB::raw('fn_obtener_nombres_clusters(fe.id_cluster) AS nom_cluster'),'cbc.tipo_base','cbc.ubigeo_distrito','c.nombre_ciudad','fe.cajas','fe.jabas','fe.cajones','fe.sobres','fe.paquetes','fe.otros','fe.detalle_otros','fe.sub_total_bultos','fe.subtotal_fletes')
+        ->join('ciudades_base_cluster AS cbc','fe.id_cluster','=','cbc.id_cluster')
+        ->leftJoin('ciudades AS c','cbc.id_ciudad','=','c.id')
+        ->where(['fe.id_embarque' => $idEmbarque,'cbc.base' => 1,'cbc.activo' => 1])->get();
+        foreach ($fletes as $fle) {
+            $fle->nombreciudad = $fle->tipo_base == 'ciudad' ? $fle->nombre_ciudad : (new Ubigeo)->getNameDistrito($fle->ubigeo_distrito);
+        }
+        $total = DB::table('embarque')->select('total_bultos_paquete','flet_esti')->where(['id' => $idEmbarque])->first();
+        return ['ciudades' => $fletes,'totales' => $total];
+    }
+    public static function eliminarManifiestoEmbarque($idEmbarque,$idManifiesto)
+    {
+        if(DB::table('embarque_manifiesto')->where(['id_embarque' => $idEmbarque])->count() === 1){
+            return ['error' => 'El embarque debe tener al menos un manifiesto'];
+        }
+       DB::select('CALL sp_embarque_eliminar_manifiesto(?,?)',[$idEmbarque,$idManifiesto]);
+       return ['success' => 'Manifiesto eliminado correctamente'];
+    }
+    public static function agregarManifiestoEmbarque($idEmbarque, $idManifiesto)
+    {
+        DB::select('CALL sp_embarque_agregar_manifiesto(?,?)', [$idEmbarque, $idManifiesto]);
+        return ['success' => 'Manifiesto agregado correctamente'];
+    }
+    public static function misEmbarquesFiltros($fechaInicio,$fechaFin,$driver,$dealer,$vehiculo,$estado,$idEmbarque)
+    {
+        $embarques = DB::select('CALL sp_embarque_obtener(?,?,?,?,?,?,?)',[$fechaInicio, $fechaFin, $driver, $dealer, $vehiculo, $estado, $idEmbarque]);
+        foreach ($embarques as $emb) {
+            $emb->manifiestos = json_decode($emb->manifiestos,true);
+        }  
         return $embarques;
     }
 
@@ -43,6 +88,19 @@ class ModeloEmbarque extends Model
     public static function obtenerEmbarqueDetalle($id_embarque,$id_user)
     {
         return DB::select('CALL sp_obtener_embarque_detalle_informe(?,?)',[$id_embarque,$id_user]);
+    }
+    public static function obtenerCiudadesBaseFleteVerif($id_manifiestos)
+    {
+        $obtener_ciudades = DB::select('CALL sp_obtener_ciudades_base_flete(?)', [$id_manifiestos]);
+        foreach ($obtener_ciudades as $guias) {
+            if (!empty($guias)) {
+                $guias->n_guias = json_decode($guias->n_guias);
+            }
+            if ($guias->tipo_base == 'distrito') {
+                $guias->nombreciudad = (new Ubigeo)->getNameDistrito($guias->nombreciudad);
+            }
+        }
+        return $obtener_ciudades;
     }
     public static function obtenerCiudadesBaseFlete($id_manifiestos,$usuario)
     {
@@ -113,6 +171,7 @@ class ModeloEmbarque extends Model
             $datos['estado'] = 4;
             $datos['user_update'] = $usuario;
             $datos['date_update'] = date('Y-m-d H:i:s');
+            // dd($datos);
             DB::table('embarque')->where(['id' => $id, 'estado' => 3, 'activo' => 1])->update($datos);
             DB::table('relacion_guias_embarque')->insert($guias_embarque);
             DB::table('embarque_manifiesto AS em')->join('manifiesto AS m', 'em.id_manifiesto', '=', 'm.id')
@@ -224,7 +283,8 @@ class ModeloEmbarque extends Model
     {
         $consulta = DB::select('CALL sp_obtener_guias_reparto_entrega(?,?,?,?,?,?,?)', ["", "", $id_guia, $id_cluster, 'detalle-guia',"",""]);
         if(isset($consulta[0])){
-            return ['success' => $consulta[0]];
+            $detalleEntregas = DB::table('numero_visitas_guias')->select("visita","motivo")->where(['id_guia' => $id_guia])->get();
+            return ['success' => $consulta[0] , 'detalle' => $detalleEntregas];
         }else{
             return ['error' => 'No se encontró la guía seleccionada'];
         }
@@ -235,10 +295,13 @@ class ModeloEmbarque extends Model
         $confirmadas = DB::select('SELECT COUNT(*) AS total FROM guias WHERE situ IN(6,7) AND activo = 1 AND estado = 1 AND id_cluster = ?', [$id_cluster]);
         $entregadoTotal = DB::select('SELECT COUNT(*) AS total FROM guias WHERE situ IN(7,8,14) AND activo = 1 AND estado = 1 AND id_cluster = ?',[$id_cluster]);
         $entregado = DB::select('SELECT COUNT(*) AS total FROM guias WHERE situ IN (8,14) AND activo = 1 AND estado = 1 AND id_cluster = ?', [$id_cluster]);
-        $atiempo = DB::select("SELECT COUNT(*) AS total FROM guias WHERE situ IN (8,14) AND activo = 1 AND estado = 1 AND DATE_FORMAT(fecha_hr_entregado,'%Y-%m-%d') <= fecha_reparto AND id_cluster = ?",[$id_cluster]);
-        $incidencias = DB::select("SELECT COUNT(*) AS total FROM guias WHERE activo = 1 AND estado = 1 AND (situacion_durante_envio = 'INCIDENCIA' OR incidencia_durante_envio = 'PERDIDA TOTAL' OR incidencia_durante_envio = 'DAÑO TOTAL') AND estado_entregado = 'NO ENTREGADO' AND id_cluster = ?",[$id_cluster]);
+        $atiempo = DB::select("SELECT COUNT(*) AS total FROM guias WHERE situ = 8 AND activo = 1 AND estado = 1 AND DATE_FORMAT(fecha_hr_entregado,'%Y-%m-%d') <= fecha_reparto AND id_cluster = ?",[$id_cluster]);
+        $entregadoSioSi = DB::select("SELECT COUNT(*) AS total FROM guias WHERE situ = 8 AND activo = 1 AND estado = 1 AND id_cluster = ?",[$id_cluster]);
+        $porEntregar = DB::select("SELECT COUNT(*) AS total FROM guias WHERE situ = 7 AND activo = 1 AND estado = 1 AND id_cluster = ?", [$id_cluster]);
+        $incidencias = DB::select("SELECT COUNT(*) AS total FROM guias WHERE activo = 1 AND estado = 1 AND (situacion_durante_envio = 'INCIDENCIA' OR incidencia_durante_envio = 'PERDIDA TOTAL' OR incidencia_durante_envio = 'DAÑO TOTAL' OR estado_entregado = 'NO ENTREGADO') AND situ = 14 AND id_cluster = ?",[$id_cluster]);
         return [
             'Confirmadas' => [
+                'porefectuar' => $porEntregar[0]->total,
                 'completadas' => $confirmadas[0]->total,
                 'total' => $confirmadasTotal[0]->total,
                 'porcentaje' => $confirmadasTotal[0]->total !== 0 ? round(($confirmadas[0]->total * 100)/ $confirmadasTotal[0]->total) : 0
@@ -255,7 +318,7 @@ class ModeloEmbarque extends Model
             ],
             'A tiempo' => [
                 'completadas' => $atiempo[0]->total,
-                'total' => $entregado[0]->total,
+                'total' => $entregadoSioSi[0]->total,
                 'porcentaje' => $entregado[0]->total !== 0 ? round(($atiempo[0]->total * 100) / $entregado[0]->total) : 0
             ]
         ];
@@ -273,17 +336,47 @@ class ModeloEmbarque extends Model
         }
         return $result;
     }
-    public static function confirmarEntregaGuias($id_guia,$estados,$usuario,$archivos)
+    public static function confirmarEntregaGuias($id_guia,$estados,$usuario,$archivos,$visitas)
     {
         DB::beginTransaction();
         try {
-            // dd($estados);
-            $situacion = $estados['estado_entregado'] == 'NO ENTREGADO' ? 14 : 8;
+            $situacion = 8;
+            if(!empty($visitas)){
+                $situacion = 7;
+                if($estados['nro_visitas_reparto'] == 'RETORNO'){
+                    $estados['nro_visitas_reparto'] = null;
+                    $situacion = 14;
+                }else{
+                    $reprogramado = date('Y-m-d',strtotime(date('Y-m-d') . "+1 days"));
+                    $estados['estado_entregado'] = null;
+                    $estados['motivo_no_ent'] = null;
+                    if(date('w',strtotime($reprogramado)) === 0){
+                        $reprogramado = date('Y-m-d', strtotime($reprogramado . "+1 days"));
+                    }
+                    DB::table('guias AS g')->join('cluster AS c', 'g.id_cluster', '=', 'c.id')->where(['c.id_usuario' => $usuario, 'g.id' => $id_guia, 'g.activo' => 1])->update(['fecha_reparto' => $reprogramado]);
+                }
+                $visitas['id_guia'] = $id_guia;
+                $existHistoriaVisita = DB::table('numero_visitas_guias')->where(['id_guia' => $id_guia, 'visita' => $visitas['visita']])->first();
+                if(!empty($existHistoriaVisita)){
+                    DB::table('numero_visitas_guias')->where(['id' => $existHistoriaVisita->id])->update(['motivo' => $visitas['motivo']]);
+                }else{
+                    DB::table('numero_visitas_guias')->insert($visitas);
+                }
+            }
+            if($estados['situacion_durante_envio'] == 'INCIDENCIA' && in_array($estados['incidencia_durante_envio'],['DAÑO TOTAL','PERDIDA TOTAL'])){
+                $situacion = 14;
+                $estados['estado_entregado'] = 'NO ENTREGADO';
+                $estados['nro_visitas_reparto'] = null;
+            }
             DB::select('CALL sp_actualizar_entrega_guia(?,?,?)',[$usuario, $id_guia, $situacion]);
             DB::table('imagenes_guia')->insert($archivos);
-            $estados['fecha_hr_entregado'] = date('Y-m-d H:i:s');
+            if(empty($visitas) && $situacion == 8){
+                $estados['fecha_hr_entregado'] = date('Y-m-d H:i:s');
+            }
             DB::table('guias AS g')->join('cluster AS c','g.id_cluster','=','c.id')->where(['c.id_usuario' => $usuario, 'g.id' => $id_guia , 'g.situ' => $situacion, 'g.activo' => 1])->update($estados);
-            DB::table('procesos_guia')->insert(['id_guia' => $id_guia,'situacion' => $situacion,'id_user' => $usuario]);
+            if (empty($visitas) && ($situacion == 8 || $situacion == 14)) {
+                DB::table('procesos_guia')->insert(['id_guia' => $id_guia, 'situacion' => $situacion, 'id_user' => $usuario]);
+            }
             DB::commit();
         } catch (Exception $ex) {
             DB::rollBack();

@@ -16,10 +16,13 @@
                   </div>
                   <div class="form-group col-12 col-md-6 col-lg-3">
                       <label for="id_flet_esti">Flete Total <small class="text-danger">*</small></label>
-                      <input type="number" name="flet_esti" id="id_flet_esti" min="1" class="form-control" step="0.01" required>
+                      <input type="number" name="flet_esti" id="id_flet_esti" min="0" class="form-control" step="0.01" required>
                   </div>
                 </div>
+                <h5 class="text-primary border-bottom pb-2"><i class="fas fa-truck"></i> TERRESTRES</h5>
                 <ol id="lista-ciudades-base" class="ml-3"></ol>
+                <h5 class="text-primary border-bottom pb-2"><i class="fas fa-plane"></i> AEREOS</h5>
+                <ol id="lista-ciudades-base-aereo" class="ml-3"></ol>
                 <button type="submit" hidden id="enviar-fletes"></button>
             </form>
         </div>

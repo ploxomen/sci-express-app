@@ -10,8 +10,8 @@
       <div class="modal-body">
           <div class="row form-group">
             <div class="form-group col-12">
-                <label for="id_fech_mani">Fecha maniesto</label>
-                <input type="date" class="form-control" name="fech_mani" id="id_fech_mani" max="{{$hoy}}" value="{{$hoy}}">
+                <label for="id_fech_mani">Fecha de manifiesto</label>
+                <input type="date" class="form-control" name="fech_mani" min="{{$antes}}" id="id_fech_mani" max="{{$hoy}}" value="{{$hoy}}">
             </div>
             <div class="form-group col-12 col-lg-6">
                 <label for="prov_view_origen">Prov Origen</label>

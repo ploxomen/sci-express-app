@@ -33,10 +33,16 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
         Route::post('ciudades', [Ubigeo::class, 'dbCiudades']);
     });
     Route::prefix('manifiesto')->group(function () {
-        Route::get('ver', [Manifiesto::class, 'viewManifiesto'])->name('viewManifi');
+        Route::get('todos', [Manifiesto::class, 'viewManifiestosTodos'])->name('misManifiestos');
         Route::get('nuevo', [Manifiesto::class, 'viewNuevoManifiesto'])->name('viewNuevoManif');
+        Route::post('actualizar', [Manifiesto::class, 'actualizarManifiesto']);
+        Route::post('eliminar', [Manifiesto::class, 'eliminarManifiesto']);
         Route::post('ver-guias', [Manifiesto::class, 'viewGuias']);
         Route::post('agregar', [Manifiesto::class, 'agregarManifiesto']);
+        Route::post('obtener-todos', [Manifiesto::class, 'obtenerTodosManifiestos']);
+        Route::post('editar-obtener', [Manifiesto::class, 'obtenerUnManifiesto']);
+        Route::post('eliminar-guia', [Manifiesto::class, 'eliminarGuiaManifiesto']);
+        Route::post('agregar-guia-manual', [Manifiesto::class, 'agregarGuiaManual']);
     });
     Route::prefix('vehiculos')->group(function () {
         Route::get('todos', [Embarque::class, 'viewVehiculos'])->name('viewVehiculos');
@@ -94,7 +100,14 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
             Route::post('modificar-estados', [Recojo::class, 'modificarEstados']);
         });
         Route::prefix('embarque')->group(function () {
+            Route::get('todos', [Embarque::class, 'viewEmbarquesTodo'])->name('misEmbarques');
             Route::get('pendientes', [Embarque::class, 'viewListEmba'])->name('pedidoListEmbar');
+            Route::post('obtener-todos', [Embarque::class, 'misEmbarques']);
+            Route::post('mostrar-editar-fletes', [Embarque::class, 'mostrarEditarFletes']);
+            Route::post('eliminar', [Embarque::class, 'eliminarEmbarque']);
+            Route::post('editar-obtener', [Embarque::class, 'mostrarEditarEmbarque']);
+            Route::post('eliminar-manifiesto', [Embarque::class, 'eliminarManifiestoEmbarque']);
+            Route::post('agregar-manifiesto', [Embarque::class, 'agregarManifiestoEmbarque']);
             Route::post('manifiesto/pendientes', [Embarque::class, 'obtenerManiPend']);
             Route::post('manifiesto/embarcar', [Embarque::class, 'embarcarMani']);
             Route::post('manifiesto/embarcar-fletes', [Embarque::class, 'verCiudadesFlestes']);
@@ -129,6 +142,7 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
             Route::get('view-retornadas', [Gias::class, 'viewGuiasRetornadas'])->name('verGuiasRetornadas');
             Route::post('retornadas', [Gias::class, 'guiasRetornadas']);
             Route::post('obtener-detalles', [Gias::class, 'detalleMisGuias']);
+            Route::post('actualizar-informes', [Gias::class, 'actualizarInformes']);
             Route::post('obtener-dias', [Gias::class, 'obtenerDiasTransito']);
             Route::post('asignar-personal', [Gias::class, 'asignarUsuario']);
             Route::post('cambiar-estado', [Gias::class, 'cambiarEstadoGuia']);
@@ -153,6 +167,12 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
         Route::get('agregar', [Solicitud::class, 'viewSolicitud'])->name('solicitud');
     });
     Route::get('storage/img/entrega/{filename}', [Entrega::class, 'obtenerImg'])->name('obtenerImgEntregas');
+    Route::prefix('cliente/consulta/guia')->group(function () {
+        Route::get('/',[Clientes::class,'viewConsultaGeneral'])->name('consultaClienteDetallada');
+        Route::post('datos',[Gias::class,'consultaGuia']);
+        Route::post('remitentes',[Gias::class,'consultaGuiaRemitentes']);
+        Route::get('remitente',[Clientes::class,'viewConsultaDetallada'])->name('consultaClienteGeneral');
+    });
     Route::get('inicio',[Usuario::class,'viewHome'])->name('home');
 });
 Route::middleware(['guest'])->prefix('intranet')->group(function(){
@@ -160,14 +180,6 @@ Route::middleware(['guest'])->prefix('intranet')->group(function(){
     Route::post('/login/restore', [Usuario::class, 'restablecerUsuario']);
     Route::post('/login/restore-cancelar', [Usuario::class, 'restablecerUsuarioCancelar']);
     Route::post('usuarios/autenticacion',[Usuario::class,'autenticacion']);
-});
-Route::get('consulta/guia',function(){
-    return view('comprobante.consultaguia');
-});
-Route::post('consulta/guia/datos',[Gias::class,'consultaGuia']);
-Route::post('consulta/guia/remitentes',[Gias::class,'consultaGuiaRemitentes']);
-Route::get('consulta/guia/remitente',function(){
-    return view('comprobante.consultaguiaremitente');
 });
 Route::get('/',function(){
     return redirect(route('login'));

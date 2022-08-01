@@ -75,4 +75,11 @@ class InformacionAdicional extends Model
     {
         DB::select('CALL sp_evento_actualizar_estados_transito()');
     }
+    public static function obtenerDiasFiltros()
+    {
+        return [
+            'inicioFiltro' => date('Y-m-d'),
+            'finFiltro' => date('Y-m-d',strtotime(date('Y-m-d') . ' -90 days')),
+        ];
+    }
 }

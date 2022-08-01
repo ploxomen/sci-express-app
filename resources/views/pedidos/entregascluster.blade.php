@@ -60,7 +60,7 @@
         <div class="form-group d-flex justify-content-between flex-wrap">
             <h3 class="text-primary">De Guías</h3>
             <div class="d-flex align-items-center">
-                <label for="lista-entregas" class="mr-3">A entregar</label>
+                <label for="lista-entregas" class="mr-3">Por entregar</label>
                 <input type="text" id="lista-entregas" readonly class="form-control mw-100" value="{{$nro_pendients}}">
             </div>
         </div>

@@ -4,13 +4,27 @@
     <title>Guias</title>
 @endsection
 @section('body')
+<style>
+    .title-label{
+        font-size: 20px;
+    }
+</style>
 <section class="p-3">
     <form id="frm_guia" class="mb-4 row">
-        <div class="my-4 col-12">
-            <div class="baner-modulo">
+        <div class="my-3 col-12">
+            <div class="baner-modulo form-group">
                 <img src="{{asset('asset/img/intranet/bill.png')}}" alt="Imagen de guia">
             </div>
-            <h3 class="text-primary text-center">Guías</h3>
+            <div class="d-flex justify-content-center flex-wrap" style="gap: 0 20px;">
+                <div>
+                    <input type="radio" id="select-guia" value="nro_guia" name="select_comprobantes" checked data-value="{{$nro_guia_result}}" data-action="guia">
+                    <label for="select-guia" class="text-primary title-label">Guías</label>
+                </div>
+                <div>
+                    <input type="radio" value="nro_or" name="select_comprobantes" id="select-os" data-value="{{$nro_os}}" data-action="os">
+                    <label for="select-os" class="text-primary title-label">Ordenes de Servicio</label>
+                </div>
+            </div>
         </div>
         <div class="col-12 p-0 px-lg-2 mb-4">
             <div class="bg-white p-3 form-row">
@@ -21,7 +35,6 @@
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_resp_pago">Responsable del pago <small class="text-danger">*</small></label>
                     <select name="resp_pago" id="id_resp_pago" class="form-control" required>
-                        <option value="" hidden>Seleccione una opción</option>
                         <option value="REMITENTE">REMITENTE</option>
                         <option value="DESTINATARIO">DESTINATARIO</option>
                     </select>
@@ -29,33 +42,33 @@
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_estado">Tipo <small class="text-danger">*</small></label>
                     <select name="estado" id="id_estado" class="form-control" required>
-                        <option value="" hidden>Seleccione una opción</option>
                         <option value="1">ACTIVA</option>
-                        <option value="2">ANULADA</option>
                         <option value="3">INACTIVA</option>
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_fech_emis">Fecha Emisión <small class="text-danger">*</small></label>
-                    <input type="date" class="form-control" value="{{$hoy}}" required max="{{$hoy}}" name="fech_emis" id="id_fech_emis">
+                    <input type="date" class="form-control" value="{{$hoy}}" min="{{$antes}}" required max="{{$hoy}}" name="fech_emis" id="id_fech_emis">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_comp_clie">Comprobantes <small class="text-danger">*</small></label>
-                    <select name="comp_clie[]" id="id_comp_clie" required class="form-control" multiple>
+                    <label for="id_comp_clie">Comprobantes <small class="text-danger data-anulada-oculta">*</small></label>
+                    <select name="comp_clie[]" id="id_comp_clie" required class="form-control data-anulada" multiple>
                         <option value="BOLETA">BOLETA</option>
                         <option value="FACTURA">FACTURA</option>
                         <option value="GUIA">GUIA</option>
                         <option value="GUIA INTERNAMIENTO">GUIA INTERNAMIENTO</option>
                         <option value="ORDEN COMPRA">ORDEN COMPRA</option>
+                        <option value="OTRO" class="delete-option">OTRO</option>
+                        <option value="NINGUNO" class="delete-option">NINGUNO</option>
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_nro_comp_cli">N° comprobante <small class="text-danger">*</small></label>
-                    <select name="nro_comp_cli[]" id="id_nro_comp_cli" required class="form-control" multiple></select>
+                    <label for="id_nro_comp_cli">N° comprobante <small class="text-danger data-anulada-oculta">*</small></label>
+                    <select name="nro_comp_cli[]" id="id_nro_comp_cli" required class="form-control data-anulada" multiple></select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_cant_comp">Cantidad Comprobante <small class="text-danger">*</small></label>
-                    <input type="text" class="form-control" value="0" name="cant_comp" required id="id_cant_comp">
+                    <label for="id_cant_comp">Cantidad Comprobante <small class="text-danger data-anulada-oculta">*</small></label>
+                    <input type="text" class="form-control data-anulada" value="0" name="cant_comp" required id="id_cant_comp">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_orde_comp">Orden de compra</label>
@@ -67,7 +80,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_fech_tras">Fecha Traslado <small class="text-danger">*</small></label>
-                    <input type="date" class="form-control" min="{{$hoy}}" required name="fech_tras" id="id_fech_tras">
+                    <input type="date" class="form-control" min="{{$antes}}" value="{{$hoy}}" required name="fech_tras" id="id_fech_tras">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_tray_env">Trayecto Envio <small class="text-danger">*</small></label>
@@ -86,8 +99,8 @@
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
-                    <label for="id_via_tras">Via Traslado(Facturación) <small class="text-danger">*</small></label>
-                    <select name="via_tras" id="id_via_tras" class="form-control" required>
+                    <label for="id_via_tras">Via Traslado(Facturación) <small class="text-danger data-anulada-oculta">*</small></label>
+                    <select name="via_tras" id="id_via_tras" class="form-control data-anulada" required>
                         @foreach ($via_envios as $via)
                             <option value="{{$via->id}}">{{$via->envio}}</option>
                         @endforeach
@@ -116,8 +129,8 @@
                     </select>
                 </div>
                 <div class="form-group col-12 col-lg-6">
-                    <label for="id_remi_tipo_docu">Tipo documento <small class="text-danger">*</small></label>
-                    <select name="remi_tipo_docu" id="id_remi_tipo_docu" required class="form-control simple-select2 cb-tipo-doc" data-input="id_remi_nro_docu" data-valor-cliente="doc_ident" data-valor-proveedor="tipo_docu_prov">
+                    <label for="id_remi_tipo_docu">Tipo documento <small class="text-danger label-disabled-os">*</small></label>
+                    <select name="remi_tipo_docu" id="id_remi_tipo_docu" required class="form-control simple-select2 cb-tipo-doc input-disabled-os" data-input="id_remi_nro_docu" data-valor-cliente="doc_ident" data-valor-proveedor="tipo_docu_prov">
                         <option></option>
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
@@ -125,8 +138,8 @@
                     </select>
                 </div>
                 <div class="form-group col-12 col-lg-6">
-                    <label for="id_remi_nro_docu">N° documento <small class="text-danger">*</small></label>
-                    <input type="text" class="form-control" name="remi_nro_docu" required id="id_remi_nro_docu" data-valor-cliente="nro_doc" data-valor-proveedor="nro_docu_prov">
+                    <label for="id_remi_nro_docu">N° documento <small class="text-danger label-disabled-os">*</small></label>
+                    <input type="text" class="form-control input-disabled-os" name="remi_nro_docu" required id="id_remi_nro_docu" data-valor-cliente="nro_doc" data-valor-proveedor="nro_docu_prov">
                 </div>
                 <div class="form-group col-12">
                     <label for="id_remi_dire">Dirección <small class="text-danger">*</small></label>
@@ -166,8 +179,8 @@
                     </select>
                 </div>
                 <div class="form-group col-12 col-lg-6">
-                    <label for="id_dest_tipo_docu">Tipo documento <small class="text-danger">*</small></label>
-                    <select name="dest_tipo_docu" id="id_dest_tipo_docu" required class="form-control simple-select2 cb-tipo-doc" data-input="id_dest_nro_docu" data-cli-cli="tipo_doc">
+                    <label for="id_dest_tipo_docu">Tipo documento <small class="text-danger label-disabled-os">*</small></label>
+                    <select name="dest_tipo_docu" id="id_dest_tipo_docu" required class="form-control simple-select2 cb-tipo-doc input-disabled-os" data-input="id_dest_nro_docu" data-cli-cli="tipo_doc">
                         <option></option>                        
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
@@ -175,8 +188,8 @@
                     </select>
                 </div>
                 <div class="form-group col-12 col-lg-6">
-                    <label for="id_dest_nro_docu">N° documento <small class="text-danger">*</small></label>
-                    <input type="text" class="form-control" name="dest_nro_docu" required id="id_dest_nro_docu" data-cli-cli="nro_doc">
+                    <label for="id_dest_nro_docu">N° documento <small class="text-danger label-disabled-os">*</small></label>
+                    <input type="text" class="form-control input-disabled-os" name="dest_nro_docu" required id="id_dest_nro_docu" data-cli-cli="nro_doc">
                 </div>
                 
                 <div class="form-group col-12">
@@ -218,15 +231,16 @@
         </div>
         <div class="col-12 p-0 px-lg-2 form-group">
             <div class="form-group text-right">
-                <button type="button" class="btn btn-primary" id="add-new-detalle"><i class="fas fa-plus"></i></button>
+                <button type="button" class="btn btn-primary mr-2" title="Agregar detalle" id="add-new-detalle"><i class="fas fa-plus"></i></button>
+                <button type="button" class="btn btn-danger" title="Eliminar detalle" id="add-delete-detalle"><i class="fas fa-minus"></i></button>
             </div>
             <div class="p-3 bg-white table-responsive">
-                <table class="table table-sm table-bordered" style="min-width: 1300px;">
+                <table class="table table-sm table-bordered" style="min-width: 1350px;">
                     <thead>
                         <tr>
                             <th style="width: 200px;">Grupo Envio</th>
                             <th style="width: 100px;">Tipo Envio</th>
-                            <th style="width: 200px;">Descripción</th>
+                            <th style="min-width: 250px;">Descripción</th>
                             <th style="width: 200px;">Embase o <br> Embalaje</th>
                             <th style="width: 100px;">Cantida</th>
                             <th style="width: 100px;">Kg</th>
@@ -240,7 +254,7 @@
                             @for ($i = 0; $i < 1; $i++)
                             <tr>
                                 <td>
-                                    <select data-name="grupo_envio" class="form-control form-control-sm simple-select2">
+                                    <select required data-name="grupo_envio" class="data-anulada form-control form-control-sm simple-select2">
                                         <option value="" hidden>Seleccione una opción</option>
                                         <option value="MEDICINA">MEDICINA</option>
                                         <option value="REPUESTOS">REPUESTOS</option>
@@ -249,7 +263,7 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <select data-name="tipo_envio" class="form-control form-control-sm simple-select2">
+                                    <select required data-name="tipo_envio" class="data-anulada form-control form-control-sm simple-select2">
                                         <option value="" hidden>Seleccione una opción</option>
                                         <option value="DGR">DGR</option>
                                         <option value="GENERAL">GENERAL</option>
@@ -261,10 +275,10 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <textarea data-name="descripcion" class="form-control form-control-sm"></textarea>
+                                    <textarea data-name="descripcion" class="form-control form-control-sm" rows="1"></textarea>
                                 </td>
                                 <td>
-                                    <select data-name="embase_embalaje" class="form-control form-control-sm simple-select2">
+                                    <select required data-name="embase_embalaje" class="data-anulada form-control form-control-sm simple-select2">
                                         <option></option>
                                         <option value="EMBASE">A GRANEL</option>
                                         <option value="EMBALAJE">ATADOS</option>
@@ -288,27 +302,28 @@
                                         <option value="PLATAFORMA">PLATAFORMA</option>
                                         <option value="ROLLOS">ROLLOS</option>
                                         <option value="SACOS">SACOS</option>
+                                        <option value="SOBRES">SOBRES</option>
                                         <option value="TAMBORES">TAMBORES</option>
                                         <option value="TONELES">TONELES</option>
                                     </select>
                                 </td>
                                 <td>
-                                    <input data-name="cantidad" type="number" value="0.00" class="form-control form-control-sm" onchange="calcTotal(event,4,'total-cantidad')" min="0" step="0.01">
+                                    <input required data-name="cantidad" type="number" value="0.00" class="data-anulada form-control form-control-sm" onchange="calcTotal(event,4,'total-cantidad')" min="0.01" step="0.01">
                                 </td>
                                 <td>
-                                    <input data-name="kg" type="number" value="0.00" class="form-control form-control-sm" onchange="calcTotal(event,5,'total-kg')" min="0" step="0.01">
+                                    <input required data-name="kg" type="number" value="0.00" class="data-anulada form-control form-control-sm" onchange="calcTotal(event,5,'total-kg')" min="0.01" step="0.01">
                                 </td>
                                 <td>
-                                    <input data-name="largo" type="number" value="0.00" class="form-control form-control-sm" onchange="calcVolumen(event)" min="0" step="0.01">
+                                    <input required data-name="largo" type="number" value="0.00" class="fdata-anulada form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
                                 </td>
                                 <td>
-                                    <input data-name="ancho" type="number" value="0.00" class="form-control form-control-sm" onchange="calcVolumen(event)" min="0" step="0.01">
+                                    <input required data-name="ancho" type="number" value="0.00" class="data-anulada form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
                                 </td>
                                 <td>
-                                    <input data-name="altura" type="number" value="0.00" class="form-control form-control-sm" onchange="calcVolumen(event)" min="0" step="0.01">
+                                    <input required data-name="altura" type="number" value="0.00" class="data-anulada form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
                                 </td>
                                 <td>
-                                    <input data-name="volumen" type="number" value="0.00" class="form-control form-control-sm" onchange="calcTotal(event,9,'total-vol')" min="0" step="0.01">
+                                    <input required data-name="volumen" type="number" value="0.00" class="data-anulada form-control form-control-sm" onchange="calcTotal(event,9,'total-vol')" min="0.01" step="0.01">
                                 </td>
                             </tr>
                             @endfor

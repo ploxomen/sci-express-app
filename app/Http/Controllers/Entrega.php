@@ -112,7 +112,27 @@ class Entrega extends Controller
                ];
             }
          }
-         ModeloEmbarque::confirmarEntregaGuias($request->guia,json_decode($request->datos_adicionales,true),Auth::id(),$filesDb);
+         $datos = json_decode($request->datos_adicionales, true);
+         $datalleNroVisitas = [];
+         if($datos['estado_entregado'] == "NO ENTREGADO"){
+            $datalleNroVisitas = [
+               'id_guia' => $request->guia,
+               'visita' => $datos['nro_visitas_reparto'],
+               'motivo' => $datos['motivo_no_ent']
+            ];
+            switch ($datos['nro_visitas_reparto']) {
+               case 'PRIMERA':
+                  $datos['nro_visitas_reparto'] = 'SEGUNDA';
+               break;
+               case 'SEGUNDA':
+                  $datos['nro_visitas_reparto'] = 'TERCERA';
+               break;
+               case 'TERCERA':
+                  $datos['nro_visitas_reparto'] = 'RETORNO';
+               break;
+            }
+         }
+         ModeloEmbarque::confirmarEntregaGuias($request->guia,$datos,Auth::id(),$filesDb, $datalleNroVisitas);
          return response(['success' => 'La Guía N° <b>' . $request->nro_guia .'</b> modificada con exito']);
       } catch (Exception $ex) {
          return response()->json(['error' => $ex->getMessage()]);

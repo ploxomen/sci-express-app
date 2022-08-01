@@ -87,29 +87,29 @@
                                 <label for="id_situacion_reparto_{{$g->id}}">Situación Rep</label>
                                 <select id="id_situacion_reparto_{{$g->id}}" class="form-control simple-select2 situacion-reparto" data-status="#id_estado_entregado_{{$g->id}}" data-detalle="#id_text_disconforme_reparto_{{$g->id}}" data-incidencia="#id_incidencia_reparto_{{$g->id}}">
                                     <option></option>
-                                    <option value="CONFORME">CONFORME</option>
-                                    <option value="INCIDENCIA">INCIDENCIA</option>
+                                    <option value="CONFORME" {{$g->situacion_durante_envio == 'CONFORME' ? 'selected' : ''}}>CONFORME</option>
+                                    <option value="INCIDENCIA" {{$g->situacion_durante_envio == 'INCIDENCIA' ? 'selected' : ''}}>INCIDENCIA</option>
                                 </select>
                             </div>
                             <div class="form-group col-12 col-md-6">
                                 <label for="id_incidencia_reparto_{{$g->id}}">Incidencia Rep</label>
-                                <select id="id_incidencia_reparto_{{$g->id}}" data-estado="#id_estado_entregado_{{$g->id}}" class="form-control simple-select2 situacion-incidencia" disabled>
+                                <select id="id_incidencia_reparto_{{$g->id}}" data-estado="#id_estado_entregado_{{$g->id}}" class="form-control simple-select2 situacion-incidencia" {{$g->situacion_durante_envio == 'CONFORME' ? 'disabled' : ''}}>
                                     <option></option>
-                                    <option value="DAÑO PARCIAL">DAÑO PARCIAL</option>
-                                    <option value="DAÑO TOTAL">DAÑO TOTAL</option>
-                                    <option value="PERDIDA PARCIAL">PERDIDA PARCIAL</option>
-                                    <option value="PERDIDA TOTAL">PERDIDA TOTAL</option>
+                                    <option value="DAÑO PARCIAL" {{$g->incidencia_durante_envio == "DAÑO PARCIAL" ? 'selected' : ''}}>DAÑO PARCIAL</option>
+                                    <option value="DAÑO TOTAL" {{$g->incidencia_durante_envio == "DAÑO TOTAL" ? 'selected' : ''}}>DAÑO TOTAL</option>
+                                    <option value="PERDIDA PARCIAL" {{$g->incidencia_durante_envio == "PERDIDA PARCIAL" ? 'selected' : ''}}>PERDIDA PARCIAL</option>
+                                    <option value="PERDIDA TOTAL" {{$g->incidencia_durante_envio == "PERDIDA TOTAL" ? 'selected' : ''}}>PERDIDA TOTAL</option>
                                 </select>
                             </div>
                             <div class="form-group col-12">
-                                <textarea class="form-control" disabled id="id_text_disconforme_reparto_{{$g->id}}" placeholder="Detallar la incidencia" maxlength="500"></textarea>
+                                <textarea class="form-control" {{$g->situacion_durante_envio == 'CONFORME' ? 'disabled' : ''}} id="id_text_disconforme_reparto_{{$g->id}}" placeholder="Detallar la incidencia" maxlength="500">{{$g->text_durante_disconforme}}</textarea>
                             </div>
                             <div class="col-12">
                                 <h6 class="text-primary"><i class="fas fa-caret-right"></i> Estados de entrega</h6>
                             </div>
                             <div class="form-group col-12 col-md-6 col-lg-4">
                                 <label for="id_estado_entregado_{{$g->id}}">Status Ent</label>
-                                <select id="id_estado_entregado_{{$g->id}}" class="form-control simple-select2 status-entrega" data-noentregado="#id_motivo_no_ent_{{$g->id}}" data-visitas="#id_nro_visitas_reparto_{{$g->id}}">
+                                <select id="id_estado_entregado_{{$g->id}}" class="form-control simple-select2 status-entrega" data-noentregado="#id_motivo_no_ent_{{$g->id}}" data-visitas="#id_nro_visitas_reparto_{{$g->id}}" {{$g->incidencia_durante_envio == 'DAÑO TOTAL' || $g->incidencia_durante_envio == 'PERDIDA TOTAL' ? 'disabled' : ''}}>
                                     <option></option>
                                     <option value="ENTREGADO">ENTREGADO</option>
                                     <option value="NO ENTREGADO">NO ENTREGADO</option>
@@ -117,16 +117,11 @@
                             </div>
                             <div class="form-group col-12 col-md-6 col-lg-4">
                                 <label for="id_nro_visitas_reparto_{{$g->id}}">N° Visitas</label>
-                                <select id="id_nro_visitas_reparto_{{$g->id}}" class="form-control simple-select2">
-                                    <option></option>
-                                    <option value="PRIMERA">PRIMERA</option>
-                                    <option value="SEGUNDA">SEGUNDA</option>
-                                    <option value="TERCERA">TERCERA</option>
-                                </select>
+                                <input type="text" class="form-control" id="id_nro_visitas_reparto_{{$g->id}}" value="{{$g->nro_visitas_reparto == null ? 'PRIMERA' : $g->nro_visitas_reparto}}" readonly>
                             </div>
                             <div class="form-group col-12 col-md-6 col-lg-4">
                                 <label for="id_motivo_no_ent_{{$g->id}}">Motivo No Ent</label>
-                                <select id="id_motivo_no_ent_{{$g->id}}" class="form-control simple-select2">
+                                <select id="id_motivo_no_ent_{{$g->id}}" class="form-control simple-select2" disabled>
                                     <option></option>
                                     <option value="AUSENTE">AUSENTE</option>
                                     <option value="DIR INCOMPLETA">DIR INCOMPLETA</option>

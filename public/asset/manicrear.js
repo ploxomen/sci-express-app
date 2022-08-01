@@ -6,6 +6,7 @@ function loadPage() {
     let tblGuias = document.getElementById('table-guias');
     let cbTra = document.getElementById('id_trayecto');
     let cbSelectAll = document.getElementById("id_check_todo");
+    let transferManifest = null;
     async function buscarGuias() {
         if($('#id_prov_dest').val() != "" && $('#id_prov_orig').val() != "" && $('#id_id_cluster').val() != ""){
             viewAllProv.checked = false;
@@ -15,6 +16,8 @@ function loadPage() {
         datos.append('prov_dest',viewAllProv.checked ? 'todos' : $('#id_prov_dest').val());
         datos.append('prov_orig',viewAllProv.checked ? 'todos' : $('#id_prov_orig').val());
         datos.append('cluster_id',viewAllProv.checked ? 'todos' : $('#id_id_cluster').val());
+        datos.append('via_traslado', $('#id_via_traslado').val());
+        datos.append('estado_guia', $('#id_estado_guia').val());
         try {
             let response = await general.funcfetch('ver-guias',datos);
             if(response.error){
@@ -22,17 +25,40 @@ function loadPage() {
                 return
             }
             let template = ``;
+            let listProvDest = [];
             if(response.success.length){
                 response.success.forEach(ele => {
-                    template += `<tr class="${ele.id_asignado ? 'table-success' : 'table-warning'}">
-                    <td>
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input ${ele.id_asignado ? 'select-guias' : 'disabled'}" ${!ele.id_asignado ? 'disabled' : ''} id="id_check_${ele.id}" data-id="${ele.id}">
+                    if(ele.situ === 1){
+                        const existeProv = listProvDest.findIndex(provincia => provincia.ciudad_base == ele.ciudad_base_cluster)
+                        if (existeProv >= 0) {
+                            listProvDest[existeProv].nro_guia++;
+                        } else {
+                            listProvDest.push({
+                                nro_guia: 1,
+                                ciudad_base: ele.ciudad_base_cluster
+                            });
+                        }
+                    }
+                    
+                    let bgTrMani = "";
+                    if (!ele.id_asignado){
+                        bgTrMani = 'table-warning';
+                    }
+                    if (ele.id_asignado && ele.situ === 1){
+                        bgTrMani = "table-success";
+                    }
+                    template += `<tr class="${bgTrMani}"><td>`;
+                    if (ele.id_asignado && ele.situ === 1) {
+                        template += `<div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input select-guias" id="id_check_${ele.id}" data-id="${ele.id}" data-traslado="${ele.via_envio}">
                             <label class="custom-control-label" for="id_check_${ele.id}"></label>
-                        </div>
+                        </div>`;
+                    }
+                    template += `
                     </td>
                     <td>${ele.nro_guia}</td>
                     <td>${ele.fcha_emi}</td>
+                    <td>${ele.via_envio}</td>
                     <td>${ele.remi_prov}</td>
                     <td>${ele.dest_prov}</td>
                     <td>${ele.orde_comp}</td>
@@ -47,14 +73,48 @@ function loadPage() {
                     </tr>`;
                 });
             }else{
-                template = '<tr><td colspan="14" class="text-center">No se encontráron guias para ser manifestadas</td></tr>'
+                template = '<tr><td colspan="14" class="text-center">No se encontráron guias pendientes para ser manifestadas</td></tr>'
             }
             tblGuias.innerHTML = template;
+            for (const selectGuia of document.querySelectorAll('.select-guias')) {
+                selectGuia.addEventListener('change',function(e){
+                    const traslado = selectGuia.dataset.traslado;
+                    let contadorCheck = 0;
+                    for (const disabilitar of document.querySelectorAll('.select-guias')) {
+                        if (traslado == 'TERRESTRE' && disabilitar.dataset.traslado != traslado) {
+                            disabilitar.disabled = true;
+                            transferManifest = 'TERRESTRE';
+                        }
+                        if (traslado.indexOf('AEREA') >= 0 && disabilitar.dataset.traslado == 'TERRESTRE') {
+                            disabilitar.disabled = true;
+                            transferManifest = 'AEREO';
+                        }
+                        contadorCheck += disabilitar.checked ? 1 : 0;
+                    }
+                    if (contadorCheck === 0){
+                        transferManifest = null;
+                        $('.select-guias').prop('disabled',false);
+                    }
+                })
+            }
+            template = "";
+            let totalGuias = 0;
+            listProvDest.forEach(prov => {
+                totalGuias = totalGuias + prov.nro_guia;
+                template += `<b class="text-info">${prov.ciudad_base}: ${prov.nro_guia}</b>`;
+            });
+            document.getElementById('detalle-provincia-destino').innerHTML = listProvDest.length === 0 ? '<b>No se encontraron guias pendientes para contabilizar</b>' : template;
+            document.getElementById('nro_guias_manifestar').textContent = totalGuias;
+            document.getElementById('total_resultamos_mostrados').textContent = response.success.length;
+
         } catch (error) {
             alertify.alert('Error',error.message);
             console.error(error);
         }
     }
+    $('.aplicar-filtro').on('select2:select',function(e){
+        buscarGuias();
+    })
     buscarGuias();
     btnBuscProv.addEventListener('click',function(e){
         e.preventDefault();
@@ -77,6 +137,9 @@ function loadPage() {
                 arrGuias.push({id_guia: element.dataset.id});
             }
         }
+        if(!transferManifest){
+            alertify.error('no se encontró el trayecto para manifestar');
+        }
         if(!arrGuias.length){
             alertify.error('seleccione una o más guias');
             return
@@ -86,12 +149,12 @@ function loadPage() {
         document.getElementById('id_cluster_modal').value = $('#id_id_cluster option:selected').text();
         document.getElementById('nro_selecionadas').textContent = arrGuias.length;
         $('#manifestar-guias').modal("show");
-        
     });
     document.getElementById("btn-generar-mani").addEventListener("click",async function(event){
         event.preventDefault();
         let datos = new FormData(frmMani);
         datos.append("fech_mani",document.getElementById("id_fech_mani").value);
+        datos.append("via_envio",transferManifest);
         let arrGuias = new Array();
         let trGuias = tblGuias.querySelectorAll('.select-guias');
         for (const element of trGuias) {
@@ -107,6 +170,7 @@ function loadPage() {
         datos.append('id_cluster',$('#id_id_cluster').val());
          try {
             let response = await general.funcfetch('agregar',datos);
+            transferManifest = null;
             if(response.error){
                 alertify.alert('Error',response.error);
                 return
@@ -186,11 +250,33 @@ function loadPage() {
             $('#id_id_cluster').val("").trigger("change");
         }
     });
-    cbSelectAll.addEventListener("change",function () {  
+    cbSelectAll.addEventListener("change",function () {
+        let via_traslado = $('#id_via_traslado').val();  
         const activo = this.checked;
         for (const tr of tblGuias.children) {
-            if(tr.querySelector(`.select-guias`)){
-                tr.querySelector(`.select-guias`).checked = activo;
+            const checkGuia = tr.querySelector(`.select-guias`);
+            if (checkGuia) {
+                if (!activo) {
+                    checkGuia.disabled = false;
+                    checkGuia.checked = false;
+                    transferManifest = null;
+                    continue;
+                }
+                if(via_traslado == 'todos'){
+                    let primerTrTraslado = tblGuias.querySelector('.select-guias').dataset.traslado;
+                    primerTrTraslado = primerTrTraslado.indexOf('AEREA') >= 0 ? 'AEREA' : primerTrTraslado;
+                    if (primerTrTraslado == "TERRESTRE") {
+                        transferManifest = "TERRESTRE";
+                        checkGuia.disabled = checkGuia.dataset.traslado != "TERRESTRE" ? true : false;
+                        checkGuia.checked = checkGuia.dataset.traslado == "TERRESTRE" ? true : false;
+                    }else{
+                        transferManifest = "AEREO";
+                        checkGuia.disabled = checkGuia.dataset.traslado.indexOf(primerTrTraslado) < 0 ? true : false;
+                        checkGuia.checked = checkGuia.dataset.traslado.indexOf(primerTrTraslado) >= 0 ? true : false;
+                    }
+                }else{
+                    checkGuia.checked = true;
+                }                
             }
         }
     });

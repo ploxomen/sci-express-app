@@ -125,6 +125,9 @@
         <div class="cuerpo-panel">
             @yield('body')
         </div>
+        <footer class="footer-login">
+            <span style="font-size: 12px !important;">Desarrollado por <a href="https://gscreativas.com/" target="_blank">gscreativas.com</a></span>
+        </footer>
     </div>
     <div class="content-mi-info" id="contenido-submenu"></div>
 </body>

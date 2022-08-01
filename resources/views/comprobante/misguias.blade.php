@@ -15,8 +15,16 @@
 @section('body')
 <section class="p-2 bg-white">
     <h3 class="text-primary"><i class="fas fa-caret-right"></i> Mis guias</h3>
-    <form class="row mb-4">
-        <div class="form-group col-12 col-md-6 col-lg-3">
+    <form class="row mb-4" id="frm-aplicar-filtros">
+        <div class="form-group col-6 col-lg-3 col-xl-2">
+            <label for="fecha_inicio">Fecha Inicio</label>
+            <input type="date" class="form-control" id="fecha_inicio" value="{{$fechaFiltros['finFiltro']}}" required>
+        </div>
+        <div class="form-group col-6 col-lg-3 col-xl-2">
+            <label for="id_fecha_fin">Fecha Fin</label>
+            <input type="date" class="form-control" id="id_fecha_fin" value="{{$fechaFiltros['inicioFiltro']}}" required>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-3 col-xl-2">
             <label for="estado_guias">Status</label>
             <select class="form-control cb-filtros" id="estado_guias">
                 <option value="0" selected>TODOS</option>
@@ -25,7 +33,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="form-group col-12 col-md-6 col-xl-2">
+        <div class="form-group col-12 col-md-6 col-lg-3 col-xl-2">
             <label for="id_tipo">Tipo</label>
             <select class="form-control cb-filtros" id="id_tipo">
                 <option value="0" selected>TODOS</option>
@@ -33,6 +41,9 @@
                 <option value="2">ANULADA</option>
                 <option value="3">INACTIVA</option>
             </select>
+        </div>
+        <div class="form-group col-12 col-md-6 col-xl-1">
+            <button type="submit" class="btn btn-sm btn-primary" title="Aplicar los filtros"><i class="fas fa-search"></i></button>
         </div>
         <div class="form-group col-12">
             <span class="text-info">Total N° guias sin asignar: <span id="total-por-procesar-guias">{{$nro_por_asignar[0]->total}}</span></span>

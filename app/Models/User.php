@@ -184,7 +184,7 @@ class User extends Authenticatable
                 break;
             case 16:
                 //GUIAS POR RETORNAR CLUSTER
-                $query = "SELECT COUNT(*) AS total FROM guias g LEFT JOIN cluster c ON g.id_cluster = c.id WHERE c.id_usuario = ? AND g.estado = 1 AND g.situ IN(8,9) AND g.activo = 1";
+                $query = "SELECT COUNT(*) AS total FROM guias g LEFT JOIN cluster c ON g.id_cluster = c.id WHERE c.id_usuario = ? AND g.estado = 1 AND g.situ IN(8,9,14) AND g.activo = 1";
                 $resultado = DB::select($query, [$id_user]);
                 $resultado = $resultado[0]->total;
             break;
@@ -222,7 +222,7 @@ class User extends Authenticatable
             break;
             case 23:
                 //TODAS LAS GUIAS POR RETORNAR
-                $query = "SELECT COUNT(*) AS total FROM guias g WHERE g.estado = 1 AND g.situ IN(8,9) AND g.activo = 1";
+                $query = "SELECT COUNT(*) AS total FROM guias g WHERE g.estado = 1 AND g.situ IN(8,9,14) AND g.activo = 1";
                 $resultado = DB::select($query);
                 $resultado = $resultado[0]->total;
             break;

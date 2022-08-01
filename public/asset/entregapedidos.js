@@ -92,22 +92,16 @@ function loadPage(){
         }
     });
     $('.status-entrega').on('change',function(e){
-        const nroEntregas = $(this).attr("data-visitas");
         const noEntregado = $(this).attr("data-noentregado");
         if($(this).val() == ""){
-            $(nroEntregas).prop('disabled',true);
-            $(nroEntregas).val('').trigger("change");
             $(noEntregado).prop('disabled',true);
             $(noEntregado).val('').trigger("change");
         }
         if($(this).val() == 'ENTREGADO'){
-            $(nroEntregas).prop('disabled',false);
             $(noEntregado).val('').trigger("change");
             $(noEntregado).prop('disabled',true);
         }
         if($(this).val() == 'NO ENTREGADO'){
-            $(nroEntregas).prop('disabled',true);
-            $(nroEntregas).val('').trigger("change");
             $(noEntregado).prop('disabled',false);
         }
     });

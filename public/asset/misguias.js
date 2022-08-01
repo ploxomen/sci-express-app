@@ -6,7 +6,12 @@ function loadPage(){
             url: 'mis-guias',
             method: 'POST',
             headers: general.jsonToken,
-            data : function(d){d.estado = $('#estado_guias').val(); d.tipo = $('#id_tipo').val()}
+            data : function(d){
+                d.estado = $('#estado_guias').val(); 
+                d.tipo = $('#id_tipo').val();
+                d.fechaInicio = $('#fecha_inicio').val();
+                d.fechaFin = $('#id_fecha_fin').val();
+            }
         },
         columns: [
             {data: 'nro_guia'},
@@ -18,6 +23,9 @@ function loadPage(){
             {data: 'ciudad_base_cluster'},
             {data: 'ciudad_final'},
             {data: 'listClusters',render : function(data,type,row){
+                if(row.guia_tipo == 'INACTIVA' || row.guia_tipo == 'ANULADA'){
+                    return '<span class="text-danger">Sin acciones</span>';
+                }
                 let tempClust = `<option></option>`;
                 if(data){
                     data.forEach(c => {
@@ -85,78 +93,9 @@ function loadPage(){
                 alertify.alert('Error',response.error);
                 return 
             }
-            verDetalleGuia(response.datos);
+            general.verDetalleGuia(response.datos);
         }
     });
-    let libraryGuia = null;
-    function verDetalleGuia(data) {
-        if(!data){
-            return
-        }
-        $('#detalle-guias-todo').modal('show');
-        for (const key in data) {
-            if (Object.hasOwnProperty.call(data, key)) {
-                const value = data[key];
-                const dom = document.getElementById('id_' + key);
-                if(!dom){
-                    continue;
-                }
-                dom.textContent = value;
-            }
-        }
-        if(libraryGuia){
-            $('#galery-img').empty();
-            $('#galery-img').nanogallery2('destroy');
-        }
-        console.log(data);
-        if(data.img_list.length > 0){
-            let arrayImg = new Array();
-            data.img_list.forEach(img => {
-                arrayImg.push({
-                    src : img.nom_id_file,
-                    srct : img.nom_id_file,
-                    title : img.nom_file
-                })
-            });
-            libraryGuia = $('#galery-img').nanogallery2({
-                thumbnailHeight:100,
-                thumbnailWidth:100,
-                thumbnailAlignment: 'center',
-                thumbnailGutterWidth : 5,
-                thumbnailGutterHeight: 5,
-                thumbnailBorderHorizontal : 1,
-                thumbnailBorderVertical : 1,
-                itemsBaseURL: window.location.origin + "/intranet/storage/img/entrega/",
-                items : arrayImg,
-                thumbnailLabel: {display : false}
-            });
-        }else{
-            $('#galery-img').html(`<span class="text-danger d-block text-center">No se encontró imagenes de entrega para esta guía</span>`)
-        }
-        let template = '';
-        if(data.detalles_guias){
-            data.detalles_guias.forEach(dg => {
-                template += `
-                <div class="card mb-2">
-                    <div class="card-body">
-                        <div class="form-row">
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Grupo Envio</b>${dg.grupo_envio}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Tipo Envio</b>${dg.tipo_envio}</div>
-                            <div class="col-12 col-lg-4"><b class="d-block text-secondary">Embase o Embalaje</b>${dg.embase_embalaje}</div>
-                            <div class="col-12"><b class="d-block text-secondary">Descripción</b>${!dg.descripcion ? 'No definido' : dg.descripcion}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Cantidad</b>${dg.cantidad}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Kg</b>${dg.kg}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Largo</b>${dg.largo}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Ancho</b>${dg.ancho}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Altura</b>${dg.altura}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Volumen</b>${dg.volumen}</div>
-                        </div>
-                    </div>
-                </div>`;
-            });
-            document.getElementById('detalle_guias').innerHTML = template;
-        }
-    }
     
     tablaGuias.on('responsive-display', function ( e, datatable, row, showHide, update ) {
         const tabla = e.target.children[0].children[0];
@@ -270,10 +209,14 @@ function loadPage(){
         }
     });
     for (const filtros of document.querySelectorAll('.cb-filtros')) {
-        filtros.addEventListener('change',function(){
+        filtros.addEventListener('change',function(e){
             tablaGuias.draw();
         });
     }
+    document.getElementById('frm-aplicar-filtros').addEventListener('submit',(e)=>{
+        e.preventDefault();
+        tablaGuias.draw();
+    });
 
 }
 window.addEventListener('DOMContentLoaded',loadPage);

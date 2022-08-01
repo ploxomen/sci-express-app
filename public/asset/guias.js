@@ -5,12 +5,70 @@ function pageLoaded(){
     $('#id_comp_clie').select2({
         theme : 'bootstrap',
         width: '100%'
+    }).on('select2:select', function (e) {
+        const valores = $(this).val();
+        if(valores){
+            const exist = valores.filter(opt => opt == 'NINGUNO');
+            if(exist.length){
+                $('#id_comp_clie').val(["NINGUNO"]).trigger("change");   
+            }
+            document.getElementById('id_nro_comp_cli').required = exist.length === 0 ? true : false;
+            document.getElementById('id_nro_comp_cli').disabled = exist.length === 0 ? false : true;
+        }
     });
     $('#id_nro_comp_cli').select2({
         theme : 'bootstrap',
         width: '100%',
         tags: true
     });
+    const dataGuias = [
+        {
+            action : 'guia',
+            label : 'N° Guía',
+            pattern: "[0-9]{3}[-][0-9]{7}",
+            maxlength : 11,
+            requiredDataClient : true
+        },
+        {
+            action : 'os',
+            label : 'N° OS',
+            pattern: "[0-9]{7}",
+            maxlength : 7,
+            requiredDataClient: false
+        }
+    ];
+    const nroGuia = document.getElementById('id_nro_guia');
+    for (const guia of document.getElementsByName('select_comprobantes')) {
+        guia.addEventListener('change',function(e){
+            e.preventDefault();
+            dataGuias.forEach((v,k) => {
+                if(v.action == e.target.dataset.action){
+                    nroGuia.value = e.target.dataset.value;
+                    nroGuia.setAttribute('maxlength',v.maxlength);
+                    nroGuia.pattern = v.pattern;
+                    nroGuia.parentElement.querySelector('label').innerHTML = `${v.label} <small class="text-danger">*</small>`;
+                    for (const d of document.querySelectorAll('.label-disabled-os')) {
+                        d.classList.remove('d-inline','d-none');
+                        d.classList.add(!v.requiredDataClient ? 'd-none' : 'd-inline');
+                    }
+                    for (const inp of document.querySelectorAll('.input-disabled-os')) {
+                        inp.required = v.requiredDataClient;
+                    }
+                }
+            });
+            // if (e.target.dataset.action == 'os') {
+            //     $('#id_comp_clie').append(`<option value="OTRO" class="delete-option">OTRO</option><option value="NINGUNO" class="delete-option">NINGUNO</option>`);
+            // } else {
+            //     document.getElementById('id_nro_comp_cli').disabled = false;
+            //     $('.delete-option').remove();
+            // }
+            // $('#id_comp_clie').select2('destroy');
+            // $('#id_comp_clie').select2({
+            //     theme: 'bootstrap',
+            //     width: '100%'
+            // });
+        });
+    }
     $('#id_dest_dist').on('select2:select',async function(e){
         let datosn = new FormData();
         datosn.append('distrito',$(this).val());
@@ -24,9 +82,17 @@ function pageLoaded(){
     $('#id_nro_comp_cli').on('change.select2',function(e){
         $('#id_cant_comp').val($(this).val().length);
     });
+    document.getElementById('add-delete-detalle').addEventListener('click',function (e) {  
+        e.preventDefault();
+        if(document.getElementById('tabla-detalle').children.length === 1){
+            alertify.error('la guía debe de tener al menos un detalle');
+            return
+        }
+        const nroChildren = document.getElementById('tabla-detalle').children.length;
+        document.getElementById('tabla-detalle').children[nroChildren-1].remove();
+        alertify.success('ultimo detalle eliminado');
+    })
     $('#id_remi_nomb').on('select2:select',async function(event){
-        // newCliCli = false;
-        // clearCliDeCli();
         let datos = new FormData();
         tipoCbRemi = this.selectedOptions[0].getAttribute('data-type');
         datos.append('tipo',tipoCbRemi);
@@ -159,13 +225,19 @@ function pageLoaded(){
             alertify.alert('Error',error.message);
         }
     }
+    document.getElementById('id_estado').addEventListener('change',function(e){
+        $('.data-anulada-oculta').prop('hidden',this.value == '3' ? true : false);
+        $('.data-anulada').prop('required',this.value == '3' ? false : true);
+    });
     document.getElementById('add-new-detalle').addEventListener('click',function(e){
         $('.simple-select2').select2('destroy');
         let tr = document.getElementById('tabla-detalle').children[0];
         const cloneTr = tr.cloneNode(true);
         for (const i2 of cloneTr.querySelectorAll('input, select')) {
-            console.dir(i2);
            i2.value = i2.localName == "input" ? "0.00" : "";
+            if (document.getElementById('id_estado').value == '3'){
+                i2.required = false;
+            }
         }
         document.getElementById('tabla-detalle').append(cloneTr);
         $('.simple-select2').select2({
@@ -173,7 +245,8 @@ function pageLoaded(){
             width: '100%',
             placeholder: 'Seleccione una opción'
         });
-        alertify.success('Se agregó otra fila');
+        
+        alertify.success('Se agregó otro detalle');
     });
     $('#id_dest_nomb').on('select2:select',async function(event){
         let datos = new FormData();

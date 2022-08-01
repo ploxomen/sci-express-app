@@ -19,17 +19,17 @@ function loadPage(){
             box.hidden = true;
         }
         for (const textos of document.querySelectorAll('.text-proceso')) {
-            textos.textContent = '..../..../....';
+            textos.textContent = '';
         }
         for (const textoSpan of document.querySelectorAll('.text-guias')) {
-            textoSpan.textContent = 'No establecido';
+            textoSpan.innerHTML = '<span>No establecido</span>';
         }
         const datos = new FormData(this);
         let request = new XMLHttpRequest();
         request.onreadystatechange = function(){
             if(request.readyState == 4 && request.status == 200){
                 if(!request.response.result){
-                    alertify.alert('Mensaje','No se encontró ninguna información de la guía, por favot asegurate de escribir bien los datos.');
+                    alertify.alert('ALERTA','NO SE ENCONTRARON RESULTADOS, FAVOR VERIFICAR LA INFORMACION CON SU ALMACEN');
                     return false;
                 }
                 for (const key in request.response.result) {

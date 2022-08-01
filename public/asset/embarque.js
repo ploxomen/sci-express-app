@@ -4,7 +4,7 @@ function loadPage() {
     let tblMani = document.getElementById("tabla-manifiestos");
     let frmEmbarque = document.getElementById('add-embarque');
     let frmListEmb = document.getElementById('frm-lista-fletes');
-    let fletes = null;
+    general.obtenerFlestes();
     let dataTableMani = $('#tabla-embarque').DataTable({
         ajax : {
             url: 'manifiesto/pendientes',
@@ -25,6 +25,7 @@ function loadPage() {
             {data: 'idExtendMani'},
             {data: 'format_fecha',searchable: false,orderable: false},
             {data: 'trayectoName'},
+            {data: 'envio'},
             {data: 'prov_orig'},
             {data: 'prov_dest'},
             {data: 'nombre_ciudad_base'},
@@ -35,10 +36,20 @@ function loadPage() {
         createdRow : function(row,data){
             let bgTable = !data.id_asignado ? 'table-warning' : 'table-success';
             $(row).addClass(bgTable);
-        }
+        },
     });
     $('#id_prov_dest').on('select2:select',function(){
         dataTableMani.draw();
+    });
+    $('#id_id_deal').on('select2:select', function () {
+        $("#id_id_deal2 option").prop('disabled', false);
+        const valDealer2 = $(this).val();
+        $("#id_id_deal2 option[value=" + valDealer2 + "]").prop('disabled', true);
+        $("#id_id_deal2").val('NINGUNO').trigger('change');
+    });
+    $('#id_id_deal2').on('change', function () {
+        const valDealer2 = $(this).val();
+        $("#id_resp_emba option[value='Dealer 2']").prop('disabled', valDealer2 == 'NINGUNO' ? true : false);
     });
     cbSelectAll.addEventListener("change",function () {  
         const activo = this.checked;
@@ -49,15 +60,6 @@ function loadPage() {
             }
         }
     });
-    async function obtenerFlestes(){
-        let response = await general.funcfetch('obtener-fletes');
-        if(response.error){
-            alertify.alert('Error',response.error);
-            return
-        }
-        fletes = response.fletes;
-    }
-    obtenerFlestes();
     frmEmbarque.addEventListener('submit',async function(event){
         event.preventDefault();
         let datos = new FormData();
@@ -78,97 +80,35 @@ function loadPage() {
             alertify.alert('Error',response.error);
             return
         }
-        let template = ``;
-        response.ciudades.forEach(c => {
-            template += `
-                <li data-cluster="${c.id_cluster}">
-                    <div class="form-row">
-                        <div class="form-group col-12 col-md-6 col-lg-5">
-                            <b>Ciudad Base:</b><span> ${c.nombreciudad}</span>
-                        </div>
-                        <div class="form-group col-12 col-md-6 col-lg-7">
-                            <b>Cluster:</b><span> ${c.nom_cluster}</span>
-                        </div>
-                        <div class="form-group col-6 col-lg-3">
-                            <label for="total_bultos_${c.id_cluster}">Sub Cant <small class="text-danger">*</small></label>
-                            <input type="number" id="total_bultos_${c.id_cluster}" min="1" class="form-control form-control-sm sub-total" readonly required>
-                        </div>
-                        <div class="form-group col-6 col-lg-3">
-                            <label for="sub_feletes_${c.id_cluster}">Sub Flete <small class="text-danger">*</small></label>
-                            <input type="number" step="0.01" id="sub_feletes_${c.id_cluster}" min="1" class="form-control form-control-sm sub-flete" required>
-                        </div>
-                        <div class="col-12"></div>
-                        <div class="form-group col-6 col-lg-2">
-                            <label for="id_nro_cajas_${c.id_cluster}">Cajas</label>
-                            <input type="number" name="nro_cajas" data-search="cajas" data-base="${c.nombreciudad.toUpperCase()}" id="id_nro_cajas_${c.id_cluster}" class="form-control form-control-sm calc-total" min="0">
-                        </div>
-                        <div class="form-group col-6 col-lg-2">
-                            <label for="id_nro_jabas_${c.id_cluster}">Jabas</label>
-                            <input type="number" name="nro_jabas" data-search="jabas" data-base="${c.nombreciudad.toUpperCase()}" id="id_nro_jabas_${c.id_cluster}" class="form-control form-control-sm calc-total" min="0">
-                        </div>
-                        <div class="form-group col-6 col-lg-2">
-                            <label for="id_nro_cajones_${c.id_cluster}">Cajones</label>
-                            <input type="number" name="nro_cajones" data-search="cajones" data-base="${c.nombreciudad.toUpperCase()}" id="id_nro_cajones_${c.id_cluster}" class="form-control form-control-sm calc-total" min="0">
-                        </div>
-                        <div class="form-group col-6 col-lg-2">
-                            <label for="id_nro_sobres_${c.id_cluster}">Sobres</label>
-                            <input type="number" name="nro_sobres" data-search="sobres" data-base="${c.nombreciudad.toUpperCase()}" id="id_nro_sobres_${c.id_cluster}" class="form-control form-control-sm calc-total" min="0">
-                        </div>
-                        <div class="form-group col-6 col-lg-2">
-                            <label for="id_nro_paquetes_${c.id_cluster}">Paquetes</label>
-                            <input type="number" name="nro_paquetes" data-search="paquetes" data-base="${c.nombreciudad.toUpperCase()}" id="id_nro_paquetes_${c.id_cluster}" class="form-control form-control-sm calc-total" min="0">
-                        </div>
-                        <div class="form-group col-6 col-lg-2">
-                            <label for="id_num_otros_${c.id_cluster}">Otros</label>
-                            <input type="number" name="num_otros" data-search="parihuelas" data-base="${c.nombreciudad.toUpperCase()}" id="id_num_otros_${c.id_cluster}" class="form-control form-control-sm calc-total" min="0">
-                        </div>
-                        <div class="form-group col-12">
-                            <label for="id_detalle_otro_${c.id_cluster}">Detallar otro</label>
-                            <textarea name="detalle_otro" maxlength="255" data-search="detalle_otros" id="id_detalle_otro_${c.id_cluster}" class="form-control form-control-sm"></textarea>
-                        </div>
-                    </div>
-                </li>`;
-        });
-        document.getElementById('lista-ciudades-base').innerHTML = template;
+        general.visualizarFletes(response, 'lista-ciudades-base', 'lista-ciudades-base-aereo');
+
         $('#modal-difinir-fletes').modal("show");
         $('#modal-difinir-fletes .calc-total').on('change',function(e){
-            const subTotalBulto = e.target.parentElement.parentElement;
-            subTotalBulto.querySelector('.sub-total').value = general.totalBultos(subTotalBulto,'.calc-total');
-            let totalBulto = 0;
-            $('#modal-difinir-fletes .calc-total').map(function(k,v){
-                const vtotal = $(v).val() == "" || $(v).val() == null ? 0 : $(v).val();
-                totalBulto += parseInt(vtotal);
-            });
-            $('#id_tota_bult').val(totalBulto);
-            if(!fletes){
-                return
-            }
-            fletes.forEach(f => {
-                if(f.ciudad_base == $(this).attr('data-base')){
-                    let total = 0;
-                    $(subTotalBulto).find('.calc-total').map(function(k,v){
-                        const fle = parseFloat(f[$(v).attr('data-search')]);
-                        const mivalor = $(this).val() == "" || $(this).val() == null ? 0 : $(this).val();
-                        total += isNaN(fle) ? 0 : fle * mivalor;
-                    });
-                    subTotalBulto.querySelector('.sub-flete').value = total.toFixed(2);
-                    $(subTotalBulto).find('.sub-flete').trigger("change");
-                    return
-                }
-            });
+            general.calcularBultosFletes('#modal-difinir-fletes', e.target.parentElement.parentElement, $(this).attr('data-base'), $(this).attr('data-transfer'));
         });
-        $('#modal-difinir-fletes .sub-flete').on('change',function(e){
-            let total = 0;
-            $('#lista-ciudades-base .sub-flete').map(function(k,v){
-                const valor = $(v).val() == "" || $(v).val() == null ? 0 : $(v).val();
-                total += parseFloat(valor);
-            });
-            $('#id_flet_esti').val(total.toFixed(2));
-        });       
+        $('#modal-difinir-fletes .sub-flete').on('change', general.calcularSubFlete);
     });
     frmEmbarque.addEventListener('reset',function(){
         $('.simple-select2').val("").trigger('change');
     });
+    function addFletes(li){
+        if(!li.dataset.cluster){
+            return false;
+        }
+        return {
+            id_cluster: li.dataset.cluster,
+            via_envio : li.dataset.transfer,
+            cajas: li.querySelector(`[data-search="cajas"]`).value == "" ? 0 : li.querySelector(`[data-search="cajas"]`).value,
+            jabas: li.querySelector(`[data-search="jabas"]`).value == "" ? 0 : li.querySelector(`[data-search="jabas"]`).value,
+            cajones: li.querySelector(`[data-search="cajones"]`).value == "" ? 0 : li.querySelector(`[data-search="cajones"]`).value,
+            sobres: li.querySelector(`[data-search="sobres"]`).value == "" ? 0 : li.querySelector(`[data-search="sobres"]`).value,
+            paquetes: li.querySelector(`[data-search="paquetes"]`).value == "" ? 0 : li.querySelector(`[data-search="paquetes"]`).value,
+            otros: li.querySelector(`[data-search="parihuelas"]`).value == "" ? 0 : li.querySelector(`[data-search="parihuelas"]`).value,
+            detalle_otros: li.querySelector(`[data-search="detalle_otros"]`).value,
+            sub_total_bultos: li.querySelector(`.sub-total`).value == "" ? 0 : li.querySelector(`.sub-total`).value,
+            subtotal_fletes: li.querySelector(`.sub-flete`).value == "" ? 0 : li.querySelector(`.sub-flete`).value
+        }
+    }
     frmListEmb.addEventListener('submit',async function (e) {  
         e.preventDefault();
         let datos = new FormData(frmEmbarque);
@@ -185,18 +125,16 @@ function loadPage() {
             return
         }
         for (const li of document.getElementById('lista-ciudades-base').children) {
-            arrBase.push({
-                id_cluster: li.dataset.cluster,
-                cajas: li.querySelector(`[data-search="cajas"]`).value == "" ? 0 : li.querySelector(`[data-search="cajas"]`).value,
-                jabas : li.querySelector(`[data-search="jabas"]`).value == "" ? 0 : li.querySelector(`[data-search="jabas"]`).value,
-                cajones : li.querySelector(`[data-search="cajones"]`).value == "" ? 0 : li.querySelector(`[data-search="cajones"]`).value,
-                sobres : li.querySelector(`[data-search="sobres"]`).value == "" ? 0 : li.querySelector(`[data-search="sobres"]`).value,
-                paquetes : li.querySelector(`[data-search="paquetes"]`).value == "" ? 0 : li.querySelector(`[data-search="paquetes"]`).value,
-                otros : li.querySelector(`[data-search="parihuelas"]`).value == "" ? 0 : li.querySelector(`[data-search="parihuelas"]`).value,
-                detalle_otros: li.querySelector(`[data-search="detalle_otros"]`).value,
-                sub_total_bultos: li.querySelector(`.sub-total`).value == "" ? 0 : li.querySelector(`.sub-total`).value, 
-                subtotal_fletes: li.querySelector(`.sub-flete`).value == "" ? 0 : li.querySelector(`.sub-flete`).value
-            })
+            const fletes = addFletes(li);
+            if(fletes){
+                arrBase.push(fletes)
+            }
+        }
+        for (const li of document.getElementById('lista-ciudades-base-aereo').children) {
+            const fletes = addFletes(li);
+            if (fletes) {
+                arrBase.push(fletes)
+            }
         }
         datos.append('flet_esti',$('#id_flet_esti').val());
         datos.append('total_bultos_paquete',$('#id_tota_bult').val());
@@ -216,6 +154,10 @@ function loadPage() {
             alertify.alert('Error',error.message);
             console.error(error)
         }
+    });
+    $('#modal-difinir-fletes').on('hidden.bs.modal',function(){
+        $('#id_flet_esti').val(0);
+        $('#id_tota_bult').val(0);
     });
     function obtenerBulto(element){
         const totBult = document.getElementById('id_tota_bult');

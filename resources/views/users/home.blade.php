@@ -71,45 +71,4 @@
                 @include('home.default')
         @endswitch
     </div>
-    {{-- @if ($rol_user->id_rol == 1 || $rol_user->id_rol == 4 || $rol_user->id_rol == 6 || $rol_user->id_rol == 7)
-    <script>
-        const labels = [
-            'Ene',
-            'Feb',
-            'Mar',
-            'Abril',
-            'Mayo',
-            'Junio',
-            'Julio',
-            'Agosto',
-            'Septiembre',
-            'Octubre',
-            'Noviembre',
-            'Diciembre'
-        ];
-        const data = {
-            labels: labels,
-            datasets: [{
-                label: 'Ventas del año',
-                backgroundColor: '#727CF5',
-                borderColor: '#727CF5',
-                barThickness: 15,
-                data: [150, 100, 50, 55, 120, 30, 50, 150,150,120,120,140],
-            }]
-        };
-
-        const config = {
-            type: 'bar',
-            data: data,
-            options: {
-                responsive: true
-            }
-        };
-        const myChart = new Chart(
-            document.getElementById('grafico-1').getContext('2d'),
-            config
-        );
-    </script>  
-    @endif --}}
-    
 @endsection

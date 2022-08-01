@@ -15,11 +15,17 @@ use Illuminate\Support\Facades\Auth;
 
 class Manifiesto extends Controller
 {
-    public function viewManifiesto()
+
+    public function viewManifiestosTodos()
     {
-        $tipo_documentos = Documentos::where('estado','1')->get();
         $modulos = User::getModulos(Auth::id());
-        return view('manifiesto.manidetalle',compact('tipo_documentos','modulos'));
+        $trayectos = TrayectoEnvio::where(['estado' => 1])->get();
+        $departamentoProv = $this->arrayDepartamentosProvincias();
+        $clusters = ModeloCluster::obtenerTodosClusters();
+        $situacionManifiesto = ModeloManifiesto::obtenerSituacionManifiesto();
+        $fechaFiltros = InformacionAdicional::obtenerDiasFiltros();
+        return view('manifiesto.manidetalle',compact('fechaFiltros','modulos', 'trayectos', 'departamentoProv', 'clusters', 'situacionManifiesto'));
+
     }
     public function viewNuevoManifiesto()
     {
@@ -27,8 +33,69 @@ class Manifiesto extends Controller
         $modulos = User::getModulos(Auth::id());
         $trayectos = TrayectoEnvio::where(['estado' => 1])->get();
         $hoy = date('Y-m-d');
+        $antes = date('Y-m-d',strtotime($hoy . '-2 days'));
         $departamentoProv = $this->arrayDepartamentosProvincias();
-        return view('manifiesto.maninuevo', compact('departamentoProv','trayectos','hoy','tipo_documentos', 'modulos'));
+        return view('manifiesto.maninuevo', compact('antes','departamentoProv','trayectos','hoy','tipo_documentos', 'modulos'));
+    }
+    public function obtenerTodosManifiestos(Request $request)
+    {
+        try {
+            $manifiestos = ModeloManifiesto::obtenerTodosManifiestos($request->fechaInicio, $request->fechaFin,$request->trayecto,$request->provOrigen,$request->provFinal,$request->cluster,$request->estado,'todos');
+            return datatables()->of($manifiestos)->toJson();
+
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function eliminarManifiesto(Request $request)
+    {
+        try {
+            $result = ModeloManifiesto::eliminarManifiesto($request->manifiesto);
+            return response()->json($result);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }    
+    }
+    public function actualizarManifiesto(Request $request)
+    {
+        try {
+            ModeloManifiesto::where(['id_cluster' => $request->id_cluster, 'id' => $request->manifiesto])->update([
+                'user_update' => Auth::id(),
+                'fech_mani' => $request->fech_mani,
+                'date_update' => date('Y-m-d H:i:s')
+            ]);
+            return response()->json(['success' => 'Manifiesto modificado correctamente']);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function agregarGuiaManual(Request $request)
+    {
+        try {
+            $result = ModeloManifiesto::agregarGuiaManifiestoManual($request->manifiesto, $request->guia);
+            return response()->json($result);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function eliminarGuiaManifiesto(Request $request)
+    {
+        try {
+            $result = ModeloManifiesto::eliminarGuiaManifiesto($request->manifiesto,$request->guia);
+            return response()->json($result);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function obtenerUnManifiesto(Request $request)
+    {
+        try {
+            $manifiesto = ModeloManifiesto::obtenerTodosManifiestos(null,null,"todos","todos","todos","todos","todos",$request->manifiesto);
+            $manifiestoPendiente = ModeloManifiesto::manifiestoPendientes($request->cluster);
+            return response()->json(['success' => $manifiesto,'guias' => $manifiestoPendiente]);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
     }
     public function arrayDepartamentosProvincias()
     {
@@ -44,7 +111,7 @@ class Manifiesto extends Controller
     public function obtenerClusterProv(Request $request)
     {
         try {
-            $clusters = ModeloCluster::select('usuarios.name', 'usuarios.last_name','cluster.id')->join('usuarios','cluster.id_usuario','=','usuarios.id')->where(['cluster.activo' => 1, 'cluster.provincia_clu' => $request->provincia])->get();
+            $clusters = ModeloCluster::obtenerUnClusterProvincia($request->provincia);
             return response()->json(['cluster' => $clusters]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);

@@ -25,6 +25,7 @@ class Gias extends Controller
         $clientes = Clientes::obtenerCliConProvee();
         $cli_cli = Clientes::obtenerCliDeCli();
         $nro_guia = ModeloGuias::select('prefijo','nro_guia')->orderBy('nro_guia', 'desc')->first();
+        $nro_os = ModeloGuias::select('nro_guia')->where(['prefijo' => null])->orderBy('nro_guia', 'desc')->first();
         $nro_guia_result = '001-0000001';
         if(!empty($nro_guia)){
             if($nro_guia->nro_guia == 9999999){
@@ -34,8 +35,15 @@ class Gias extends Controller
                 $nro_guia_result = str_pad((intval($nro_guia->prefijo)), 3, '0', STR_PAD_LEFT) . '-' . str_pad((intval($nro_guia->nro_guia) + 1), 7, '0', STR_PAD_LEFT);
             }
         }
+        if (!empty($nro_os)) {
+            $nro_os->nro_guia++;
+            $nro_os = str_pad($nro_os->nro_guia,7,"0",STR_PAD_LEFT);
+        }else{
+            $nro_os = "0000001";
+        }
         $hoy = date('Y-m-d');
-        return view('comprobante.guias',compact('nro_guia_result','cli_cli','clientes','departamentos','hoy','trayecto','via_envios','tipo_documentos','modulos'));
+        $antes = date('Y-m-d',strtotime($hoy . '-2 days'));
+        return view('comprobante.guias',compact('nro_guia_result','cli_cli','clientes','departamentos','hoy','trayecto','via_envios', 'nro_os','tipo_documentos','modulos','antes'));
     }
     public function obtenerDiasTransito(Request $request)
     {
@@ -84,7 +92,8 @@ class Gias extends Controller
         $modulos = User::getModulos(Auth::id());
         $estado_guias = InformacionAdicional::situacionEstado();
         $nro_por_asignar = ModeloGuias::guiaPorAsignar();
-        return view('comprobante.misguias',compact('modulos', 'estado_guias', 'nro_por_asignar'));
+        $fechaFiltros = InformacionAdicional::obtenerDiasFiltros();
+        return view('comprobante.misguias',compact('modulos', 'estado_guias', 'nro_por_asignar', 'fechaFiltros'));
     }
     public function anularGuia(Request $request)
     {
@@ -117,7 +126,7 @@ class Gias extends Controller
     public function obtenerMisGuias(Request $request)
     {
         if($request->ajax()){
-            $guias = ModeloGuias::mostrarTodasGuias($request->estado,$request->tipo);
+            $guias = ModeloGuias::mostrarTodasGuias($request->estado,$request->tipo,$request->fechaInicio,$request->fechaFin);
             return datatables()->of($guias)->toJson();
         }
     }
@@ -126,6 +135,13 @@ class Gias extends Controller
         if ($request->ajax()) {
             ModeloGuias::where(['id' => $request->id_guia,'activo' => 1])->update(['id_cluster' => $request->id_cluster]);
             return response()->json(['success' => 'Se cambió correctamente el cluster']);
+        }
+    }
+    public function actualizarInformes(Request $request)
+    {
+        if ($request->ajax()) {
+            InformacionAdicional::calcularTransito();
+            return response()->json(['success' => 'Embarques actualizados correctamente de informados a transito']);
         }
     }
     public function addGuia(Request $request)
@@ -144,6 +160,8 @@ class Gias extends Controller
                 unset($datos['detalle_guia']);
             }
             $detalles = json_decode($request->detalle_guia,true);
+            // dd($datos,$detalles);
+
             $response = ModeloGuias::agregar($datos,$detalles, $add_cli, $add_cli_bool,Auth::id());
             return response()->json($response);
         } catch (Exception $ex) {
@@ -183,10 +201,6 @@ class Gias extends Controller
                     $datos = ModeloGuias::obtenerGuiasConsulta($request->remitente,$request->fecha);
                     return datatables()->of($datos)->toJson();
                 break;
-                
-                default:
-                    # code...
-                    break;
             }
         }
     }

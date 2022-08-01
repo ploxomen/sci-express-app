@@ -105,7 +105,6 @@ class Usuario extends Controller
                 $datos = [];
             break;
         }
-        // dd($datos,$rol_user);
         return view('users.home',compact('modulos', 'datos', 'rol_user'));
     }
     public function viewLista()

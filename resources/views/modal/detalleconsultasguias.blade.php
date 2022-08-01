@@ -27,22 +27,22 @@
                     <h6 class="text-center text-primary"><b>ESTADO - RASTREO</b></h6>
                     <div class="row">
                         <div class="form-group col-12 col-sm-6">
-                            <b>Registrada el <span id="info_fecha_rastreo_1" class="text-proceso"></span></b>
+                            <b>Registrada el: <span id="info_fecha_rastreo_1" class="text-proceso"></span></b>
                         </div>
                         <div class="form-group col-12 col-sm-6">
-                            <b>En Tránsito el <span id="info_fecha_rastreo_5" class="text-proceso"></span></b>
+                            <b>En Tránsito el: <span id="info_fecha_rastreo_5" class="text-proceso"></span></b>
                         </div>
                         <div class="form-group col-12 col-sm-6">
-                            <b>En reparto el <span id="info_fecha_rastreo_7" class="text-proceso"></span></b>
+                            <b>En reparto el: <span id="info_fecha_rastreo_7" class="text-proceso"></span></b>
                         </div>
                         <div class="form-group col-12 col-sm-6">
-                            <b>Entregado el <span id="info_fecha_rastreo_8" class="text-proceso"></span></b>
+                            <b>Entregado el: <span id="info_fecha_rastreo_8" class="text-proceso"></span></b>
                         </div>
                         <div class="form-group col-12 text-center">
-                            <b>Cargo entregado <span id="info_fecha_rastreo_13" class="text-proceso"></span></b>
+                            <b>Cargo entregado: <span id="info_fecha_rastreo_13" class="text-proceso"></span></b>
                         </div>
                         <div class="form-group col-12">
-                            <div class="bg-estado">
+                            <div class="bg-estado text-center">
                                 <span>ESTADO ACTUAL: </span>
                                 <span id="info_estado_actual"></span>
                             </div>
