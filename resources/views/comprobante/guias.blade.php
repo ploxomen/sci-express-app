@@ -314,7 +314,7 @@
                                     <input required data-name="kg" type="number" value="0.00" class="data-anulada form-control form-control-sm" onchange="calcTotal(event,5,'total-kg')" min="0.01" step="0.01">
                                 </td>
                                 <td>
-                                    <input required data-name="largo" type="number" value="0.00" class="fdata-anulada form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
+                                    <input required data-name="largo" type="number" value="0.00" class="data-anulada form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
                                 </td>
                                 <td>
                                     <input required data-name="ancho" type="number" value="0.00" class="data-anulada form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">

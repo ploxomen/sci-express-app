@@ -119,21 +119,54 @@ class ModeloManifiesto extends Model
             $datos['id_deal2'] = $datos['id_deal2'] == 'NINGUNO' ? null : $datos['id_deal2'];
             $transportes = isset($datos['id_empr_tran']) ? $datos['id_empr_tran'] : null;
             $manifiestos = isset($datos['lista_manifiestos']) ? json_decode($datos['lista_manifiestos'], true) : null;
+            $fletes_cluster = isset($datos['flestes_cluster']) ? json_decode($datos['flestes_cluster'], true) : null;
             if (isset($datos['id_empr_tran'])) {
                 unset($datos['id_empr_tran']);
             }
             if (isset($datos['lista_manifiestos'])) {
                 unset($datos['lista_manifiestos']);
             }
+            if (isset($datos['flestes_cluster'])) {
+                unset($datos['flestes_cluster']);
+            }
+            $filterManifiestos = [];
+            foreach ($manifiestos as $v) {
+                $filterManifiestos[] = $v['id_manifiesto'];
+            }
             $datos['user_create'] = $id_user;
-            $fletes_cluster = json_decode($datos['flestes_cluster'],true);
-            unset($datos['flestes_cluster']);
-
             $id_embarque = DB::table('embarque')->insertGetId($datos);
             for ($i=0; $i < count($fletes_cluster); $i++) {
-                $fletes_cluster[$i]['id_embarque'] = $id_embarque;
+                $nombreCiudad = $fletes_cluster[$i]['nombreCiudad'];
+                $embarque_ciudad = [
+                    'id_ciudad' => empty($fletes_cluster[$i]['id_ciudad']) || $fletes_cluster[$i]['id_ciudad'] == 'null' ? null : $fletes_cluster[$i]['id_ciudad'],
+                    'ubigeo_distrito' => $fletes_cluster[$i]['ubigeo'],
+                    'tipo_base' => $fletes_cluster[$i]['tipo_base'],
+                    'tipo_trayecto' => $fletes_cluster[$i]['transfer'],
+                    'id_embarque' => $id_embarque
+                ];
+                $idEmbarqueCiudad = DB::table('embarque_ciudad_llegada')->insertGetId($embarque_ciudad);
+                foreach ($fletes_cluster[$i]['fletes'] as $flete) {
+                    $embarqueFlete = array_merge(['id_embarque_ciudad' => $idEmbarqueCiudad],$flete);
+                    DB::table('embarque_fletes')->insert($embarqueFlete);
+                }
+                if (!empty($filterManifiestos)) {
+                    $existManifiestos = DB::table('manifiesto AS m')->select('m.id')->join('ciudades_base_cluster AS cbc','m.id_cluster','=','cbc.id_cluster')
+                    ->where(['cbc.activo' => 1,'cbc.base' => 1,'cbc.ubigeo_distrito'=>$embarque_ciudad['ubigeo_distrito'],'cbc.tipo_base' => $embarque_ciudad['tipo_base'],'m.via_envio' => $embarque_ciudad['tipo_trayecto'], 
+                    'cbc.id_ciudad' => $embarque_ciudad['id_ciudad']])->whereIn('m.id',$filterManifiestos)->get();
+                    if($existManifiestos->isEmpty()){
+                        DB::rollBack();
+                        return ['error' => 'No se encontró manifiestos para la ciudad base ' . $nombreCiudad];
+                    }
+                    $nManifiesto = [];
+                    foreach ($existManifiestos as $nm) {
+                       $nManifiesto[] = [
+                        'id_embarque_ciudad' => $idEmbarqueCiudad,
+                        'id_manifiesto' => $nm->id
+                       ];
+                    }
+                    DB::table('embarque_manifiesto')->insert($nManifiesto);
+                }
             }
-            DB::table('fletes_embarque')->insert($fletes_cluster);
             if (!empty($transportes)) {
                 $newTrasn = [];
                 for ($i = 0; $i < count($transportes); $i++) {
@@ -141,13 +174,8 @@ class ModeloManifiesto extends Model
                 }
                 DB::table('transporte_embarque')->insert($newTrasn);
             }
-            if (!empty($manifiestos)) {
-                for ($i = 0; $i < count($manifiestos); $i++) {
-                    $manifiestos[$i]['id_embarque'] = $id_embarque;
-                }
-                DB::table('embarque_manifiesto')->insert($manifiestos);
-            }
-            DB::select('CALL sp_embarque_actualizar_estado(?)',[$id_embarque]);
+            DB::table('manifiesto AS m')->join('detalle_manifiesto AS dm','m.id','=','dm.id_manifiesto')
+            ->join('guias AS g','g.id','=','dm.id_guia')->whereIn('m.id', $filterManifiestos)->where(['m.estado' => 1,'g.situ' => 2])->update(['m.estado' => 2,'g.situ' => 3]);
             DB::commit();
             return ['success' => 'Embarque programado con exito'];
         } catch (Exception $ex) {

@@ -12,13 +12,19 @@ class ModeloEmbarque extends Model
     protected $table = "embarque";
     public $timestamps = false;
 
-    public static function embarcarTrabajador($id_user){
-        $embarques = DB::select('CALL sp_embarcar_trabajador(?)',[$id_user]);
+    public static function embarcarTrabajador($idEmbarque,$id_user,$condicion){
+        $embarques = DB::select('CALL sp_embarcar_trabajador(?,?,?)',[$idEmbarque,$id_user, $condicion]);
         foreach ($embarques as $em) {
-            $em->transportes = DB::table('transporte_embarque AS te')->select('et.id','et.empresa','et.aereo')
-            ->join('empresa_transporte AS et','te.id_empr_tran','=','et.id')->where(['te.id_list_emba' => $em->id, 'et.activo' => 1])->get();
+            if($condicion == 'embarque'){
+                $em->transportes = DB::table('transporte_embarque AS te')->select('et.id', 'et.empresa', 'et.aereo')
+                ->join('empresa_transporte AS et', 'te.id_empr_tran', '=', 'et.id')->where(['te.id_list_emba' => $em->id, 'et.activo' => 1])->get();
+            }
             $em->manfiestos = DB::select('CALL sp_embarque_embarcar_manifiesto(?)',[$em->id]);
             foreach ($em->manfiestos as $prov) {
+                if($condicion == 'informe' && $prov->via_envio == 'TERRESTRE'){
+                    $codCiudad = $prov->tipo_base == 'ciudad' ? $prov->cod_ciudad : $prov->ubigeo_distrito;
+                    $prov->guiasEmbarque = DB::select('CALL sp_generar_guias_embarque(?,?,?,?)',[$idEmbarque,$id_user,$prov->tipo_base, $codCiudad]);
+                }
                 $prov->listaManifiestos = explode(',',$prov->listaManifiestos);
                 if($prov->tipo_base == 'distrito'){
                     $prov->nombreciudad = mb_strtoupper((new Ubigeo)->getNameDistrito($prov->ubigeo_distrito),'UTF-8');
@@ -77,17 +83,54 @@ class ModeloEmbarque extends Model
         return $embarques;
     }
 
-    public static function actualizarEmbarque($id_embarque,$id_user,$empresa)
+    public static function actualizarEmbarque($id_embarque,$id_user,$empresas)
     {
-        return DB::select('CALL sp_actualizar_embarque_trabajador(?,?,?,?)',[$id_embarque,$id_user,date('H:i'),$empresa]);
+        DB::beginTransaction();
+        try {
+            $hroInicio = DB::table('embarque')->select('hr_ini_emba')->where(function ($query) use ($id_user) {
+                $query->orWhere(['id_cond' => $id_user, 'id_deal' => $id_user, 'id_deal2' => $id_user]);
+            })->where(['estado' => 2, 'activo' => 1, 'id' => $id_embarque])->first();
+            if(empty($hroInicio)){
+                return ['error' => 'Embarque no actualizado debido a que no se le a asignado'];
+            }
+            if (is_null($hroInicio->hr_ini_emba)) {
+                DB::table('embarque')->where(['id' => $id_embarque])->update(['hr_ini_emba' => now()->format('H:i:s'), 'user_update' => $id_user, 'date_update' => now()]);
+                DB::commit();
+                return ['mensaje' => 'Hora de inicio marcada correctamente'];
+            }
+            foreach (json_decode($empresas, true) as $empresa) {
+                $valor = [
+                    'e.estado' => 2,
+                    'e.activo' => 1,
+                    'e.id' => $id_embarque
+                ];
+                if ($empresa['tipoCiudad'] == 'ciudad') {
+                    $valor['cbc.id_ciudad'] = $empresa['ciudadaBase'];
+                } else {
+                    $valor['cbc.ubigeo_distrito'] = $empresa['ciudadaBase'];
+                }
+                DB::table('fletes_embarque AS fe')->join('ciudades_base_cluster AS cbc', 'fe.id_cluster', '=', 'cbc.id_cluster')->join('embarque AS e', 'fe.id_embarque', '=', 'e.id')->where(function ($query) use ($id_user) {
+                    $query->orWhere(['e.id_cond' => $id_user, 'e.id_deal' => $id_user, 'e.id_deal2' => $id_user]);
+                })->where($valor)->update(['fe.id_empr_tran_emba' => $empresa['transporte']]);
+            }
+            DB::table('embarque AS e')->join('embarque_manifiesto AS em','e.id','=','em.id_embarque')
+            ->join('detalle_manifiesto AS dm','em.id_manifiesto','=','dm.id_manifiesto')
+            ->join('guias AS g','dm.id_guia','=','g.id')
+            ->join('manifiesto AS m','em.id_manifiesto','=','m.id')
+            ->where(function ($query) use ($id_user) {
+                $query->orWhere(['id_cond' => $id_user, 'id_deal' => $id_user, 'id_deal2' => $id_user]);
+            })->where(['e.estado' => 2, 'e.activo' => 1, 'e.id' => $id_embarque])
+            ->update(['m.user_update' => $id_user, 'm.date_update' => now(),'e.fin_emba' => now(),'e.user_update' => $id_user, 'e.date_update' => now(),'e.estado' => 3,'m.estado' => 3 ,'g.situ' => 4]);
+            DB::commit();
+            return ['success' => 'Embarque exitoso'];
+        } catch (Exception $ex) {
+            DB::rollBack();
+            return ['error' => $ex->getMessage()];
+        }
     }
     public static function obtenerEmbarqueInforme($id_usuario)
     {
         return DB::select('CALL sp_obtener_embarques_informar(?)',[$id_usuario]);
-    }
-    public static function obtenerEmbarqueDetalle($id_embarque,$id_user)
-    {
-        return DB::select('CALL sp_obtener_embarque_detalle_informe(?,?)',[$id_embarque,$id_user]);
     }
     public static function obtenerCiudadesBaseFleteVerif($id_manifiestos)
     {
@@ -110,24 +153,24 @@ class ModeloEmbarque extends Model
                 $guias->n_guias = json_decode($guias->n_guias);
             }
             if ($guias->tipo_base == 'distrito') {
-                $guias->nombreciudad = (new Ubigeo)->getNameDistrito($guias->nombreciudad);
+                $guias->nombreciudad = mb_strtoupper((new Ubigeo)->getNameDistrito($guias->nombreciudad),'UTF-8');
             }
         }
         return $obtener_ciudades;
     }
-    public static function obtenerGuiasEmbarqueInsertar($id_embarque,$id_usuario)
-    {
-        $obtener_ciudades = DB::select('CALL sp_generar_guias_embarque(?,?)',[$id_embarque, $id_usuario]);
-        foreach ($obtener_ciudades as $guias) {
-            if(!empty($guias)){
-                $guias->n_guias = json_decode($guias->n_guias);
-            }
-            if($guias->tipo_base == 'distrito'){
-                $guias->nombreciudad = (new Ubigeo)->getNameDistrito($guias->nombreciudad);
-            }
-        }
-        return $obtener_ciudades;
-    }
+    // public static function obtenerGuiasEmbarqueInsertar($id_embarque,$id_usuario)
+    // {
+    //     $obtener_ciudades = DB::select('CALL sp_generar_guias_embarque(?,?)',[$id_embarque, $id_usuario]);
+    //     foreach ($obtener_ciudades as $guias) {
+    //         if(!empty($guias)){
+    //             $guias->n_guias = json_decode($guias->n_guias);
+    //         }
+    //         if($guias->tipo_base == 'distrito'){
+    //             $guias->nombreciudad = mb_strtoupper((new Ubigeo)->getNameDistrito($guias->nombreciudad),'UTF-8');
+    //         }
+    //     }
+    //     return $obtener_ciudades;
+    // }
     public static function agregarInformeEmbarque($datos,$usuario)
     {
         DB::beginTransaction();

@@ -254,9 +254,9 @@ class User extends Authenticatable
             break;
             case 29:
                 //EMBARQUES EFECTUADOS
-                $query = "SELECT COUNT(*) AS total FROM embarque WHERE activo = 1 AND estado IN(3,4,5,6)";
-                $resultado = DB::select($query);
-                $resultado = $resultado[0]->total;            
+                // $query = "SELECT COUNT(*) AS total FROM embarque WHERE activo = 1 AND estado IN(3,4,5,6)";
+                // $resultado = DB::select($query);
+                $resultado = 5;            
             break;
             case 30:
                 //EMBARQUES POR INFORMAR
@@ -288,15 +288,15 @@ class User extends Authenticatable
             break;
             case 35:
                 //TODOS LOS EMBARQUES DE HOY MANAGER
-                $query = "SELECT COUNT(*) AS total FROM embarque WHERE estado IN(1,2,3,4) AND activo = 1 AND fch_emba = ?";
-                $resultado = DB::select($query, [date('Y-m-d')]);
-                $resultado = $resultado[0]->total;
+                // $query = "SELECT COUNT(*) AS total FROM embarque WHERE estado IN(1,2,3,4) AND activo = 1 AND fch_emba = ?";
+                // $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = 5;
             break;
             case 36:
                 //TODOS LOS EMBARQUES CONCRETADOS DE HOY MANAGER
-                $query = "SELECT COUNT(*) AS total FROM embarque WHERE estado = 4 AND activo = 1 AND fch_emba = ?";
-                $resultado = DB::select($query, [date('Y-m-d')]);
-                $resultado = $resultado[0]->total;
+                // $query = "SELECT COUNT(*) AS total FROM embarque WHERE estado = 4 AND activo = 1 AND fch_emba = ?";
+                // $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = 5;
             break;
             case 37:
                 //TODAS LAS ENTREGAS DE HOY MANAGER

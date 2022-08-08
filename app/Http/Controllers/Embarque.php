@@ -213,18 +213,16 @@ class Embarque extends Controller
     }
     public function transporteEmbarque(Request $request)
     {
-        $embarques = ModeloEmbarque::embarcarTrabajador(Auth::id());
+        $embarques = ModeloEmbarque::embarcarTrabajador(0,Auth::id(),'embarque');
         $modulos = User::getModulos(Auth::id());
         $hoy = strtotime(date('Y-m-d'));
-        // dd($embarques);
-        // dd($embarques);
         return view('pedidos.embarquemanifiesto',compact('hoy','modulos','embarques'));
     }
     public function actualizarEmbarque(Request $request)
     {
         try {
-            ModeloEmbarque::actualizarEmbarque($request->id_embarque,Auth::id(),$request->has('empresa') ? $request->empresa : null);
-            return response()->json(['success' => true]);
+            $resultado = ModeloEmbarque::actualizarEmbarque($request->id_embarque,Auth::id(),$request->has('ciudades') ? $request->ciudades : null);
+            return response()->json($resultado);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
@@ -241,7 +239,8 @@ class Embarque extends Controller
     public function obtenerInfoEmbDeta(Request $request)
     {
         try {
-            $embarque = ModeloEmbarque::obtenerEmbarqueDetalle($request->id_embarque,Auth::id());
+            $embarque = ModeloEmbarque::embarcarTrabajador($request->id_embarque,Auth::id(),'informe');
+            // $guias = ModeloEmbarque::obtenerGuiasEmbarqueInsertar($request->id_embarque, Auth::id());
             return response()->json(['embarque' => isset($embarque[0]) ? $embarque[0] : null]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
@@ -260,14 +259,6 @@ class Embarque extends Controller
         try {
             $manifiestos = implode(',', json_decode($request->lista_manifiestos, true));
             return response()->json(['ciudades' => ModeloEmbarque::obtenerCiudadesBaseFlete($manifiestos,Auth::id())]);
-        } catch (Exception $ex) {
-            return response()->json(['error' => $ex->getMessage()]);
-        }
-    }
-    public function obtenerGuiasEmbarque(Request $request)
-    {
-        try {
-            return response()->json(['ciudades' => ModeloEmbarque::obtenerGuiasEmbarqueInsertar($request->id_embarque, Auth::id())]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }

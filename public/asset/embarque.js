@@ -97,7 +97,6 @@ function loadPage() {
         }
         return {
             id_cluster: li.dataset.cluster,
-            via_envio : li.dataset.transfer,
             cajas: li.querySelector(`[data-search="cajas"]`).value == "" ? 0 : li.querySelector(`[data-search="cajas"]`).value,
             jabas: li.querySelector(`[data-search="jabas"]`).value == "" ? 0 : li.querySelector(`[data-search="jabas"]`).value,
             cajones: li.querySelector(`[data-search="cajones"]`).value == "" ? 0 : li.querySelector(`[data-search="cajones"]`).value,
@@ -124,16 +123,20 @@ function loadPage() {
             alertify.error('seleccione uno o más manifiestos');
             return
         }
-        for (const li of document.getElementById('lista-ciudades-base').children) {
+        for (const li of document.querySelectorAll('.lista-fletes')) {
             const fletes = addFletes(li);
-            if(fletes){
-                arrBase.push(fletes)
-            }
-        }
-        for (const li of document.getElementById('lista-ciudades-base-aereo').children) {
-            const fletes = addFletes(li);
-            if (fletes) {
-                arrBase.push(fletes)
+            const existCiudad = arrBase.findIndex(ciudad => ciudad.tipo_base == li.dataset.tipoCiudad && ciudad.transfer == li.dataset.transfer && ciudad.id_ciudad == li.dataset.ciudad && ciudad.ubigeo == li.dataset.distrito);
+            if(existCiudad === -1){
+                arrBase.push({
+                    tipo_base: li.dataset.tipoCiudad,
+                    transfer: li.dataset.transfer,
+                    id_ciudad: li.dataset.ciudad,
+                    ubigeo: li.dataset.distrito,
+                    nombreCiudad : li.dataset.nombreCiudad,
+                    fletes: [fletes]
+                });
+            }else{
+                arrBase[existCiudad].fletes.push(fletes);
             }
         }
         datos.append('flet_esti',$('#id_flet_esti').val());

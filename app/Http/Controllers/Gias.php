@@ -150,6 +150,7 @@ class Gias extends Controller
             $datos = $request->all();
             $add_cli = $request->has('add_cli_cli') ? $request->add_cli_cli : null;
             $add_cli_bool = $request->has('add_cli_bool') ? $request->add_cli_bool : null;
+            $detalles = [];
             if(isset($datos['comp_clie'])){
                 $datos['comp_clie'] = implode(';', $datos['comp_clie']);
             }
@@ -158,10 +159,8 @@ class Gias extends Controller
             }
             if(isset($datos['detalle_guia'])){
                 unset($datos['detalle_guia']);
+                $detalles = json_decode($request->detalle_guia, true);
             }
-            $detalles = json_decode($request->detalle_guia,true);
-            // dd($datos,$detalles);
-
             $response = ModeloGuias::agregar($datos,$detalles, $add_cli, $add_cli_bool,Auth::id());
             return response()->json($response);
         } catch (Exception $ex) {

@@ -149,11 +149,13 @@ function pageLoaded(){
                 detalles.push(objeto);
             }
         }
-        if(!detalles.length){
+        if (!detalles.length && document.getElementById('id_estado').value != '3') {
             alertify.alert('Mensaje','Por favor agregue detalles a la guía');
             return
         }
-        datos.append('detalle_guia',JSON.stringify(detalles));
+        if (document.getElementById('id_estado').value != '3'){
+            datos.append('detalle_guia', JSON.stringify(detalles));
+        }
         if(newCliCli){
             alertify.confirm('Mensaje','Se a detectado un nuevo cliente del cliente. <br> ¿Deseas guardarlo para la proxima vez?',()=>{
                 datos.append('add_cli_bool',true);
@@ -228,6 +230,7 @@ function pageLoaded(){
     document.getElementById('id_estado').addEventListener('change',function(e){
         $('.data-anulada-oculta').prop('hidden',this.value == '3' ? true : false);
         $('.data-anulada').prop('required',this.value == '3' ? false : true);
+        $('.data-anulada').prop('min', this.value == '3' ? '0' : '0.01');
     });
     document.getElementById('add-new-detalle').addEventListener('click',function(e){
         $('.simple-select2').select2('destroy');

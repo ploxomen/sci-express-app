@@ -252,7 +252,7 @@ class General{
                 }
             }
             template = `
-                <li data-cluster="${c.id_cluster}" data-transfer="${c.via_envio}">
+                <li class="lista-fletes" data-cluster="${c.id_cluster}" data-nombre-ciudad="${c.nombreciudad}" data-transfer="${c.via_envio}" data-ciudad="${c.id_ciudad}" data-distrito="${c.ubigeo_distrito}" data-tipo-ciudad="${c.tipo_base}">
                     <div class="form-row">
                         <div class="form-group col-12 col-md-6 col-lg-5">
                             <b>Ciudad Base:</b><span> ${c.nombreciudad}</span>

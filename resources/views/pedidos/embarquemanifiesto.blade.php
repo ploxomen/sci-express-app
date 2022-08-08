@@ -120,7 +120,7 @@
                                                     @if (!empty($emb->hr_ini_emba) && empty($emb->fin_emba))
                                                         <div>
                                                             <label for="transpotes_select_{{$emb->id}}">Empresa de Transporte</label>
-                                                            <select class="form-control form-control-sm" id="transpotes_select_{{$emb->id}}">
+                                                            <select class="form-control form-control-sm transpotes_select_{{$emb->id}}" data-nomciudad="{{$m->nombreciudad}}" data-base="{{$m->tipo_base}}" data-ciudad="{{$m->cod_ciudad}}">
                                                                 <option value="" hidden>Seleccione la empresa de trasnporte</option>
                                                                 @foreach ($emb->transportes as $trans)
                                                                     <option value="{{$trans->id}}">{{$trans->empresa}}</option>
@@ -130,7 +130,6 @@
                                                     @endif
                                                 </div>
                                             </div>
-                                            
                                         </div>
                                     @endforeach
                                     </div>
@@ -140,7 +139,6 @@
                                         <strong class="text-danger">Envio local</strong>
                                     </div>
                                 @endif
-                                
                                 <div class="col-12 text-center">
                                     <button class="btn btn-primary marcar-embarque" data-embarque="{{$emb->id}}">Marcar Hr {{empty($emb->hr_ini_emba) ? 'Inicio' : 'Fin'}}</button>
                                 </div>
