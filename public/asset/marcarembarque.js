@@ -12,8 +12,7 @@ function loadPage(){
                     return
                 }
                 empresaTrasporteSend.push({
-                    tipoCiudad: empresa.dataset.base,
-                    ciudadaBase : empresa.dataset.ciudad,
+                    ciudadBase: empresa.dataset.ciudad,
                     transporte : empresa.value
                 });
             }

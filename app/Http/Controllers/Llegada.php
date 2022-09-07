@@ -31,7 +31,8 @@ class Llegada extends Controller
             $id_embarque = $request->has('embarque') ? $request->embarque : 0;
             $id_guia = $request->has('guia') ? $request->guia : 0;
             $id_usuario = $request->has('id_cluster') ? $request->id_cluster : Auth::id();
-            return response()->json(['resultados' => ModeloEmbarque::obtenerEmbarqueArribado($id_embarque,$id_guia, $id_usuario,$request->tipo)]);
+            $trayecto = $request->has('trayecto') ? $request->trayecto : "";
+            return response()->json(['resultados' => ModeloEmbarque::obtenerEmbarqueArribado($id_embarque,$id_guia, $id_usuario,$request->tipo, $trayecto)]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
@@ -66,7 +67,7 @@ class Llegada extends Controller
     public function actualizarGuiasLlegada(Request $request)
     {
         try {
-            ModeloEmbarque::actualizarGuiaLlegadas($request->embarque,$request->manifiesto,$request->guia,$request->conforme,$request->texto,$request->situacion,$request->incidencia,Auth::id());
+            ModeloEmbarque::actualizarGuiaLlegadas($request->embarque,$request->manifiesto,$request->guia,$request->conforme,$request->texto,$request->situacion,$request->incidencia,$request->flete,Auth::id());
             return response()->json(['success' => 'El estado de la guía se cambio con éxito']);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);

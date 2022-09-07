@@ -19,7 +19,7 @@ class Embarque extends Controller
     {
         $hoy = date('Y-m-d');
         $modulos = User::getModulos(Auth::id());
-        $ciudadesBase = InformacionAdicional::obtenerCiudadesBase();
+        $ciudadesBase = InformacionAdicional::obtenerCiudadBaseEmbarcar(Auth::id());
         $dealers = User::obtenerUsuarioRol(7);
         $conductores = User::obtenerUsuarioRol(6);
         $vehiculos = Vehiculos::obtenerVehiculos();
@@ -31,11 +31,11 @@ class Embarque extends Controller
     {
         $modulos = User::getModulos(Auth::id());
         $fechaFiltros = InformacionAdicional::obtenerDiasFiltros();
-        $situacionManifiesto = ModeloManifiesto::obtenerSituacionManifiesto();
         $dealers = User::obtenerUsuarioRol(7);
         $conductores = User::obtenerUsuarioRol(6);
         $vehiculos = Vehiculos::obtenerVehiculos();
-        return view('embarque.misEmbarques',compact('modulos', 'fechaFiltros', 'situacionManifiesto', 'dealers', 'conductores', 'vehiculos'));
+        $transportes = EmpresaTransporte::obtenerTransportes();
+        return view('embarque.misEmbarques',compact('modulos', 'transportes','fechaFiltros', 'dealers', 'conductores', 'vehiculos'));
     }
     public function agregarManifiestoEmbarque(Request $request)
     {
@@ -54,6 +54,21 @@ class Embarque extends Controller
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
+    }
+    public function editarFletes(Request $request)
+    {
+       $fletes = json_decode($request->fletes,true);
+       $editarFlete = ModeloEmbarque::editarFlete($request->embarque,$fletes,$request->tota_bult,$request->flet_esti);
+        return response()->json($editarFlete);
+    }
+    public function editarEmbarque(Request $request)
+    {
+        $actualizadDatos = $request->all();
+        $empresasTransporte = $request->id_empr_tran;
+        unset($actualizadDatos['embarque']);
+        unset($actualizadDatos['id_empr_tran']);
+        $result = ModeloEmbarque::editarEmbarque($actualizadDatos,$empresasTransporte,$request->embarque,Auth::id());
+        return response()->json($result);
     }
     public function mostrarEditarEmbarque(Request $request)
     {
@@ -205,8 +220,8 @@ class Embarque extends Controller
     public function obtenerManiPend(Request $request)
     {
         try {
-            $manifiestos = ModeloManifiesto::obtenerEmbarcar($request->ciudad_base,$request->tipo,Auth::id());
-            return datatables()->of($manifiestos)->toJson();
+            $manifiestos = ModeloManifiesto::obtenerEmbarcar($request->ciudad_base, $request->tipo == 'undefined' ? null : $request->tipo,Auth::id());
+            return response()->json($manifiestos);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
@@ -236,11 +251,22 @@ class Embarque extends Controller
             return response()->json(['error' => $ex->getMessage()]);
         }
     }
+    public function editarInforme(Request $request)
+    {
+        $datos = $request->all();
+        $idEmbarque = $request->embarque;
+        $actualizar = ModeloEmbarque::actualizarInforme($datos,$idEmbarque,Auth::id());
+        return response()->json($actualizar);
+    }
+    public function verEditarInformeEmbarque(Request $request)
+    {
+        $embarque = ModeloEmbarque::verEmbarqueInforme($request->embarque);
+        return response()->json(['embarque' => $embarque]);
+    }
     public function obtenerInfoEmbDeta(Request $request)
     {
         try {
             $embarque = ModeloEmbarque::embarcarTrabajador($request->id_embarque,Auth::id(),'informe');
-            // $guias = ModeloEmbarque::obtenerGuiasEmbarqueInsertar($request->id_embarque, Auth::id());
             return response()->json(['embarque' => isset($embarque[0]) ? $embarque[0] : null]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);

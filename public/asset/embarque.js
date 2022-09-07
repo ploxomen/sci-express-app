@@ -4,52 +4,162 @@ function loadPage() {
     let tblMani = document.getElementById("tabla-manifiestos");
     let frmEmbarque = document.getElementById('add-embarque');
     let frmListEmb = document.getElementById('frm-lista-fletes');
+    let viewData = 'todos';
     general.obtenerFlestes();
-    let dataTableMani = $('#tabla-embarque').DataTable({
-        ajax : {
-            url: 'manifiesto/pendientes',
-            method: 'POST',
-            headers: general.jsonToken,
-            data: function(d){
-                d.ciudad_base = $('#id_prov_dest').val();
-                d.tipo = $('#id_prov_dest').find(':selected').attr("data-tipo");
+    async function obtenerManifiestos() {
+        let datos = new FormData();
+        datos.append('ciudad_base', $('#id_prov_dest').val());
+        datos.append('tipo', $('#id_prov_dest').find(':selected').attr("data-tipo"));
+        const response = await general.funcfetch('manifiesto/pendientes',datos);
+        if (response && $('#id_prov_dest').val() == 'todos'){
+            selectFilterAll(response);
+        } else if (response && $('#id_prov_dest').val() != 'todos'){
+            selectOneCity(response);
+        }
+    }
+    function selectOneCity(response) {
+        if (viewData == 'todos'){
+            tblMani.innerHTML = "";
+        }
+        response.forEach(manifiesto => {
+            const tr = document.createElement("tr");
+            tr.classList.add(!manifiesto.id_asignado ? 'table-warning' : 'table-success');
+            tr.dataset.selected = $('#id_prov_dest').find(':selected').attr("data-position");
+            tr.innerHTML = `
+                <td>
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" data-manifiesto="${manifiesto.id}" data-bulto="${manifiesto.totBulto}" class="custom-control-input ${manifiesto.id_asignado ? 'check-embarque' : 'disabled'}" ${!manifiesto.id_asignado ? 'disabled' : ''} id="check_manifiesto_${manifiesto.id}">
+                        <label class="custom-control-label" for="check_manifiesto_${manifiesto.id}"></label>
+                    </div>
+                </td>
+                <td>${manifiesto.idExtendMani}</td>
+                <td>${manifiesto.format_fecha}</td>
+                <td>${manifiesto.trayectoName}</td>
+                <td>${manifiesto.envio}</td>
+                <td>${manifiesto.prov_orig}</td>
+                <td>${manifiesto.prov_dest}</td>
+                <td>${manifiesto.nombre_ciudad_base}</td>
+                <td>${manifiesto.nom_cluster}</td>
+                <td>${manifiesto.totBulto}</td>
+                <td>${manifiesto.totguias}</td>
+                `
+            tblMani.append(tr);
+        });
+        viewData = $('#id_prov_dest').val();
+    }
+    function selectFilterAll(response){
+        let template = "";
+        let ciudadesFiltros = [];
+        response.forEach(manifiesto => {
+            const existeProv = ciudadesFiltros.findIndex(provincia => provincia.ciudad_base.toLowerCase() == manifiesto.nombre_ciudad_base.toLowerCase());
+            if (existeProv >= 0) {
+                ciudadesFiltros[existeProv].nro_manifiesto++;
+            } else {
+                ciudadesFiltros.push({
+                    nro_manifiesto: 1,
+                    ciudad_base: manifiesto.nombre_ciudad_base
+                });
             }
-        },
-        columns: [
-            {data: 'id',searchable: false,orderable: false, render : function(data,type,full){
-                return `<div class="custom-control custom-checkbox">
-                    <input type="checkbox" data-manifiesto="${data}" data-bulto="${full.totBulto}" class="custom-control-input ${full.id_asignado ? 'check-embarque' : 'disabled'}" ${!full.id_asignado ? 'disabled' : ''} id="check_manifiesto_${data}">
-                    <label class="custom-control-label" for="check_manifiesto_${data}"></label>
-                </div>`
-            }},
-            {data: 'idExtendMani'},
-            {data: 'format_fecha',searchable: false,orderable: false},
-            {data: 'trayectoName'},
-            {data: 'envio'},
-            {data: 'prov_orig'},
-            {data: 'prov_dest'},
-            {data: 'nombre_ciudad_base'},
-            {data: 'nom_cluster'},
-            {data: 'totBulto'},
-            {data: 'totguias'}
-        ],
-        createdRow : function(row,data){
-            let bgTable = !data.id_asignado ? 'table-warning' : 'table-success';
-            $(row).addClass(bgTable);
-        },
+            template += `<tr class="${!manifiesto.id_asignado ? 'table-warning' : 'table-success'}">
+            <td>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" data-manifiesto="${manifiesto.id}" data-bulto="${manifiesto.totBulto}" class="custom-control-input ${manifiesto.id_asignado ? 'check-embarque' : 'disabled'}" ${!manifiesto.id_asignado ? 'disabled' : ''} id="check_manifiesto_${manifiesto.id}">
+                    <label class="custom-control-label" for="check_manifiesto_${manifiesto.id}"></label>
+                </div>
+            </td>
+            <td>${manifiesto.idExtendMani}</td>
+            <td>${manifiesto.format_fecha}</td>
+            <td>${manifiesto.trayectoName}</td>
+            <td>${manifiesto.envio}</td>
+            <td>${manifiesto.prov_orig}</td>
+            <td>${manifiesto.prov_dest}</td>
+            <td>${manifiesto.nombre_ciudad_base}</td>
+            <td>${manifiesto.nom_cluster}</td>
+            <td>${manifiesto.totBulto}</td>
+            <td>${manifiesto.totguias}</td>
+            </tr>`
+        });
+        let totalGuias = 0;
+        let templateManifiesto = "";
+        ciudadesFiltros.forEach(prov => {
+            totalGuias = totalGuias + prov.nro_manifiesto;
+            templateManifiesto += `<b class="text-info">${prov.ciudad_base.toUpperCase()}: ${prov.nro_manifiesto}</b>`;
+        });
+        document.getElementById('detalle-provincia-destino').innerHTML = ciudadesFiltros.length === 0 ? '<b>No se encontraron guias pendientes para contabilizar</b>' : templateManifiesto;
+        document.getElementById('total_resultamos_mostrados').textContent = response.length;
+        tblMani.innerHTML = !response.length ? '<tr><td colspan="11" class="text-center">No se encontraron manifiestos para ser embarcados</td></tr>' : template;
+        document.getElementById('filtro-section').innerHTML = "";
+        viewData = 'todos';
+    }
+    obtenerManifiestos();
+    // let dataTableMani = $('#tabla-embarque').DataTable({
+    //     ajax : {
+    //         url: 'manifiesto/pendientes',
+    //         method: 'POST',
+    //         headers: general.jsonToken,
+    //         data: function(d){
+    //             d.ciudad_base = ;
+    //             d.tipo = ;
+    //         }
+    //     },
+    //     columns: [
+    //         {data: 'id',searchable: false,orderable: false, render : function(data,type,full){
+    //             return `<div class="custom-control custom-checkbox">
+    //                 <input type="checkbox" data-manifiesto="${data}" data-bulto="${full.totBulto}" class="custom-control-input ${full.id_asignado ? 'check-embarque' : 'disabled'}" ${!full.id_asignado ? 'disabled' : ''} id="check_manifiesto_${data}">
+    //                 <label class="custom-control-label" for="check_manifiesto_${data}"></label>
+    //             </div>`
+    //         }},
+    //         {data: 'idExtendMani'},
+    //         {data: 'format_fecha',searchable: false,orderable: false},
+    //         {data: 'trayectoName'},
+    //         {data: 'envio'},
+    //         {data: 'prov_orig'},
+    //         {data: 'prov_dest'},
+    //         {data: 'nombre_ciudad_base'},
+    //         {data: 'nom_cluster'},
+    //         {data: 'totBulto'},
+    //         {data: 'totguias'}
+    //     ],
+    //     createdRow : function(row,data){
+    //         let bgTable = !data.id_asignado ? 'table-warning' : 'table-success';
+    //         $(row).addClass(bgTable);
+    //     },
+    // });
+
+    $('#id_prov_dest').on('select2:select',async function(){
+        await obtenerManifiestos();
+        const listFiltro = document.getElementById('filtro-section');
+        if ($('#id_prov_dest').val() == 'todos'){
+            listFiltro.innerHTML = "";
+            $('#id_prov_dest option').prop("disabled",false);
+        }else{
+            const filtro = document.createElement("div");
+            filtro.classList.add('rectangulo-filtro');
+            filtro.innerHTML = `<span class="icono-delete" data-select="${$('#id_prov_dest').find(':selected').attr("data-position")}"><i class="fas fa-times"></i></span><span>${$('#id_prov_dest option:selected').text()}</span>`;
+            listFiltro.append(filtro);
+            $(`#id_prov_dest [data-position='${$('#id_prov_dest').find(':selected').attr("data-position")}']`).prop('disabled',true);
+            $(this).val("");
+        }
+        $("#id_prov_dest").trigger("change");
     });
-    $('#id_prov_dest').on('select2:select',function(){
-        dataTableMani.draw();
-    });
+    document.getElementById("filtro-section").onclick = function(event){
+        if (event.target.classList.contains("icono-delete")){
+            $(tblMani).find(`tr[data-selected="${event.target.dataset.select}"]`).remove();
+            $(`#id_prov_dest [data-position='${event.target.dataset.select}']`).prop('disabled', false);
+            $("#id_prov_dest").trigger("change");
+            event.target.parentElement.remove();
+            if (!document.getElementById('filtro-section').children.length){
+                $("#id_prov_dest").val("todos").trigger("change");
+                obtenerManifiestos();
+            }
+            
+        }
+    }
     $('#id_id_deal').on('select2:select', function () {
-        $("#id_id_deal2 option").prop('disabled', false);
-        const valDealer2 = $(this).val();
-        $("#id_id_deal2 option[value=" + valDealer2 + "]").prop('disabled', true);
-        $("#id_id_deal2").val('NINGUNO').trigger('change');
+        general.validarDealerEmbarque('id_id_deal2',$(this).val());
     });
     $('#id_id_deal2').on('change', function () {
-        const valDealer2 = $(this).val();
-        $("#id_resp_emba option[value='Dealer 2']").prop('disabled', valDealer2 == 'NINGUNO' ? true : false);
+        general.validarResponsableEmbarque('id_resp_emba',$(this).val());
     });
     cbSelectAll.addEventListener("change",function () {  
         const activo = this.checked;
@@ -77,8 +187,7 @@ function loadPage() {
         datos.append('lista_manifiestos',JSON.stringify(arrMani));
         let response = await general.funcfetch('manifiesto/embarcar-fletes',datos);
         if(response.error){
-            alertify.alert('Error',response.error);
-            return
+            return alertify.alert('Error',response.error);
         }
         general.visualizarFletes(response, 'lista-ciudades-base', 'lista-ciudades-base-aereo');
 
@@ -146,13 +255,20 @@ function loadPage() {
         try {
             let response = await general.funcfetch('manifiesto/embarcar',datos);
             if(response.error){
-                alertify.alert('Error',response.error);
-                return
+                return alertify.alert('Error',response.error);
             }
             alertify.alert('Mensaje',response.success);
             $('#modal-difinir-fletes').modal("hide");
-            dataTableMani.draw();
             $('.simple-select2').val("").trigger('change');
+            if (response.ciudades){
+                let tempCiudad = `<option value="todos">TODOS</option>`;
+                response.ciudades.forEach((ciudad,key) => {
+                    tempCiudad += `<option data-position="${key}" value="${ciudad.value}" data-tipo="${ciudad.tipo_base}">${ciudad.nombre}</option>`
+                });
+                document.getElementById('id_prov_dest').innerHTML = tempCiudad;
+                $('#id_prov_dest').val("todos").trigger("change");
+            }
+            obtenerManifiestos();
         } catch (error) {
             alertify.alert('Error',error.message);
             console.error(error)
@@ -171,18 +287,18 @@ function loadPage() {
     document.getElementById('siguiente-fletes').onclick = ()=>{
         document.getElementById('enviar-fletes').click();
     }
-    dataTableMani.on('draw',function(){
-        for (const c of document.querySelectorAll('.check-embarque')) {
-            c.addEventListener('change',function(){
-                obtenerBulto(this);
-                let checked = tblMani.querySelectorAll('input:checked').length;
-                if(checked == tblMani.children.length){
-                    cbSelectAll.checked = true;
-                }else{
-                    cbSelectAll.checked = false;
-                }
-            });
-        }
-    });
+    // dataTableMani.on('draw',function(){
+    //     for (const c of document.querySelectorAll('.check-embarque')) {
+    //         c.addEventListener('change',function(){
+    //             obtenerBulto(this);
+    //             let checked = tblMani.querySelectorAll('input:checked').length;
+    //             if(checked == tblMani.children.length){
+    //                 cbSelectAll.checked = true;
+    //             }else{
+    //                 cbSelectAll.checked = false;
+    //             }
+    //         });
+    //     }
+    // });
 }
 window.addEventListener('DOMContentLoaded',loadPage);

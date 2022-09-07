@@ -47,6 +47,14 @@ class General{
                 if (!dom) {
                     continue;
                 }
+                if (key == 'nro_guia' && data['prefijo'] === null){
+                    dom.textContent = 'Orden de Servicio N° ' + value;
+                    continue;
+                }
+                if(key == 'nro_guia' && data['prefijo'] !== null) {
+                    dom.textContent = 'Guía N° ' + value;
+                    continue;
+                }
                 dom.textContent = value;
             }
         }
@@ -251,8 +259,9 @@ class General{
                     }
                 }
             }
+            const existIdFlete = c.id_embarque_flete ? `data-flete="${c.id_embarque_flete}"` : '';
             template = `
-                <li class="lista-fletes" data-cluster="${c.id_cluster}" data-nombre-ciudad="${c.nombreciudad}" data-transfer="${c.via_envio}" data-ciudad="${c.id_ciudad}" data-distrito="${c.ubigeo_distrito}" data-tipo-ciudad="${c.tipo_base}">
+                <li class="lista-fletes" data-cluster="${c.id_cluster}" ${existIdFlete} data-nombre-ciudad="${c.nombreciudad}" data-transfer="${c.via_envio}" data-ciudad="${c.id_ciudad}" data-distrito="${c.ubigeo_distrito}" data-tipo-ciudad="${c.tipo_base}">
                     <div class="form-row">
                         <div class="form-group col-12 col-md-6 col-lg-5">
                             <b>Ciudad Base:</b><span> ${c.nombreciudad}</span>
@@ -262,11 +271,11 @@ class General{
                         </div>
                         <div class="form-group col-6 col-lg-3">
                             <label for="total_bultos_${c.id_cluster}">Sub Cant <small class="text-danger">*</small></label>
-                            <input type="number" id="total_bultos_${c.id_cluster}" min="1" class="form-control form-control-sm sub-total" readonly required value="${valoresFletes.sub_total_bultos}">
+                            <input type="number" id="total_bultos_${c.id_cluster}" min="1" class="form-control form-control-sm sub-total" required value="${valoresFletes.sub_total_bultos}">
                         </div>
                         <div class="form-group col-6 col-lg-3">
                             <label for="sub_feletes_${c.id_cluster}">Sub Flete <small class="text-danger">*</small></label>
-                            <input type="number" step="0.01" id="sub_feletes_${c.id_cluster}" readonly min="1" class="form-control form-control-sm sub-flete" required value="${valoresFletes.subtotal_fletes}">
+                            <input type="number" step="0.01" id="sub_feletes_${c.id_cluster}" readonly min="1" class="form-control form-control-sm sub-flete" value="${valoresFletes.subtotal_fletes}">
                         </div>
                         <div class="col-12"></div>
                         <div class="form-group col-6 col-lg-2">
@@ -308,7 +317,363 @@ class General{
                 valoresFletes[key2] = '';
             }
         });
-        document.getElementById($terrestre).innerHTML = !templateLand ? '<li class="text-center">No se encontraron Envios Terrestres    </li>' : templateLand;
+        document.getElementById($terrestre).innerHTML = !templateLand ? '<li class="text-center">No se encontraron Envios Terrestres</li>' : templateLand;
         document.getElementById($aereo).innerHTML = !templateAerial ? '<li class="text-center">No se encontraron Envios Aereos</li>' : templateAerial;
+    }
+    validarDealerEmbarque($cbDealer2,value){
+        $(`#${$cbDealer2} option`).prop('disabled', false);
+        if (value == $(`#${$cbDealer2}`).val()) {
+            $(`#${$cbDealer2}`).val('NINGUNO').trigger('change');
+        }
+        $(`#${$cbDealer2} option[value=` + value + "]").prop('disabled', true);
+    }
+    validarResponsableEmbarque($cbResponsable,value){
+        if(value == 'NINGUNO'){
+            $(`#${$cbResponsable}`).val('Dealer 1').trigger('change');
+        }
+        $(`#${$cbResponsable} option[value='Dealer 2']`).prop('disabled', value == 'NINGUNO' ? true : false);
+    }
+    verInformeEmbarque(response){
+        let nroBultos = {
+            bulto_total: isNaN(parseInt(response.embarque.total_bultos_paquete)) ? 0 : parseInt(response.embarque.total_bultos_paquete),
+            embarque_nro_cajas: 0,
+            embarque_nro_jabas: 0,
+            embarque_nro_cajones: 0,
+            embarque_nro_sobres: 0,
+            embarque_nro_paquetes: 0,
+            embarque_num_otros: 0
+        };
+        let template = "";
+        let cbComprobante = null,
+            cbNroComprobantes = "";
+        response.embarque.manfiestos.forEach(e => {
+            for (const key in nroBultos) {
+                if (Object.hasOwnProperty.call(nroBultos, key)) {
+                    nroBultos[key] += isNaN(parseInt(e[key])) ? 0 : parseInt(e[key]);
+                }
+            }
+            cbNroComprobantes = "";
+            cbComprobante = e.comprobantes ? e.comprobantes.split(';') : null;
+            if (e.nro_comprobantes) {
+                e.nro_comprobantes = e.nro_comprobantes.split(';');
+                e.nro_comprobantes.forEach(nro => {
+                    cbNroComprobantes += `<option value="${nro}" selected>${nro}</option>`;
+                });
+            }
+            let empresasTransporte = document.createElement(response.embarque.lista_empresas_transporte ? 'select' : 'input');
+            empresasTransporte.classList.add('form-control','form-control-sm');
+            empresasTransporte.id = 'empresa_trasporte_' + e.id;
+            empresasTransporte.required = true;
+            if (response.embarque.lista_empresas_transporte) {
+                empresasTransporte.classList.add('simple-select2');
+                let templateEmpre = "";
+                response.embarque.lista_empresas_transporte.forEach(emp => {
+                    templateEmpre += `<option value="${emp.id}" ${emp.id === e.id_empr_tran_emba ? 'selected' : ''}>${emp.empresa}</option>`;
+                });
+                empresasTransporte.innerHTML = templateEmpre;
+            }else{
+                empresasTransporte.setAttribute('value', e.empresa_trasporte);
+                empresasTransporte.type = 'text';
+                empresasTransporte.disabled = true;
+            }
+            const requerido = e.tipo_trayecto == 'AEREO' ? '' : 'required';
+            template += `
+                        <li class='informe-ciudades' data-ciudad="${e.id}" data-trayecto="${e.tipo_trayecto}">
+                            <div class="form-row">
+                                <div class="form-group col-7 col-lg-4">
+                                    <b>Ciudad Base:</b><span> ${e.nombreciudad}</span>
+                                </div>
+                                <div class="form-group col-5 col-lg-8">
+                                    <b>Envio:</b><span> ${e.tipo_trayecto}</span>
+                                </div>
+                                <div class="form-group col-12 col-md-6 col-lg-5">
+                                    <label for="id_comprobantes_${e.id}">Comprobantes <small class="text-danger">*</small></label>
+                                    <select id="id_comprobantes_${e.id}" class="form-control simple-select2 form-control-sm" multiple ${requerido}>
+                                        <option value="GUIA TRANSPORTISTA" ${cbComprobante && cbComprobante.indexOf('GUIA TRANSPORTISTA') >= 0 ? 'selected' : ''}>GUIA TRANSPORTISTA</option>
+                                        <option value="GUIA AEREA" ${cbComprobante && cbComprobante.indexOf('GUIA AEREA') >= 0 ? 'selected' : ''}>GUIA AEREA</option>
+                                        <option value="FACTURA" ${cbComprobante && cbComprobante.indexOf('FACTURA') >= 0 ? 'selected' : ''}>FACTURA</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-12 col-md-6 col-lg-5">
+                                    <label for="id_nro_comprobantes_${e.id}">N° Comprobantes <small class="text-danger">*</small></label>
+                                    <select id="id_nro_comprobantes_${e.id}" ${requerido} multiple class="form-control cb-select2-tags form-control-sm">${cbNroComprobantes}</select>
+                                </div>
+                                <div class="form-group col-12 col-md-6 col-lg-2">
+                                    <label for="id_importe_factura_${e.id}">Importe Factura <small class="text-danger">*</small></label>
+                                    <input type="number" value="${e.importe_factura}" ${requerido} step="0.01" id="id_importe_factura_${e.id}" class="form-control form-control-sm" step="0.01" min="0">
+                                </div>
+                                <div class="form-group col-12 col-md-6 col-lg-3">
+                                    <label for="empresa_trasporte_${e.id}">Empresa <small class="text-danger">*</small></label>
+                                    ${empresasTransporte.outerHTML}
+                                </div>
+                                <div class="form-group col-12 col-md-6 col-lg-3">
+                                    <label for="id_embarque_fch_emba_${e.id}">Fecha embarque <small class="text-danger">*</small></label>
+                                    <input type="date" id="id_embarque_fch_emba_${e.id}" value="${response.embarque.fch_emba}" required class="form-control form-control-sm" disabled>
+                                </div>
+                                <div class="form-group col-6 col-lg-3">
+                                    <label for="id_fecha_llegada_${e.id}">Fecha llegada <small class="text-danger">*</small></label>
+                                    <input type="date" id="id_fecha_llegada_${e.id}" value="${e.fecha_llegada}" class="form-control form-control-sm" ${requerido}>
+                                </div>
+                                <div class="form-group col-6 col-lg-3">
+                                    <label for="id_hr_llegada_${e.id}">Hr llegada <small class="text-danger">*</small></label>
+                                    <input type="time" id="id_hr_llegada_${e.id}" value="${e.hr_llegada}" class="form-control form-control-sm" ${requerido}>
+                                </div>
+                                `
+                                if (e.guiasEmbarque) {
+                                    const nroGuiaEmbarque = e.prefijo_guia_embarque == null && e.nro_guia_embarque == null ? '' : e.prefijo_guia_embarque.toString().padStart(3, '0') + '-' + e.nro_guia_embarque.toString().padStart(7, '0');
+                                    template += `
+                                                <div class="col-12 form-group border-top pt-2"></div>
+                                                <div class="col-12 form-group col-md-6 col-lg-8">
+                                                    <h6 class="text-info mb-0">GUÍA DE EMBARQUE - ${e.nombreciudad}</h6>
+                                                </div>
+                                                <div class="col-12 col-md-6 form-group col-lg-4">
+                                                    <input type="text" required pattern="[0-9]{3}[-][0-9]{7}" id="id_guia_embarque_${e.id}" value="${nroGuiaEmbarque}" maxlength="11" class="form-control form-control-sm informe-embarque" placeholder="N° guía embarque">
+                                                </div>
+                                                <div class="form-group col-12">
+                                                        `
+                                    e.guiasEmbarque.forEach(g => {
+                                        const nroGuia = g.prefijo !== null ? g.prefijo.toString().padStart(3, '0') + '-' + g.nro_guia.toString().padStart(7, '0') : g.nro_guia.toString().padStart(7, '0');
+                                        template += `
+                                                                <span class="p-2">N° ${nroGuia}</span>
+                                                            `
+                                    });
+                                    template += `</div>`;
+                                }
+            template += "</div></li>";
+        });
+        for (const key in nroBultos) {
+            if (Object.hasOwnProperty.call(nroBultos, key)) {
+                if (key == 'bulto_total') {
+                    document.getElementById('informe_' + key).textContent = nroBultos[key];
+                    continue;
+                }
+                document.getElementById('informe_' + key).value = nroBultos[key];
+            }
+        }
+        document.getElementById('informes-embarques').innerHTML = template;
+        $('#modal-informe-embarque').modal('show');
+        $('#modal-informe-embarque .simple-select2').select2({
+            theme: 'bootstrap',
+            width: '100%',
+            placeholder: 'Seleccione una opción'
+        });
+        $('#modal-informe-embarque .cb-select2-tags').select2({
+            theme: 'bootstrap',
+            width: '100%',
+            placeholder: 'Seleccione o agregue una opción',
+            tags: true
+        });
+    }
+    changeTipoGuia(valor){
+        $('.data-anulada-oculta').prop('hidden', valor == '3' ? true : false);
+        $('.data-anulada').prop('required', valor == '3' ? false : true);
+        $('.data-anulada-int').prop('min', valor == '3' ? '0' : '1');
+        $('.data-anulada-decimal').prop('min', valor == '3' ? '0' : '0.01');
+    }
+    async obtenerDetalleGuia(){
+        return await this.funcfetch('obtener-detalle-tabla');
+    }
+    validarSeleccionComprobantes(valor,idComprobante,idNroComprobante){
+        const valores = valor;
+        console.log(valores);
+        if (valores) {
+            const exist = valores.filter(opt => opt == 'NINGUNO');
+            if (exist.length) {
+                $(idComprobante).val(["NINGUNO"]).trigger("change");
+                $(idNroComprobante).val("").trigger("change");
+            }
+            document.querySelector(idNroComprobante).required = exist.length === 0 ? true : false;
+            document.querySelector(idNroComprobante).disabled = exist.length === 0 ? false : true;
+        }
+    }
+    agregarNuevoDetalleGuia($estadoGuia,$cbDuplicado){
+        $('#tabla-detalle ' + $cbDuplicado).select2('destroy');
+        let tr = document.getElementById('tabla-detalle').children[document.getElementById('tabla-detalle').children.length - 1];
+        const cloneTr = tr.cloneNode(true);
+        for (const i2 of cloneTr.querySelectorAll('input, select')) {
+            i2.value = i2.localName === "input" && i2.getAttribute('step') == '0.01' ? "0.00" : "0";
+            if (document.getElementById($estadoGuia).value == '3') {
+                i2.required = false;
+            }
+            if (i2.localName === 'select' || i2.localName === 'textarea'){
+                i2.value = tr.querySelector(`[data-name="${i2.dataset.name}"]`).value;
+            }
+        }
+        const buttonDelete = cloneTr.querySelector('button');
+        if (buttonDelete){
+            buttonDelete.dataset.tipo = 'new';
+            buttonDelete.removeAttribute('data-detalle');
+        }
+        document.getElementById('tabla-detalle').append(cloneTr);
+        $('#tabla-detalle ' +$cbDuplicado).select2({
+            theme: 'bootstrap',
+            width: '100%',
+            placeholder: 'Seleccione una opción'
+        });
+        alertify.success('Se agregó otro detalle');
+    }
+    changeTipoGuiaFormato(idNroGuia,value,max,condicion,textLabel,dataClient){
+        const nroGuia = document.getElementById(idNroGuia);
+        console.log(nroGuia);
+        if(value){
+            nroGuia.value = value;
+        }
+        nroGuia.setAttribute('maxlength', max);
+        nroGuia.pattern = condicion;
+        nroGuia.parentElement.querySelector('label').innerHTML = `${textLabel} <small class="text-danger">*</small>`;
+        for (const d of document.querySelectorAll('.label-disabled-os')) {
+            d.classList.remove('d-inline', 'd-none');
+            d.classList.add(!dataClient ? 'd-none' : 'd-inline');
+        }
+        for (const inp of document.querySelectorAll('.input-disabled-os')) {
+            inp.required = dataClient;
+        }
+    }
+    async getCiudadesFinales(value,$cbCiudades){
+        let datosn = new FormData();
+        datosn.append('distrito', value);
+        let response = await this.funcfetch(window.location.origin + '/intranet/ubigeo/ciudades', datosn);
+        let template = `<option></option>`;
+        response.ciudades.forEach(c => {
+            template += `<option value="${c.id}">${c.nombre_ciudad}</option>`;
+        });
+        document.querySelector($cbCiudades).innerHTML = template;
+    }
+    async getDataRemitenteGuia(cbBox,idRemiProv,idRemiDist,idRemiDepa,idRemiTipoDocu){
+        console.log(cbBox);
+        let datos = new FormData();
+        const tipoCbRemi = cbBox.selectedOptions[0].getAttribute('data-type');
+        datos.append('tipo', tipoCbRemi);
+        datos.append('id', $(cbBox).val());
+        if (tipoCbRemi == 'proveedor') {
+            datos.append('idcliente', cbBox.selectedOptions[0].getAttribute('data-id-cliente'));
+        }
+        try {
+            let response = await this.funcfetch(window.location.origin + '/intranet/comprobante/guias/obtener-clipro', datos);
+            if (response.error) {
+                alertify.alert('Error', response.error);
+                return null;
+            }
+            if (response.prov.length > 0) {
+                this.transforData(response.prov, document.querySelector(idRemiProv));
+            }
+            if (response.dist.length > 0) {
+                this.transforData(response.dist, document.querySelector(idRemiDist));
+            }
+            for (const key in response.datos) {
+                if (Object.hasOwnProperty.call(response.datos, key)) {
+                    const valor = response.datos[key];
+                    const element = document.querySelector(tipoCbRemi == 'proveedor' ? `[data-valor-proveedor="${key}"]` : `[data-valor-cliente="${key}"]`);
+                    if (!element) {
+                        continue;
+                    }
+                    element.value = valor;
+                }
+            }
+            $(idRemiDepa).trigger('change');
+            $(idRemiTipoDocu).trigger('change');
+            return tipoCbRemi;
+        } catch (error) {
+            console.error(error);
+            alertify.alert('Error', error.message);
+            return tipoCbRemi;
+        }
+    }
+    async getDataDestGuia(cbBox, idRemitDepa, idDestTipoDocu,idDestDepa ,idDestPorv, idDestDist, idCiudadFinal,idDiasTransito,idViaEnvio){
+        let datos = new FormData();
+        datos.append('id', $(cbBox).val());
+        datos.append('departamentoOrigen', $(idRemitDepa).find("option:selected").text());
+        try {
+            let response = await this.funcfetch(window.location.origin +  '/intranet/comprobante/guias/detalle-cli-de-cli', datos);
+            if (response.error) {
+                alertify.alert('Error', response.error);
+                return false;
+            }
+            if (!response.datos) {
+                console.log('aaa');
+                this.clearCliDeCli(idDestTipoDocu, idDestPorv, idDestDist, idCiudadFinal);
+                return true;
+            }
+            if (response.prov.length > 0) {
+                this.transforData(response.prov, document.querySelector(idDestPorv));
+            }
+            if (response.dist.length > 0) {
+                this.transforData(response.dist, document.querySelector(idDestDist));
+            }
+            if (response.ciudades.length > 0) {
+                let template2 = "<option></option>";
+                response.ciudades.forEach(c => {
+                    template2 += `<option value="${c.id}">${c.nombre_ciudad}</option>`;
+                });
+                document.querySelector(idCiudadFinal).innerHTML = template2;
+            }
+            for (const key in response.datos) {
+                if (Object.hasOwnProperty.call(response.datos, key)) {
+                    const valor = response.datos[key];
+                    const dom = document.querySelector(`[data-cli-cli="${key}"]`);
+                    if (!dom) {
+                        continue;
+                    }
+                    dom.value = valor;
+                }
+            }
+            $(idDestDepa).trigger('change');
+            $(idDestTipoDocu).trigger('change');
+            $(idCiudadFinal).trigger('change');
+            if (!response.dias) {
+                document.querySelector(idDiasTransito).value = "";
+                alertify.error('no se encontró los dias de transito para este destino');
+            }else{
+                this.calcularDiasTransito(idViaEnvio, idDiasTransito, response.dias.total_origen_base_hr_aereo, response.dias.total_hr_origen_destino);
+            }
+            return false;
+        } catch (error) {
+            console.error(error);
+            alertify.alert('Error', error.message);
+            return false;
+        }
+    }
+    async calculoDiasTrancitoCb(idRemiDepa,idDestDepa,idDestProv,idDiasTran,idViaEnvi){
+        let datos = new FormData();
+        datos.append('departamento_origen', $(idRemiDepa).find("option:selected").text());
+        datos.append('departamento_destino', $(idDestDepa).find("option:selected").text());
+        datos.append('provincia_destino', $(idDestProv).find("option:selected").text());
+        datos.append('ciudad_final', $(this).find("option:selected").text());
+        let response = await this.funcfetch(window.location.origin + '/intranet/comprobante/guias/obtener-dias', datos);
+        if (response.error) {
+            alertify.alert('Error', response.error);
+            return
+        }
+        if (!response.dias) {
+            document.querySelector(idDiasTran).value = "";
+            alertify.error('no se encontró los dias de transito para este destino');
+            return
+        }
+        this.calcularDiasTransito(idViaEnvi, idDiasTran, response.dias.total_origen_base_hr_aereo, response.dias.total_hr_origen_destino);
+    }
+    clearCliDeCli(idDestTipoDocu,idDestPorv,idDestDist,idCiudadFinal) {
+        for (const e of document.querySelectorAll(`[data-cli-cli]`)) {
+            e.value = "";
+        }
+        $('.cb-dest').val("").trigger("change");
+        $(idDestTipoDocu).val("").trigger("change");
+        $(idDestPorv).html("");
+        $(idDestDist).html("");
+        $(idCiudadFinal).html("");
+    }
+    calcularDiasTransito(idViaEnvio,domId, aereo, terrestre) {
+        let diasEnvio = 0;
+        switch ($(idViaEnvio).val()) {
+            case '1':
+                diasEnvio = Math.ceil(terrestre / 24);
+                break;
+            case '2':
+                diasEnvio = Math.ceil(aereo / 24);
+                break;
+            case '5':
+                diasEnvio = Math.ceil(aereo / 24);
+                break;
+        }
+        document.querySelector(domId).value = diasEnvio;
     }
 }

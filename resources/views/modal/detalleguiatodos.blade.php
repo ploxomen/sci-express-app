@@ -2,7 +2,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <span class="modal-title" id="staticBackdropLabel">Guía N° <span id="id_nro_guia"></span></span>
+        <span class="modal-title"><span id="id_nro_guia"></span></span>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>

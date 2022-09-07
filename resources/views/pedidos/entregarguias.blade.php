@@ -35,7 +35,11 @@
                 <div class="card-header" id="headingOne{{$g->id}}">
                     <h2 class="mb-0">
                         <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse{{$g->id}}" aria-expanded="true" aria-controls="collapse{{$g->id}}">
-                        Guía N° {{$g->nro_guia}}
+                        @if (empty($g->prefijo))
+                            OS N° {{$g->nro_guia}}
+                        @else
+                            Guía N° {{$g->nro_guia}}
+                        @endif
                         </button>
                     </h2>
                 </div>

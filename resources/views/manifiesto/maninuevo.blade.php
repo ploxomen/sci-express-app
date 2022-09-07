@@ -77,26 +77,26 @@
     <section class="p-3 bg-white">
         <div class="form-group d-flex flex-wrap" style="gap: 10px 20px;" id="detalle-provincia-destino"></div>
         <div class="row">
-            <div class="col-12 col-md-4 col-xl-8 form-group text-primary">
+            <div class="col-12 col-md-8 col-xl-10 form-group text-primary">
                 <strong>Total de guias pendientes: </strong>
                 <strong id="nro_guias_manifestar"></strong>
             </div>
             <div class="col-12 col-md-4 col-xl-2 form-group">
                 <label for="id_via_traslado">Vía de traslado</label>
                 <select name="via_traslado" id="id_via_traslado" class="form-control aplicar-filtro simple-select2">
-                    <option value="todos" selected>Todos</option>
-                    <option value="terrestre">Terrestre</option>
-                    <option value="aereo">Aereo</option>
+                    <option value="todos" selected>TODOS</option>
+                    <option value="terrestre">TERRESTRE</option>
+                    <option value="aereo">AEREO</option>
                 </select>
             </div>
-            <div class="col-12 col-md-4 col-xl-2 form-group">
+            {{-- <div class="col-12 col-md-4 col-xl-2 form-group">
                 <label for="id_estado_guia">Estado</label>
                 <select name="estado_guia" id="id_estado_guia" class="form-control aplicar-filtro simple-select2">
                     <option value="todos">Todos</option>
                     <option value="pendiente" selected>Pendientes</option>
                     <option value="concretados">Manifestados</option>
                 </select>
-            </div>
+            </div> --}}
             <div class="form-group col-12 col-md-6">
                 <h4 class="text-primary"><i class="far fa-newspaper"></i> Guías pendientes</h4>
             </div>

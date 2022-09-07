@@ -10,8 +10,11 @@ use App\Models\Tipos\Documentos;
 use App\Models\TrayectoEnvio;
 use App\Models\User;
 use Exception;
+use Illuminate\Contracts\Cache\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class Gias extends Controller
 {
@@ -45,6 +48,22 @@ class Gias extends Controller
         $antes = date('Y-m-d',strtotime($hoy . '-2 days'));
         return view('comprobante.guias',compact('nro_guia_result','cli_cli','clientes','departamentos','hoy','trayecto','via_envios', 'nro_os','tipo_documentos','modulos','antes'));
     }
+    public function deleteImgGuia(Request $request)
+    {
+        $guia = ModeloGuias::find($request->id_guia);
+        if(empty($guia)){
+            return response()->json(['error' => 'No se encontró la guía']);
+        }
+        $deleteGuia = ModeloGuias::deleteImgEntregaGuia($request->id_guia,$request->id_img);
+        if(!Storage::disk('guias-img')->exists($deleteGuia['nomFile']->nom_id_file)){
+            return ['error' => 'Imagen no encontrada para ser eliminada'];
+        }
+        if($deleteGuia['delete'] === 1 && Storage::disk('guias-img')->exists($deleteGuia['nomFile']->nom_id_file)){
+            Storage::disk('guias-img')->delete($deleteGuia['nomFile']->nom_id_file);
+            return response()->json(['success' => 'Imagen eliminada correctamente']);
+        }
+        return response()->json(['error' => 'No se eliminó la imagen']);
+    }
     public function obtenerDiasTransito(Request $request)
     {
         try {
@@ -58,6 +77,37 @@ class Gias extends Controller
         $modulos = User::getModulos(Auth::id());
         $clusters = ModeloCluster::obtenerTodosClusters();
         return view('retornos.retornosguiasencargado',compact('modulos','clusters'));
+    }
+    public function uploadImgDetalleGuia(Request $request)
+    {
+        $filesDb = [];
+        try {
+            $guia = ModeloGuias::find($request->id_guia);
+            if (empty($guia)) {
+                return response()->json(['error' => 'No se encontró la guía']);
+            }
+            if($guia->situ < 8 || $guia->estado === 3){
+                return response()->json(['error' => 'La guía/OS no esta apta para agregar imagenes']);
+            }
+            $id_file = time();
+            foreach ($request->file('image') as $file) {
+                $nombre = $id_file . '_' . $file->getClientOriginalName();
+                Storage::disk('guias-img')->put($nombre, File::get($file));
+                $filesDb[] = [
+                    'id_guia' => $request->id_guia,
+                    'nom_file' => $file->getClientOriginalName(),
+                    'nom_id_file' => $nombre,
+                    'size' => $file->getSize(),
+                    'type' => $file->extension()
+                ];
+            }
+            $imgAdd = ModeloGuias::addNewImgGuiaEntrega($filesDb);
+            return response()->json(['success' => count($imgAdd) > 1 ? 'Imagen cargada correctamente' : 'Imágenes subidas correctamente','list' => $imgAdd]);
+        } catch (Exception $ex) {
+            Storage::disk('guias-img')->delete($filesDb);
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+        dd($request->all());
     }
     public function guiasRetornadas(Request $request)
     {
@@ -79,13 +129,30 @@ class Gias extends Controller
             }
         }
     }
+    public function eliminarDetalleGuia(Request $request)
+    {
+        return response()->json(ModeloGuias::elimiarDetalleGuia($request->guia,$request->detalle,$request->situacion_guia));
+    }
+    public function obtenerDetalleTabla()
+    {
+        $datos['grupo_envio'] = InformacionAdicional::getGrupoEnvio();
+        $datos['tipo_envio'] = InformacionAdicional::getTipoEnvio();
+        $datos['envase_embalaje'] = InformacionAdicional::getEnvaseEmbalaje();
+        return response()->json($datos);
+    }
     public function detalleMisGuias(Request $request)
     {
         try {
-            return response()->json(['datos' => ModeloGuias::obtenerDetalleMisGuias($request->guia)]);
+            $resultGuia = $request->tipo == 'detalle' ? ModeloGuias::obtenerDetalleMisGuias($request->guia) : ModeloGuias::verEditar($request->guia);
+            return response()->json(['datos' => $resultGuia]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
+    }
+    public function obtenerAsignacionGlobal()
+    {
+        $guiasPorAsignar = ModeloGuias::selectRaw("DATE_FORMAT(fech_emis,'%d/%m/%Y') AS fecha_emision,id,prefijo,nro_guia")->where(['id_asignado' => null,'activo' => 1, 'situ' => 1, 'estado' => 1])->get();
+        return response()->json(['guias' => $guiasPorAsignar]);
     }
     public function misGuias()
     {
@@ -93,7 +160,52 @@ class Gias extends Controller
         $estado_guias = InformacionAdicional::situacionEstado();
         $nro_por_asignar = ModeloGuias::guiaPorAsignar();
         $fechaFiltros = InformacionAdicional::obtenerDiasFiltros();
-        return view('comprobante.misguias',compact('modulos', 'estado_guias', 'nro_por_asignar', 'fechaFiltros'));
+        $trayecto = TrayectoEnvio::where(['estado' => 1])->get();
+        $clientes = Clientes::obtenerCliConProvee();
+        $cli_cli = Clientes::obtenerCliDeCli();
+        $via_envios = InformacionAdicional::viaEnvio();
+        $departamentos = (new Ubigeo)->getDepartamentosClientes();
+        $tipo_documentos = Documentos::where('estado', '1')->get();
+        $usuarios = User::obtenerUsuarioRol(3);
+        return view('comprobante.misguias',compact('usuarios','trayecto','departamentos','via_envios','clientes','tipo_documentos','cli_cli','modulos', 'estado_guias', 'nro_por_asignar', 'fechaFiltros'));
+    }
+    public function asignarMuchasGuiasUsuario(Request $request)
+    {
+        $usuario = $request->id_usuario;
+        $guias = json_decode($request->guias,true);
+        foreach ($guias as $guia) {
+            ModeloGuias::where(['id' => $guia["id"], 'id_asignado' => null, 'activo' => 1, 'situ' => 1, 'estado' => 1])->update(['id_asignado' => $usuario]);
+        }
+        $nro_por_asignar = ModeloGuias::guiaPorAsignar();
+        return response()->json(['success' => 'guías/OS asignadas correctamente', 'porAsignar' => isset($nro_por_asignar[0]->total) ? $nro_por_asignar[0]->total : 0]);
+    }
+    public function updateGuia(Request $request)
+    {
+        try {
+            $datos = $request->all();
+            $idGuia = $request->id_guia;
+            $add_cli_bool = $request->has('add_cli_bool') ? $request->add_cli_bool : null;
+            $detallesNew = [];
+            $detallesUpdate = [];
+            if (isset($datos['comp_clie'])) {
+                $datos['comp_clie'] = implode(';', $datos['comp_clie']);
+            }
+            if (isset($datos['nro_comp_cli'])) {
+                $datos['nro_comp_cli'] = implode(';', $datos['nro_comp_cli']);
+            }
+            if (isset($datos['detalle_guia_new'])) {
+                unset($datos['detalle_guia_new']);
+                $detallesNew = json_decode($request->detalle_guia_new, true);
+            }
+            if (isset($datos['detalle_guia_update'])) {
+                unset($datos['detalle_guia_update']);
+                $detallesUpdate = json_decode($request->detalle_guia_update, true);
+            }
+            $response = ModeloGuias::updateGuia($idGuia,$datos, $detallesNew, $detallesUpdate, $add_cli_bool);
+            return response()->json($response);
+        } catch (Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
     }
     public function anularGuia(Request $request)
     {

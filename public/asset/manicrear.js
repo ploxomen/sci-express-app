@@ -14,10 +14,10 @@ function loadPage() {
         cbSelectAll.checked = false;
         let datos = new FormData();
         datos.append('prov_dest',viewAllProv.checked ? 'todos' : $('#id_prov_dest').val());
-        datos.append('prov_orig',viewAllProv.checked ? 'todos' : $('#id_prov_orig').val());
+        datos.append('prov_orig','todos');
         datos.append('cluster_id',viewAllProv.checked ? 'todos' : $('#id_id_cluster').val());
         datos.append('via_traslado', $('#id_via_traslado').val());
-        datos.append('estado_guia', $('#id_estado_guia').val());
+        datos.append('estado_guia', 'pendiente');
         try {
             let response = await general.funcfetch('ver-guias',datos);
             if(response.error){
@@ -80,14 +80,13 @@ function loadPage() {
                 selectGuia.addEventListener('change',function(e){
                     const traslado = selectGuia.dataset.traslado;
                     let contadorCheck = 0;
+                    transferManifest = traslado == 'TERRESTRE' ? 'TERRESTRE' : 'AEREO';
                     for (const disabilitar of document.querySelectorAll('.select-guias')) {
                         if (traslado == 'TERRESTRE' && disabilitar.dataset.traslado != traslado) {
                             disabilitar.disabled = true;
-                            transferManifest = 'TERRESTRE';
                         }
                         if (traslado.indexOf('AEREA') >= 0 && disabilitar.dataset.traslado == 'TERRESTRE') {
                             disabilitar.disabled = true;
-                            transferManifest = 'AEREO';
                         }
                         contadorCheck += disabilitar.checked ? 1 : 0;
                     }
@@ -95,6 +94,7 @@ function loadPage() {
                         transferManifest = null;
                         $('.select-guias').prop('disabled',false);
                     }
+                    console.log(transferManifest);
                 })
             }
             template = "";
@@ -262,9 +262,9 @@ function loadPage() {
                     transferManifest = null;
                     continue;
                 }
+                let primerTrTraslado = tblGuias.querySelector('.select-guias').dataset.traslado;
+                primerTrTraslado = primerTrTraslado.indexOf('AEREA') >= 0 ? 'AEREA' : primerTrTraslado;
                 if(via_traslado == 'todos'){
-                    let primerTrTraslado = tblGuias.querySelector('.select-guias').dataset.traslado;
-                    primerTrTraslado = primerTrTraslado.indexOf('AEREA') >= 0 ? 'AEREA' : primerTrTraslado;
                     if (primerTrTraslado == "TERRESTRE") {
                         transferManifest = "TERRESTRE";
                         checkGuia.disabled = checkGuia.dataset.traslado != "TERRESTRE" ? true : false;
@@ -276,9 +276,11 @@ function loadPage() {
                     }
                 }else{
                     checkGuia.checked = true;
+                    transferManifest = primerTrTraslado;
                 }                
             }
         }
+        console.log(transferManifest);
     });
 }
 window.addEventListener('DOMContentLoaded',loadPage);

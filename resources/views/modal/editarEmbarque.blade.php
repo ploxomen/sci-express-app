@@ -10,7 +10,7 @@
       <div class="modal-body">
         <form class="form-row" id="update-embarque-form">
             <div class="form-group col-6">
-                <label for="informe_fecha_embarque">Fecha Embarque</label>
+                <label for="informe_fecha_embarque_input">Fecha Embarque</label>
                 <input type="date" name="fch_emba" id="informe_fecha_embarque_input" class="form-control form-control-sm" required>
             </div>
             <div class="form-group col-6">
@@ -32,7 +32,7 @@
             <div class="form-group col-6">
                 <label for="informe_id_deal2">Dealer 2</label>
                 <select class="form-control form-control-sm simple-select2 reset-update" name="id_deal2" id="informe_id_deal2">
-                    <option value="Ninguno">NINGUNO</option>
+                    <option value="NINGUNO">NINGUNO</option>
                     @foreach ($dealers as $dea)
                         <option value="{{$dea->id}}">{{$dea->name}} {{$dea->last_name}}</option>
                     @endforeach
@@ -41,21 +41,33 @@
             <div class="form-group col-6">
                 <label for="informe_resp_emba">Responsable Informe</label>
                 <select class="form-control form-control-sm simple-select2 reset-update" name="resp_emba" id="informe_resp_emba" required>
-                    <option value="Dealer 1">Dealer 1</option>
-                    <option value="Dealer 2">Dealer 2</option>
+                    <option value="Dealer 1" selected>Dealer 1</option>
+                    <option value="Dealer 2" disabled>Dealer 2</option>
                 </select>
             </div>
             <div class="form-group col-6">
-                <label for="informe_estado">Situación</label>
-                <select class="form-control form-control-sm simple-select2 reset-update" name="estado" id="informe_estado" required>
-                    @foreach ($situacionManifiesto as $estado)
-                        <option value="{{$estado->id}}">{{$estado->tipo}}</option>
+                <label for="informe_id_vehi">Vehículo</label>
+                <select class="form-control form-control-sm simple-select2 reset-update" name="id_vehi" id="informe_id_vehi" required>
+                    <option></option>
+                    @foreach ($vehiculos as $v)
+                        <option value="{{$v->id}}">{{$v->placa}}</option>
                     @endforeach
                 </select>
             </div>
+            {{-- <div class="form-group col-6 col-lg-4">
+                <label for="informe_completado">Situación</label>
+                <select class="form-control form-control-sm simple-select2 reset-update" name="completado" id="informe_completado" required>
+                    
+                </select>
+            </div> --}}
             <div class="form-group col-12">
-                <label for="informe_estado">Empresa de Transporte</label>
-                <select name="empresas_transporte" id="informe_empresas" class="simple-select2" multiple></select>
+                <label for="informe_empresas">Empresa de Transporte</label>
+                <select name="id_empr_tran[]" id="informe_empresas" class="simple-select2 reset-update" multiple required>
+                    <option></option>
+                    @foreach ($transportes as $t)
+                        <option value="{{$t->id}}">{{$t->empresa}}</option>
+                    @endforeach
+                </select>
             </div>
             <div class="form-group col-6 col-md-4">
                 <label for="informe_hr_ini_emba">Hora Inicio</label>
@@ -85,7 +97,7 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id="actualizar-manifiesto">Actualizar</button>
+        <button type="button" class="btn btn-primary" id="actualizar-embarque">Actualizar</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
       </div>
     </div>

@@ -12,10 +12,64 @@
     <script src="{{asset('asset/misguias.js')}}"></script>
     <title>Mis guías</title>
 @endsection
+<style>
+    .form-editar-guia label{
+        font-size: 12px !important;
+    }
+    .new-img{
+        border: 2px dashed rgb(103, 103, 255);
+        padding: 20px 10px;
+        text-align: center;
+        outline: none;
+        background: #ffffff;
+        max-height: 80px;
+        transition: all .3s ease-in-out;
+    }
+    .new-img i{
+        color: rgb(103, 103, 255);
+        font-size: 30px;
+        transition: color .3s ease-in-out;
+    }
+    .new-img:hover{
+        background: rgb(103, 103, 255);
+        border-color: #ffffff;
+    }
+    .new-img:hover i{
+        color: #ffffff;
+    }
+    .img-delivery{
+        position: relative;
+        width: 200px;
+        max-height: 200px;
+    }
+    .img-delivery img{
+        width: 100%;
+        display: block;
+        object-fit: contain;
+        height: 100%
+    }
+    .img-delivery button{
+        position: absolute;
+        right: 0;
+        border: none;
+        padding: 5px;
+        border-radius: 50%;
+        width: 30px;
+        background: #7885ee;
+        height: 30px;
+        display: block;
+        outline: none;
+    }
+    .img-delivery button i{
+        color: #ffffff;
+    }
+
+
+</style>
 @section('body')
 <section class="p-2 bg-white">
     <h3 class="text-primary"><i class="fas fa-caret-right"></i> Mis guias</h3>
-    <form class="row mb-4" id="frm-aplicar-filtros">
+    <form class="row" id="frm-aplicar-filtros">
         <div class="form-group col-6 col-lg-3 col-xl-2">
             <label for="fecha_inicio">Fecha Inicio</label>
             <input type="date" class="form-control" id="fecha_inicio" value="{{$fechaFiltros['finFiltro']}}" required>
@@ -42,11 +96,12 @@
                 <option value="3">INACTIVA</option>
             </select>
         </div>
-        <div class="form-group col-12 col-md-6 col-xl-1">
+        <div class="form-group col-12 col-md-6 col-xl-2">
             <button type="submit" class="btn btn-sm btn-primary" title="Aplicar los filtros"><i class="fas fa-search"></i></button>
+            <button type="button" class="btn btn-sm btn-secondary" title="Asignación masiva" id="view-lista-guias"><i class="fas fa-globe-asia"></i></button>
         </div>
         <div class="form-group col-12">
-            <span class="text-info">Total N° guias sin asignar: <span id="total-por-procesar-guias">{{$nro_por_asignar[0]->total}}</span></span>
+            <span class="text-info">Total N° Guías/OS sin asignar: <span id="total-por-procesar-guias">{{$nro_por_asignar[0]->total}}</span></span>
         </div>
     </form>
     <div class="form-group">
@@ -75,4 +130,6 @@
     </table>
 </section>
 @include('modal.detalleguiatodos')
+@include('modal.editarguia')
+@include('modal.asignarPersonalMasivoGuia')
 @endsection

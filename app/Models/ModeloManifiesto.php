@@ -177,7 +177,7 @@ class ModeloManifiesto extends Model
             DB::table('manifiesto AS m')->join('detalle_manifiesto AS dm','m.id','=','dm.id_manifiesto')
             ->join('guias AS g','g.id','=','dm.id_guia')->whereIn('m.id', $filterManifiestos)->where(['m.estado' => 1,'g.situ' => 2])->update(['m.estado' => 2,'g.situ' => 3]);
             DB::commit();
-            return ['success' => 'Embarque programado con exito'];
+            return ['success' => 'Embarque programado con exito','ciudades' => InformacionAdicional::obtenerCiudadBaseEmbarcar($id_user)];
         } catch (Exception $ex) {
             DB::rollBack();
             return ['error' => $ex->getMessage()];

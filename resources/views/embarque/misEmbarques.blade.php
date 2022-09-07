@@ -33,9 +33,12 @@
             <label for="estado_guias">Situación Embarque</label>
             <select class="form-control cb-filtros simple-select2" id="estado_embarque">
                 <option value="todos" selected>TODOS</option>
-                @foreach ($situacionManifiesto as $estado)
-                    <option value="{{$estado->id}}">{{$estado->tipo}}</option>
-                @endforeach
+                <option value="0">PROGRAMADO</option>
+                <option value="1">EMBARCADO</option>
+                <option value="2">PROC. INFORME</option>
+                <option value="3">INFORMADO</option>
+                <option value="4">TRANSITO</option>
+                <option value="5">ARRIVO</option>
             </select>
         </div>
         <div class="form-group col-6 col-lg-3 col-xl-2">
@@ -94,4 +97,5 @@
 @include('modal.editarEmbarque')
 @include('modal.mostrarManifiesto')
 @include('modal.editarFletes')
+@include('modal.informeembarque')
 @endsection

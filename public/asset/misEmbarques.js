@@ -1,6 +1,7 @@
 function loadPage(){
     const general = new General();
-     let tablaEmbarques = $('#tabla-embarques').DataTable({
+    const estadoEmbarque = ['PROGRAMADO', 'EMBARCADO', 'PROC. INFORME', 'INFORMADO','TRANSITO','ARRIVO'];
+    let tablaEmbarques = $('#tabla-embarques').DataTable({
         ajax: {
             url: 'obtener-todos',
             method: 'POST',
@@ -17,7 +18,12 @@ function loadPage(){
         columns : [
             {data : 'nro_embarque'},
             {data : 'fecha_embarque'},
-            {data : 'nom_estado'},
+            {data : 'nom_estado',render: function(data){
+                if(data > 5 || data < 0){
+                    return 'ESTADO NO DEFINIDO';
+                }
+                return estadoEmbarque[data];
+            }},
             {data : 'nomConductor'},
             {data : 'manifiesto_search', visible : false},
             {data : 'dealer'},
@@ -39,7 +45,7 @@ function loadPage(){
             {
                 data: "id",
                 render : function(data,type,row){
-                    return `<div class="d-flex justify-content-center" style="gap:5px;"><button class="btn btn-sm btn-primary mr-2 editar-embarque" data-estado="${row.estado}" data-embarque="${data}" title="Editar embarque"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-secondary mr-2 editar-embarque-fletes" data-estado="${row.estado}" data-embarque="${data}" title="Editar fletes de embarque"><i class="fas fa-pencil-alt"></i></button><button class="btn eliminar-embarque btn-sm btn-danger" data-embarque="${data}" data-estado="${row.estado}" title="Eliminar embarque"><i class="far fa-trash-alt"></i></button></div>`
+                    return `<div class="d-flex justify-content-center" style="gap:5px;"><button class="btn btn-sm btn-primary editar-embarque" data-estado="${row.completado}" data-embarque="${data}" title="Editar embarque"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-secondary editar-embarque-fletes" data-estado="${row.completado}" data-embarque="${data}" title="Editar fletes de embarque"><i class="fas fa-pencil-alt"></i></button><button class="btn btn-sm btn-info editar-informe" data-embarque="${data}" title="Editar informe de embarque"><i class="fas fa-cube"></i></button><button class="btn eliminar-embarque btn-sm btn-danger" data-embarque="${data}" data-estado="${row.completado}" title="Eliminar embarque"><i class="far fa-trash-alt"></i></button></div>`
                 }
             }
         ],
@@ -55,6 +61,11 @@ function loadPage(){
         idEmbarque : 0,
         listaManifiesto: 0,
         changeTabla: 0
+    }
+    document.getElementById('btn-actualizar-guias').onclick = async function(e){
+        e.preventDefault();
+        let response = await general.funcfetch(window.location.origin + '/intranet/comprobante/guias/actualizar-informes');
+        alertify.success(response.success);
     }
     general.obtenerFlestes();
     let listaManifiestos = document.getElementById('lista-manifiestos'),
@@ -86,6 +97,14 @@ function loadPage(){
                     if (Object.hasOwnProperty.call(response.success[0], key)) {
                         const element = response.success[0][key];
                         const domcontent = document.getElementById('informe_' + key);
+                        if (key == 'transportes' && element) {
+                            $('#informe_empresas').val(element.map(t => t.id_empr_tran).join(';').split(';'));
+                            continue;
+                        }
+                        if (key == 'id_deal2' && !element){
+                            $('#informe_id_deal2').val('NINGUNO');
+                            continue;
+                        }
                         if (key == 'manifiestos') {
                             let template = "";
                             element.forEach(g => {
@@ -173,9 +192,17 @@ function loadPage(){
             $('#modal-editar-fletes .calc-total').on('change', function (e) {
                 general.calcularBultosFletes('#modal-editar-fletes', e.target.parentElement.parentElement, $(this).attr('data-base'), $(this).attr('data-transfer'));
             });
+            datosGlobales.idEmbarque = e.target.dataset.embarque;
             $('#modal-editar-fletes .sub-flete').on('change', general.calcularSubFlete);
             $('#id_tota_bult').val(response.totales.total_bultos_paquete);
             $('#id_flet_esti').val(response.totales.flet_esti);
+        }
+        if(e.target.classList.contains('editar-informe')){
+            let datos = new FormData();
+            datos.append('embarque',e.target.dataset.embarque);
+            const response = await general.funcfetch('obtener-detalle-informe-editar',datos);
+            datosGlobales.idEmbarque = e.target.dataset.embarque;
+            general.verInformeEmbarque(response)
         }
     });
     document.getElementById('embarque-editar').onclick = e => {
@@ -234,10 +261,34 @@ function loadPage(){
         e.preventDefault();
         tablaEmbarques.draw();
     }
-    document.getElementById('update-embarque-form').onsubmit = e => {
-        e.preventDefault();
-
+    document.getElementById('actualizar-embarque').onclick = function(){
+        document.getElementById('update-embarque').click();
     }
+    document.getElementById('update-embarque-form').onsubmit = async function(e){
+        e.preventDefault();
+        if(!datosGlobales.idEmbarque){
+            return alertify.alert('Alerta','No se encontró el embarque, por favor seleccione nuevamente el boton de editar embarque');
+        }
+        let datos = new FormData(this);
+        datos.append('embarque',datosGlobales.idEmbarque);
+        const response = await general.funcfetch('editar-embarque',datos);
+        if(response.error){
+            return alertify.alert('Error',response.error);
+        }
+        datosGlobales.changeTabla = 1;
+        alertify.success(response.success);
+        $('#embarque-editar').modal('hide');
+    }
+    $('#informe_id_deal').on('change',function(e){
+        general.validarDealerEmbarque('informe_id_deal2', $(this).val());
+    });
+    $('#informe_id_deal2').on('change',function(e){
+        general.validarResponsableEmbarque('informe_resp_emba', $(this).val());
+    });
+    $('#informe_completado').on('change',function(e){
+        document.getElementById('informe_hr_ini_emba').required = parseInt($(this).val()) >= 1 ? true : false;
+        document.getElementById('informe_fin_emba').required = parseInt($(this).val()) >= 2 ? true : false;
+    });
     $('#embarque-editar').on('hidden.bs.modal', (e) => {
         if(datosGlobales.changeTabla === 1){
             tablaEmbarques.draw();
@@ -246,5 +297,78 @@ function loadPage(){
         datosGlobales.listaManifiesto = 0;
         datosGlobales.changeTabla = 0;
     });
+    document.getElementById('actualizar-fletes').onclick = function () {  
+        document.getElementById('guardar-fletes').click();
+    }
+    document.getElementById('frm-lista-fletes-actualizar').onsubmit =  async function(e){
+        e.preventDefault();
+        if (!datosGlobales.idEmbarque) {
+            return alertify.alert('Alerta', 'No se encontró el embarque, por favor seleccione nuevamente el boton de editar fletes');
+        }
+        let datos = new FormData(this);
+        datos.append('embarque', datosGlobales.idEmbarque);
+        let fletes = [];
+        for (const lista of document.querySelectorAll('.lista-fletes')) {
+            if(lista.dataset.flete){
+                fletes.push({
+                    idFlete: lista.dataset.flete,
+                    sub_total_bultos: lista.querySelector('.sub-total').value,
+                    subtotal_fletes: lista.querySelector('.sub-flete').value,
+                    cajas: lista.querySelector(`[name="nro_cajas"]`).value,
+                    jabas: lista.querySelector(`[name="nro_jabas"]`).value,
+                    cajones: lista.querySelector(`[name="nro_cajones"]`).value,
+                    sobres: lista.querySelector(`[name="nro_sobres"]`).value,
+                    paquetes: lista.querySelector(`[name="nro_paquetes"]`).value,
+                    otros: lista.querySelector(`[name="num_otros"]`).value,
+                    detalle_otros: lista.querySelector(`[name="detalle_otro"]`).value
+                });
+            }
+        }
+        datos.append('fletes',JSON.stringify(fletes));
+        const response = await general.funcfetch('editar-fletes',datos);
+        if(response.error){
+            return alertify.alert('Error',response.error);
+        }
+        alertify.success(response.success);
+        $('#modal-editar-fletes').modal('hide');
+    }
+    document.getElementById('actualizar-embarque-informe').onclick = function () {
+        document.getElementById('enviar-informe').click();
+    }
+    document.getElementById('frm-informar-embarques').onsubmit = async function (e) {
+        e.preventDefault();
+        if (!datosGlobales.idEmbarque) {
+            return alertify.alert('Alerta', 'No se encontró el embarque, por favor seleccione nuevamente el boton de editar informe');
+        }
+        let datos = new FormData();
+        datos.append('embarque', datosGlobales.idEmbarque);
+        let informes = [];
+        for (const informe of document.querySelectorAll('.informe-ciudades')) {
+            const idCiudad = informe.dataset.ciudad;
+            informes.push({
+                ciudadBase : idCiudad,
+                trayecto: informe.dataset.trayecto,
+                comprobantes: $('#id_comprobantes_' + idCiudad).val(),
+                nroComprobantes: $('#id_nro_comprobantes_' + idCiudad).val(),
+                importeFactura: informe.querySelector('#id_importe_factura_' + idCiudad).value,
+                empresaTransporte: $('#empresa_trasporte_' + idCiudad).val(),
+                fechaLlegada: informe.querySelector('#id_fecha_llegada_' + idCiudad).value,
+                hrLlegada: informe.querySelector('#id_hr_llegada_' + idCiudad).value,
+                guiasEmbarque: informe.querySelector("#id_guia_embarque_" + idCiudad).value
+            });
+        }
+        if(!informes.length){
+            return alertify.alert('Alerta','No se encontraron ciudades de embarque');
+        }
+        datos.append('ciudades_base',JSON.stringify(informes));
+        const response = await general.funcfetch('editar-informe', datos);
+        if(response.error){
+            return alertify.alert('Error',response.error);
+        }
+        alertify.success(response.success);
+        $('#modal-informe-embarque').modal('hide');
+
+    }
+
 }
 window.addEventListener('DOMContentLoaded',loadPage);

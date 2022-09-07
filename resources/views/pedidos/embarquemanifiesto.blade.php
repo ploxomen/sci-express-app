@@ -95,7 +95,7 @@
                                                     <button class="btn btn-link d-block w-100" data-toggle="collapse" data-target="#colapset_mani_{{$m->id}}" aria-expanded="true">
                                                         <div class="d-flex justify-content-between">
                                                             <span>
-                                                                @if ($m->via_envio == 'TERRESTRE')
+                                                                @if ($m->tipo_trayecto == 'TERRESTRE')
                                                                     <i class="fas fa-truck"></i>
                                                                 @else
                                                                     <i class="fas fa-plane"></i>
@@ -120,7 +120,7 @@
                                                     @if (!empty($emb->hr_ini_emba) && empty($emb->fin_emba))
                                                         <div>
                                                             <label for="transpotes_select_{{$emb->id}}">Empresa de Transporte</label>
-                                                            <select class="form-control form-control-sm transpotes_select_{{$emb->id}}" data-nomciudad="{{$m->nombreciudad}}" data-base="{{$m->tipo_base}}" data-ciudad="{{$m->cod_ciudad}}">
+                                                            <select class="form-control form-control-sm transpotes_select_{{$emb->id}}" data-nomciudad="{{$m->nombreciudad}}" data-ciudad="{{$m->id}}">
                                                                 <option value="" hidden>Seleccione la empresa de trasnporte</option>
                                                                 @foreach ($emb->transportes as $trans)
                                                                     <option value="{{$trans->id}}">{{$trans->empresa}}</option>

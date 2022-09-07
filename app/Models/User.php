@@ -149,12 +149,14 @@ class User extends Authenticatable
                 break;
             case 9:
                 //EMBARQUE PARA HOY CONDUCTOR 
-                $resultado = DB::table('embarque')->where(['id_cond' => $id_user,'estado' => 2, 'fch_emba' => date('Y-m-d'), 'activo' => 1])->count();
+                // $resultado = DB::table('embarque')->where(['id_cond' => $id_user,'estado' => 2, 'fch_emba' => date('Y-m-d'), 'activo' => 1])->count();
+                $resultado = 5;
             break;
             case 10:
                 //EMBARQUE PARA HOY DEALER 
-                $n = DB::select('CALL sp_obtener_embarques_cluster(?,?,?)',[$id_user,date('Y-m-d'),1]);
-                $resultado = $n[0]->total;
+                // $n = DB::select('CALL sp_obtener_embarques_cluster(?,?,?)',[$id_user,date('Y-m-d'),1]);
+                // $resultado = $n[0]->total;
+                $resultado = 5;
             break;
             case 11:
                 //EMBARQUEs ASIGNADOS CONDUCTOR 
@@ -167,8 +169,9 @@ class User extends Authenticatable
             break;
             case 13:
                 //INFORMES PENDIENTES SOLO PARA DEALER
-                $n = DB::select('CALL sp_obtener_informes_pendientes(?)',[$id_user]);
-                $resultado = $n[0]->total;
+                // $n = DB::select('CALL sp_obtener_informes_pendientes(?)',[$id_user]);
+                // $resultado = $n[0]->total;
+                $resultado = 5;
             break;
             case 14:
                 //GUIAS POR ARRIBAR PARA CONFIRMAR CLUSTER

@@ -12,6 +12,8 @@ class ModeloEmbarque extends Model
     protected $table = "embarque";
     public $timestamps = false;
 
+    protected $fillable = ['fch_emba','id_cond','id_deal','id_vehi','id_deal2','resp_emba','hr_fin_esti_emba', 'hr_ini_emba','fin_emba','flete_esti','total_bultos_paquete','importe_total','nosotros'];
+
     public static function embarcarTrabajador($idEmbarque,$id_user,$condicion){
         $embarques = DB::select('CALL sp_embarcar_trabajador(?,?,?)',[$idEmbarque,$id_user, $condicion]);
         foreach ($embarques as $em) {
@@ -21,9 +23,11 @@ class ModeloEmbarque extends Model
             }
             $em->manfiestos = DB::select('CALL sp_embarque_embarcar_manifiesto(?)',[$em->id]);
             foreach ($em->manfiestos as $prov) {
-                if($condicion == 'informe' && $prov->via_envio == 'TERRESTRE'){
-                    $codCiudad = $prov->tipo_base == 'ciudad' ? $prov->cod_ciudad : $prov->ubigeo_distrito;
-                    $prov->guiasEmbarque = DB::select('CALL sp_generar_guias_embarque(?,?,?,?)',[$idEmbarque,$id_user,$prov->tipo_base, $codCiudad]);
+                if($condicion == 'informe' && $prov->tipo_trayecto == 'TERRESTRE'){
+                    $prov->guiasEmbarque = DB::table('embarque_manifiesto AS em')->select('g.prefijo','g.nro_guia')
+                    ->join('detalle_manifiesto AS dm','em.id_manifiesto','=','dm.id_manifiesto')
+                    ->join('guias AS g','dm.id_guia','=','g.id')
+                    ->where(['em.id_embarque_ciudad' => $prov->id])->get();
                 }
                 $prov->listaManifiestos = explode(',',$prov->listaManifiestos);
                 if($prov->tipo_base == 'distrito'){
@@ -32,6 +36,115 @@ class ModeloEmbarque extends Model
             }
         }
         return $embarques;
+    }
+    public static function actualizarInforme($datos,$idEmbarque,$usuario)
+    { 
+        DB::beginTransaction();
+        try {
+            $datosInformes = json_decode($datos['ciudades_base'], true);
+            foreach ($datosInformes as $ciudad) {
+                $fecha_reparto = null;
+                if (!empty($ciudad['fechaLlegada']) && !empty($ciudad['fechaLlegada'])) {
+                    $fecha_reparto = $ciudad['fechaLlegada'];
+                    $limite_hora = date('N', strtotime($ciudad['fechaLlegada'])) == 6 ? strtotime('12:00') : strtotime("17:00");
+                    $hora_llegada = strtotime($ciudad['hrLlegada']);
+                    if ($hora_llegada > $limite_hora) {
+                        $fecha_reparto = date('Y-m-d', strtotime($fecha_reparto . '+ 1 day'));
+                    }
+                    if (date('N', strtotime($fecha_reparto)) == 7) {
+                        $fecha_reparto = date('Y-m-d', strtotime($fecha_reparto . '+ 1 day'));
+                    }
+                }
+                $idEmbarqueCiudad = $ciudad['ciudadBase'];
+                $datosEmbarqueCiudad = [
+                    'ecl.fecha_llegada' => empty($ciudad['fechaLlegada']) ? null : $ciudad['fechaLlegada'],
+                    'ecl.hr_llegada' =>  empty($ciudad['hrLlegada']) ? null : $ciudad['hrLlegada'],
+                    'ecl.comprobantes' => null,
+                    'ecl.nro_comprobantes' => null,
+                    'ecl.id_empr_tran_emba' => empty($ciudad['empresaTransporte']) ? null : $ciudad['empresaTransporte'],
+                    'ecl.importe_factura' => empty($ciudad['importeFactura']) ? null : $ciudad['importeFactura']
+                ];
+                if (!empty($ciudad['guiasEmbarque']) && $ciudad['trayecto'] == 'TERRESTRE') {
+                    if (strlen(trim($ciudad['guiasEmbarque'])) > 11 && strpos($ciudad['guiasEmbarque'], '-') != 3) {
+                        return ['error' => 'La guía de embarque N° ' . $ciudad['guiasEmbarque'] . ' no está con el formato solicitado'];
+                    }
+                    $nro_guia = explode('-', trim($ciudad['guiasEmbarque']));
+                    if (DB::table('guias')->where(['nro_guia' => $nro_guia[1], 'prefijo' => $nro_guia[0]])->count() > 0) {
+                        return ['error' => 'La guía de embarque N° <b>' . $ciudad['guiasEmbarque'] . '</b> ya se encuentra registrada, por favor intente con otro número de guía.'];
+                    }
+                    if (DB::table('embarque_ciudad_llegada')->where(['nro_guia_embarque' => $nro_guia[1], 'prefijo_guia_embarque' => $nro_guia[0]])->where('id', '!=', $idEmbarqueCiudad)->count() > 0) {
+                        return ['error' => 'La guía de embarque N° <b>' . $ciudad['guiasEmbarque'] . '</b> está pendiente por registrar, por favor intente con otro número de guía.'];
+                    }
+                    $datosEmbarqueCiudad['ecl.nro_guia_embarque'] = $nro_guia[1];
+                    $datosEmbarqueCiudad['ecl.prefijo_guia_embarque'] = $nro_guia[0];
+                }
+                if (!empty($ciudad['comprobantes'])) {
+                    $datosEmbarqueCiudad['ecl.comprobantes'] = implode(';', $ciudad['comprobantes']);
+                }
+                if (!empty($ciudad['nroComprobantes'])) {
+                    $datosEmbarqueCiudad['ecl.nro_comprobantes'] = implode(';', $ciudad['nroComprobantes']);
+                }
+                DB::table('embarque AS e')
+                ->join('embarque_ciudad_llegada AS ecl', 'e.id', '=', 'ecl.id_embarque')
+                ->join('embarque_fletes AS ef', 'ecl.id', '=', 'ef.id_embarque_ciudad')
+                ->where(['e.activo' => 1, 'e.id' => $idEmbarque, 'ecl.id' => $idEmbarqueCiudad])
+                ->update($datosEmbarqueCiudad);
+                    //ACTUALIZAR GUIAS
+                DB::table('embarque_manifiesto AS em')
+                ->join('detalle_manifiesto AS dm', 'em.id_manifiesto', '=', 'dm.id_manifiesto')
+                ->join('guias AS g', 'dm.id_guia', '=', 'g.id')->where(['em.id_embarque_ciudad' => $idEmbarqueCiudad])
+                ->update(['g.fecha_reparto' => $fecha_reparto]);
+            }
+            DB::table('embarque')->where(['id' => $idEmbarque, 'activo' => 1])->update(['date_update' => now(), 'user_update' => $usuario]);
+            DB::commit();
+            return ['success' => 'Informe actualizado con éxito'];
+        } catch (Exception $ex) {
+            DB::rollBack();
+            return ['error' => $ex->getMessage()];
+        }
+    }
+    public function scopeVerEmbarqueInforme($query,$idEmbarque)
+    {
+        $embarque = DB::table('embarque AS e')->select('e.total_bultos_paquete', 'e.fch_emba')->where('id',$idEmbarque)->first();
+        $embarque->lista_empresas_transporte = DB::table('transporte_embarque AS te')->select('et.id','et.empresa')->join('empresa_transporte AS et','te.id_empr_tran','=','et.id')->where('id_list_emba',$idEmbarque)->get();
+        $embarque->manfiestos = DB::table('embarque_ciudad_llegada AS ecl')
+        ->select('ecl.*','c.nombre_ciudad','et.empresa AS empresa_trasporte')->selectRaw('SUM(ef.cajas) AS embarque_nro_cajas,SUM(ef.cajones) AS embarque_nro_cajones, SUM(ef.jabas) AS embarque_nro_jabas, SUM(ef.paquetes) AS embarque_nro_paquetes, SUM(ef.sobres) AS embarque_nro_sobres, SUM(ef.otros) AS embarque_num_otros')
+        ->join('embarque_fletes AS ef','ecl.id','=','ef.id_embarque_ciudad')
+        ->leftJoin('ciudades AS c','ecl.id_ciudad','=','c.id')
+        ->leftJoin('empresa_transporte AS et','ecl.id_empr_tran_emba','=','et.id')
+        ->where('ecl.id_embarque',$idEmbarque)->groupBy('ecl.id')->get();
+        foreach ($embarque->manfiestos as $detalle) {
+            if($detalle->tipo_trayecto == 'TERRESTRE'){
+                $detalle->guiasEmbarque = DB::table('embarque_manifiesto AS em')->select('g.prefijo', 'g.nro_guia')
+                ->join('detalle_manifiesto AS dm', 'em.id_manifiesto', '=', 'dm.id_manifiesto')
+                ->join('guias AS g', 'dm.id_guia', '=', 'g.id')
+                ->where(['em.id_embarque_ciudad' => $detalle->id])->get();
+            }
+            $detalle->nombreciudad = $detalle->tipo_base == 'distrito' ? mb_strtoupper((new Ubigeo)->getNameDistrito($detalle->ubigeo_distrito), 'UTF-8') : $detalle->nombre_ciudad;
+        }
+        return $embarque;
+    }
+    public function scopeEditarEmbarque($query,$actualizar,$empresas,$idEmbarque,$idUser)
+    {
+        DB::beginTransaction();
+        try {
+            $actualizar['date_update'] = now();
+            $actualizar['user_update'] = $idUser;
+            $actualizar['id_deal2'] = $actualizar['id_deal2'] == 'NINGUNO' ? null : $actualizar['id_deal2'];
+            $query->where('id',$idEmbarque)->update($actualizar);
+            DB::table('transporte_embarque')->where('id_list_emba',$idEmbarque)->delete();
+            $nuevaEmpresas = [];
+            for ($i=0; $i < count($empresas); $i++) {
+                $nuevaEmpresas[$i]['id_list_emba'] = $idEmbarque;
+                $nuevaEmpresas[$i]['id_empr_tran'] = $empresas[$i];
+            }
+            DB::table('transporte_embarque')->insert($nuevaEmpresas);
+            DB::commit();
+            return ['success' => 'Embarque actualizado correctamente'];
+        } catch (Exception $ex) {
+            DB::rollBack();
+            return ['error' => $ex->getMessage()];
+        }
     }
     public static function eliminarEmbarque($idEmbarque)
     {
@@ -49,14 +162,40 @@ class ModeloEmbarque extends Model
             return ['error' => $ex->getMessage()];
         }
     }
+    public function scopeEditarFlete($query,$idEmbarque,$fletes,$bulto,$total)
+    {
+        DB::beginTransaction();
+        try {
+            foreach ($fletes as $key => $value) {
+                $actualizarFlete = [];
+                foreach ($value as $k2 => $v2) {
+                    if($k2 === 'detalle_otros' || $k2 === 'idFlete'){
+                        continue;
+                    }
+                    $fletes[$key][$k2] = empty($v2) ? 0 : $v2;
+                    $actualizarFlete['ef.' . $k2] = $fletes[$key][$k2];
+                }
+                DB::table('embarque AS e')->join('embarque_ciudad_llegada AS ecl', 'e.id', '=', 'ecl.id_embarque')
+                ->join('embarque_fletes AS ef', 'ecl.id', '=', 'ef.id_embarque_ciudad')
+                ->where(['ef.id' => $value['idFlete'],'e.id' => $idEmbarque])->update($actualizarFlete);
+            }
+            DB::table('embarque AS e')->where('id',$idEmbarque)->update([ 'e.flet_esti' => $total,'e.total_bultos_paquete' => $bulto]);
+            DB::commit();
+            return ['success' => 'Flete actualizado correctamente'];
+        } catch (Exception $ex) {
+            DB::rollBack();
+            return ['error' => $ex->getMessage()];
+        }
+    }
     public static function mostrarEditarFletes($idEmbarque)
     {
-        $fletes = DB::table('fletes_embarque AS fe')->select('fe.id','fe.via_envio','fe.id_cluster',DB::raw('fn_obtener_nombres_clusters(fe.id_cluster) AS nom_cluster'),'cbc.tipo_base','cbc.ubigeo_distrito','c.nombre_ciudad','fe.cajas','fe.jabas','fe.cajones','fe.sobres','fe.paquetes','fe.otros','fe.detalle_otros','fe.sub_total_bultos','fe.subtotal_fletes')
-        ->join('ciudades_base_cluster AS cbc','fe.id_cluster','=','cbc.id_cluster')
-        ->leftJoin('ciudades AS c','cbc.id_ciudad','=','c.id')
-        ->where(['fe.id_embarque' => $idEmbarque,'cbc.base' => 1,'cbc.activo' => 1])->get();
+        $fletes = DB::table('embarque AS e')->select('ef.id AS id_embarque_flete', 'ecl.tipo_trayecto AS via_envio','ef.id_cluster',DB::raw('fn_obtener_nombres_clusters(ef.id_cluster) AS nom_cluster'),'ecl.tipo_base', 'ecl.ubigeo_distrito','c.nombre_ciudad','ef.cajas','ef.jabas','ef.cajones','ef.sobres','ef.paquetes','ef.otros','ef.detalle_otros','ef.sub_total_bultos','ef.subtotal_fletes')
+        ->join('embarque_ciudad_llegada AS ecl','e.id','=','ecl.id_embarque')
+        ->join('embarque_fletes AS ef','ecl.id','=','ef.id_embarque_ciudad')
+        ->leftJoin('ciudades AS c', 'ecl.id_ciudad','=','c.id')
+        ->where(['e.id' => $idEmbarque])->get();
         foreach ($fletes as $fle) {
-            $fle->nombreciudad = $fle->tipo_base == 'ciudad' ? $fle->nombre_ciudad : (new Ubigeo)->getNameDistrito($fle->ubigeo_distrito);
+            $fle->nombreciudad = $fle->tipo_base == 'ciudad' ? $fle->nombre_ciudad : mb_strtoupper((new Ubigeo)->getNameDistrito($fle->ubigeo_distrito),'UTF-8');
         }
         $total = DB::table('embarque')->select('total_bultos_paquete','flet_esti')->where(['id' => $idEmbarque])->first();
         return ['ciudades' => $fletes,'totales' => $total];
@@ -79,6 +218,9 @@ class ModeloEmbarque extends Model
         $embarques = DB::select('CALL sp_embarque_obtener(?,?,?,?,?,?,?)',[$fechaInicio, $fechaFin, $driver, $dealer, $vehiculo, $estado, $idEmbarque]);
         foreach ($embarques as $emb) {
             $emb->manifiestos = json_decode($emb->manifiestos,true);
+            if(!empty($idEmbarque)){
+                $emb->transportes = DB::table('transporte_embarque')->select('id_empr_tran')->where('id_list_emba',$idEmbarque)->get();
+            }
         }  
         return $embarques;
     }
@@ -89,7 +231,7 @@ class ModeloEmbarque extends Model
         try {
             $hroInicio = DB::table('embarque')->select('hr_ini_emba')->where(function ($query) use ($id_user) {
                 $query->orWhere(['id_cond' => $id_user, 'id_deal' => $id_user, 'id_deal2' => $id_user]);
-            })->where(['estado' => 2, 'activo' => 1, 'id' => $id_embarque])->first();
+            })->where(['completado' => 0, 'activo' => 1, 'id' => $id_embarque])->first();
             if(empty($hroInicio)){
                 return ['error' => 'Embarque no actualizado debido a que no se le a asignado'];
             }
@@ -100,27 +242,26 @@ class ModeloEmbarque extends Model
             }
             foreach (json_decode($empresas, true) as $empresa) {
                 $valor = [
-                    'e.estado' => 2,
+                    'e.completado' => 0,
                     'e.activo' => 1,
+                    'ecl.id' => $empresa['ciudadBase'],
                     'e.id' => $id_embarque
                 ];
-                if ($empresa['tipoCiudad'] == 'ciudad') {
-                    $valor['cbc.id_ciudad'] = $empresa['ciudadaBase'];
-                } else {
-                    $valor['cbc.ubigeo_distrito'] = $empresa['ciudadaBase'];
-                }
-                DB::table('fletes_embarque AS fe')->join('ciudades_base_cluster AS cbc', 'fe.id_cluster', '=', 'cbc.id_cluster')->join('embarque AS e', 'fe.id_embarque', '=', 'e.id')->where(function ($query) use ($id_user) {
+                DB::table('embarque AS e')->join('embarque_ciudad_llegada AS ecl', 'e.id', '=', 'ecl.id_embarque')
+                ->join('embarque_fletes AS ef', 'ef.id_embarque_ciudad', '=', 'ecl.id')->where(function ($query) use ($id_user) {
                     $query->orWhere(['e.id_cond' => $id_user, 'e.id_deal' => $id_user, 'e.id_deal2' => $id_user]);
-                })->where($valor)->update(['fe.id_empr_tran_emba' => $empresa['transporte']]);
+                })->where($valor)->update(['ecl.id_empr_tran_emba' => $empresa['transporte'],'ef.estado' => 3]);
             }
-            DB::table('embarque AS e')->join('embarque_manifiesto AS em','e.id','=','em.id_embarque')
+            DB::table('embarque AS e')
+            ->join('embarque_ciudad_llegada AS ecl', 'e.id', '=', 'ecl.id_embarque')
+            ->join('embarque_manifiesto AS em', 'ecl.id','=','em.id_embarque_ciudad')
             ->join('detalle_manifiesto AS dm','em.id_manifiesto','=','dm.id_manifiesto')
             ->join('guias AS g','dm.id_guia','=','g.id')
             ->join('manifiesto AS m','em.id_manifiesto','=','m.id')
             ->where(function ($query) use ($id_user) {
                 $query->orWhere(['id_cond' => $id_user, 'id_deal' => $id_user, 'id_deal2' => $id_user]);
-            })->where(['e.estado' => 2, 'e.activo' => 1, 'e.id' => $id_embarque])
-            ->update(['m.user_update' => $id_user, 'm.date_update' => now(),'e.fin_emba' => now(),'e.user_update' => $id_user, 'e.date_update' => now(),'e.estado' => 3,'m.estado' => 3 ,'g.situ' => 4]);
+            })->where(['e.completado' => 0, 'e.activo' => 1, 'e.id' => $id_embarque])
+            ->update(['m.user_update' => $id_user, 'm.date_update' => now(),'e.fin_emba' => now(),'e.user_update' => $id_user, 'e.date_update' => now(),'e.completado' => 1,'m.estado' => 3 ,'g.situ' => 4]);
             DB::commit();
             return ['success' => 'Embarque exitoso'];
         } catch (Exception $ex) {
@@ -158,87 +299,103 @@ class ModeloEmbarque extends Model
         }
         return $obtener_ciudades;
     }
-    // public static function obtenerGuiasEmbarqueInsertar($id_embarque,$id_usuario)
-    // {
-    //     $obtener_ciudades = DB::select('CALL sp_generar_guias_embarque(?,?)',[$id_embarque, $id_usuario]);
-    //     foreach ($obtener_ciudades as $guias) {
-    //         if(!empty($guias)){
-    //             $guias->n_guias = json_decode($guias->n_guias);
-    //         }
-    //         if($guias->tipo_base == 'distrito'){
-    //             $guias->nombreciudad = mb_strtoupper((new Ubigeo)->getNameDistrito($guias->nombreciudad),'UTF-8');
-    //         }
-    //     }
-    //     return $obtener_ciudades;
-    // }
     public static function agregarInformeEmbarque($datos,$usuario)
     {
         DB::beginTransaction();
         try {
-            $fecha_reparto = $datos['fecha_llegada'];
-            $limite_hora = date('N',strtotime($datos['fecha_llegada'])) == 6 ? strtotime('12:00') : strtotime("17:00");
-            $hora_llegada = strtotime($datos['hr_llegada']);
-            if($hora_llegada > $limite_hora){
-                $fecha_reparto = date('Y-m-d',strtotime($fecha_reparto . '+ 1 day'));
-            }
-            if(date('N', strtotime($fecha_reparto)) == 7){
-                $fecha_reparto = date('Y-m-d', strtotime($fecha_reparto . '+ 1 day'));
-            }
-            $id = $datos['id_embarque'];
-            $guias_embarque = !empty($datos['guias_embarque']) ? json_decode($datos['guias_embarque'],true) : [];
-            foreach ($guias_embarque as $key => $guia) {
-                if (strlen(trim($guia['nro_guia_embarque'])) > 11 && strpos($guia['nro_guia_embarque'], '-') != 3) {
-                    return ['error' => 'La guía N° ' . $guia['nro_guia_embarque'] . ' no está con el formato solicitado'];
+            $datosInformes = json_decode($datos['ciudades_base'],true);
+            $idEmbarque = $datos['id_embarque'];
+            $competadoTodo = 0;
+            foreach ($datosInformes as $ciudad) {
+                $fecha_reparto = null;
+                if(!empty($ciudad['fechaLlegada']) && !empty($ciudad['fechaLlegada'])){
+                    $fecha_reparto = $ciudad['fechaLlegada'];
+                    $limite_hora = date('N', strtotime($ciudad['fechaLlegada'])) == 6 ? strtotime('12:00') : strtotime("17:00");
+                    $hora_llegada = strtotime($ciudad['hrLlegada']);
+                    if ($hora_llegada > $limite_hora) {
+                        $fecha_reparto = date('Y-m-d', strtotime($fecha_reparto . '+ 1 day'));
+                    }
+                    if (date('N', strtotime($fecha_reparto)) == 7) {
+                        $fecha_reparto = date('Y-m-d', strtotime($fecha_reparto . '+ 1 day'));
+                    }
                 }
-                $nro_guia = explode('-', trim($guia['nro_guia_embarque']));
-                if (DB::table('guias')->where(['nro_guia' => $nro_guia[1], 'prefijo' => $nro_guia[0]])->count() > 0) {
-                    return ['error' => 'La guía de embarque N° <b>' . $guia['nro_guia_embarque'] . '</b> ya se encuentra registrada, por favor intente con otro número de guía.'];
+                
+                $idEmbarqueCiudad = $ciudad['ciudadBase'];
+                $datosEmbarqueCiudad = [
+                    'ecl.fecha_llegada' => empty($ciudad['fechaLlegada']) ? null : $ciudad['fechaLlegada'],
+                    'ecl.hr_llegada' =>  empty($ciudad['hrLlegada']) ? null : $ciudad['hrLlegada'],
+                    'ecl.comprobantes' => null,
+                    'ecl.nro_comprobantes' => null,
+                    'ecl.importe_factura' => empty($ciudad['importeFactura']) ? null : $ciudad['importeFactura'],
+                    'ef.estado' => 4
+                ];
+                if(!empty($ciudad['guiasEmbarque']) && $ciudad['trayecto'] == 'TERRESTRE'){
+                    if (strlen(trim($ciudad['guiasEmbarque'])) > 11 && strpos($ciudad['guiasEmbarque'], '-') != 3) {
+                        return ['error' => 'La guía de embarque N° ' . $ciudad['guiasEmbarque'] . ' no está con el formato solicitado'];
+                    }
+                    $nro_guia = explode('-', trim($ciudad['guiasEmbarque']));
+                    if (DB::table('guias')->where(['nro_guia' => $nro_guia[1], 'prefijo' => $nro_guia[0]])->count() > 0) {
+                        return ['error' => 'La guía de embarque N° <b>' . $ciudad['guiasEmbarque'] . '</b> ya se encuentra registrada, por favor intente con otro número de guía.'];
+                    }
+                    if (DB::table('embarque_ciudad_llegada')->where(['nro_guia_embarque' => $nro_guia[1], 'prefijo_guia_embarque' => $nro_guia[0]])->where('id','!=',$idEmbarqueCiudad)->count() > 0) {
+                        return ['error' => 'La guía de embarque N° <b>' . $ciudad['guiasEmbarque'] . '</b> está pendiente por registrar, por favor intente con otro número de guía.'];
+                    }
+                    $datosEmbarqueCiudad['ecl.nro_guia_embarque'] = $nro_guia[1];
+                    $datosEmbarqueCiudad['ecl.prefijo_guia_embarque'] = $nro_guia[0];
+                }else if(empty($ciudad['guiasEmbarque']) && $ciudad['trayecto'] == 'TERRESTRE'){
+                    $datosEmbarqueCiudad['ef.estado'] = 3;
                 }
-                if (DB::table('relacion_guias_embarque')->where(['nro_guia_embarque' => $nro_guia[1], 'prefijo_guia_embarque' => $nro_guia[0]])->count() > 0) {
-                    return ['error' => 'La guía de embarque N° <b>' . $guia['nro_guia_embarque'] . '</b> está pendiente por registrar, por favor intente con otro número de guía.'];
+                if(!empty($ciudad['comprobantes'])){
+                    $datosEmbarqueCiudad['ecl.comprobantes'] = implode(';', $ciudad['comprobantes']);
                 }
-                $guias_embarque[$key]['id_embarque'] = $id;
-                $guias_embarque[$key]['prefijo_guia_embarque'] = $nro_guia[0];
-                $guias_embarque[$key]['nro_guia_embarque'] = $nro_guia[1];
+                if (!empty($ciudad['nroComprobantes'])) {
+                    $datosEmbarqueCiudad['ecl.nro_comprobantes'] = implode(';', $ciudad['nroComprobantes']);
+                }
+                foreach ($datosEmbarqueCiudad as $v) {
+                    if(empty($v)){
+                        $datosEmbarqueCiudad['ef.estado'] = 3;
+                        break;
+                    }
+                }
+                DB::table('embarque AS e')
+                ->join('embarque_ciudad_llegada AS ecl','e.id','=', 'ecl.id_embarque')
+                ->join('embarque_fletes AS ef','ecl.id','=','ef.id_embarque_ciudad')
+                ->where(function ($query) use ($usuario) {
+                    $query->orWhere(['e.id_deal' => $usuario, 'e.id_deal2' => $usuario]);
+                })->where(['e.activo' => 1, 'e.id' => $idEmbarque,'ecl.id' => $idEmbarqueCiudad])
+                ->whereIn('ef.estado',[3,4])->whereIn('e.completado',[1,2,3])->update($datosEmbarqueCiudad);
+                if($datosEmbarqueCiudad['ef.estado'] == 4){
+                    $competadoTodo++;
+                    DB::table('embarque_manifiesto AS em')
+                    ->join('manifiesto AS m', 'em.id_manifiesto', '=', 'm.id')
+                    ->where(['m.activo' => 1, 'm.estado' => 3, 'em.id_embarque_ciudad' => $idEmbarqueCiudad])
+                    ->update(['m.estado' => 4, 'date_update' => now(), 'user_update' => $usuario]);
+                    //ACTUALIZAR GUIAS
+                    DB::table('embarque_manifiesto AS em')
+                    ->join('detalle_manifiesto AS dm', 'em.id_manifiesto', '=', 'dm.id_manifiesto')
+                    ->join('guias AS g', 'dm.id_guia', '=', 'g.id')->where(['em.id_embarque_ciudad' => $idEmbarqueCiudad])
+                    ->update(['g.fecha_reparto' => $fecha_reparto]);
+                }
             }
-            if(isset($datos['guias_embarque'])){
-                unset($datos['guias_embarque']);
-            }
-            unset($datos['id_embarque']);
-            if(isset($datos['comprobantes'])){
-                $datos['comprobantes'] = implode(';',$datos['comprobantes']);
-            }
-            if (isset($datos['nro_comprobantes'])) {
-                $datos['nro_comprobantes'] = implode(';', $datos['nro_comprobantes']);
-            }
-            $datos['estado'] = 4;
-            $datos['user_update'] = $usuario;
-            $datos['date_update'] = date('Y-m-d H:i:s');
-            // dd($datos);
-            DB::table('embarque')->where(['id' => $id, 'estado' => 3, 'activo' => 1])->update($datos);
-            DB::table('relacion_guias_embarque')->insert($guias_embarque);
-            DB::table('embarque_manifiesto AS em')->join('manifiesto AS m', 'em.id_manifiesto', '=', 'm.id')
-                ->where(['m.activo' => 1, 'm.estado' => 3, 'em.id_embarque' => $id])
-                ->update(['m.estado' => $datos['estado'], 'date_update' => $datos['date_update'], 'user_update' => $usuario]);
-            DB::table('embarque_manifiesto AS em')->join('detalle_manifiesto AS dm','em.id_manifiesto','=', 'dm.id_manifiesto')
-                ->join('guias AS g','dm.id_guia','=','g.id')->where(['em.id_embarque' => $id])
-                ->update(['g.fecha_reparto' => $fecha_reparto]);
+            $completo = count($datosInformes) === $competadoTodo ? 3 : 2;
+            DB::table('embarque')->where(['id' => $idEmbarque,'activo' => 1])->update(['completado' => $completo,'date_update' => now(),'user_update' => $usuario]);
             DB::commit();
-            return ['success' => 'Informe agregado con éxito'];
+            return ['success' => 'Informe procesado con éxito'];
         } catch (Exception $ex) {
             DB::rollBack();
             return ['error' => $ex->getMessage()];
         }
     }
-    public static function obtenerEmbarqueArribado($id_embarque,$id_guia,$id_usuario,$tipo)
+    public static function obtenerEmbarqueArribado($id_embarque,$id_guia,$id_usuario,$tipo,$trayecto)
     {
-        $result = DB::select('CALL sp_obtener_embarques_arribar(?,?,?,?)',[$id_embarque,$id_guia,$id_usuario,$tipo]);
+        // dd($tipo);
+        $result = DB::select('CALL sp_obtener_embarques_arribar(?,?,?,?,?)',[$id_embarque,$id_guia,$id_usuario,$tipo, $trayecto]);
         switch ($tipo) {
             case 'manifiestos':
                 foreach ($result as $mani) {
                     $mani->prov_dest = (new Ubigeo)->getNameProvincia($mani->prov_dest);
                     $mani->prov_orig = (new Ubigeo)->getNameProvincia($mani->prov_orig);
-                    $mani->guias = DB::select('CALL sp_obtener_embarques_arribar(?,?,?,?)',[$mani->id,0, $id_usuario, 'obtener-guias']);
+                    $mani->guias = DB::select('CALL sp_obtener_embarques_arribar(?,?,?,?,?)',[$mani->id,0, $id_usuario, 'obtener-guias', $trayecto]);
                     if(!empty($mani->guias)){
                         for ($i=0; $i < count($mani->guias); $i++) {
                             $mani->guias[$i]->fecha_reparto = date('d/m/Y',strtotime($mani->guias[$i]->fecha_reparto));
@@ -314,9 +471,9 @@ class ModeloEmbarque extends Model
             DB::rollBack();
         }
     }
-    public static function actualizarGuiaLlegadas($id_embarque,$id_manifiesto,$id_guia,$estado, $texto,$situacion,$incidencia,$usuario)
+    public static function actualizarGuiaLlegadas($id_embarque,$id_manifiesto,$id_guia,$estado, $texto,$situacion,$incidencia,$flete,$usuario)
     {
-        return DB::select('CALL sp_actualizar_llegadas_guias(?,?,?,?,?,?,?,?)',[$id_embarque, $id_manifiesto,$id_guia,$estado,$texto, $situacion, $incidencia, $usuario]);
+        return DB::select('CALL sp_actualizar_llegadas_guias(?,?,?,?,?,?,?,?,?)',[$id_embarque, $id_manifiesto,$id_guia,$estado,$texto, $situacion, $incidencia,$flete, $usuario]);
     }
     public static function obtenerGuiasRepartoConfirmado($fecha_confirmado,$fecha_reparto,$esto_guia,$cluster, $ciudad_final, $tipo_ciudad)
     {

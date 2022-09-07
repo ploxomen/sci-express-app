@@ -15,15 +15,19 @@
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
 }
+.form-group{
+    margin-bottom: .4rem !important;
+}
 label{
     color: var(--color-letra-title);
-    font-size: 13px;
+    font-size: 12px !important;
+    margin-bottom: 0 !important;
 }
 .cursor-pointer{
     cursor: pointer !important;
 }
 span,th,td,select,b, select option, input, textarea{
-    font-size: 13px !important;
+    font-size: 12px !important;
 }
 .footer-login{
     position: absolute;
@@ -64,6 +68,7 @@ table thead tr th{
     width: 300px;
     transition: width .5s ease-in-out;
     bottom: 0;
+    z-index: 2;
     overflow-y: auto;
     overflow-x: hidden;
 }

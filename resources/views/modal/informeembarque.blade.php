@@ -48,12 +48,13 @@
                 </div>
             </form>
             <h5 class="text-primary border-bottom pb-2">Informe de embarques</h5>
-            <form>
+            <form id="frm-informar-embarques">
                 <ol class="ml-3" id="informes-embarques"></ol>
+                <input type="submit" id="enviar-informe" hidden>
             </form>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-primary">Actualizar</button>
+            <button type="button" class="btn btn-primary" id="actualizar-embarque-informe">Actualizar</button>
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
         </div>
     </div>

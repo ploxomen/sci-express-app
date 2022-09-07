@@ -67,6 +67,15 @@ class InformacionAdicional extends Model
         }
         return $ciudades;
     }
+    public static function obtenerCiudadBaseEmbarcar($idUsuario)
+    {
+        $ciudades = DB::select("CALL sp_embarque_filtros_manifiestos(?)",[$idUsuario]);
+        foreach ($ciudades as $ciudad) {
+            $ciudad->nombre = $ciudad->tipo_base == 'distrito' ? mb_strtoupper((new Ubigeo)->getNameDistrito($ciudad->ubigeo_distrito),'UTF-8') : $ciudad->nombre_ciudad;
+            $ciudad->value = $ciudad->tipo_base == 'distrito' ? $ciudad->ubigeo_distrito : $ciudad->id;
+        }
+        return $ciudades;
+    }
     public static function obtenerFletes()
     {
         return DB::table('fletes')->select('cajas','cajones','ciudad_base','jabas','paquetes','sobres','parihuelas')->get();
@@ -74,6 +83,18 @@ class InformacionAdicional extends Model
     public static function calcularTransito()
     {
         DB::select('CALL sp_evento_actualizar_estados_transito()');
+    }
+    public static function getGrupoEnvio()
+    {
+       return ['MEDICINA', 'REPUESTOS', 'VALORADA', 'OTROS'];
+    }
+    public static function getTipoEnvio()
+    {
+        return ['DGR', 'GENERAL', 'REFRIGERADO', 'VACUNA', 'DOCUMENTOS', 'EQ COMP. COMUN', 'OTROS'];
+    }
+    public static function getEnvaseEmbalaje()
+    {
+        return ['EMBASE', 'EMBALAJE', 'BALDES', 'BARRICAS', 'BIDONES', 'BOBINAS', 'BOLSAS', 'BOTELLONES', 'CAJAS', 'CAJONES', 'CANASTOS', 'CANECAS', 'CARRETES', 'CILINDROS', 'CISTERNAS', 'CUÑETES', 'FARDOS', 'JAULAS', 'LATAS', 'PAQUETES', 'PLATAFORMA', 'ROLLOS', 'SACOS', 'SOBRES', 'TAMBORES', 'TONELES'];
     }
     public static function obtenerDiasFiltros()
     {

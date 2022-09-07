@@ -241,8 +241,8 @@
                             <th style="width: 200px;">Grupo Envio</th>
                             <th style="width: 100px;">Tipo Envio</th>
                             <th style="min-width: 250px;">Descripción</th>
-                            <th style="width: 200px;">Embase o <br> Embalaje</th>
-                            <th style="width: 100px;">Cantida</th>
+                            <th style="min-width: 200px;">Envase o <br> Embalaje</th>
+                            <th style="width: 100px;">Cantidad</th>
                             <th style="width: 100px;">Kg</th>
                             <th style="width: 100px;">Lar / cm</th>
                             <th style="width: 100px;">Anc / cm</th>
@@ -299,6 +299,7 @@
                                         <option value="FARDOS">FARDOS</option>
                                         <option value="JAULAS">JAULAS</option>
                                         <option value="LATAS">LATAS</option>
+                                        <option value="PAQUETES">PAQUETES</option>
                                         <option value="PLATAFORMA">PLATAFORMA</option>
                                         <option value="ROLLOS">ROLLOS</option>
                                         <option value="SACOS">SACOS</option>
@@ -308,22 +309,22 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <input required data-name="cantidad" type="number" value="0.00" class="data-anulada form-control form-control-sm" onchange="calcTotal(event,4,'total-cantidad')" min="0.01" step="0.01">
+                                    <input required data-name="cantidad" type="number" value="0" class="data-anulada data-anulada-int form-control form-control-sm" onchange="calcTotal(event,4,'total-cantidad')" min="1">
                                 </td>
                                 <td>
-                                    <input required data-name="kg" type="number" value="0.00" class="data-anulada form-control form-control-sm" onchange="calcTotal(event,5,'total-kg')" min="0.01" step="0.01">
+                                    <input required data-name="kg" type="number" value="0.00" class="data-anulada data-anulada-decimal form-control form-control-sm" onchange="calcTotal(event,5,'total-kg')" min="0.01" step="0.01">
                                 </td>
                                 <td>
-                                    <input required data-name="largo" type="number" value="0.00" class="data-anulada form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
+                                    <input required data-name="largo" type="number" value="0.00" class="data-anulada data-anulada-decimal form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
                                 </td>
                                 <td>
-                                    <input required data-name="ancho" type="number" value="0.00" class="data-anulada form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
+                                    <input required data-name="ancho" type="number" value="0.00" class="data-anulada data-anulada-decimal form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
                                 </td>
                                 <td>
-                                    <input required data-name="altura" type="number" value="0.00" class="data-anulada form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
+                                    <input required data-name="altura" type="number" value="0.00" class="data-anulada data-anulada-decimal form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
                                 </td>
                                 <td>
-                                    <input required data-name="volumen" type="number" value="0.00" class="data-anulada form-control form-control-sm" onchange="calcTotal(event,9,'total-vol')" min="0.01" step="0.01">
+                                    <input required data-name="volumen" type="number" value="0.00" class="data-anulada data-anulada-decimal form-control form-control-sm" onchange="calcTotal(event,9,'total-vol')" min="0.01" step="0.01">
                                 </td>
                             </tr>
                             @endfor
@@ -334,7 +335,7 @@
                                 Totales
                             </td>
                             <td>
-                                <input type="number" value="0.00" id="total-cantidad" class="form-control form-control-sm" min="0" step="0.01">
+                                <input type="number" value="0" id="total-cantidad" class="form-control form-control-sm" min="0">
                             </td>
                             <td>
                                 <input type="number" value="0.00" id="total-kg" class="form-control form-control-sm" min="0" step="0.01">

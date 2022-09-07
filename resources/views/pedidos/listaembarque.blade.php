@@ -1,16 +1,24 @@
 @extends('general.index')
 @section('head')
-    <script src="{{asset('asset/homedatatable.js')}}"></script>
-    <link rel="stylesheet" href="{{asset('library/datatable/datatable-bootstrap.min.css')}}">
-    <link rel="stylesheet" href="{{asset('library/datatable/responsive-bootstrap.min.css')}}">
-    <script src="{{asset('library/datatable/jq-datatable.min.js')}}"></script>
-    <script src="{{asset('library/datatable/datatable-bootstrap4.min.js')}}"></script>
-    <script src="{{asset('library/datatable/datatable-responsive.min.js')}}"></script>
-    <script src="{{asset('library/datatable/responsive-bootstrap.min.js')}}"></script>
     <script src="{{asset('asset/embarque.js')}}"></script>
     <title>Embarcar manifiestos</title>
 @endsection
 @section('body')
+<style>
+    .rectangulo-filtro{
+        padding: 1px 10px;
+        border: 1px solid #d4d4d4;
+        background: #ececec;
+        border-radius: 20px;
+    }
+    .rectangulo-filtro i{
+        color: rgb(192, 192, 192);
+    }
+    .rectangulo-filtro .icono-delete{
+        cursor: pointer;
+        padding: 2px;
+    }
+</style>
 <section class="bg-white p-2">
     <form id="add-embarque" class="mb-4 form-row">
         <div class="my-4 col-12">
@@ -97,14 +105,25 @@
         <div class="form-group col-12">
             <h4 class="text-primary"><i class="fas fa-caret-right"></i> Manifiestos para embarcar</h4>
         </div>
+        
+        <div class="form-group col-12 col-lg-9 col-xl-10">
+            <div class="form-group d-flex flex-wrap" style="gap: 10px 20px;" id="detalle-provincia-destino"></div>
+        </div>
+        <div class="text-lg-right text-primary col-12 col-lg-3 col-xl-2">
+            <strong>Total Manifiesto: </strong>
+            <strong id="total_resultamos_mostrados"></strong>
+        </div>
         <div class="form-group col-12 col-md-6 col-lg-3">
-            <label for="id_prov_dest">Ciudades o distritos base</label>
+            <label for="id_prov_dest">Ciudades base</label>
             <select name="prov_dest" id="id_prov_dest" class="form-control simple-select2">
-                <option value="todos">Todos</option>
-                    @foreach ($ciudadesBase as $ciudad)
-                        <option value="{{$ciudad->value}}" data-tipo="{{$ciudad->tipo_base}}">{{$ciudad->nombre}}</option>
+                <option value="todos">TODOS</option>
+                    @foreach ($ciudadesBase as $key => $ciudad)
+                        <option data-position="{{$key}}" value="{{$ciudad->value}}" data-tipo="{{$ciudad->tipo_base}}">{{$ciudad->nombre}}</option>
                     @endforeach
             </select>
+        </div>
+        <div class="form-group col-12">
+            <div class="d-flex" style="gap: 10px;" id="filtro-section"></div>
         </div>
     </div>
     <div class="d-flex mb-3" style="gap: 10px;">

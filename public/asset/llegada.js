@@ -3,12 +3,14 @@ function loadPage(){
     const tablaEmbarque = document.getElementById('tabla-embarques');
     const tablaMani = document.getElementById('tabla-mani');
     const cbCluster = document.getElementById('cb-clusters');
-    let nro_embarque = null;
-    let nro_guia = null;
-    let id_cluster = null;
-    let nro_mani = null;
-    let nroguiainfo = null;
-    async function obtenerEmbarquesPorLlegar(embarque,guia,tipo,validarFuncion,valorCluster){
+    let nro_embarque = null,
+        nro_guia = null,
+        id_cluster = null,
+        nro_mani = null,
+        nroguiainfo = null,
+        nroFlete = null,
+        trayectoEmbarque = null;
+    async function obtenerEmbarquesPorLlegar(embarque,guia,tipo,validarFuncion,valorCluster,trayecto){
         try {
             let datos = new FormData();
             datos.append('tipo',tipo);
@@ -20,6 +22,9 @@ function loadPage(){
             }
             if(guia){
                 datos.append('guia',guia);
+            }
+            if(trayecto){
+                datos.append('trayecto', trayecto);
             }
             let response = await general.funcfetch(window.location.origin + '/intranet/pedidos/llegada/embarques/arribar',datos);
             validarFuncion(response);
@@ -37,8 +42,9 @@ function loadPage(){
         }
         let template = ``;
         recorrer.resultados.forEach(r => {
+            let iconoTrayecto = r.tipo_trayecto == 'TERRESTRE' ? `<i class="fas fa-truck text-info"></i>` : `<i class="fas fa-plane text-primary"></i>`;
             template+= `<tr>
-            <td>${r.nro_embarque}</td>
+            <td>${iconoTrayecto} - ${r.nro_embarque}</td>
             <td>${r.fecha_embarque}</td>
             <td>${r.empresa}</td>
             <td>${r.format_fch_llegada}</td>
@@ -48,7 +54,7 @@ function loadPage(){
             <td>${r.total_bultos_paquete}</td>
             <td>
                 <button class="btn btn-primary btn-sm ver-detalles" title="Ver más detalles" data-cluster="${r.id_usuario}" data-embarque="${r.id}"><i class="fas fa-eye"></i></button>
-                <button class="btn btn-success btn-sm ver-manifiestos-guias" title="Ver manifiestos - guias" data-cluster="${r.id_usuario}" data-embarque="${r.id}"><i class="fas fa-location-arrow"></i></button>
+                <button class="btn btn-success btn-sm ver-manifiestos-guias" title="Ver manifiestos - guias" data-trayecto="${r.tipo_trayecto}" data-flete="${r.fletes_id}" data-cluster="${r.id_usuario}" data-embarque="${r.id}"><i class="fas fa-location-arrow"></i></button>
             </td>
             </tr>`;
         });
@@ -64,12 +70,15 @@ function loadPage(){
     }
     tablaEmbarque.addEventListener('click',function(event){
         nro_embarque = null;
+        nroFlete = null;
         if(event.target.classList.contains('ver-manifiestos-guias')){
             nro_embarque = event.target.dataset.embarque;
+            nroFlete = event.target.dataset.flete;
+            trayectoEmbarque = event.target.dataset.trayecto;
             if(cbCluster){
                 id_cluster = event.target.dataset.cluster;
             }
-            obtenerEmbarquesPorLlegar(nro_embarque,0,'manifiestos',llenarTablaMani,id_cluster);
+            obtenerEmbarquesPorLlegar(nro_embarque, 0, 'manifiestos', llenarTablaMani, id_cluster, trayectoEmbarque);
         }
         if(event.target.classList.contains('ver-detalles')){
             nro_embarque = event.target.dataset.embarque;
@@ -114,7 +123,7 @@ function loadPage(){
                 total += r.guias.length;
                 template += `<td>${r.guias[0].nro_guia}</td><td>${r.guias[0].fecha_reparto}</td>
                 <td>
-                    <button class="btn btn-primary btn-sm ver-detalle-guias" data-cluster="${r.id_usuario}" title="Ver detalle de guía" data-manifiesto="${r.guias[0].id}" data-nroguia="${r.guias[0].nro_guia}" data-guia="${r.guias[0].id}"><i class="fas fa-eye"></i></button>
+                    <button class="btn btn-primary btn-sm ver-detalle-guias" data-cluster="${r.id_usuario}" title="Ver detalle de guía" data-manifiesto="${r.id}" data-nroguia="${r.guias[0].nro_guia}" data-guia="${r.guias[0].id}"><i class="fas fa-eye"></i></button>
                 </td>
                 </tr>`;
                 for (let i = 1; i < r.guias.length; i++) {
@@ -122,7 +131,7 @@ function loadPage(){
                         <td>${r.guias[i].nro_guia}</td>
                         <td>${r.guias[i].fecha_reparto}</td>
                         <td>
-                            <button class="btn btn-primary btn-sm ver-detalle-guias" data-cluster="${r.id_usuario}" title="Ver detalle de guía" data-manifiesto="${r.guias[i].id}" data-nroguia="${r.guias[0].nro_guia}" data-guia="${r.guias[i].id}"><i class="fas fa-eye"></i></button>
+                            <button class="btn btn-primary btn-sm ver-detalle-guias" data-cluster="${r.id_usuario}" title="Ver detalle de guía" data-manifiesto="${r.id}" data-nroguia="${r.guias[i].nro_guia}" data-guia="${r.guias[i].id}"><i class="fas fa-eye"></i></button>
                         </td>
                     </tr>`;
                 }
@@ -152,6 +161,10 @@ function loadPage(){
                 const value = data.resultados[0][key];
                 const dom = document.getElementById('id_' + key);
                 if(!dom){
+                    continue;
+                }
+                if ((key == 'fech_venc_orde_comp' || key == 'orde_comp') && value !== 'No definido'){
+                    dom.innerHTML = `<span class="text-danger bold font-weight-boldinforme_completado">${value}</span>`;
                     continue;
                 }
                 dom.textContent = value;
@@ -199,6 +212,7 @@ function loadPage(){
         let datos = new FormData();
         datos.append('guia',nro_guia);
         datos.append('embarque',nro_embarque);
+        datos.append('flete', nroFlete);
         datos.append('manifiesto',nro_mani);
         datos.append('situacion',$('#id_situacion_envio').val());
         datos.append('incidencia',$('#id_incidencia_envio').val());
@@ -211,9 +225,12 @@ function loadPage(){
                     alertify.alert('Error',response.error);
                     return
                 }
+                const valorManifiesto = document.getElementById('valor-manifiesto').value;
                 alertify.alert('Mensaje',response.success);
-                obtenerEmbarquesPorLlegar(0,0,'embarques',llenarTablaEmbarque);
-                obtenerEmbarquesPorLlegar(nro_embarque,0,'manifiestos',llenarTablaMani,id_cluster);
+                if ((parseInt(valorManifiesto) - 1) === 0) {
+                    obtenerEmbarquesPorLlegar(0, 0, 'embarques', llenarTablaEmbarque);
+                }
+                obtenerEmbarquesPorLlegar(nro_embarque, 0, 'manifiestos', llenarTablaMani, id_cluster, trayectoEmbarque);
                 nro_guia = null;
                 nro_mani = null;
                 $('#detalle-guias-llegada').modal('hide');

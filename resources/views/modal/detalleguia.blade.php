@@ -71,7 +71,7 @@
             </div>
             <div class="form-group col-12 col-md-6 col-lg-4 ocultar-situacion">
                 <label for="id_incidencia_envio">Incidencia Env</label>
-                <select name="incidencia_envio" required id="id_incidencia_envio" class="form-control simple-select2">
+                <select name="incidencia_envio" required id="id_incidencia_envio" class="form-control simple-select2" disabled>
                     <option></option>
                     <option value="DAÑO PARCIAL">DAÑO PARCIAL</option>
                     <option value="DAÑO TOTAL">DAÑO TOTAL</option>

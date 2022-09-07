@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\Clientes;
 use App\Http\Controllers\Cluster;
+use App\Http\Controllers\DiasTransito;
 use App\Http\Controllers\Embarque;
 use App\Http\Controllers\Entrega;
+use App\Http\Controllers\Fletes;
 use App\Http\Controllers\Gias;
 use App\Http\Controllers\Llegada;
 use App\Http\Controllers\Manifiesto;
@@ -103,6 +105,10 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
             Route::get('todos', [Embarque::class, 'viewEmbarquesTodo'])->name('misEmbarques');
             Route::get('pendientes', [Embarque::class, 'viewListEmba'])->name('pedidoListEmbar');
             Route::post('obtener-todos', [Embarque::class, 'misEmbarques']);
+            Route::post('obtener-detalle-informe-editar', [Embarque::class, 'verEditarInformeEmbarque']);
+            Route::post('editar-embarque', [Embarque::class, 'editarEmbarque']);
+            Route::post('editar-fletes', [Embarque::class, 'editarFletes']);
+            Route::post('editar-informe', [Embarque::class, 'editarInforme']);
             Route::post('mostrar-editar-fletes', [Embarque::class, 'mostrarEditarFletes']);
             Route::post('eliminar', [Embarque::class, 'eliminarEmbarque']);
             Route::post('editar-obtener', [Embarque::class, 'mostrarEditarEmbarque']);
@@ -135,11 +141,32 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
             Route::post('actualizar', [Entrega::class, 'actualizarEntrega']);
         });
     });
+    Route::prefix('flete')->group(function () {
+        Route::get('todos',[Fletes::class, 'viewMisFletes'])->name('misFletes');
+        Route::post('ver', [Fletes::class, 'getFletes']);
+        Route::post('eliminar', [Fletes::class, 'deleteFlete']);
+        Route::post('actualizar', [Fletes::class, 'updateFlete']);
+        Route::post('agregar', [Fletes::class, 'addFlete']);
+    });
+    Route::prefix('transito')->group(function () {
+        Route::get('todos', [DiasTransito::class, 'viewDiasTransito'])->name('diasDeTransito');
+        Route::post('ver', [DiasTransito::class, 'getDiasTransito']);
+        Route::post('eliminar', [DiasTransito::class, 'deleteDiaTransito']);
+        Route::post('actualizar', [DiasTransito::class, 'updateDiasTransito']);
+        Route::post('agregar', [DiasTransito::class, 'addDiasTransito']);
+    });
     Route::prefix('comprobante')->group(function(){
         Route::prefix('guias')->group(function () {
             Route::get('/', [Gias::class, 'viewGuias'])->name('compGuias');
             Route::get('obtener-todos', [Gias::class, 'misGuias'])->name('misGuiasTotal');
             Route::get('view-retornadas', [Gias::class, 'viewGuiasRetornadas'])->name('verGuiasRetornadas');
+            Route::post('obtener-asignacion-global', [Gias::class, 'obtenerAsignacionGlobal']);
+            Route::post('asignar-global', [Gias::class, 'asignarMuchasGuiasUsuario']);
+            Route::post('update-total-guia', [Gias::class, 'updateGuia']);
+            Route::post('delete-img-guia', [Gias::class, 'deleteImgGuia']);
+            Route::post('upload-img-entrega', [Gias::class, 'uploadImgDetalleGuia']);
+            Route::post('obtener-detalle-tabla', [Gias::class, 'obtenerDetalleTabla']);
+            Route::post('eliminar-detalle-guia', [Gias::class, 'eliminarDetalleGuia']);
             Route::post('retornadas', [Gias::class, 'guiasRetornadas']);
             Route::post('obtener-detalles', [Gias::class, 'detalleMisGuias']);
             Route::post('actualizar-informes', [Gias::class, 'actualizarInformes']);

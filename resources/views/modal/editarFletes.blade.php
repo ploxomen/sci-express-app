@@ -8,7 +8,7 @@
           </button>
         </div>
         <div class="modal-body">
-            <form id="frm-lista-fletes">
+            <form id="frm-lista-fletes-actualizar">
                 <div class="row">
                   <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_tota_bult">Bulto Total <small class="text-danger">*</small></label>
