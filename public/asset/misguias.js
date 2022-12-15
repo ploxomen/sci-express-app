@@ -5,12 +5,18 @@ function loadPage() {
         idGuia: null
     }
     let newCliCli = false;
+    const $cbCliente = document.getElementById('id_editar_id_remitente');
     let tipoCbRemi = null;
     general.obtenerDetalleGuia().then(data => {
         detalleTabla = data;
     }).catch(errer => {
         alertify.alert('Error', 'Ocurrió un problema al obtener los datos de la tabla detalle, por favor intentelo más tarde');
     });
+    $('.simple-select2-2').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: 'Seleccione una opción'
+    })
     const tblDetalleGuia = document.getElementById('tabla-detalle-guias');
     let tablaGuias = $('#tabla-guias').DataTable({
         ajax: {
@@ -120,7 +126,8 @@ function loadPage() {
         cbOrdenServicio = document.getElementById('id_orden_servicio'),
         txtNGuia = document.getElementById('id_editar__nro_guia'),
         labelGuia = document.getElementById('label_nro_guia'),
-        $boxImgGuia = document.getElementById('list-img');
+        $boxImgGuia = document.getElementById('list-img'),
+        $boxComplejo = document.getElementById('id-editar-box-complejo-distante');
     tblDetalleGuia.addEventListener('click', async function (e) {
         if (e.target.classList.contains('delete-guia')) {
             const guia = e.target.dataset.guia;
@@ -156,12 +163,36 @@ function loadPage() {
                 alertify.alert('Error', response.error);
                 return
             }
+            tipoCbRemi = response.datos.tipo_guia;
+            $('#editar-guias .simple-select2, #editar-guias .cb-select2-tags, #editar-guias .cb-ubigeo').val("").trigger('change');
             datosGlobales.idGuia = e.target.dataset.guia;
             const { listDistDest, listDistRemi, listProvDest, listProvRemi } = response.datos;
             general.transforData(listProvRemi, document.getElementById('id_editar_remi_prov'));
             general.transforData(listDistRemi, document.getElementById('id_editar_remi_dist'));
             general.transforData(listProvDest, document.getElementById('id_editar_dest_prov'));
             general.transforData(listDistDest, document.getElementById('id_editar_dest_dist'));
+            const idInvitado = '#id_editar_id_invitado';
+            const ccInvitado = $(idInvitado).attr('data-cuenta');
+            $(ccInvitado).empty();
+            $(ccInvitado).prop('disabled', true);
+            $(idInvitado).empty();
+            $(idInvitado).append(new Option('Ninguno', 'ninguno', false,false));
+            if (response.datos.listInvitados.length > 0){
+                response.datos.listInvitados.forEach(invitado => {
+                    const optNew = new Option(invitado.name + ' ' + invitado.last_name, invitado.id, false, false);
+                    $(idInvitado).append(optNew)
+                });
+                $(ccInvitado).prop('disabled', false);
+            }
+            const valorInvitado = response.datos.id_invitado == null ? "ninguno" : response.datos.id_invitado;
+            $(idInvitado).val(valorInvitado).trigger("change");
+            if (response.datos.listCc.cc && response.datos.listCc.cc.length > 0) {
+                response.datos.listCc.cc.forEach(cc => {
+                    const optNew = new Option(cc, cc, cc == response.datos.cc_invitado ? true : false, false);
+                    $(ccInvitado).append(optNew)
+                });
+            }
+            $(ccInvitado).prop('required', valorInvitado != 'ninguno' ? true : false);
             if (response.datos.ciudadesFinales){
                 let templateOpt = "<option></option>";
                 response.datos.ciudadesFinales.forEach(c => {
@@ -180,6 +211,10 @@ function loadPage() {
                         }
                         $(dom).val(valor.split(';'));
                         continue;
+                    }
+                    if (key == 'ciudad_alejada' && valor != null){
+                        $boxComplejo.hidden = false;
+                        dom.textContent = valor;
                     }
                     if (key == 'nro_comp_cli' && valor) {
                         let templateCom = "";
@@ -231,7 +266,8 @@ function loadPage() {
                 placeholder: 'Seleccione una opción'
             });
             $('.enable-estado-4').prop('disabled',true);
-            $('.simple-select2, .cb-select2-tags, .cb-ubigeo').trigger('change');
+
+            $('#editar-guias .simple-select2, #editar-guias .cb-select2-tags, #editar-guias .cb-ubigeo').trigger('change');
             if (response.datos.estado === 3) {
                 $('.disable_inactiva').prop('disabled', true);
             }
@@ -270,6 +306,9 @@ function loadPage() {
             $boxImgGuia.innerHTML = templateImg;
             $('#id_editar_estado').trigger('change');
         }
+    });
+    $('#id_editar_id_invitado').on('select2:select', async function (e) {
+        general.getCCInvitados('#id_editar_id_invitado', $cbCliente);
     });
     document.getElementById('view-lista-guias').onclick = async function(e){
         e.preventDefault();
@@ -470,8 +509,10 @@ function loadPage() {
         event.preventDefault();
         let datos = new FormData(this);
         let tablaDetalle = document.getElementById('tabla-detalle');
+        const idCliente = tipoCbRemi == 'proveedor' ? $cbCliente.selectedOptions[0].getAttribute('data-id-cliente') : $($cbCliente).val();
         datos.append('tipo_guia', tipoCbRemi);
         datos.append('id_guia', datosGlobales.idGuia);
+        datos.append('id_cliente_facturacion', idCliente);
         let detalleUpdate = new Array();
         let detalleNew = new Array();
         for (const e of tablaDetalle.children) {
@@ -515,7 +556,7 @@ function loadPage() {
             });
             nuevoCliente.set('onok', function () {
                 datos.append('add_cli_bool', true);
-                datos.append('add_cli_cli', tipoCbRemi == 'proveedor' ? document.getElementById('id_editar_id_remitente').selectedOptions[0].getAttribute('data-id-cliente') : $('#id_editar_id_remitente').val());
+                datos.append('add_cli_cli', );
                 updateGuia(datos);
             });
             nuevoCliente.set('oncalcel', function () {
@@ -546,11 +587,11 @@ function loadPage() {
             alertify.alert('Error', error.message);
         }
     }
-    $('#id_editar_id_remitente').on('select2:select', async function (e) {
-        tipoCbRemi = await general.getDataRemitenteGuia(this, '#id_editar_remi_prov', '#id_editar_remi_dist', '#id_editar_remi_depa', '#id_editar_remi_tipo_docu');
+    $($cbCliente).on('select2:select', async function (e) {
+        tipoCbRemi = await general.getDataRemitenteGuia(this, '#id_editar_remi_prov', '#id_editar_remi_dist', '#id_editar_remi_depa', '#id_editar_remi_tipo_docu','#id_editar_id_invitado');
     });
     $('#id_editar_id_destinatario').on('select2:select', async function (e) {
-        newCliCli = await general.getDataDestGuia(this, '#id_editar_remi_depa', '#id_editar_dest_tipo_docu', '#id_editar_dest_depa', '#id_editar_dest_prov', '#id_editar_dest_dist', '#id_editar_ciudad_destino_final', '#id_editar_dias_tran','#id_editar_via_envi');
+        newCliCli = await general.getDataDestGuia(this, '#id_editar_remi_depa', '#id_editar_dest_tipo_docu', '#id_editar_dest_depa', '#id_editar_dest_prov', '#id_editar_dest_dist', '#id_editar_ciudad_destino_final', '#id_editar_dias_tran', '#id_editar_via_envi','#id-editar-box-complejo-distante');
     });
     $('.calculo-dia').on('select2:select', function () {
         general.calculoDiasTrancitoCb('#id_editar_remi_depa', '#id_editar_dest_depa', '#id_editar_dest_prov', '#id_editar_dias_tran', '#id_editar_via_envi');

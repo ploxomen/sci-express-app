@@ -7,9 +7,12 @@ function loadPage(){
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             data : function(d){
-                d.tipo = 'remitentes';
+                d.tipo = document.getElementById("cb-clientes") ? 'remitentes-cliente' : 'remitentes';
                 d.remitente = $('#rucdniremi').val(); 
                 d.fecha = $('#fechadepacho').val();
+                d.fechaIncio = $("#fechaInicio").val();
+                d.fechaFin = $("#fechaFin").val();
+                d.cliente = $("#cb-clientes").val();
             }
         },
         columns: [
@@ -79,6 +82,8 @@ function loadPage(){
                         alertify.alert('ALERTA','NO SE ENCONTRARON RESULTADOS, FAVOR VERIFICAR LA INFORMACION CON SU ALMACEN');
                         return false;
                     }
+                    document.getElementById('imagen-entre-guia').parentElement.hidden = true;
+                    $('#modal-detalle-consultas').modal("show");
                     for (const key in request.response.result) {
                         if (Object.hasOwnProperty.call(request.response.result, key)) {
                             const valor = request.response.result[key];
@@ -98,7 +103,37 @@ function loadPage(){
                             dom.textContent = valor;
                         }
                     }
-                    $('#modal-detalle-consultas').modal("show");
+                    if (request.response.result.imagenes.length){
+                        document.getElementById('imagen-entre-guia').parentElement.hidden = false;
+                        $('#imagen-entre-guia').empty();
+                        $('#imagen-entre-guia').nanogallery2('destroy');
+                        let arrayImg = new Array();
+                        request.response.result.imagenes.forEach(img => {
+                            arrayImg.push({
+                                src: img.nom_id_file,
+                                srct: img.nom_id_file,
+                                title: img.nom_file
+                            })
+                        });
+                        setTimeout(function(){
+                            $('#imagen-entre-guia').nanogallery2({
+                                thumbnailHeight: 100,
+                                thumbnailWidth: 100,
+                                thumbnailAlignment: 'center',
+                                thumbnailGutterWidth: 5,
+                                thumbnailGutterHeight: 5,
+                                thumbnailBorderHorizontal: 1,
+                                thumbnailBorderVertical: 1,
+                                itemsBaseURL: window.location.origin + "/intranet/storage/img/entrega/",
+                                items: arrayImg,
+                                thumbnailLabel: {
+                                    display: false
+                                }
+                            });
+                        },500)
+                        
+                       
+                    }
                 }
             }
             request.open('POST','datos');

@@ -47,11 +47,32 @@ class User extends Authenticatable
         DB::beginTransaction();
         try {
             $roles = [];
+            $clientesUsuarios = [];
+            $idDocumentoCli = [];
+            $centroCosto = [];
+            $centroCuenta = [];
+
             if(isset($usuario['roles'])){
                 $roles = $usuario['roles'];
                 unset($usuario['roles']);
             }
+            if (isset($usuario['id_documento_cli']) && isset($usuario['centro_costo']) && isset($usuario['centro_cuenta'])) {
+                $idDocumentoCli = $usuario['id_documento_cli'];
+                $centroCosto = $usuario['centro_costo'];
+                $centroCuenta = $usuario['centro_cuenta'];
+                unset($usuario['id_documento_cli']);
+                unset($usuario['centro_costo']);
+                unset($usuario['centro_cuenta']);
+            }
             $id = User::insertGetId($usuario);
+            for ($i = 0; $i < count($idDocumentoCli); $i++) {
+                $clientesUsuarios[] = [
+                    'cod_cliente' => $idDocumentoCli[$i],
+                    'centro_costo' => $centroCosto[$i],
+                    'cuenta' => $centroCuenta[$i],
+                    'cod_usuario' => $id
+                ];
+            }
             $new_roles = [];
             foreach ($roles as $rol) {
                 $new_roles[] = [
@@ -60,12 +81,18 @@ class User extends Authenticatable
                 ];
             }
             DB::table('usuario_rol')->insert($new_roles);
+            DB::table('usuario_cliente')->insert($clientesUsuarios);
             DB::commit();
             return ['success' => true];
         } catch (Exception $error) {
             DB::rollBack();
             return ['error' => $error->getMessage()];
         }
+    }
+    public static function getCentroCostoCliente($idCliente)
+    {
+        $centroCostos = DB::table('clientes')->select('centros_costo')->where(['estado' => 1,'id' => $idCliente])->first();
+        return !empty($centroCostos->centros_costo) ? explode(';', $centroCostos->centros_costo) : null;
     }
     public static function misUsuarios($id_usuario)
     {
@@ -87,6 +114,13 @@ class User extends Authenticatable
         DB::table('usuario_rol')->where(['id_usuario' => $id_user, 'id_rol' => $id_rol])->update(['active' => 1]);
         return true;
     }
+    public static function defaultSelectRol($id_usuario)
+    {
+        $usuario_rol = DB::table('usuario_rol')->where(['id_usuario' => $id_usuario]);
+        if($usuario_rol->where('active','=',1)->count() === 0){
+            DB::table('usuario_rol')->where(['id_usuario' => $id_usuario,'active' => 0])->limit(1)->update(['active' => 1]);
+        }
+    }
     public static function miArea($id_user)
     {
         return DB::table('usuarios AS u')->select('a.area')->join('area AS a','u.id_area','=','a.id')->where(['u.id' => $id_user])->first();
@@ -103,9 +137,29 @@ class User extends Authenticatable
     {
         return DB::table('usuario_rol')->select('id_rol')->where(['id_usuario' => $id_user,'active' => 1])->first();
     }
+    public static function obtenerDatosEditar($id_user)
+    {
+        $usuario = DB::table('usuarios AS u')->select('id', 'type_document', 'n_document', 'name', 'last_name', 'email', 'phone', 'sexo', 'nacimiento', 'direction', 'id_area')->where(['id' => $id_user])->first();
+        $rolClienteInvitado = DB::table('usuario_rol')->where(['id_usuario' => $id_user, 'id_rol' => 10])->count();
+        $response = [];
+        if(!empty($usuario)){
+            $response['datos'] = $usuario;
+            if($rolClienteInvitado > 0){
+                $response['ccInvitado'] = DB::table('usuario_cliente')->select('cod_cliente','centro_costo')->where(['cod_usuario' => $id_user, 'estado' => 1])->get();
+                foreach ($response['ccInvitado'] as $key => $value) {
+                    $response['ccInvitado'][$key]->adicional = Clientes::centrosCosto($usuario->id,$value->cod_cliente);
+                }
+            }
+        }
+        return $response;
+    }
     public static function obtenerUnUsuario($id_usuario)
     {
         return DB::table('usuarios')->select("id","type_document","n_document","name","last_name","email","phone","direction","nacimiento","sexo")->where(['id' => $id_usuario])->first();
+    }
+    public static function obtenerClientesTrabajadores($idUsuario)
+    {
+        return DB::table("usuario_cliente AS uc")->select('c.id','c.nom_cli','c.nro_doc')->join("clientes AS c",'c.id','=', 'uc.cod_cliente')->where(['uc.cod_usuario' => $idUsuario,'uc.estado' => 1])->get();
     }
     public static function obtenerDatosHome($id_user, $tipo)
     {
@@ -129,23 +183,27 @@ class User extends Authenticatable
             break;
             case 5:
                 //RECOJOS PARA HOY CONDUCTOR 
-                $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE r.id_conductor = ? AND s.dia_recojo = ? AND s.estado IN(2,3)";
-                $resultado = DB::select($query,[$id_user,date('Y-m-d')]);
-                $resultado = $resultado[0]->total;
+                // $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE r.id_conductor = ? AND s.dia_recojo = ? AND s.estado IN(2,3)";
+                // $resultado = DB::select($query,[$id_user,date('Y-m-d')]);
+                // $resultado = $resultado[0]->total;
+                $resultado = 5;
             break;
             case 6:
                 //RECOJOS PARA HOY DEALER 
-                $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE r.id_dealer = ? AND s.dia_recojo = ? AND s.estado IN(2,3)";
-                $resultado = DB::select($query, [$id_user, date('Y-m-d')]);
-                $resultado = $resultado[0]->total;
+                // $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE r.id_dealer = ? AND s.dia_recojo = ? AND s.estado IN(2,3)";
+                // $resultado = DB::select($query, [$id_user, date('Y-m-d')]);
+                // $resultado = $resultado[0]->total;
+                $resultado = 5;
             break;
             case 7:
                 //TOTAL RECOJOS DEALER 
-                $resultado = DB::table('solicitud AS s')->leftJoin('recojo AS r', 's.id', '=', 'r.id_solicitud')->where(['r.id_dealer' => $id_user])->count();
+                // $resultado = DB::table('solicitud AS s')->leftJoin('recojo AS r', 's.id', '=', 'r.id_solicitud')->where(['r.id_dealer' => $id_user])->count();
+                $resultado = 5;
             break;
             case 8:
                 //TOTAL RECOJOS CONDUCTOR 
-                $resultado = DB::table('solicitud AS s')->leftJoin('recojo AS r', 's.id', '=', 'r.id_solicitud')->where(['r.id_conductor' => $id_user])->count();
+                // $resultado = DB::table('solicitud AS s')->leftJoin('recojo AS r', 's.id', '=', 'r.id_solicitud')->where(['r.id_conductor' => $id_user])->count();
+                $resultado = 5;
                 break;
             case 9:
                 //EMBARQUE PARA HOY CONDUCTOR 
@@ -253,7 +311,8 @@ class User extends Authenticatable
             break;
             case 28:
                 //EMBARQUES PENDIENTES
-                $resultado = DB::table('embarque')->where(['activo' => 1, 'estado' => 1])->count();
+                // $resultado = DB::table('embarque')->where(['activo' => 1, 'estado' => 1])->count();
+                $resultado = 5;
             break;
             case 29:
                 //EMBARQUES EFECTUADOS
@@ -263,7 +322,8 @@ class User extends Authenticatable
             break;
             case 30:
                 //EMBARQUES POR INFORMAR
-                $resultado = DB::table('embarque')->where(['activo' => 1, 'estado' => 3])->count();
+                // $resultado = DB::table('embarque')->where(['activo' => 1, 'estado' => 3])->count();
+                $resultado = 5;
             break;
             case 31:
                 //TODAS LAS GUIAS ENTREGADAS EN DESTINO FINAL
@@ -279,15 +339,17 @@ class User extends Authenticatable
             break;
             case 33:
                 //TODOS LOS RECOJOS DE HOY MANAGER
-                $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE s.estado IN(2,3,4) AND s.activo = 1 AND s.dia_recojo = ?";
-                $resultado = DB::select($query,[date('Y-m-d')]);
-                $resultado = $resultado[0]->total;
+                // $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE s.estado IN(2,3,4) AND s.activo = 1 AND s.dia_recojo = ?";
+                // $resultado = DB::select($query,[date('Y-m-d')]);
+                // $resultado = $resultado[0]->total;
+                $resultado = 5;
             break;
             case 34:
                 //TODOS LOS RECOJOS CONCRETADOS DE HOY MANAGER
-                $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE s.estado = 4 AND s.activo = 1 AND s.dia_recojo = ?";
-                $resultado = DB::select($query, [date('Y-m-d')]);
-                $resultado = $resultado[0]->total;
+                // $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE s.estado = 4 AND s.activo = 1 AND s.dia_recojo = ?";
+                // $resultado = DB::select($query, [date('Y-m-d')]);
+                // $resultado = $resultado[0]->total;
+                $resultado = 5;
             break;
             case 35:
                 //TODOS LOS EMBARQUES DE HOY MANAGER

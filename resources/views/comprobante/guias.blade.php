@@ -53,11 +53,12 @@
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_comp_clie">Comprobantes <small class="text-danger data-anulada-oculta">*</small></label>
                     <select name="comp_clie[]" id="id_comp_clie" required class="form-control data-anulada" multiple>
-                        <option value="BOLETA">BOLETA</option>
-                        <option value="FACTURA">FACTURA</option>
-                        <option value="GUIA">GUIA</option>
-                        <option value="GUIA INTERNAMIENTO">GUIA INTERNAMIENTO</option>
-                        <option value="ORDEN COMPRA">ORDEN COMPRA</option>
+                        <option value="BOLETA ELECTRÓNICA">BOLETA ELECTRÓNICA</option>
+                        <option value="FACTURA ELECTRÓNICA">FACTURA ELECTRÓNICA</option>
+                        <option value="GUIA DE REMISIÓN (R) ELECTRÓNICA">GUIA DE REMISIÓN (R) ELECTRÓNICA</option>
+                        <option value="GUIA DE REMISIÓN (T) ELECTRONICA">GUIA DE REMISIÓN (T) ELECTRÓNICA</option>
+                        <option value="GUIA DE INTERNAMIENTO">GUIA DE INTERNAMIENTO</option>
+                        <option value="ORDEN DE COMPRA">ORDEN DE COMPRA</option>
                         <option value="OTRO" class="delete-option">OTRO</option>
                         <option value="NINGUNO" class="delete-option">NINGUNO</option>
                     </select>
@@ -164,6 +165,16 @@
                     <select class="form-control cb-ubigeo" name="remi_dist" required id="id_remi_dist" data-valor-cliente="dist_so" data-valor-proveedor="dist_prov">
                     </select>
                 </div>
+                <div class="form-group col-12 col-md-6">
+                    <label for="id-invitado-remitente">Invitado</label>
+                    <select name="id_invitado" id="id-invitado-remitente" data-cuenta="#cc-invitado-remitente" class="simple-select2">
+                        <option value="ninguno" selected>Ninguno</option>
+                    </select>
+                </div>
+                <div class="form-group col-12 col-md-6">
+                    <label for="cc-invitado-remitente">CC. Invitado</label>
+                    <select name="cc_invitado" id="cc-invitado-remitente" required disabled class="simple-select2"></select>
+                </div>
             </fieldset>
         </div>
         <div class="col-12 p-0 px-lg-2 col-lg-6 mb-4">
@@ -227,6 +238,10 @@
                     <label for="id_dias_tran">Días de tránsito <small class="text-danger">*</small></label>
                     <input type="number" min="1" class="form-control" required name="dias_tran" id="id_dias_tran">
                 </div>
+                <div class="form-group col-12 col-md-6 col-lg-3" id="box-complejo-distante" data-texto="#text-complejo-distante" data-input="#id-tipo-complejo-distante" hidden>
+                    <label for="id-tipo-complejo-distante"><span id="text-complejo-distante"></span> <small class="text-danger">*</small></label>
+                    <input type="number" min="0" class="form-control" name="valor_complejo_distante" id="id-tipo-complejo-distante" disabled>
+                </div>
             </div>
         </div>
         <div class="col-12 p-0 px-lg-2 form-group">
@@ -256,7 +271,7 @@
                                 <td>
                                     <select required data-name="grupo_envio" class="data-anulada form-control form-control-sm simple-select2">
                                         <option value="" hidden>Seleccione una opción</option>
-                                        <option value="MEDICINA">MEDICINA</option>
+                                        <option value="MEDICINA" selected>MEDICINA</option>
                                         <option value="REPUESTOS">REPUESTOS</option>
                                         <option value="VALORADA">VALORADA</option>
                                         <option value="OTROS">OTROS</option>
@@ -266,7 +281,7 @@
                                     <select required data-name="tipo_envio" class="data-anulada form-control form-control-sm simple-select2">
                                         <option value="" hidden>Seleccione una opción</option>
                                         <option value="DGR">DGR</option>
-                                        <option value="GENERAL">GENERAL</option>
+                                        <option value="GENERAL" selected>GENERAL</option>
                                         <option value="REFRIGERADO">REFRIGERADO</option>
                                         <option value="VACUNA">VACUNA</option>
                                         <option value="DOCUMENTOS">DOCUMENTOS</option>
@@ -275,7 +290,7 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <textarea data-name="descripcion" class="form-control form-control-sm" rows="1"></textarea>
+                                    <textarea data-name="descripcion" class="form-control form-control-sm data-texto" rows="1"></textarea>
                                 </td>
                                 <td>
                                     <select required data-name="embase_embalaje" class="data-anulada form-control form-control-sm simple-select2">
@@ -288,7 +303,7 @@
                                         <option value="BOBINAS">BOBINAS</option>
                                         <option value="BOLSAS">BOLSAS</option>
                                         <option value="BOTELLONES">BOTELLONES</option>
-                                        <option value="CAJAS">CAJAS</option>
+                                        <option value="CAJAS" selected>CAJAS</option>
                                         <option value="CAJONES">CAJONES</option>
                                         <option value="CANASTOS">CANASTOS</option>
                                         <option value="CANECAS">CANECAS</option>

@@ -8,6 +8,8 @@
     <script src="{{asset('library/datatable/datatable-responsive.min.js')}}"></script>
     <script src="{{asset('library/datatable/responsive-bootstrap.min.js')}}"></script>
     <link rel="stylesheet" href="{{asset('asset/consultaguia.css')}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nanogallery2/3.0.5/css/nanogallery2.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nanogallery2/3.0.5/jquery.nanogallery2.min.js"></script>
     <script src="{{asset('asset/consultaguiaremitente.js?v1.1')}}"></script>
     <title>Guias</title>
 @endsection

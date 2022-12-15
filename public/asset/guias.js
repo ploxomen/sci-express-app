@@ -2,6 +2,7 @@ function pageLoaded(){
     let general = new General();
     let newCliCli = false;
     let tipoCbRemi = null;
+    const $cbCliente = document.getElementById('id_remi_nomb');
     $('#id_comp_clie').select2({
         theme : 'bootstrap',
         width: '100%'
@@ -47,29 +48,44 @@ function pageLoaded(){
     });
     document.getElementById('add-delete-detalle').addEventListener('click',function (e) {  
         e.preventDefault();
-        if(document.getElementById('tabla-detalle').children.length === 1){
-            alertify.error('la guía debe de tener al menos un detalle');
+        if (document.getElementById('tabla-detalle').children.length === 1 && $('#id_estado').val() === '1'){
+            alertify.error('la guía activa debe de tener al menos un detalle');
             return
         }
         const nroChildren = document.getElementById('tabla-detalle').children.length;
-        document.getElementById('tabla-detalle').children[nroChildren-1].remove();
+        if ($('#id_estado').val() === '3' && document.getElementById('tabla-detalle').children.length === 1) {
+            $("#tabla-detalle .simple-select2").val("").trigger("change");
+            $("#tabla-detalle .data-texto").val("");
+            $("#tabla-detalle .data-anulada-int").val("0").trigger("change");
+            $("#tabla-detalle .data-anulada-decimal").val("0").trigger("change");
+            return
+        }
+        document.getElementById('tabla-detalle').children[nroChildren - 1].remove();
         alertify.success('ultimo detalle eliminado');
     })
-    $('#id_remi_nomb').on('select2:select',async function(e){
-        tipoCbRemi = await general.getDataRemitenteGuia(this, '#id_remi_prov', '#id_remi_dist', '#id_remi_depa','#id_remi_tipo_docu');
+    $($cbCliente).on('select2:select',async function(e){
+        tipoCbRemi = await general.getDataRemitenteGuia(this, '#id_remi_prov', '#id_remi_dist', '#id_remi_depa', '#id_remi_tipo_docu','#id-invitado-remitente');
+    });
+    $('#id-invitado-remitente').on('select2:select', async function (e){
+        general.getCCInvitados('#id-invitado-remitente', $cbCliente);
     });
     let frmGuia = document.getElementById('frm_guia');
     frmGuia.addEventListener('submit',async function(event){
         event.preventDefault();
         let datos = new FormData(this);
         let tablaDetalle = document.getElementById('tabla-detalle');
+        const idCliente = tipoCbRemi == 'proveedor' ? $cbCliente.selectedOptions[0].getAttribute('data-id-cliente') : $($cbCliente).val();
+        if (datos.has('valor_complejo_distante')){
+            datos.append('ciudad_alejada', document.getElementById('id-tipo-complejo-distante').dataset.tipo);
+        }
+        datos.append('id_cliente_facturacion', idCliente);
         datos.append('tipo_guia',tipoCbRemi);
         let detalles = new Array();
         for (const e of tablaDetalle.children) {
             let objeto = new Object();
             let deta = e.querySelectorAll('input, select, textarea');
             for (const ele2 of deta) {
-                if(ele2.value && ele2.value != '0.00'){
+                if (ele2.value && (ele2.value != '0.00' || ele2.value != '0')){
                     objeto[ele2.dataset.name] = ele2.value;
                 }
             }
@@ -100,7 +116,7 @@ function pageLoaded(){
                     });
                     nuevoCliente.set('onok', function () {
                         datos.append('add_cli_bool', true);
-                        datos.append('add_cli_cli', tipoCbRemi == 'proveedor' ? document.getElementById('id_remi_nomb').selectedOptions[0].getAttribute('data-id-cliente') : $('#id_remi_nomb').val());
+                        datos.append('add_cli_cli', idCliente);
                         addGuia(datos);
                     });
                     nuevoCliente.set('oncalcel', function () {
@@ -144,7 +160,7 @@ function pageLoaded(){
         general.agregarNuevoDetalleGuia('id_estado', '.simple-select2');
     });
     $('#id_dest_nomb').on('select2:select',async function(e){
-        newCliCli = await general.getDataDestGuia(this, '#id_remi_depa', '#id_dest_tipo_docu', '#id_dest_depa', '#id_dest_prov', '#id_dest_dist', '#id_ciudad_destino_final', '#id_dias_tran','#id_via_envi');
+        newCliCli = await general.getDataDestGuia(this, '#id_remi_depa', '#id_dest_tipo_docu', '#id_dest_depa', '#id_dest_prov', '#id_dest_dist', '#id_ciudad_destino_final', '#id_dias_tran', '#id_via_envi','#box-complejo-distante');
     });
 }
 function calcVolumen(event){

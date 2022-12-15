@@ -10,21 +10,29 @@
         </div>
         <h3 class="text-primary text-center">Agregar usuarios</h3>
     </div>
-    <section class="bg-white p-2">
+    <section class="p-2">
         <form id="frm-add-user">
-            <fieldset class="px-3 border mb-2 row">
-                <legend class="d-inline-block w-auto px-2 border shadow-sm text-left legend-add">Datos personales</legend>
+            <fieldset class="px-3 bg-white border mb-2">
+                <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add">Datos personales</legend>
+                <div class="form-group col-12">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="id_trabajador_cliente">
+                        <label class="custom-control-label" for="id_trabajador_cliente">Usuario trabajador del Cliente</label>
+                    </div>
+                </div>
+                <div class="form-row">
                 <div class="form-group col-12 col-md-6">
-                    <label for="type_document">Tipo de documento: <small class="text-danger">*</small> </label>
-                    <select name="type_document" id="type_document" class="form-control" required>
+                    <label for="type_document">Tipo de documento:</label>
+                    <select name="type_document" id="type_document" class="form-control simple-select2 cb-tipo-doc" data-input="n_document">
+                        <option></option>
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="form-group col-12 col-md-6">
-                    <label for="n_document">N° de documento: <small class="text-danger">*</small></label>
-                    <input type="text" name="n_document" id="n_document" class="form-control" required>
+                    <label for="n_document">N° de documento:</label>
+                    <input type="text" name="n_document" id="n_document" class="form-control">
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="name">Nombres: <small class="text-danger">*</small></label>
@@ -58,9 +66,10 @@
                     <label for="direction">Direccion:</label>
                     <textarea name="direction" class="form-control" id="direction" cols="30" rows="2"></textarea>
                 </div>
+                </div>
             </fieldset>
-            <fieldset class="px-3 border mb-2">
-                <legend class="d-inline-block w-auto px-2 border shadow-sm text-left legend-add">Datos del sistema</legend>
+            <fieldset class="bg-white px-3 border mb-2">
+                <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add">Datos del sistema</legend>
                 <div class="row">
                     <div class="form-group col-12 col-md-6 col-lg-4">
                         <label for="areas">Área: <small class="text-danger">*</small></label>
@@ -99,5 +108,5 @@
             </div>
         </form>
     </section>
-    
+@include('modal.usuarioCliente')
 @endsection

@@ -1,5 +1,19 @@
 function loadPage(){
-    contadorLi = 0;
+    let contadorLi = 0;
+    const listRemoteCity = [
+        {
+            value :'Rural - Alejada',
+            text : 'Rural - Alejada (S/)'
+        },
+        {
+            value : 'Complejo - Distante',
+            text: 'Complejo - Distante (%)'
+        },
+        {
+            value: 'FAU',
+            text: 'FAU (%)'
+        }
+    ];
     let general = new General();
     let bodyCluster = document.getElementById('lista-clusters');
     const frmEdidCluster = document.getElementById('edid_cluster');
@@ -50,16 +64,26 @@ function loadPage(){
                 h.listCity.forEach(li => {
                     tempCity += `<option value="${li.id}" ${li.id == h.id_ciudad ? 'selected' : ''}>${li.nombre_ciudad}</option>`;
                 });
+                let tempRemoteCity = `<option></option><option value='Ninguno' ${h.ciudad_alejada === null || h.ciudad_alejada == '' || h.ciudad_alejada == 'Ninguno' ? 'selected' : ''}>Ninguno</option>`;
+                listRemoteCity.forEach(city => {
+                    tempRemoteCity += `<option value="${city.value}" ${city.value == h.ciudad_alejada && 'selected'}>${city.text}</option>`;
+                });
                 template += `
                 <li data-type="old" data-ciudad="${h.id}">
                     <div class="form-row">
-                        <div class="form-group col-12 col-md-5">
+                        <div class="form-group col-6 col-lg-3">
                             <select class="form-control cb-ubigeo" required data-ciudades="#id_ciudad_old_destino_${h.id}" data-idciudad="${h.id}" id="id_distrito_old_clu_${h.id}">${templateDist}</select>
                         </div>
-                        <div class="form-group col-12 col-md-5">
+                        <div class="form-group col-6 col-lg-3">
                             <select class="form-control cb-select2-tags" id="id_ciudad_old_destino_${h.id}">${tempCity}</select>
                         </div>
-                        <div class="form-group col-12 col-md-2 text-right">
+                        <div class="form-group col-6 col-sm-6 col-lg-3">
+                            <select required class="form-control simple-select2" data-costo="#costo-alejado-${h.id}">${tempRemoteCity}</select>
+                        </div>
+                        <div class="form-group col-6 col-sm-4 col-lg-2">
+                            <input type="number" placeholder="S/ ó %" id="costo-alejado-${h.id}" step="0.01" min="0" class="form-control form-control-sm" value="${h.costo_ciudad_alejada}">
+                        </div>
+                        <div class="form-group col-12 col-sm-2 col-lg-1 text-right">
                             <input type="radio" name="destino_final" class="selection-base" ${h.base ? 'checked' : ''}>
                             <button type="button" class="btn btn-danger btn-sm btn-delete-destino"><i class="far fa-trash-alt"></i></button>
                         </div>
@@ -96,6 +120,20 @@ function loadPage(){
                 placeholder : 'Seleccione o agregue una opción',
                 tags: true
             });
+            $('#lista-destino-final .simple-select2').select2({
+                theme: 'bootstrap',
+                width: '100%',
+                placeholder: 'Seleccione una opción'
+            }).on('change',(e) => {
+                if (e.target.value == 'Ninguno'){
+                    $(e.target.dataset.costo).prop('disabled',true);
+                    $(e.target.dataset.costo).prop('required', false);
+                    $(e.target.dataset.costo).val("");
+                }else{
+                    $(e.target.dataset.costo).prop('disabled', false);
+                    $(e.target.dataset.costo).prop('required', true);
+                }
+            });
             $('#lista-destino-final .cb-ubigeo').select2({
                 theme: 'bootstrap',
                 width: '100%',
@@ -110,6 +148,7 @@ function loadPage(){
                 });
                 document.querySelector($(this).attr('data-ciudades')).innerHTML = template;
             });
+            $('#lista-destino-final .simple-select2').trigger('change');
             $('#modal-editar-cluster').modal("show");
         }
         if(e.target.classList.contains('delete-cluster')){
@@ -147,13 +186,13 @@ function loadPage(){
             element.querySelector('.cb-select2-tags').innerHTML = '<option></option>';
             element.querySelector('.selection-base').checked = false;
         }
-        $('#lista-destino-final .cb-ubigeo, #lista-destino-final .cb-select2-tags').val("").trigger("change");
+        $('#lista-destino-final .cb-ubigeo, #lista-destino-final .cb-select2-tags, #lista-destino-final .simple-select2').val("").trigger("change");
     });
     const btnAddCiudad = document.getElementById('btn-add-ciudad');
     btnAddCiudad.addEventListener('click',function(e){
         e.preventDefault();
         contadorLi++;
-        $('#lista-destino-final .cb-ubigeo, #lista-destino-final .cb-select2-tags').select2('destroy');
+        $('#lista-destino-final .cb-ubigeo, #lista-destino-final .cb-select2-tags, #lista-destino-final .simple-select2').select2('destroy');
         const liPrimero = ulListCiudad.children[0];
         const liDuplicado = liPrimero.cloneNode(true);
         liDuplicado.setAttribute('data-type','new');
@@ -165,6 +204,9 @@ function loadPage(){
             element.value = "";
             if(element.classList.contains('cb-select2-tags')){
                 element.innerHTML = '<option></option>';
+            }
+            if (element.classList.contains('simple-select2')) {
+                element.value = "Ninguno";
             }
         }
         ulListCiudad.append(liDuplicado);
@@ -189,6 +231,11 @@ function loadPage(){
             placeholder : 'Seleccione o agregue una opción',
             tags: true,
         });
+        $('#lista-destino-final .simple-select2').select2({
+            theme: 'bootstrap',
+            width: '100%',
+            placeholder: 'Seleccione una opción'
+        });
     });
     frmEdidCluster.addEventListener('submit',function(e){
         e.preventDefault();
@@ -205,7 +252,9 @@ function loadPage(){
                     ciudad: $(ciudades).find('.cb-select2-tags').val(),
                     distrito : $(ciudades).find('.cb-ubigeo').val(),
                     ciudad_base : $(ciudades).find('.selection-base').prop("checked") ? 1 : 0,
-                    id_ciudad : $(ciudades).attr('data-type') == 'old' ? $(ciudades).attr('data-ciudad') : null 
+                    id_ciudad : $(ciudades).attr('data-type') == 'old' ? $(ciudades).attr('data-ciudad') : null,
+                    ciudad_alejada : $(ciudades).find('.simple-select2').val(),
+                    costo_ciudad_alejada: $(ciudades).find('.form-control-sm').val()
                 }
                 ciudades.dataset.type == 'new' ? agregarCiudades.push(valores) : actualizarCiudades.push(valores);
             }

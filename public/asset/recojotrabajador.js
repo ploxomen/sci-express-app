@@ -38,6 +38,7 @@ function loadPage(){
         element.addEventListener('click',async function(event){
             event.preventDefault();
             const idRecojo = this.dataset.recojo;
+            const nroSolicitud = this.dataset.solicitud;
             const ndatos = datos(idRecojo);
             if(ndatos === false){
                 alertify.alert('Mensaje','Por favor asegurate que los campos de documento recojo, N° de guías consolidadas y cantida de bultos esten llenadas correctamente');
@@ -49,7 +50,7 @@ function loadPage(){
                     alertify.alert('Error',response.error);
                     return
                 }
-                alertify.alert('Mensaje','Hora marcada correctamente N° de solicitud <b>' + idRecojo.toString().padStart(5,'0') + '</b>',()=>{window.location.reload()});
+                alertify.alert('Mensaje', 'Hora marcada correctamente N° de solicitud <b>' + nroSolicitud + '</b>',()=>{window.location.reload()});
             } catch (error) {
                alertify.alert('Error',error.message); 
             }

@@ -5,6 +5,7 @@ use App\Http\Controllers\Cluster;
 use App\Http\Controllers\DiasTransito;
 use App\Http\Controllers\Embarque;
 use App\Http\Controllers\Entrega;
+use App\Http\Controllers\Facturacion;
 use App\Http\Controllers\Fletes;
 use App\Http\Controllers\Gias;
 use App\Http\Controllers\Llegada;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->prefix('intranet')->group(function (){
     Route::prefix('cliente')->group(function(){
+        Route::get('solicitud/agregar', [Clientes::class, 'agregarSolicitudCliente'])->name('solicitudCliente');
         Route::get('agregar-modificar',[Clientes::class,'viewAgreModi'])->name('cliAgreModi');
         Route::get('archivos',[Clientes::class,'viewArchivos'])->name('cliArchi');
         Route::get('mostrar', [Clientes::class, 'misClientes'])->name('viewMisClientes');
@@ -60,6 +62,7 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
         Route::get('cambiar/rol/{id}', [Usuario::class, 'cambiarRol'])->name('cambiarRol');
         Route::get('miperfil', [Usuario::class, 'miPerfil'])->name('miPerfil');
         Route::post('agregar',[Usuario::class,'agregar']);
+        Route::post('obtener-centro-costo', [Usuario::class, 'getCentroCosto']);
         Route::post('miperfil/modificar', [Usuario::class, 'miPerfilModificar']);
         Route::post('obtener', [Usuario::class, 'misUsuarios']);
         Route::post('obtener/roles', [Usuario::class, 'obtenerRoles']);
@@ -93,11 +96,15 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
     });
     Route::prefix('pedidos')->group(function(){
         Route::prefix('recojos')->group(function () {
-            Route::get('/', [Recojo::class, 'viewPediReco'])->name('pedidoRecojo');
+            Route::get('programar', [Recojo::class, 'viewPediReco'])->name('pedidoRecojoProgramar');
+            Route::get('todos',[Recojo::class,'viewRecojoAdmin'])->name('recojoAdmin');
             Route::get('pendientes', [Recojo::class, 'recojoPendiente'])->name('recojoPendiTraba');
+            Route::post('mis-recojos', [Recojo::class, 'verRecojosAdmin']);
+            Route::post('modificaciones-admin', [Recojo::class, 'modificarAdminRecojo']);
             Route::post('actualizar-trabajador', [Recojo::class, 'actualizarRecoTra']);
             Route::post('obtener', [Recojo::class, 'obtenerRecojo']);
             Route::post('agregar', [Recojo::class, 'agregarRecojo']);
+            Route::post('obtener-programacion', [Solicitud::class, 'obtenerParaProgramar']);
             Route::post('modificar', [Recojo::class, 'modificarRecojo']);
             Route::post('modificar-estados', [Recojo::class, 'modificarEstados']);
         });
@@ -181,20 +188,36 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
             Route::post('agregar-guia', [Gias::class, 'addGuia']);
         });
     });
+    Route::prefix('facturacion')->group(function () {
+        Route::get('guias/mostrar', [Facturacion::class, 'viewFacturacionGuia'])->name('facturacionMisGuias');
+        Route::post('guias/ver', [Facturacion::class, 'obtenerFacturacionGuia']);
+        Route::get('guias/expor/excel', [Facturacion::class, 'exportarExcelFacturacionGuia'])->name('exportExcelFacturacionGuias');
+    });
+
     Route::prefix('solicitud')->group(function () {
         Route::post('ver-proveedor', [Solicitud::class, 'obtenerProveedor']);
+        Route::post('asignar-global', [Solicitud::class, 'asignacionGlobalSolicitud']);
+        Route::post('actualizar/notificacion', [Solicitud::class, 'modificarEstadoNotificacion']);
+
         Route::post('obtener-cliente', [Solicitud::class, 'obtenerDetalleCli']);
+        Route::post('obtener-cliente-cc', [Solicitud::class, 'obtnerCentroCostos']);
+        Route::post('obtener-cliente-invitado', [Solicitud::class, 'obtenerDetalleCliInvitado']);
         Route::post('obtener', [Solicitud::class, 'obtenerSolicitud']);
         Route::post('asignar-personal', [Solicitud::class, 'asignarPersonal']);
         Route::post('ver-detalle', [Solicitud::class, 'verDetalleSoli']);
         Route::post('cambiar-estado', [Solicitud::class, 'cambiarEstadoSoli']);
+        Route::post('editar', [Solicitud::class, 'editarSolicitud']);
+        Route::post('eliminar-detalle', [Solicitud::class, 'deleteDetalle']);
         Route::post('eliminar-solicitud', [Solicitud::class, 'deleteSolicitud']);
         Route::post('nuevo', [Solicitud::class, 'insertarNuevaSoli']);
+        Route::post('nuevo-cliente', [Solicitud::class, 'insertarNuevaSoliCliente']);
         Route::get('mostrar', [Solicitud::class, 'mostrarSolicitud'])->name('misSolicitudes');
         Route::get('agregar', [Solicitud::class, 'viewSolicitud'])->name('solicitud');
     });
     Route::get('storage/img/entrega/{filename}', [Entrega::class, 'obtenerImg'])->name('obtenerImgEntregas');
     Route::prefix('cliente/consulta/guia')->group(function () {
+        Route::get('pendiente-general', [Clientes::class, 'viewConsultaTrabajador'])->name('consultaGuiaClienteTrabajaro');
+        Route::get('pendiente-detallado', [Clientes::class, 'viewConsultaTrabajadorDetalle'])->name('consultaGuiaClienteTrabajadorDetallado');
         Route::get('/',[Clientes::class,'viewConsultaGeneral'])->name('consultaClienteDetallada');
         Route::post('datos',[Gias::class,'consultaGuia']);
         Route::post('remitentes',[Gias::class,'consultaGuiaRemitentes']);

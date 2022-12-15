@@ -1,7 +1,10 @@
 function loadPage(){
-    let cbProvincias = document.getElementById('id_ciudad_cli');
-    let cbDistritos = document.getElementById('id_distrito_cli');
+    let cbProvincias = document.getElementById('id_ciudad_cli_recojo');
+    let cbDistritos = document.getElementById('id_distrito_cli_recojo');
     let cbProveedores = document.getElementById('id_nom_soli');
+    let cbInvitados = document.getElementById('id_solicitante');
+    let cbCentroCostos = document.getElementById('id_centro_costo');
+    let cbCuentaInvitado = document.getElementById('id_cuenta_invitado');
     let nuevoProveedor = false;
     let general = new General();
     $(cbProveedores).select2({
@@ -9,12 +12,51 @@ function loadPage(){
         width: '100%',
         tags: true,
         placeholder : 'Seleccione un proveedor'
-    })
+    }); 
+    $('#id_documento_cli').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        templateResult: general.tempSeleCli,
+        placeholder: 'Seleccione un cliente'
+    });
+    $(cbInvitados).on('select2:select',async function(e){
+        let dato = new FormData();
+        dato.append('usuario',$(this).val());
+        dato.append('cliente', $('#id_documento_cli').val());
+        try {
+            let response = await general.funcfetch(window.location.origin + '/intranet/solicitud/obtener-cliente-cc', dato);
+            let template = '';
+            response.centrosCostos.cc.forEach((c, k) => {
+                template += `<option value="${c}" ${k === 0 ? "selected" : ''}>${c}</option>`;
+            });
+            cbCentroCostos.innerHTML = template;
+            template = "";
+            response.centrosCostos.cuenta.forEach((c, k) => {
+                template += `<option value="${c}" ${k === 0 ? "selected" : ''}>${c}</option>`;
+            });
+            cbCuentaInvitado.innerHTML = template;
+            template = '';
+        } catch (error) {
+            alertify.error('error al obtener los cc del invitado');
+            console.error(error);
+        }
+    });
+    document.getElementById('id_responsable_solicitud').onchange = function(e){
+        general.setAtributos('.datos-proveedor, .datos-invitado','required',false);
+        switch (this.value) {
+            case 'PROVEEDOR':
+                general.setAtributos('.datos-proveedor', 'required', true);
+                break;
+            case 'INVITADO':
+                general.setAtributos('.datos-invitado', 'required', true);
+                break;
+        }
+    }
     $('#id_documento_cli').on('select2:select',async function(event){
         let dato = new FormData();
         dato.append('id',$(this).val());
         try {
-            let response = await general.funcfetch('obtener-cliente',dato);
+            let response = await general.funcfetch(window.location.origin + '/intranet/solicitud/obtener-cliente',dato);
             if(response.error){
                 alertify.error('Error',response.error);
                 return
@@ -32,14 +74,21 @@ function loadPage(){
             cbDistritos.innerHTML = template;
             template = `<option value=""><option>`;
             if(response.proveedores.length){
-                $('.limitar-proveedor').prop('required',true);
                 response.proveedores.forEach(prov => {
                     template += `<option value="${prov.id}">${prov.nomb_prov}</option>`;
                 });
-            }else{
-                $('.limitar-proveedor').prop('required',false);
             }
+            cbCentroCostos.innerHTML = "<option></option>";
+            cbCuentaInvitado.innerHTML = "<option></option>";
             cbProveedores.innerHTML = template;
+            template = '';
+            if(response.invitados.length){
+                template += "<option></option>";
+                response.invitados.forEach(inv => {
+                    template += `<option value="${inv.id}">${inv.name + ' ' + inv.last_name}</option>`;
+                });
+            }
+            cbInvitados.innerHTML = template;
             template = '';
             for (const key in response.cliente) {
                 if (Object.hasOwnProperty.call(response.cliente, key)) {
@@ -51,7 +100,7 @@ function loadPage(){
                     domelement.value = element;
                 }
             }
-            $('#id_depar_cli').trigger('change');
+            $('#id_depart_cli_recojo').trigger('change');
             $('.cb-tipo-doc').trigger('change');
             general.validarMinMaxTipoDocumento($('#id_doc_iden_cli').data('input'),$('#id_doc_iden_cli').val());
         } catch (error) {
@@ -64,71 +113,6 @@ function loadPage(){
             element.value = "";
         }
     }
-    $(cbProveedores).on('select2:select',async function(event){
-        let datos = new FormData();
-        datos.append('id_proveedor',$(this).val());
-        try {
-            let response = await general.funcfetch('ver-proveedor',datos);
-            if(response.error){
-                alertify.alert('Error',response.error);
-                return
-            }
-            if(!response.proveedor){
-                nuevoProveedor = true;
-                document.getElementById('id_doc_iden_soli').value = "";
-                document.getElementById('id_nro_doc_soli').value = "";
-                return
-            }
-            nuevoProveedor = false;
-            document.getElementById('id_doc_iden_soli').value = response.proveedor.tipo_docu_prov;
-            document.getElementById('id_nro_doc_soli').value = response.proveedor.nro_docu_prov;
-            alertify.confirm('Atención','¿Deseas sustituir la informacion de recojo?',()=>{
-                for (const key in response.proveedor) {
-                    if (Object.hasOwnProperty.call(response.proveedor, key)) {
-                        const value = response.proveedor[key];
-                        const nodo = document.querySelector(`[data-proveedor='${key}']`);
-                        if(!nodo){
-                            continue;
-                        }
-                        switch (key) {
-                            case 'prov_prov':
-                                let template = `<option value=""></option>`;
-                                response.proveedor.listProv.forEach(prov => {
-                                    template += `<option value="${prov.id_ubigeo}">${prov.nombre_ubigeo}</option>`;
-                                });
-                                nodo.innerHTML = template;
-                                nodo.value = value;
-                            break;
-                            case 'dist_prov':
-                                let template2 = `<option value=""></option>`;
-                                response.proveedor.listDist.forEach(prov => {
-                                    template2 += `<option value="${prov.id_ubigeo}">${prov.nombre_ubigeo}</option>`;
-                                });
-                                nodo.innerHTML = template2;
-                                nodo.value = value;
-                            break;
-                            default:
-                                nodo.value = value;
-                            break;
-                        }
-                    }
-                }
-                $('#id_depar_cli').trigger('change');
-                general.validarMinMaxTipoDocumento($('#id_doc_iden_soli').data('input'),$('#id_doc_iden_soli').val());
-            },()=>{});
-            $('.cb-tipo-doc').trigger('change');
-
-        } catch (error) {
-            alertify.alert('Error',error.message);
-            
-        } 
-    })
-    $('#id_documento_cli').select2({
-        theme : 'bootstrap',
-        width: '100%',
-        templateResult: general.tempSeleCli,
-        placeholder: 'Seleccione un cliente'
-    });
     let frmSoli = document.getElementById('agregar-solicitud');
     frmSoli.addEventListener('submit',async function(event){
         event.preventDefault();

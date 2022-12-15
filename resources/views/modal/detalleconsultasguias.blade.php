@@ -23,7 +23,7 @@
                         <span id="info_departamento_destinatario"></span> - <span id="info_provincia_destinatario"></span> - <span id="info_distrito_destinatario"></span>
                     </div>
                 </div>
-                <div class="border-guia p-2 ocultar-box">
+                <div class="mb-3 border-guia p-2 ocultar-box">
                     <h6 class="text-center text-primary"><b>ESTADO - RASTREO</b></h6>
                     <div class="row">
                         <div class="form-group col-12 col-sm-6">
@@ -41,6 +41,10 @@
                         <div class="form-group col-12 text-center">
                             <b>Cargo entregado: <span id="info_fecha_rastreo_13" class="text-proceso"></span></b>
                         </div>
+                        <div class="form-group col-12" hidden>
+                            <h6 class="text-center text-primary"><b>IMAGENES DE ENTREGA</b></h6>
+                            <div id="imagen-entre-guia"></div>
+                        </div>
                         <div class="form-group col-12">
                             <div class="bg-estado text-center">
                                 <span>ESTADO ACTUAL: </span>
@@ -49,6 +53,7 @@
                         </div>
                     </div>
                 </div>
+                
             </div>
         </div>
         <div class="modal-footer">

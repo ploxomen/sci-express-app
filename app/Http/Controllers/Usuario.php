@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Area;
+use App\Models\Clientes;
 use App\Models\Rol;
 use App\Models\Tipos\Documentos;
 use App\Models\User;
@@ -17,7 +18,6 @@ class Usuario extends Controller
     {
         $modulos = User::getModulos(Auth::id());
         $rol_user = User::obtenerRolActivo(Auth::id());
-        // dd($rol_user);
         switch ($rol_user->id_rol) {
             case '1':
                 $datos = [
@@ -107,6 +107,13 @@ class Usuario extends Controller
         }
         return view('users.home',compact('modulos', 'datos', 'rol_user'));
     }
+    public function getCentroCosto(Request $request)
+    {
+        if($request->ajax()){
+            $cc = User::getCentroCostoCliente($request->cliente);
+            return response()->json(['success' => $cc]);
+        }
+    }
     public function viewLista()
     {
         $modulos = User::getModulos(Auth::id());
@@ -114,7 +121,8 @@ class Usuario extends Controller
         $tipo_documentos = Documentos::where('estado', '1')->get();
         $areas = Area::get();
         $roles = Rol::get();
-        return view('users.lista',compact('modulos','year', 'tipo_documentos', 'areas', 'roles'));
+        $clientes = Clientes::getClientesFiles();
+        return view('users.lista',compact('modulos','year', 'tipo_documentos', 'areas', 'roles', 'clientes'));
     }
     public function miPerfilModificar(Request $request)
     {
@@ -190,7 +198,7 @@ class Usuario extends Controller
                     $message = ['success' => 'usuario eliminado'];
                 break;
                 case 'mostrar_editar':
-                    $message = ['success' => User::select('id', 'type_document', 'n_document', 'name', 'last_name', 'email', 'phone', 'sexo', 'nacimiento', 'direction', 'id_area')->where(['id' => $request->id_usuario])->first()];
+                    $message = User::obtenerDatosEditar($request->id_usuario);
                 break;
                 case 'mostrar_roles':
                     $message = ['success' => ['usuario' => $request->id_usuario, 'roles' => Rol::obtenerRolesUsuario($request->id_usuario)]];
@@ -211,7 +219,7 @@ class Usuario extends Controller
                     $message = ['success' => 'Contraseña restaurada, recuerda que la contraseña temporal es: <strong>' . $request->password . '</strong>'];
                 break;
                 case 'actualizar_rol':
-                    $message = Rol::modificarUsuarioRol($request->id_usuario,json_decode($request->roles,true));
+                    $message = Rol::modificarUsuarioRol($request->id_usuario,json_decode($request->roles,true),$request->has('elimiarRol') ? true : false);
                 break;
             }
             return response()->json($message);
@@ -225,8 +233,9 @@ class Usuario extends Controller
         $tipo_documentos = Documentos::where('estado','1')->get();
         $areas = Area::get();
         $roles = Rol::get();
+        $clientes = Clientes::getClientesFiles();
         $modulos = User::getModulos(Auth::id());
-        return view('users.crear',compact('tipo_documentos','areas','roles','modulos'));
+        return view('users.crear',compact('clientes','tipo_documentos','areas','roles','modulos'));
     }
     public function restablecerUsuario(Request $request)
     {
@@ -242,6 +251,7 @@ class Usuario extends Controller
                     unset($_COOKIE['login_first']);
                     setcookie("login_first", null, -1 ,"/");
                 }
+                User::defaultSelectRol($user->id);
                 $request->session()->regenerate();
                 return response()->json(['success' => true]);
             }else{
@@ -277,6 +287,7 @@ class Usuario extends Controller
             $message = [];
             if(Auth::attempt($credenciales,$remember)){
                 $request->session()->regenerate();
+                User::defaultSelectRol(Auth::id());
                 $message = ['success' => true];
             }else{
                 $message = ['not_user' => true];
@@ -306,9 +317,9 @@ class Usuario extends Controller
         try {
             if ($request->ajax()) {
                 $datos = $request->all();
-                $repetidos = User::where(['type_document' => $datos['type_document'], 'n_document' => $datos['n_document']])->count();
+                $repetidos = User::where(['email' => $request->email])->count();
                 if ($repetidos > 0) {
-                    return response()->json(['alerta' => 'Se encontró ' . $repetidos . ' coincidencia en el tipo y número de documento, para continuar por favor cambie el tipo o número de documento']);
+                    return response()->json(['alerta' => 'El correo ' . $request->email . ' ya se encuentra registrado, por favor intente con otro correo']);
                 }
                 $datos['password'] = Hash::make($datos['password']);
                 $result = User::addUser($datos);

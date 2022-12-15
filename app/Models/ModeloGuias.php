@@ -86,6 +86,9 @@ class ModeloGuias extends Model
                     'id_ciudad_final' => empty($guia['id_ciudad_final']) ? null : $guia['id_ciudad_final']
                 ]);
             }
+            if ($guia['id_invitado'] == 'ninguno') {
+                $guia['id_invitado'] = null;
+            }
             unset($guia['id_ciudad_final']);
             if(isset($guia['add_cli_bool'])){
                 unset($guia['add_cli_bool']);
@@ -117,6 +120,19 @@ class ModeloGuias extends Model
             return ['error' => $ex->getMessage()];
         }
     }
+    public static function determinarClienteProveedor($tipo,$id)
+    {
+        $idCliente = 0;
+        if($tipo === 'proveedor'){
+            $cliente = DB::table('relacion_cliente_proveedor')->select('id_cliente')->where('id_proveedor',$id)->first();
+            if(!empty($cliente->id_cliente)){
+                $idCliente = $cliente->id_cliente;
+            }
+            return $idCliente;
+        }
+        return intval($id);
+
+    }
     public static function camposNoCambiados()
     {
         return [
@@ -139,6 +155,9 @@ class ModeloGuias extends Model
     {
         DB::beginTransaction();
         try {
+            if (isset($guia['id_invitado']) && $guia['id_invitado'] == 'ninguno') {
+                $guia['id_invitado'] = null;
+            }
             $estadoGeneral = DB::table('guias')->select('situ','estado','prefijo','nro_guia')->where(['id' => $idGuia])->first();
             if(empty($estadoGeneral)){
                 return ['error' => 'La guía u O/S no existe'];
@@ -228,6 +247,7 @@ class ModeloGuias extends Model
                     }
                 }
             }
+            
             if (isset($guia['id_guia'])) {
                 unset($guia['id_guia']);
             }
@@ -243,6 +263,7 @@ class ModeloGuias extends Model
             if (isset($guia['add_cli_cli'])) {
                 unset($guia['add_cli_cli']);
             }
+            DB::table('guias')->where('id', '=', $idGuia)->update(['id_invitado' => null,'cc_invitado' => null]);
             DB::table('guias')->where('id','=',$idGuia)->update($guia);
             $tot_cant = 0;
             $tot_kg = 0;
@@ -292,6 +313,7 @@ class ModeloGuias extends Model
     {
         $guia = DB::select('CALL sp_obtener_detalle_guia(?)',[$guia]);
         if (isset($guia[0])) {
+            
             $guia[0]->remi_depa = (new Ubigeo)->getNameDepartamento($guia[0]->remi_depa);
             $guia[0]->remi_prov = (new Ubigeo)->getNameProvincia($guia[0]->remi_prov);
             $guia[0]->remi_dist = (new Ubigeo)->getNameDistrito($guia[0]->remi_dist);
@@ -307,10 +329,14 @@ class ModeloGuias extends Model
     {   
         $ubigeo = new Ubigeo();
         $guia = $query->where('id',$idGuia)->first();
+        // dd($guia);
+        $idCLiente = self::determinarClienteProveedor($guia->tipo_guia,$guia->id_remitente);
         $guia->listProvRemi = $ubigeo->getProvinciasCliente($guia->remi_depa);
         $guia->listDistRemi = $ubigeo->getDistritosCliente($guia->remi_prov); 
         $guia->listProvDest = $ubigeo->getProvinciasCliente($guia->dest_depa);
         $guia->listDistDest = $ubigeo->getDistritosCliente($guia->dest_prov);
+        $guia->listInvitados = Clientes::obtenerInvitados($idCLiente);
+        $guia->listCc = empty($guia->id_invitado) ? [] : Clientes::centrosCosto($guia->id_invitado, $idCLiente);
         $guia->ciudadesFinales = DB::table('ciudades')->select('id', 'nombre_ciudad')->where(['ubigeo_distrito' => $guia->dest_dist])->get();
         $guia->detalle = DB::table('detalle_guias AS dg')->select('dg.*')->join('guias AS g','g.id','=','dg.id_guia')->where('dg.id_guia',$idGuia)->get();
         $guia->imagenes = DB::table('imagenes_guia AS im')->select('im.*')->join('guias AS g', 'g.id', '=', 'im.id_guia')->where('im.id_guia', $idGuia)->get();
@@ -497,6 +523,14 @@ class ModeloGuias extends Model
         return $datos;
      
     }
+    public static function obtenerGuiasConsultaTrabajador($idCliente,$idUsuario,$fechaInicio,$fechaFin)
+    {
+        $datos = DB::select('CALL sp_consulta_guias_remitente_trabajador(?,?,?,?)', [$idCliente, $idUsuario, $fechaInicio, $fechaFin]);
+        foreach ($datos as $value) {
+            $value->nro_comp_cli = self::filterComprobantes($value->nro_comp_cli);
+        }
+        return $datos;
+    }
     public static function consultaGuiaCliente($filtros)
     {
         $queryEstados = "SELECT DATE_FORMAT(pg.fecha_hr_update,'%d/%m/%Y') AS fecha_cambio,se.id,se.tipo FROM procesos_guia pg LEFT JOIN situacion_estado se ON pg.situacion = se.id WHERE pg.id_guia = ?";
@@ -515,6 +549,7 @@ class ModeloGuias extends Model
         $consulta = DB::select('CALL sp_consulta_guia(?,?,?,?)',[$filtros['tipoguia'],$filtros['nro_guia_sci'],$filtros['documento_remitente'],$filtros['nro_guia_remitente']]);
         if(!empty($consulta) && isset($consulta[0])){
             $consulta[0]->seguimiento = DB::select($queryEstados,[$consulta[0]->id]);
+            $consulta[0]->imagenes = DB::table('imagenes_guia')->select("nom_file","nom_id_file","size","type")->where('id_guia', $consulta[0]->id)->get();
             $consulta[0]->departamento_destinatario = (new Ubigeo)->getNameDepartamento($consulta[0]->departamento_destinatario);
             $consulta[0]->departamento_remitente = (new Ubigeo)->getNameDepartamento($consulta[0]->departamento_remitente);
             $consulta[0]->provincia_destinatario = (new Ubigeo)->getNameProvincia($consulta[0]->provincia_destinatario);

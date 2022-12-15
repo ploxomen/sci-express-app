@@ -11,7 +11,7 @@
     <title>Mis Clusters</title>
 @endsection
 @section('body')
-    <section class="p-2">
+    <section class="p-2 bg-white">
         <h3 class="text-primary"><i class="fas fa-caret-right"></i> Mis Clusters</h3>
         <table id="tabla-cluster" class="table table-sm table-bordered table-striped">
             <thead>

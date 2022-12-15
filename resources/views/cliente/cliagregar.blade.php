@@ -66,7 +66,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_ctii_sa">CTLF</label>
-                    <input type="text" name="ctii_sa" id="id_ctii_sa" minlength="7" maxlength="7" class="form-control clone-value" data-clone="#id_ctii_so" required>
+                    <input type="text" name="ctii_sa" id="id_ctii_sa" minlength="7" maxlength="7" class="form-control clone-value" data-clone="#id_ctii_so">
                 </div>
             </fieldset>
         </div>
@@ -318,6 +318,11 @@
                         <option value="CRED 30 DIAS">CRED 30 DIAS</option>
                         <option value="CRED 45 DIAS">CRED 45 DIAS</option>
                         <option value="CREDITO">CREDITO</option>
+                    </select>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4">
+                    <label for="id_centros_costo">Centros de Costo</label>
+                    <select name="centros_costo[]" id="id_centros_costo" class="form-control cb-select2-tags" multiple>
                     </select>
                 </div>
             </fieldset>

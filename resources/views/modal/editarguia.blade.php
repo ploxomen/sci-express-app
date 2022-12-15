@@ -48,11 +48,12 @@
             <div class="form-group col-12 col-md-6 col-lg-6 col-xl-4">
                 <label for="id_editar_comp_clie">Comprobantes <small class="text-danger data-anulada-oculta">*</small></label>
                 <select name="comp_clie[]" id="id_editar_comp_clie" required class="form-control-sm form-control simple-select2 data-anulada" multiple>
-                    <option value="BOLETA">BOLETA</option>
-                    <option value="FACTURA">FACTURA</option>
-                    <option value="GUIA">GUIA</option>
-                    <option value="GUIA INTERNAMIENTO">GUIA INTERNAMIENTO</option>
-                    <option value="ORDEN COMPRA">ORDEN COMPRA</option>
+                    <option value="BOLETA ELECTRÓNICA">BOLETA ELECTRÓNICA</option>
+                    <option value="FACTURA ELECTRÓNICA">FACTURA ELECTRÓNICA</option>
+                    <option value="GUIA DE REMISIÓN (R) ELECTRÓNICA">GUIA DE REMISIÓN (R) ELECTRÓNICA</option>
+                    <option value="GUIA DE REMISIÓN (T) ELECTRONICA">GUIA DE REMISIÓN (T) ELECTRÓNICA</option>
+                    <option value="GUIA DE INTERNAMIENTO">GUIA DE INTERNAMIENTO</option>
+                    <option value="ORDEN DE COMPRA">ORDEN DE COMPRA</option>
                     <option value="OTRO" class="delete-option">OTRO</option>
                     <option value="NINGUNO" class="delete-option">NINGUNO</option>
                 </select>
@@ -89,7 +90,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="form-group col-12 col-md-6 col-lg-3 col-xl-2">
+            <div class="form-group col-12 col-md-6 col-lg-3 col-xl-3">
                 <label for="id_editar_via_envi">Vía Envío <small class="text-danger">*</small></label>
                 <select name="via_envi" id="id_editar_via_envi" class="form-control form-control-sm disable_estado_2" required>
                     @foreach ($via_envios as $via)
@@ -97,17 +98,13 @@
                     @endforeach
                 </select>
             </div>
-            <div class="form-group col-12 col-md-6 col-lg-3 col-xl-2">
+            <div class="form-group col-12 col-md-6 col-lg-3 col-xl-3">
                 <label for="id_editar_via_tras">Via Traslado(Facturación) <small class="text-danger data-anulada-oculta">*</small></label>
                 <select name="via_tras" id="id_editar_via_tras" class="form-control form-control-sm data-anulada" required>
                     @foreach ($via_envios as $via)
                         <option value="{{$via->id}}">{{$via->envio}}</option>
                     @endforeach
                 </select>
-            </div>
-            <div class="form-group col-12 col-md-6 col-lg-3 col-xl-2">
-                <label for="id_editar_dias_tran">Días de tránsito <small class="text-danger">*</small></label>
-                <input type="number" min="1" class="form-control form-control-sm" required name="dias_tran" id="id_editar_dias_tran">
             </div>
             <div class="col-12">
                 <h5 class="text-info">REMITENTE</h5>
@@ -165,6 +162,14 @@
                 <select class="form-control cb-ubigeo disable_estado_2" name="remi_dist" required id="id_editar_remi_dist" data-valor-cliente="dist_so" data-valor-proveedor="dist_prov">
                 </select>
             </div>
+            <div class="form-group col-12 col-md-6">
+                <label for="id_editar_id_invitado">Invitado</label>
+                <select name="id_invitado" id="id_editar_id_invitado" data-cuenta="#id_editar_cc_invitado" class="simple-select2-2"></select>
+            </div>
+            <div class="form-group col-12 col-md-6">
+                <label for="id_editar_cc_invitado">CC. Invitado</label>
+                <select name="cc_invitado" id="id_editar_cc_invitado" required disabled class="cb-select2-tags"></select>
+            </div>
             <div class="col-12">
                 <h5 class="text-info">DESTINATARIO</h5>
             </div>
@@ -216,6 +221,17 @@
                 <label for="id_editar_ciudad_destino_final">Ciudad Final</label>
                 <select name="id_ciudad_final" id="id_editar_ciudad_destino_final" data-cli-cli="id_ciudad_final" class="disable_estado_2 form-control simple-select2 cb-dest calculo-dia">
                 </select>
+            </div>
+            <div class="col-12">
+                <h5 class="text-info">ADICIONAL</h5>
+            </div>
+            <div class="form-group col-12 col-md-6 col-lg-3">
+                <label for="id_editar_dias_tran">Días de tránsito <small class="text-danger">*</small></label>
+                <input type="number" min="1" class="form-control form-control-sm" required name="dias_tran" id="id_editar_dias_tran">
+            </div>
+            <div class="form-group col-12 col-md-6 col-lg-3" id="id-editar-box-complejo-distante" data-texto="#id_editar_ciudad_alejada" data-input="#id_editar_valor_complejo_distante" hidden>
+                <label for="id-tipo-complejo-distante"><span id="id_editar_ciudad_alejada"></span> <small class="text-danger">*</small></label>
+                <input type="number" min="0" class="form-control" name="valor_complejo_distante" id="id_editar_valor_complejo_distante" disabled>
             </div>
             <div class="col-12">
                 <h5 class="text-info">ARRIBO CLUSTER</h5>

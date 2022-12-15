@@ -76,7 +76,7 @@ class ModeloCluster extends Model
         $datos = DB::select('CALL sp_mis_clusters(?)',[$id]);
         if($id != 0 && isset($datos[0])){
             $datos[0]->lista_provincia_clu = (new Ubigeo)->getProvinciasCliente($datos[0]->departamento_clu);
-            $datos[0]->ciudades = DB::table('ciudades_base_cluster')->select('id','tipo_base','ubigeo_distrito','id_ciudad','base')->where(['id_cluster' => $datos[0]->cluster_id,'activo' => 1])->get();
+            $datos[0]->ciudades = DB::table('ciudades_base_cluster')->select('id','tipo_base','ubigeo_distrito','id_ciudad','base', 'ciudad_alejada', 'costo_ciudad_alejada')->where(['id_cluster' => $datos[0]->cluster_id,'activo' => 1])->get();
             foreach ($datos[0]->ciudades as $city) {
                 $city->listCity = DB::table('ciudades')->select('id','nombre_ciudad')->where(['ubigeo_distrito' => $city->ubigeo_distrito])->get();
             }
@@ -108,7 +108,9 @@ class ModeloCluster extends Model
                     'tipo_base' => !empty($valor_agregar->ciudad) ? 'ciudad' : 'distrito',
                     'ubigeo_distrito' => $valor_agregar->distrito,
                     'id_ciudad' => null,
-                    'base' => $valor_agregar->ciudad_base
+                    'base' => $valor_agregar->ciudad_base,
+                    'ciudad_alejada' => $valor_agregar->ciudad_alejada,
+                    'costo_ciudad_alejada' => !empty($valor_agregar->costo_ciudad_alejada) ? $valor_agregar->costo_ciudad_alejada : 0
                 ];
                 if (!empty($valor_agregar->ciudad)) {
                     $exist_ciudad = DB::table('ciudades')->select('id')->where(['ubigeo_distrito' => $valor_agregar->distrito, 'id' => $valor_agregar->ciudad])->first();
@@ -126,7 +128,9 @@ class ModeloCluster extends Model
                     'tipo_base' => !empty($valor_actualizar->ciudad) ? 'ciudad' : 'distrito',
                     'ubigeo_distrito' => $valor_actualizar->distrito,
                     'id_ciudad' => null,
-                    'base' => $valor_actualizar->ciudad_base
+                    'base' => $valor_actualizar->ciudad_base,
+                    'ciudad_alejada' => $valor_actualizar->ciudad_alejada,
+                    'costo_ciudad_alejada' => !empty($valor_actualizar->costo_ciudad_alejada) ? $valor_actualizar->costo_ciudad_alejada : 0
                 ];
                 // dd($ciudad_actua);
                 if (!empty($valor_actualizar->ciudad)) {
@@ -154,7 +158,7 @@ class ModeloCluster extends Model
     }
     public static function obtenerTodosClusters()
     {
-        return DB::table('cluster AS c')->select('u.id','c.id AS id_cluster','u.name','u.last_name')->join('usuarios AS u','c.id_usuario','=','u.id')->where(['c.activo' => 1])->get();
+        return DB::table('cluster AS c')->select('u.id','c.provincia_clu','c.id AS id_cluster','u.name','u.last_name','u.status')->join('usuarios AS u','c.id_usuario','=','u.id')->where(['c.activo' => 1])->get();
     }
     
 }

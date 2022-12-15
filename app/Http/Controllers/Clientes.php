@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Clientes as ModelsClientes;
+use App\Models\ModeloSolicitud;
 use App\Models\Tipos\Documentos;
+use App\Models\TrayectoEnvio;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -25,6 +27,33 @@ class Clientes extends Controller
             $info_cli = ['nro_doc' => $request->nro_doc];
         }
         return view('cliente.cliagregar',compact('id_new_prov','info_cli','agregar','dep','tipo_documentos','modulos'));
+    }
+    public function agregarSolicitudCliente()
+    {
+        $tipo_documentos = Documentos::where('estado', '1')->get();
+        $modulos = User::getModulos(Auth::id());
+        $hoy = date('Y-m-d');
+        $trayectos = TrayectoEnvio::where(['estado' => 1])->get();
+        $clientes = User::obtenerClientesTrabajadores(Auth::id());
+        $ultimo_id = ModeloSolicitud::getLastId();
+        $dep = (new Ubigeo)->getDepartamentosClientes();
+        $usuarioNom = Auth::user()->name . ' ' . Auth::user()->last_name;
+        if (is_null($ultimo_id)) {
+            $ultimo_id = 1;
+        } else {
+            $ultimo_id = $ultimo_id->id + 1;
+        }
+        return view('solicitud.solicitudcliente', compact('usuarioNom','dep', 'ultimo_id', 'clientes', 'tipo_documentos', 'modulos', 'hoy', 'trayectos'));
+    }
+    public function viewConsultaTrabajador()
+    {
+        $modulos = User::getModulos(Auth::id());
+        $clientes = User::obtenerClientesTrabajadores(Auth::id());
+        return view("cliente.trabajadores.consultaGuia",compact("modulos", "clientes"));
+    }
+    public function viewConsultaTrabajadorDetalle()
+    {
+        # code...
     }
     public function viewConsultaGeneral(){
         $modulos = User::getModulos(Auth::id());
@@ -144,6 +173,7 @@ class Clientes extends Controller
                 $proveedorAdd = json_decode($datos['prov_add'], true);
                 unset($datos['prov_add']);
             }
+            $datos['centros_costo'] = $request->has('centros_costo') ? implode(";", $datos['centros_costo']) : null;
             $id_cli = $request->has('id_cliente') ? $request->id_cliente : null;
             if ($request->has('id_cliente')) {
                 unset($datos['id_cliente']);

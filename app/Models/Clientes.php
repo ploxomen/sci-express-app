@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Http\Controllers\Ubigeo;
 use Exception;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -26,6 +25,50 @@ class Clientes extends Model
         $result = DB::select('CALL sp_get_files_estado_cliente(?)',[$nro_doc]);
         return isset($result[0]) ? $result[0] : [];
     }
+    public static function obtenerInvitados($idCliente)
+    {
+        return DB::table('usuario_cliente AS uc')->select('u.last_name','u.name','u.type_document','u.n_document','u.id')->join('usuarios AS u','uc.cod_usuario','=','u.id')->where(['uc.cod_cliente' => $idCliente,'uc.estado' => 1])->get();
+    }
+    public static function centrosCosto($idInvitado,$idCliente)
+    {
+        $centroCosto = DB::table('usuario_cliente')->select('centro_costo', 'cuenta')->where(['cod_usuario' => $idInvitado,'cod_cliente' => $idCliente,'estado' => 1])->first();
+        $centroCostoArray = [
+            'cc' => null,
+            'cuenta' => null
+        ];
+        // dd($idInvitado,$idCliente,$centroCosto);
+        switch ($centroCosto->centro_costo) {
+            case 'CC':
+                $cc = DB::table('clientes')->select('centros_costo')->where(['id' => $idCliente])->first();
+                if(empty($cc->centros_costo)){
+                    $centroCostoArray['cc'] = ['Ninguno'];
+                }else{
+                    $centroCostoArray['cc'] = explode(';', $cc->centros_costo);
+                }
+            break;
+            case 'Ninguno':
+                $centroCostoArray['cc'] = ['Ninguno'];
+            break;
+            default:
+                $centroCostoArray['cc'] = [empty($centroCosto->centro_costo) ? 'Ninguno' : $centroCosto->centro_costo];
+            break;
+        }
+        $centroCostoArray['cuenta'] = !empty($centroCosto->cuenta) ? explode(';',$centroCosto->cuenta) : ['Ninguno'];
+        return $centroCostoArray;
+    }
+    public static function comprobarNroCuenta($idCliente,$idUsuario,$cuenta)
+    {
+        if(mb_strtolower($cuenta,'UTF-8') === 'ninguno'){
+            return null;
+        }
+        $centroCosto = DB::table('usuario_cliente')->select('centro_costo', 'cuenta')->where(['cod_usuario' => $idUsuario, 'cod_cliente' => $idCliente, 'estado' => 1])->first();
+        $existCuenta = !empty($centroCosto->cuenta) && strpos($centroCosto->cuenta, $cuenta) !== false ? true : false;
+        $cadena = null;
+        if(!$existCuenta){
+            $cadena = empty($centroCosto->cuenta) ? $cuenta : $centroCosto->cuenta . ';'. $cuenta;
+        }
+        return $cadena;
+    }
     public static function addCliente($datos)
     {
         return DB::table('clientes')->insertGetId($datos);
@@ -41,7 +84,7 @@ class Clientes extends Model
     }
     public static function obtenerProveedoresSoli($id_cliente)
     {
-        return DB::table('proveedor_clientes AS pc')->leftJoin('relacion_cliente_proveedor AS rc','pc.id','=','rc.id_proveedor')->where(['pc.activo' => 1, 'rc.id_cliente' => $id_cliente])->get();
+        return DB::table('proveedor_clientes AS pc')->select('pc.*')->join('relacion_cliente_proveedor AS rc','pc.id','=','rc.id_proveedor')->where(['pc.activo' => 1, 'rc.id_cliente' => $id_cliente])->get();
     }
     public static function obtenerProveedores($id_cliente)
     {
@@ -135,6 +178,20 @@ class Clientes extends Model
         }else{
             return $ciudad->id;
         }
+    }
+    public static function obtenerComplejoDistante($tipo,$distrito,$ciudad)
+    {
+        $where = [
+            'activo' => 1,
+            'tipo_base' => $tipo,
+            'ubigeo_distrito' => $distrito
+        ];
+        if(!empty($ciudad)){
+            $where = [
+                'id_ciudad' => $ciudad
+            ];
+        }
+        return DB::table('ciudades_base_cluster')->select('ciudad_alejada','costo_ciudad_alejada')->where($where)->first();
     }
 
 }

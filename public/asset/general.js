@@ -18,10 +18,14 @@ class General{
         for (const element of $cbUbigeos) {
             $(element).on('select2:select',async (e)=>{
                 let cbUbigeo = document.getElementById(e.target.dataset.info);
+                console.log(cbUbigeo);
+
                 if(!cbUbigeo){
                     return
                 }
                 let consulta = e.target.dataset.consulta;
+                console.log(consulta);
+
                 if(consulta == 'provincia'){
                     document.getElementById(e.target.dataset.infoDistrito).innerHTML = '';
                 }
@@ -193,6 +197,9 @@ class General{
         }
         nro.setAttribute('minlength',minMax);
         nro.setAttribute('maxlength',minMax);
+    }
+    setAtributos(querySelector, atributo, valor) {
+        [...document.querySelectorAll(querySelector)].forEach(element => element[atributo] = valor);
     }
     calcularBultosFletes(modal,subTotalBulto,dataBase,dataTransfer) {
         subTotalBulto.querySelector('.sub-total').value = this.totalBultos(subTotalBulto, '.calc-total');
@@ -376,7 +383,8 @@ class General{
                 empresasTransporte.type = 'text';
                 empresasTransporte.disabled = true;
             }
-            const requerido = e.tipo_trayecto == 'AEREO' ? '' : 'required';
+            const tipoAreos = ["AEREO","AEREA"];
+            const requerido = tipoAreos.indexOf(e.tipo_trayecto) >= 0 ? '' : 'required';
             template += `
                         <li class='informe-ciudades' data-ciudad="${e.id}" data-trayecto="${e.tipo_trayecto}">
                             <div class="form-row">
@@ -387,19 +395,20 @@ class General{
                                     <b>Envio:</b><span> ${e.tipo_trayecto}</span>
                                 </div>
                                 <div class="form-group col-12 col-md-6 col-lg-5">
-                                    <label for="id_comprobantes_${e.id}">Comprobantes <small class="text-danger">*</small></label>
+                                    <label for="id_comprobantes_${e.id}">Comprobantes ${requerido != '' ? '<small class="text-danger">*</small>' : ''}</label>
                                     <select id="id_comprobantes_${e.id}" class="form-control simple-select2 form-control-sm" multiple ${requerido}>
                                         <option value="GUIA TRANSPORTISTA" ${cbComprobante && cbComprobante.indexOf('GUIA TRANSPORTISTA') >= 0 ? 'selected' : ''}>GUIA TRANSPORTISTA</option>
-                                        <option value="GUIA AEREA" ${cbComprobante && cbComprobante.indexOf('GUIA AEREA') >= 0 ? 'selected' : ''}>GUIA AEREA</option>
                                         <option value="FACTURA" ${cbComprobante && cbComprobante.indexOf('FACTURA') >= 0 ? 'selected' : ''}>FACTURA</option>
+                                        <option value="MANIFIESTO" ${cbComprobante && cbComprobante.indexOf('MANIFIESTO') >= 0 ? 'selected' : ''}>MANIFIESTO</option>
+                                        <option value="ORDEN DE SERVICIO" ${cbComprobante && cbComprobante.indexOf('ORDEN DE SERVICIO') >= 0 ? 'selected' : ''}>ORDEN DE SERVICIO</option>
                                     </select>
                                 </div>
                                 <div class="form-group col-12 col-md-6 col-lg-5">
-                                    <label for="id_nro_comprobantes_${e.id}">N° Comprobantes <small class="text-danger">*</small></label>
+                                    <label for="id_nro_comprobantes_${e.id}">N° Comprobantes ${requerido != '' ? '<small class="text-danger">*</small>' : ''}</label>
                                     <select id="id_nro_comprobantes_${e.id}" ${requerido} multiple class="form-control cb-select2-tags form-control-sm">${cbNroComprobantes}</select>
                                 </div>
                                 <div class="form-group col-12 col-md-6 col-lg-2">
-                                    <label for="id_importe_factura_${e.id}">Importe Factura <small class="text-danger">*</small></label>
+                                    <label for="id_importe_factura_${e.id}">Importe Factura ${requerido != '' ? '<small class="text-danger">*</small>' : ''}</label>
                                     <input type="number" value="${e.importe_factura}" ${requerido} step="0.01" id="id_importe_factura_${e.id}" class="form-control form-control-sm" step="0.01" min="0">
                                 </div>
                                 <div class="form-group col-12 col-md-6 col-lg-3">
@@ -411,11 +420,11 @@ class General{
                                     <input type="date" id="id_embarque_fch_emba_${e.id}" value="${response.embarque.fch_emba}" required class="form-control form-control-sm" disabled>
                                 </div>
                                 <div class="form-group col-6 col-lg-3">
-                                    <label for="id_fecha_llegada_${e.id}">Fecha llegada <small class="text-danger">*</small></label>
+                                    <label for="id_fecha_llegada_${e.id}">Fecha llegada ${requerido != '' ? '<small class="text-danger">*</small>' : ''}</label>
                                     <input type="date" id="id_fecha_llegada_${e.id}" value="${e.fecha_llegada}" class="form-control form-control-sm" ${requerido}>
                                 </div>
                                 <div class="form-group col-6 col-lg-3">
-                                    <label for="id_hr_llegada_${e.id}">Hr llegada <small class="text-danger">*</small></label>
+                                    <label for="id_hr_llegada_${e.id}">Hr llegada ${requerido != '' ? '<small class="text-danger">*</small>' : ''}</label>
                                     <input type="time" id="id_hr_llegada_${e.id}" value="${e.hr_llegada}" class="form-control form-control-sm" ${requerido}>
                                 </div>
                                 `
@@ -434,8 +443,8 @@ class General{
                                     e.guiasEmbarque.forEach(g => {
                                         const nroGuia = g.prefijo !== null ? g.prefijo.toString().padStart(3, '0') + '-' + g.nro_guia.toString().padStart(7, '0') : g.nro_guia.toString().padStart(7, '0');
                                         template += `
-                                                                <span class="p-2">N° ${nroGuia}</span>
-                                                            `
+                                            <span class="p-2">N° ${nroGuia}</span>
+                                        `
                                     });
                                     template += `</div>`;
                                 }
@@ -475,7 +484,6 @@ class General{
     }
     validarSeleccionComprobantes(valor,idComprobante,idNroComprobante){
         const valores = valor;
-        console.log(valores);
         if (valores) {
             const exist = valores.filter(opt => opt == 'NINGUNO');
             if (exist.length) {
@@ -514,7 +522,6 @@ class General{
     }
     changeTipoGuiaFormato(idNroGuia,value,max,condicion,textLabel,dataClient){
         const nroGuia = document.getElementById(idNroGuia);
-        console.log(nroGuia);
         if(value){
             nroGuia.value = value;
         }
@@ -539,8 +546,26 @@ class General{
         });
         document.querySelector($cbCiudades).innerHTML = template;
     }
-    async getDataRemitenteGuia(cbBox,idRemiProv,idRemiDist,idRemiDepa,idRemiTipoDocu){
-        console.log(cbBox);
+    async getCCInvitados(cbInvitado,$cbCliente) {
+        const $ccCosto = $($(cbInvitado).attr('data-cuenta'));
+        const $selectedCliente = $cbCliente.selectedOptions[0];
+        if ($(cbInvitado).val() == 'ninguno') {
+            $ccCosto.val("").empty().trigger('change');
+            $ccCosto.prop('disabled', true);
+        } else {
+            let dato = new FormData();
+            dato.append('usuario', $(cbInvitado).val());
+            dato.append('cliente', $selectedCliente.getAttribute('data-type') == 'proveedor' ? $selectedCliente.getAttribute('data-id-cliente') : $cbCliente.value);
+            let response = await this.funcfetch(window.location.origin + '/intranet/solicitud/obtener-cliente-cc', dato);
+            let template = '';
+            response.centrosCostos.cc.forEach((c, k) => {
+                template += `<option value="${c}" ${k === 0 ? "selected" : ''}>${c}</option>`;
+            });
+            $ccCosto.html(template);
+            $ccCosto.prop('disabled', false);
+        }
+    }
+    async getDataRemitenteGuia(cbBox,idRemiProv,idRemiDist,idRemiDepa,idRemiTipoDocu,idInvitado){
         let datos = new FormData();
         const tipoCbRemi = cbBox.selectedOptions[0].getAttribute('data-type');
         datos.append('tipo', tipoCbRemi);
@@ -554,6 +579,18 @@ class General{
                 alertify.alert('Error', response.error);
                 return null;
             }
+            const ccInvitado = $(idInvitado).attr('data-cuenta');
+            $(ccInvitado).val(null).empty().trigger('change');
+            $(ccInvitado).prop('disabled',true);
+            $(idInvitado).val(null).empty();
+            $(idInvitado).append(new Option('Ninguno','ninguno',true,false));
+            if(response.invitados.length > 0){
+                response.invitados.forEach(invitado => {
+                    const optNew = new Option(invitado.name + ' ' + invitado.last_name,invitado.id,false,false);
+                    $(idInvitado).append(optNew)
+                });
+            }
+            $(idInvitado).trigger('change');
             if (response.prov.length > 0) {
                 this.transforData(response.prov, document.querySelector(idRemiProv));
             }
@@ -579,7 +616,7 @@ class General{
             return tipoCbRemi;
         }
     }
-    async getDataDestGuia(cbBox, idRemitDepa, idDestTipoDocu,idDestDepa ,idDestPorv, idDestDist, idCiudadFinal,idDiasTransito,idViaEnvio){
+    async getDataDestGuia(cbBox, idRemitDepa, idDestTipoDocu,idDestDepa ,idDestPorv, idDestDist, idCiudadFinal,idDiasTransito,idViaEnvio,idComplejoDistante){
         let datos = new FormData();
         datos.append('id', $(cbBox).val());
         datos.append('departamentoOrigen', $(idRemitDepa).find("option:selected").text());
@@ -590,9 +627,21 @@ class General{
                 return false;
             }
             if (!response.datos) {
-                console.log('aaa');
                 this.clearCliDeCli(idDestTipoDocu, idDestPorv, idDestDist, idCiudadFinal);
                 return true;
+            }
+            const complejoDistante = document.querySelector(idComplejoDistante);
+            if(response.complejo){
+                if (response.complejo.ciudad_alejada != null && response.complejo.ciudad_alejada != 'Ninguno'){
+                    complejoDistante.hidden = false;
+                    document.querySelector(complejoDistante.dataset.texto).textContent = response.complejo.ciudad_alejada + ' ' + (response.complejo.ciudad_alejada == 'Rural - Alejada' ? '(S/)' : '(%)') ;
+                    document.querySelector(complejoDistante.dataset.input).value = response.complejo.costo_ciudad_alejada;
+                    document.querySelector(complejoDistante.dataset.input).disabled = false;
+                    document.querySelector(complejoDistante.dataset.input).dataset.tipo = response.complejo.ciudad_alejada;
+                }else{
+                    complejoDistante.hidden = true;
+                    document.querySelector(complejoDistante.dataset.input).disabled = true;
+                }
             }
             if (response.prov.length > 0) {
                 this.transforData(response.prov, document.querySelector(idDestPorv));
@@ -675,5 +724,131 @@ class General{
                 break;
         }
         document.querySelector(domId).value = diasEnvio;
+    }
+    formaterFecha(fecha,separador){
+        const fechaDestruc = fecha.split('-');
+        return fechaDestruc[2] + separador + fechaDestruc[1] + separador + fechaDestruc[0];
+    }
+    formaterHora(hora) {
+        const fechaDestruc = hora.split(':');
+        let amorpm = "AM";
+
+        if (parseInt(fechaDestruc[0]) >= 13){
+            fechaDestruc[0] = (parseInt(fechaDestruc[0]) - 12).toString().padStart(2,'0');
+            amorpm = "PM";
+        } else if (parseInt(fechaDestruc[0]) === 0){
+            fechaDestruc[0] = 12;
+        } else if (parseInt(fechaDestruc[0]) === 12){
+            fechaDestruc[0] = 12;
+            amorpm = "PM";
+        }
+        return fechaDestruc[0] + ":" + fechaDestruc[1] + " " + amorpm;
+    }
+    agregarNuevaListCliente(clientesInvitado, limiteCliente, idTemp, valCliente, valCc,listCc,listNumeroCuenta,listaClientes,update){
+        const listaClienteCC = document.querySelector(clientesInvitado.listaClietnes);
+        if (listaClienteCC.children.length >= limiteCliente) {
+
+            return alertify.error('el limite de clientes es de ' + (update ? limiteCliente - 1 : limiteCliente));
+        }
+        $(clientesInvitado.listSelectCliente).off("change");
+        $(clientesInvitado.listSelectCliente + ', ' + clientesInvitado.listaClietnes + ' .simple-select2, ' + clientesInvitado.listaClietnes + ' .cb-mult-nuevo').select2('destroy');
+        const idSelectClient = +idTemp + 1;
+        const listaCopia = listaClienteCC.children[0].cloneNode(true);
+        const $cbListCliente = listaCopia.querySelector(clientesInvitado.listSelectCliente);
+        $cbListCliente.id = "documento_cli_" + idSelectClient;
+        if (valCliente){
+            for (const opt of $cbListCliente.options) {
+                const exist = listaClientes.filter(cuenta => cuenta.cod_cliente === +opt.value);
+                if (exist.length > 0 && +opt.value !== +valCliente){
+                    opt.setAttribute('disabled','disabled');
+                    console.log(opt);
+                }
+            }
+            $cbListCliente.value = valCliente;
+        }
+        const optSelected = this.clienteSeleccionados(clientesInvitado);
+        const $cbCentroCosto = listaCopia.querySelector(".simple-select2")
+        $cbCentroCosto.id = "cc_cli_" + idSelectClient;
+        let template = "";
+        if (valCc){
+            template = `<option value="Ninguno">Ninguno</option>`;
+            if (listCc.length > 0){
+                template += `<option value="CC" ${'CC' == valCc ? 'selected' : ''}>CC de acuerdo a envio</option>`;
+            }
+            listCc.forEach(cc => {
+                template += `<option value="${cc}" ${cc == valCc ? 'selected' : ''}>${cc}</option>`;
+            });
+        }
+        $cbCentroCosto.innerHTML = template;
+        const $cbNroCuenta = listaCopia.querySelector(".cb-mult-nuevo");
+        $cbNroCuenta.id = "cuenta_cli_" + idSelectClient;
+        template = "";
+        if (listNumeroCuenta){
+            listNumeroCuenta.forEach(nro => {
+                if(nro != 'Ninguno'){
+                    template += `<option value="${nro}" selected>${nro}</option>`;
+                }
+            });
+        }
+        $cbNroCuenta.innerHTML = template;
+
+        listaClienteCC.append(listaCopia);
+        if (valCliente === null){
+            listaClienteCC.querySelectorAll("#documento_cli_" + idSelectClient + " option").forEach(opt => {
+                opt.disabled = optSelected.indexOf(opt.value) === -1 ? false : true;
+            });
+        }
+        
+        let configSelect2 = {
+            theme: 'bootstrap',
+            width: '100%',
+            placeholder: 'Seleccione un cliente',
+            tags : false
+        }
+        $(clientesInvitado.listSelectCliente).select2(configSelect2);
+        configSelect2.placeholder = "Seleccione una opción";
+        $(clientesInvitado.listaClietnes + ' .simple-select2').select2(configSelect2);
+        configSelect2.placeholder = "";
+        configSelect2.tags = true;
+        $(clientesInvitado.listaClietnes + ' .cb-mult-nuevo').select2(configSelect2);
+        
+        $(clientesInvitado.listSelectCliente).change(event => {
+            this.consultarCentroCosto($(event.target), $(event.target).parents('li').find('.simple-select2'), clientesInvitado);
+        });
+        return idSelectClient;
+    }
+    async consultarCentroCosto(elemenThis, cbCentroCosto, clientesInvitado){
+        const idCliente = elemenThis.val();
+        const seleccionClientes = this.clienteSeleccionados(clientesInvitado);
+        for (const cbCliente of document.querySelectorAll(clientesInvitado.listSelectCliente)) {
+            if (cbCliente != elemenThis) {
+                cbCliente.querySelectorAll('option').forEach(opt => {
+                    const valor = opt.selected ? opt.value : null;
+                    const valorSelectAll = seleccionClientes.indexOf(opt.value);
+                    opt.disabled = valorSelectAll >= 0 && valor != seleccionClientes[valorSelectAll] ? true : false;
+                });
+            }
+        }
+        let datos = new FormData();
+        datos.append('cliente', idCliente);
+        let result = await this.funcfetch('obtener-centro-costo', datos);
+        let template = `<option value="Ninguno">Ninguno</option>`;
+        if (result.success) {
+            template += `<option value="CC">CC de acuerdo a envio</option>`;
+            result.success.forEach(centroCosto => {
+                template += `<option value="${centroCosto}">${centroCosto}</option>`;
+            });
+        }
+        $(cbCentroCosto).html(template);
+    }
+    clienteSeleccionados(clientesInvitado){
+        let idClientes = [];
+        const optSelected = document.querySelector(clientesInvitado.listaClietnes).querySelectorAll(".simple-select2-cliente option:checked");
+        optSelected.forEach(opt => {
+            if (opt.value != '') {
+                idClientes.push(opt.value);
+            }
+        });
+        return idClientes;
     }
 }

@@ -26,11 +26,14 @@
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered">
                             <thead>
-                                <th>
-                                    <input type="checkbox" title="Selecionar todo" id="seleccion-todo-asignar">
-                                </th>
-                                <th>N° Guía/OS</th>
-                                <th>Fecha Emi</th>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" title="Selecionar todo" id="seleccion-todo-asignar">
+                                    </th>
+                                    <th>N° Guía/OS</th>
+                                    <th title="fecha emitida">Fecha Emitida</th>
+                                </tr>
+                                
                             </thead>
                             <tbody id="llenar-guias-por-asignar"></tbody>
                         </table>

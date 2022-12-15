@@ -20,7 +20,7 @@ class Rol extends Model
     {
        return DB::table('usuario_rol AS ur')->select('r.id','r.rol','ur.active')->join('roles AS r','ur.id_rol','=','r.id')->where(['ur.id_usuario' => $id_usuario])->get();
     }
-    public static function modificarUsuarioRol($id_usuario,$roles)
+    public static function modificarUsuarioRol($id_usuario,$roles,$deleteRol)
     {
         DB::beginTransaction();
         try {
@@ -30,6 +30,9 @@ class Rol extends Model
                 $roles[$key]['active'] = $key === 0 ? 1 : 0;
             }
             DB::table('usuario_rol')->insert($roles);
+            if($deleteRol){
+                DB::table('usuario_cliente')->where(['cod_usuario' => $id_usuario])->delete();
+            }
             DB::commit();
             return ['success' => 'roles actualizados con exito'];
         } catch (Exception $ex) {

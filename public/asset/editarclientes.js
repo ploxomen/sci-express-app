@@ -92,6 +92,15 @@ function loadPage(){
                     dom.checked = element ? true : false;
                     continue;
                 }
+                if (key == 'centros_costo' && element != null && element != ''){
+                    let optNroCentroCosto = "";
+                    element.split(';').forEach(opt => {
+                        optNroCentroCosto += `<option value="${opt}" selected>${opt}</option>`;
+                    });
+                    $(dom).html(optNroCentroCosto);
+                    $(dom).trigger("change");
+                    continue;
+                }
                 dom.value = element;
             }
         }

@@ -74,14 +74,14 @@
                         <div class="form-group text-right">
                             <button class="btn btn-primary btn-sm" type="button" id="btn-add-ciudad" title="Agregar más ciudades de destino"><i class="fas fa-plus"></i></button>
                         </div>
-                        <div class="row">
-                            <div class="form-group col-12 col-md-6 text-center">
-                                <b>Distritos</b>
-                            </div>
-                            <div class="form-group col-12 col-md-6 text-center">
-                                <b>Ciudades</b>
-                            </div>
-                        </div> 
+                        <div class="form-group">
+                            <b>
+                                <span class="text-info">Distrito</span> / 
+                                <span class="text-info">Ciudad</span> / 
+                                <span class="text-info">Zona Complejo Distante</span> / 
+                                <span class="text-info">Costo</span>
+                            </b>
+                        </div>
                         <ol id="lista-destino-final" class="pl-3"></ol>
                     </div>
                     <div class="form-group col-12">

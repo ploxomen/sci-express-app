@@ -284,6 +284,8 @@ class Gias extends Controller
         try {
             $provincias = [];
             $distritos = [];
+            $ínvitados = [];
+            $idCliente = $request->has('idcliente') ? $request->idcliente : $request->id;
             if($request->tipo == 'cliente'){
                 $datos = Clientes::getDetalleSoliCli($request->id);
                 $provincias = Ubigeo::getProvinciasCliente($datos->dpto_so);
@@ -293,7 +295,8 @@ class Gias extends Controller
                 $provincias = $datos->listProv;
                 $distritos = $datos->listDist;
             }
-            return response()->json(['datos' => $datos, 'prov' => $provincias, 'dist' => $distritos]);
+            $ínvitados = Clientes::obtenerInvitados($idCliente);
+            return response()->json(['datos' => $datos, 'prov' => $provincias, 'dist' => $distritos,'invitados' => $ínvitados]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
@@ -312,6 +315,10 @@ class Gias extends Controller
                     $datos = ModeloGuias::obtenerGuiasConsulta($request->remitente,$request->fecha);
                     return datatables()->of($datos)->toJson();
                 break;
+                case 'remitentes-cliente':
+                    $datos = ModeloGuias::obtenerGuiasConsultaTrabajador($request->cliente,Auth::id(), $request->fechaIncio,$request->fechaFin);
+                    return datatables()->of($datos)->toJson();
+                break;
             }
         }
     }
@@ -323,6 +330,7 @@ class Gias extends Controller
             $distritos = [];
             $ciudades = [];
             $dias = null;
+            $complejoDistante = null;
             if(!empty($datos)){
                 $provincias = Ubigeo::getProvinciasCliente($datos->departamento);
                 $distritos = Ubigeo::getDistritosCliente($datos->provincia);
@@ -333,9 +341,10 @@ class Gias extends Controller
                 if(!empty($datos->id_ciudad_final)){
                     $infoCiudDest = Clientes::obtenerNombreCliDest($datos->id_ciudad_final);
                 }
+                $complejoDistante = Clientes::obtenerComplejoDistante(!empty($datos->id_ciudad_final) ? 'ciudad' : 'distrito', $datos->distrito, $datos->id_ciudad_final);
                 $dias = InformacionAdicional::obtenerDiasTransito($request->departamentoOrigen, $infoDepDest, $infoProvDest, $infoCiudDest);
-            }           
-            return response()->json(['datos' => $datos, 'prov' => $provincias,'dias' => $dias ,'dist' => $distritos, 'ciudades' => $ciudades]);
+            }
+            return response()->json(['datos' => $datos, 'prov' => $provincias,'dias' => $dias ,'dist' => $distritos, 'ciudades' => $ciudades,'complejo' => $complejoDistante]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
