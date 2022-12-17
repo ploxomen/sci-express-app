@@ -205,14 +205,27 @@ class Usuario extends Controller
                 break;
                 case 'actualizar':
                     $datos = $request->all();
+                    $actualizarCc = [];
+                    $agregarCc = [];
                     if(isset($datos['id_usuario'])){
                         unset($datos['id_usuario']);
                     }
                     if (isset($datos['accion'])) {
                         unset($datos['accion']);
                     }
+                    if($request->has('lista_actualizar_cc')){
+                        $actualizarCc = json_decode($request->lista_actualizar_cc,true);
+                        unset($datos['lista_actualizar_cc']);
+                    }
+                    if($request->has('lista_agregar_cc')){
+                        $agregarCc = json_decode($request->lista_agregar_cc,true);
+                        unset($datos['lista_agregar_cc']);
+                    }
                     User::where(['id' => $request->id_usuario])->update($datos);
-                    $message = ['success' => 'usuario modificado correctamente'];
+                    $message = User::actualizarUsuario($request->id_usuario,$datos,$agregarCc,$actualizarCc);
+                break;
+                case 'eliminar_cc':
+                    $message = ['success' => User::eliminarCcUsuarioInvitado($request->id_usuario,$request->id_cc)];
                 break;
                 case 'restaurar' :
                     User::where(['id' => $request->id_usuario])->update(['password' => Hash::make($request->password),'status' => 2]);

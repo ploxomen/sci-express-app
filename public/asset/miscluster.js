@@ -1,20 +1,7 @@
 function loadPage(){
     let contadorLi = 0;
-    const listRemoteCity = [
-        {
-            value :'Rural - Alejada',
-            text : 'Rural - Alejada (S/)'
-        },
-        {
-            value : 'Complejo - Distante',
-            text: 'Complejo - Distante (%)'
-        },
-        {
-            value: 'FAU',
-            text: 'FAU (%)'
-        }
-    ];
     let general = new General();
+    const listRemoteCity = general.opcionesAlejadas;
     let bodyCluster = document.getElementById('lista-clusters');
     const frmEdidCluster = document.getElementById('edid_cluster');
     const ulListCiudad = document.getElementById('lista-destino-final');
@@ -78,10 +65,10 @@ function loadPage(){
                             <select class="form-control cb-select2-tags" id="id_ciudad_old_destino_${h.id}">${tempCity}</select>
                         </div>
                         <div class="form-group col-6 col-sm-6 col-lg-3">
-                            <select required class="form-control simple-select2" data-costo="#costo-alejado-${h.id}">${tempRemoteCity}</select>
+                            <select required class="form-control simple-select2" id="opcion-alejado-old-destino-${h.id}" data-costo="#costo-old-alejado-${h.id}">${tempRemoteCity}</select>
                         </div>
                         <div class="form-group col-6 col-sm-4 col-lg-2">
-                            <input type="number" placeholder="S/ ó %" id="costo-alejado-${h.id}" step="0.01" min="0" class="form-control form-control-sm" value="${h.costo_ciudad_alejada}">
+                            <input type="number" placeholder="S/ ó %" id="costo-old-alejado-${h.id}" step="0.01" min="0" class="form-control form-control-sm" value="${h.costo_ciudad_alejada}">
                         </div>
                         <div class="form-group col-12 col-sm-2 col-lg-1 text-right">
                             <input type="radio" name="destino_final" class="selection-base" ${h.base ? 'checked' : ''}>
@@ -124,16 +111,7 @@ function loadPage(){
                 theme: 'bootstrap',
                 width: '100%',
                 placeholder: 'Seleccione una opción'
-            }).on('change',(e) => {
-                if (e.target.value == 'Ninguno'){
-                    $(e.target.dataset.costo).prop('disabled',true);
-                    $(e.target.dataset.costo).prop('required', false);
-                    $(e.target.dataset.costo).val("");
-                }else{
-                    $(e.target.dataset.costo).prop('disabled', false);
-                    $(e.target.dataset.costo).prop('required', true);
-                }
-            });
+            }).on('change',general.changeCiudadAlejada);
             $('#lista-destino-final .cb-ubigeo').select2({
                 theme: 'bootstrap',
                 width: '100%',
@@ -192,50 +170,7 @@ function loadPage(){
     btnAddCiudad.addEventListener('click',function(e){
         e.preventDefault();
         contadorLi++;
-        $('#lista-destino-final .cb-ubigeo, #lista-destino-final .cb-select2-tags, #lista-destino-final .simple-select2').select2('destroy');
-        const liPrimero = ulListCiudad.children[0];
-        const liDuplicado = liPrimero.cloneNode(true);
-        liDuplicado.setAttribute('data-type','new');
-        liDuplicado.querySelector(".cb-ubigeo").setAttribute('id','id_distrito_new_clu_' + contadorLi);
-        liDuplicado.querySelector(".cb-ubigeo").setAttribute('data-ciudades','#id_ciudad_new_destino_' + contadorLi);
-        liDuplicado.querySelector(".cb-select2-tags").setAttribute('id','id_ciudad_new_destino_' + contadorLi);
-        liDuplicado.querySelector(".selection-base").checked = false;
-        for (const element of liDuplicado.querySelectorAll("select")) {
-            element.value = "";
-            if(element.classList.contains('cb-select2-tags')){
-                element.innerHTML = '<option></option>';
-            }
-            if (element.classList.contains('simple-select2')) {
-                element.value = "Ninguno";
-            }
-        }
-        ulListCiudad.append(liDuplicado);
-        alertify.success('accion relizada');
-        $('#lista-destino-final .cb-ubigeo').select2({
-            theme: 'bootstrap',
-            width: '100%',
-            placeholder: 'Seleccione una opción'
-        }).on('select2:select',async function(e){
-            let datosn = new FormData();
-            datosn.append('distrito',$(this).val());
-            let response = await general.funcfetch(window.location.origin + '/intranet/ubigeo/ciudades',datosn);
-            let template = `<option></option>`;
-            response.ciudades.forEach(c => {
-                template += `<option value="${c.id}">${c.nombre_ciudad}</option>`;
-            });
-            document.querySelector($(this).attr('data-ciudades')).innerHTML = template;
-        });
-        $('#lista-destino-final .cb-select2-tags').select2({
-            theme: 'bootstrap',
-            width: '100%',
-            placeholder : 'Seleccione o agregue una opción',
-            tags: true,
-        });
-        $('#lista-destino-final .simple-select2').select2({
-            theme: 'bootstrap',
-            width: '100%',
-            placeholder: 'Seleccione una opción'
-        });
+        general.nuevoCiuadaAlejada(contadorLi,ulListCiudad);
     });
     frmEdidCluster.addEventListener('submit',function(e){
         e.preventDefault();

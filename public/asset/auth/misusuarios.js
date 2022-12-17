@@ -104,8 +104,10 @@ function loadPage(){
                 }
             }
             if(response.ccInvitado){
+                usuarioClienteExterno = true;
+                changeEstadoCentroCostoDOM(false);
                 response.ccInvitado.forEach(dato => {
-                    idSelectClient = general.agregarNuevaListCliente(clientesInvitado, limiteCliente, idSelectClient, dato.cod_cliente, dato.centro_costo, dato.adicional.cc, dato.adicional.cuenta, response.ccInvitado,true);
+                    idSelectClient = general.agregarNuevaListCliente(clientesInvitado, limiteCliente, idSelectClient, dato.cod_cliente, dato.centro_costo, dato.adicional.cc, dato.adicional.cuenta, response.ccInvitado,true,dato.id);
                 });
                 desactivarPrimeraLinia(true);
             }
@@ -135,9 +137,20 @@ function loadPage(){
             $('#modal-usuario-roles').modal("show");
         }
     });
+    function changeEstadoCentroCostoDOM(estado){
+        [...document.querySelectorAll('#lista-contenedora-clientes select')].forEach((v,k) =>{
+            if(k > 0){
+                v.disabled = estado;
+            }
+        });
+        for (const ocultar of document.querySelectorAll("#modal-usuario-editar .change_centro_costo")) {
+            ocultar.hidden = estado;
+        }
+    }
+    changeEstadoCentroCostoDOM(true);
     document.getElementById('agregar-nuevo-cliente').onclick = function () {
         desactivarPrimeraLinia(false);
-        idSelectClient = general.agregarNuevaListCliente(clientesInvitado, limiteCliente, idSelectClient, null, null, null,null,null,true)
+        idSelectClient = general.agregarNuevaListCliente(clientesInvitado, limiteCliente, idSelectClient, null, null, null,null,null,true,null)
         desactivarPrimeraLinia(true);
     };
     const btnRestaurarPassword = document.getElementById('cambiar-password');
@@ -179,7 +192,34 @@ function loadPage(){
         usuarioid = null;
         document.getElementById('frm-edid-user').reset();
         desactivarPrimeraLinia(false);
+        general.eliminarListaCentroCostoModal(document.querySelector(clientesInvitado.listaClietnes).children);
+        changeEstadoCentroCostoDOM(true);
     });
+    document.querySelector(clientesInvitado.listaClietnes).onclick = function(event){
+        if (event.target.classList.contains('btn-outline-danger')){
+            const li = event.target.parentElement.parentElement.parentElement;
+            if(li.dataset.type == 'old'){
+                alertify.confirm("Mensaje","¿Estás seguro de eliminar este centro de costo?",async ()=>{
+                    try {
+                        let dato = new FormData();
+                        dato.append('accion','eliminar_cc');
+                        dato.append('id_usuario',usuarioid);
+                        dato.append('id_cc',li.dataset.cliente);
+                        const response = await general.funcfetch("modificar",dato);
+                        if(response.success){
+                            alertify.success('centro de costo eliminado correctamente');
+                            general.eliminarListaCentroCosto(this,event,clientesInvitado);
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        alertify.error('ocurrió un error al eliminar el centro de costo');
+                    }
+                },()=>{})
+            }else{
+                general.eliminarListaCentroCosto(this,event,clientesInvitado);
+            }
+        }
+    }
     document.getElementById('actualizar-usuario').addEventListener('click',()=>{document.getElementById('btn-send-edid-user').click()});
     document.getElementById('frm-edid-user').addEventListener('submit',async function(e){
         e.preventDefault();
@@ -190,6 +230,33 @@ function loadPage(){
         let datos = new FormData(this);
         datos.append('id_usuario',usuarioid);
         datos.append('accion','actualizar');
+        let datosNew = [];
+        let datosUpdate = [];
+        [...document.querySelector(clientesInvitado.listaClietnes).children].forEach(li => {
+            if(li.dataset.type){
+                let valor = {
+                    idInvitado : null,
+                    cliente : $(li.querySelector('.simple-select2-cliente')).val(),
+                    centroCosto : $(li.querySelector('.simple-select2')).val(),
+                    cuenta : $(li.querySelector('.cb-mult-nuevo')).val() ? $(li.querySelector('.cb-mult-nuevo')).val().join(";") : null
+                }
+                if(li.dataset.type == "new"){
+                    datosNew.push(valor);
+                }else{
+                    valor.idInvitado = li.dataset.cliente;
+                    datosUpdate.push(valor);
+                }
+            }
+        });
+        datos.delete('centro_costo[]');
+        datos.delete('id_documento_cli[]');
+        datos.delete('centro_cuenta[]');
+        if(datosNew.length){
+            datos.append('lista_agregar_cc',JSON.stringify(datosNew));
+        }
+        if(datosUpdate.length){
+            datos.append('lista_actualizar_cc',JSON.stringify(datosUpdate));
+        }
         let response = await general.funcfetch('modificar',datos);
         if(response.error){
             alertify.alert('Error',response.error);
@@ -225,7 +292,7 @@ function loadPage(){
     function desactivarPrimeraLinia(valor) {
         const listClientesInvitado = document.querySelector(clientesInvitado.listaClietnes);
         for (const select of listClientesInvitado.children[0].querySelectorAll('select')) {
-            select.disabled = valor;
+            $(select).prop("disabled",valor);
         }
         listClientesInvitado.children[0].hidden = valor;
     }

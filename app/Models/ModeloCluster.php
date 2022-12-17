@@ -48,7 +48,9 @@ class ModeloCluster extends Model
                     'id_cluster' => $id_cluster, 
                     'tipo_base' => !empty($valor->ciudad) ? 'ciudad' : 'distrito', 
                     'ubigeo_distrito' => $valor->distrito, 
-                    'id_ciudad' => null, 
+                    'id_ciudad' => null,
+                    'ciudad_alejada' => $valor->ciudad_alejada,
+                    'costo_ciudad_alejada' => floatval($valor->costo_ciudad_alejada),
                     'base' => $valor->ciudad_base
                 ];
                 if(!empty($valor->ciudad)){

@@ -145,13 +145,37 @@ class User extends Authenticatable
         if(!empty($usuario)){
             $response['datos'] = $usuario;
             if($rolClienteInvitado > 0){
-                $response['ccInvitado'] = DB::table('usuario_cliente')->select('cod_cliente','centro_costo')->where(['cod_usuario' => $id_user, 'estado' => 1])->get();
+                $response['ccInvitado'] = DB::table('usuario_cliente')->select('id','cod_cliente','centro_costo')->where(['cod_usuario' => $id_user, 'estado' => 1])->get();
                 foreach ($response['ccInvitado'] as $key => $value) {
                     $response['ccInvitado'][$key]->adicional = Clientes::centrosCosto($usuario->id,$value->cod_cliente);
                 }
             }
         }
         return $response;
+    }
+    public static function actualizarUsuario($idUsuario,$datos,$agregarCc,$actualizarCc)
+    {
+        DB::beginTransaction();
+        try {
+            foreach ($agregarCc as $add) {
+                DB::table('usuario_cliente')->insert(['cod_usuario' => $idUsuario,'cod_cliente' => $add['cliente'],'centro_costo' => $add['centroCosto'],'cuenta' => $add['cuenta']]);
+            }
+            foreach ($actualizarCc as $update) {
+                DB::table('usuario_cliente')->where(['cod_usuario' => $idUsuario,'id' => $update['idInvitado']])->update([
+                    'cod_cliente' => $update['cliente'],'centro_costo' => $update['centroCosto'],'cuenta' => $update['cuenta']
+                ]);
+            }
+            User::where(['id' => $idUsuario])->update($datos);
+            DB::commit();
+            return ['success' => 'usuario actualizado correctamente'];
+        }catch (\Throwable $th) {
+            DB::rollBack();
+            return ['error' => $th->getMessage()];
+        }
+    }
+    public static function eliminarCcUsuarioInvitado($idUsuario,$idClienteInvitado)
+    {
+        return DB::table('usuario_cliente')->where(['cod_usuario' => $idUsuario, 'id' => $idClienteInvitado])->delete();
     }
     public static function obtenerUnUsuario($id_usuario)
     {

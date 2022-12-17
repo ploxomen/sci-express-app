@@ -1,5 +1,5 @@
-<div class="modal fade" id="modal-difinir-cluster" data-backdrop="static" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="modal-difinir-cluster" data-backdrop="static" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Definir ciudades de destino</h5>
@@ -8,37 +8,40 @@
           </button>
         </div>
         <div class="modal-body">
-            <div class="form-group d-flex justify-content-between flex-wrap">
-                <span class="text-info mb-2">Seleccione una ciudad base</span>
-                <button class="btn btn-primary btn-sm" id="btn-add-ciudad" title="Agregar más ciudades de destino"><i class="fas fa-plus"></i></button>
+            <div class="form-group text-right">
+              <button class="btn btn-primary btn-sm" type="button" id="btn-add-ciudad" title="Agregar más ciudades de destino"><i class="fas fa-plus"></i></button>
             </div>
             <div class="form-group">
-                <div class="row">
-                    <div class="form-group col-12 col-md-6 text-center">
-                        <b>Distritos</b>
-                    </div>
-                    <div class="form-group col-12 col-md-6 text-center">
-                        <b>Ciudades</b>
-                    </div>
-                </div> 
-                <ol id="lista-destino-final" class="pl-2">
-                    <li>
-                       <div class="form-row">
-                            <div class="form-group col-12 col-md-5">
-                                <select class="form-control cb-ubigeo" data-ciudades="#id_ciudad_destino_1" id="id_distrito_clu_1"></select>
-                            </div>
-                            <div class="form-group col-12 col-md-5">
-                                <select class="form-control cb-select2-tags" id="id_ciudad_destino_1"></select>
-                            </div>
-                            <div class="form-group col-12 col-md-2 text-right">
-                              <input type="radio" name="destino_final" class="selection-base">
-                              <button class="btn btn-danger btn-sm btn-delete-destino"><i class="far fa-trash-alt"></i></button>
-                            </div>
-                        </div> 
-                    </li>
-                </ol>
+                <b>
+                    <span class="text-info">Distrito</span> / 
+                    <span class="text-info">Ciudad</span> / 
+                    <span class="text-info">Zona Complejo Distante</span> / 
+                    <span class="text-info">Costo</span>
+                </b>
             </div>
-        </div>
+            <ol id="lista-destino-final" class="pl-3">
+              <li data-type="new">
+                  <div class="form-row">
+                      <div class="form-group col-6 col-lg-3">
+                          <select class="form-control cb-ubigeo" required data-ciudades="#id_ciudad_new_destino_1" data-idciudad="1" id="id_distrito_new_clu_1"></select>
+                      </div>
+                      <div class="form-group col-6 col-lg-3">
+                          <select class="form-control cb-select2-tags" id="id_ciudad_new_destino_1"></select>
+                      </div>
+                      <div class="form-group col-6 col-sm-6 col-lg-3">
+                          <select required class="form-control simple-select2" id="opcion-alejado-new-destino-1" data-costo="#costo-new-alejado-1"></select>
+                      </div>
+                      <div class="form-group col-6 col-sm-4 col-lg-2">
+                          <input type="number" placeholder="S/ ó %" id="costo-new-alejado-1" disabled required step="0.01" min="0" class="form-control form-control-sm">
+                      </div>
+                      <div class="form-group col-12 col-sm-2 col-lg-1 text-right">
+                          <input type="radio" checked name="destino_final" class="selection-base">
+                          <button type="button" class="btn btn-danger btn-sm btn-delete-destino"><i class="far fa-trash-alt"></i></button>
+                      </div>
+                  </div> 
+              </li>
+            </ol>
+          </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" id="agregar-cluster">Agregar</button>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>

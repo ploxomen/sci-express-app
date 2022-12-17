@@ -80,7 +80,7 @@
             </div>
              <div class="col-12 form-group col-md-6 col-lg-3 col-xl-4">
                 <label for="id_provincia_clu">Provincia <small class="text-danger">*</small></label>
-                <select class="form-control cb-ubigeo" id="id_provincia_clu" name="provincia_clu" data-consulta="distrito" data-info="id_distrito_clu_1" required></select>
+                <select class="form-control cb-ubigeo" id="id_provincia_clu" name="provincia_clu" data-consulta="distrito" data-info="id_distrito_new_clu_1" required></select>
             </div>
             <div class="from-group col-12">
                 <button class="btn btn-success" type="submit">Siguiente</button>

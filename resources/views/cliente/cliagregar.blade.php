@@ -285,7 +285,7 @@
                             </div>
                             <div class="form-group col-12 col-md-6 col-lg-6">
                                 <label for="id_tele_prov_{{$id_new_prov}}" data-selected="true">Contactos</label>
-                                <select disabled data-name="tele_prov" required id="id_tele_prov_{{$id_new_prov}}" data-selected="true" required class="form-control from-control-sm cb-mult-nuevo" multiple></select>
+                                <select disabled data-name="tele_prov" id="id_tele_prov_{{$id_new_prov}}" data-selected="true" required class="form-control from-control-sm cb-mult-nuevo" multiple></select>
                             </div>
                             <div class="form-group col-12 col-md-6 col-lg-6">
                                 <label for="id_email_prov_{{$id_new_prov}}" data-selected="true">Correos</label>

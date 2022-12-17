@@ -16,28 +16,13 @@ function loadPage(){
     });
     
     document.getElementById('agregar-nuevo-cliente').onclick = function(){
-        idSelectClient = general.agregarNuevaListCliente(clientesInvitado, limiteCliente, idSelectClient,null,null,null,null,null,false);
+        idSelectClient = general.agregarNuevaListCliente(clientesInvitado, limiteCliente, idSelectClient,null,null,null,null,null,false,null);
     };
 
     document.querySelector(clientesInvitado.listaClietnes).onclick = function(event){
+        console.log(event);
         if (event.target.classList.contains('btn-outline-danger')){
-            if (this.children.length === 1){
-                alertify.error('El usuario debe de tener al menos un cliente');
-                return
-            }
-            event.target.parentElement.parentElement.parentElement.remove();
-            const seleccionClientes = general.clienteSeleccionados(clientesInvitado);
-            for (const cbCliente of document.querySelectorAll(clientesInvitado.listSelectCliente)) {
-                cbCliente.querySelectorAll('option').forEach(opt => {
-                    if (this.children.length === 1) {
-                        opt.disabled = false;
-                    }else{
-                        const valor = opt.selected ? opt.value : null;
-                        const valorSelectAll = seleccionClientes.indexOf(opt.value);
-                        opt.disabled = valorSelectAll >= 0 && valor != seleccionClientes[valorSelectAll] ? true : false;
-                    }
-                });
-            }
+            general.eliminarListaCentroCosto(this,event,clientesInvitado);
         }
     }
     $('#documento_cli_1').change( event => {

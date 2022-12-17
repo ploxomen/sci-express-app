@@ -1,15 +1,26 @@
 function loadPage(){
     let general = new General();
+    const listRemoteCity = general.opcionesAlejadas;
     let contadorLi = 1;
     let frmAddCluster = document.getElementById('frm_cluster');
     const btnAddCluster = document.getElementById('agregar-cluster');
     $('#lista-destino-final .cb-ubigeo, #lista-destino-final .cb-select2-tags').select2('destroy');
     const ulListCiudad = document.getElementById('lista-destino-final');
+    const $cbOptionAlejada = document.getElementById('opcion-alejado-new-destino-1');
     frmAddCluster.addEventListener('submit',function(e){
         e.preventDefault();
         $('#modal-difinir-cluster').modal("show");
-        
     });
+    $cbOptionAlejada.append(new Option("Ninguno","Ninguno",false,true));
+    listRemoteCity.forEach(city => {
+        $cbOptionAlejada.append(new Option(city.text,city.value,false,false));
+    });
+    $('#lista-destino-final .simple-select2').select2({
+        theme: 'bootstrap',
+        width: '100%',
+        placeholder: 'Seleccione una opción'
+    }).on('change',general.changeCiudadAlejada);
+    $($cbOptionAlejada).trigger("change");
     btnAddCluster.addEventListener('click',async function(e){
         e.preventDefault();
         for (const li of ulListCiudad.children) {
@@ -27,11 +38,15 @@ function loadPage(){
         for (const ciudades of ulListCiudad.children) {
             const ubigeo = ciudades.querySelector('.cb-ubigeo');
             const ciudad = ciudades.querySelector('.cb-select2-tags');
+            const alejada = ciudades.querySelector(".simple-select2");
+            const costoCiudad = ciudades.querySelector("input[type='number']");
             const base = ciudades.querySelectorAll(`input:checked`).length ? 1 : 0;
             ciudadesDestino.push({
                 distrito : $(ubigeo).val(),
                 ciudad : $(ciudad).val(),
-                ciudad_base :  base
+                ciudad_base :  base,
+                ciudad_alejada : $(alejada).val(),
+                costo_ciudad_alejada : $(costoCiudad).val(),
             })
         }
         let datos = new FormData(frmAddCluster);
@@ -48,7 +63,6 @@ function loadPage(){
             alertify.alert('Error',error.message);
             console.error(error);
         }
-        
     });
     $('#modal-difinir-cluster').on('hidden.bs.modal', function (e) {
         Array.from(ulListCiudad.children).forEach((v,k) => {
@@ -56,6 +70,7 @@ function loadPage(){
                 v.remove();
             }
         });
+        $('#lista-destino-final .simple-select2').val("Ninguno").trigger("change");
         $('#lista-destino-final .cb-ubigeo').val("").trigger("change");
         $('#lista-destino-final .cb-select2-tags').html("<option></option>");
         $('#lista-destino-final .selection-base').prop("checked",false);
@@ -65,41 +80,7 @@ function loadPage(){
     btnAddCiudad.addEventListener('click',function(e){
         e.preventDefault();
         contadorLi++;
-        $('#lista-destino-final .cb-ubigeo, #lista-destino-final .cb-select2-tags').select2('destroy');
-        const liPrimero = ulListCiudad.children[0];
-        const liDuplicado = liPrimero.cloneNode(true);
-        liDuplicado.querySelector(".cb-ubigeo").setAttribute('id','id_distrito_clu_' + contadorLi);
-        liDuplicado.querySelector(".cb-ubigeo").setAttribute('data-ciudades','#id_ciudad_destino_' + contadorLi);
-        liDuplicado.querySelector(".cb-select2-tags").setAttribute('id','id_ciudad_destino_' + contadorLi);
-        liDuplicado.querySelector(".selection-base").checked = false;
-        for (const element of liDuplicado.querySelectorAll("select")) {
-            element.value = "";
-            if(element.classList.contains('cb-select2-tags')){
-                element.innerHTML = '<option></option>';
-            }
-        }
-        ulListCiudad.append(liDuplicado);
-        alertify.success('accion relizada');
-        $('#lista-destino-final .cb-ubigeo').select2({
-            theme: 'bootstrap',
-            width: '100%',
-            placeholder: 'Seleccione una opción'
-        }).on('select2:select',async function(e){
-            let datosn = new FormData();
-            datosn.append('distrito',$(this).val());
-            let response = await general.funcfetch(window.location.origin + '/intranet/ubigeo/ciudades',datosn);
-            let template = `<option></option>`;
-            response.ciudades.forEach(c => {
-                template += `<option value="${c.id}">${c.nombre_ciudad}</option>`;
-            });
-            document.querySelector($(this).attr('data-ciudades')).innerHTML = template;
-        });
-        $('#lista-destino-final .cb-select2-tags').select2({
-            theme: 'bootstrap',
-            width: '100%',
-            placeholder : 'Seleccione o agregue una opción',
-            tags: true,
-        });
+        general.nuevoCiuadaAlejada(contadorLi,ulListCiudad);
     });
     ulListCiudad.addEventListener('click',function(e){
         if(e.target.classList.contains('btn-delete-destino')){

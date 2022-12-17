@@ -63,30 +63,30 @@
                     <textarea name="direction" class="form-control" id="modal_direction" cols="30" rows="2"></textarea>
                 </div>
                 
-                <div class="col-12">
+                <div class="col-12 change_centro_costo">
                     <h5 class="text-secondary">Centro de Costo</h5>
                 </div>
-                <div class="form-group col-12">
+                <div class="form-group col-12 change_centro_costo">
                     <span class="text-primary">Asigne los clientes para el usuario con su debido centro de costo</span>
                 </div>
-                <div class="form-group text-center col-4">
+                <div class="form-group text-center col-4 change_centro_costo">
                     <span class="text-info">Cliente</span>
                 </div>
-                <div class="form-group text-center col-3">
+                <div class="form-group text-center col-3 change_centro_costo">
                     <span class="text-info">Centro de costo</span>
                 </div>
-                <div class="form-group text-center col-4">
+                <div class="form-group text-center col-4 change_centro_costo">
                     <span class="text-info">N° de Cuenta</span>
                 </div>
-                <div class="form-group text-right col-1">
+                <div class="form-group text-right col-1 change_centro_costo">
                     <button type="button" class="btn btn-sm btn-outline-primary" id="agregar-nuevo-cliente" title="Agregar clientes"><i class="fas fa-plus"></i></button>
                 </div>
-                <div class="for-group col-12">
+                <div class="for-group col-12 change_centro_costo">
                     <ol id="lista-contenedora-clientes" class="ml-3">
                         <li>
                             <div class="form-row">
                                 <div class="form-group col-12 col-md-4">
-                                    <select name="id_documento_cli[]" id="documento_cli_1" required class="simple-select2-cliente">
+                                    <select name="id_documento_cli[]" id="documento_cli_1" class="simple-select2-cliente">
                                         <option></option>
                                         @foreach ($clientes as $k => $cliente)
                                             <option data-nro="{{$cliente->nro_doc}}" value="{{$cliente->id}}">{{$cliente->nom_cli}}</option>
@@ -94,7 +94,7 @@
                                     </select>
                                 </div>
                                 <div class="form-group col-5 col-md-3">
-                                    <select name="centro_costo[]" id="cc_cli_1" required class="simple-select2"></select>
+                                    <select name="centro_costo[]" id="cc_cli_1" class="simple-select2"></select>
                                 </div>
                                 <div class="form-group col-5 col-md-4">
                                     <select name="centro_cuenta[]" id="cuenta_cli_1" multiple class="cb-mult-nuevo"></select>

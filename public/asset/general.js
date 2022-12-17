@@ -145,6 +145,20 @@ class General{
     getDepartamentos(){
         return this.funcfetch(window.location.origin + '/intranet/ubigeo/departamentos',null);
     }
+    opcionesAlejadas = [
+        {
+            value :'Rural - Alejada',
+            text : 'Rural - Alejada (S/)'
+        },
+        {
+            value : 'Complejo - Distante',
+            text: 'Complejo - Distante (%)'
+        },
+        {
+            value: 'FAU',
+            text: 'FAU (%)'
+        }
+    ];
     getProvincias(id_ubigeo_departamento){
         let datos = new FormData();
         datos.append('id_ubigeo',id_ubigeo_departamento);
@@ -744,24 +758,25 @@ class General{
         }
         return fechaDestruc[0] + ":" + fechaDestruc[1] + " " + amorpm;
     }
-    agregarNuevaListCliente(clientesInvitado, limiteCliente, idTemp, valCliente, valCc,listCc,listNumeroCuenta,listaClientes,update){
+    agregarNuevaListCliente(clientesInvitado, limiteCliente, idTemp, valCliente, valCc,listCc,listNumeroCuenta,listaClientes,update,idInvitado){
         const listaClienteCC = document.querySelector(clientesInvitado.listaClietnes);
         if (listaClienteCC.children.length >= limiteCliente) {
-
             return alertify.error('el limite de clientes es de ' + (update ? limiteCliente - 1 : limiteCliente));
         }
         $(clientesInvitado.listSelectCliente).off("change");
         $(clientesInvitado.listSelectCliente + ', ' + clientesInvitado.listaClietnes + ' .simple-select2, ' + clientesInvitado.listaClietnes + ' .cb-mult-nuevo').select2('destroy');
         const idSelectClient = +idTemp + 1;
         const listaCopia = listaClienteCC.children[0].cloneNode(true);
+        listaCopia.setAttribute("data-type",update && valCliente ? 'old' : 'new');
+        listaCopia.setAttribute("data-cliente",update && idInvitado ? idInvitado : 'no definido');
         const $cbListCliente = listaCopia.querySelector(clientesInvitado.listSelectCliente);
         $cbListCliente.id = "documento_cli_" + idSelectClient;
+        $cbListCliente.required = true;
         if (valCliente){
             for (const opt of $cbListCliente.options) {
                 const exist = listaClientes.filter(cuenta => cuenta.cod_cliente === +opt.value);
                 if (exist.length > 0 && +opt.value !== +valCliente){
                     opt.setAttribute('disabled','disabled');
-                    console.log(opt);
                 }
             }
             $cbListCliente.value = valCliente;
@@ -769,6 +784,7 @@ class General{
         const optSelected = this.clienteSeleccionados(clientesInvitado);
         const $cbCentroCosto = listaCopia.querySelector(".simple-select2")
         $cbCentroCosto.id = "cc_cli_" + idSelectClient;
+        $cbCentroCosto.required = true;
         let template = "";
         if (valCc){
             template = `<option value="Ninguno">Ninguno</option>`;
@@ -850,5 +866,92 @@ class General{
             }
         });
         return idClientes;
+    }
+    nuevoCiuadaAlejada(contadorLi,ulListCiudad){
+        $('#lista-destino-final .cb-ubigeo, #lista-destino-final .cb-select2-tags, #lista-destino-final .simple-select2').select2('destroy');
+        const liPrimero = ulListCiudad.children[0];
+        const liDuplicado = liPrimero.cloneNode(true);
+        liDuplicado.setAttribute('data-type','new');
+        liDuplicado.querySelector(".simple-select2").setAttribute("data-costo","#costo-new-alejado-" + contadorLi);
+        liDuplicado.querySelector(".simple-select2").id = "opcion-alejado-new-destino-" + contadorLi;
+        liDuplicado.querySelector(".cb-ubigeo").setAttribute('id','id_distrito_new_clu_' + contadorLi);
+        liDuplicado.querySelector(".cb-ubigeo").setAttribute('data-ciudades','#id_ciudad_new_destino_' + contadorLi);
+        liDuplicado.querySelector(".cb-select2-tags").setAttribute('id','id_ciudad_new_destino_' + contadorLi);
+        liDuplicado.querySelector("input").id = "costo-new-alejado-" + contadorLi;
+        liDuplicado.querySelector("input").value = "";
+        liDuplicado.querySelector("input").disabled = true;
+        liDuplicado.querySelector(".selection-base").checked = false;
+        for (const element of liDuplicado.querySelectorAll("select")) {
+            element.value = "";
+            if(element.classList.contains('cb-select2-tags')){
+                element.innerHTML = '<option></option>';
+            }
+            if (element.classList.contains('simple-select2')) {
+                element.value = "Ninguno";
+            }
+        }
+        ulListCiudad.append(liDuplicado);
+        alertify.success('accion relizada');
+        $('#lista-destino-final .cb-ubigeo').select2({
+            theme: 'bootstrap',
+            width: '100%',
+            placeholder: 'Seleccione una opción'
+        }).on('select2:select',async (e) => {
+            let datosn = new FormData();
+            datosn.append('distrito',$(e.target).val());
+            let response = await this.funcfetch(window.location.origin + '/intranet/ubigeo/ciudades',datosn);
+            let template = `<option></option>`;
+            response.ciudades.forEach(c => {
+                template += `<option value="${c.id}">${c.nombre_ciudad}</option>`;
+            });
+            document.querySelector($(e.target).attr('data-ciudades')).innerHTML = template;
+        });
+        $('#lista-destino-final .cb-select2-tags').select2({
+            theme: 'bootstrap',
+            width: '100%',
+            placeholder : 'Seleccione o agregue una opción',
+            tags: true,
+        });
+        $('#lista-destino-final .simple-select2').select2({
+            theme: 'bootstrap',
+            width: '100%',
+            placeholder: 'Seleccione una opción'
+        }).on('change',this.changeCiudadAlejada);
+    }
+    changeCiudadAlejada(e){
+        if (e.target.value == 'Ninguno'){
+            $(e.target.dataset.costo).prop('disabled',true);
+            $(e.target.dataset.costo).prop('required', false);
+            $(e.target.dataset.costo).val("");
+        }else{
+            $(e.target.dataset.costo).prop('disabled', false);
+            $(e.target.dataset.costo).prop('required', true);
+        }
+    }
+    eliminarListaCentroCostoModal($listaCentroCosto){
+        [...$listaCentroCosto].forEach((l,k) =>{
+            if(k > 0){
+                l.remove();
+            }
+        });
+    }
+    eliminarListaCentroCosto(contenedor,evento,clientesInvitado){
+        if (contenedor.children.length === 1){
+            alertify.error('El usuario debe de tener al menos un cliente');
+            return
+        }
+        evento.target.parentElement.parentElement.parentElement.remove();
+        const seleccionClientes = this.clienteSeleccionados(clientesInvitado);
+        for (const cbCliente of document.querySelectorAll(clientesInvitado.listSelectCliente)) {
+            cbCliente.querySelectorAll('option').forEach(opt => {
+                if (contenedor.children.length === 1) {
+                    opt.disabled = false;
+                }else{
+                    const valor = opt.selected ? opt.value : null;
+                    const valorSelectAll = seleccionClientes.indexOf(opt.value);
+                    opt.disabled = valorSelectAll >= 0 && valor != seleccionClientes[valorSelectAll] ? true : false;
+                }
+            });
+        }
     }
 }
