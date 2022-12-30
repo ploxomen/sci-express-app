@@ -20,6 +20,14 @@ class Clientes extends Model
     {
         return DB::table('proveedor_clientes')->where(['id_cliente' => $id_cliente, 'id' => $id_proveedor])->update(['activo' => 0]);
     }
+    public static function getRemitente(int $nroRuc)
+    {
+        $resultado = Clientes::select('id','nom_cli','dir_sede_so AS direccion','dpto_so AS dpto','prov_so AS prov','dist_so AS dist')->selectRaw("'cliente' AS tipo")->where('nro_doc',$nroRuc)->first();
+        if(empty($resultado)){
+            $resultado = DB::table('proveedor_clientes')->select('id','nomb_prov','dire_prov AS direccion','depa_prov AS dpto','prov_prov AS prov','dist_prov AS dist')->selectRaw("'proveedor' AS tipo")->where('nro_docu_prov',$nroRuc)->first();
+        }
+        return $resultado;
+    }
     public static function getFileCliente($nro_doc)
     {
         $result = DB::select('CALL sp_get_files_estado_cliente(?)',[$nro_doc]);
@@ -178,6 +186,10 @@ class Clientes extends Model
         }else{
             return $ciudad->id;
         }
+    }
+    public static function obtenerClienteProveedor(int $idProveedor)
+    {
+        return DB::table('clientes AS c')->select('c.*')->join('relacion_cliente_proveedor AS pc','c.id','=','pc.id_proveedor')->first();
     }
     public static function obtenerComplejoDistante($tipo,$distrito,$ciudad)
     {

@@ -18,8 +18,6 @@ class General{
         for (const element of $cbUbigeos) {
             $(element).on('select2:select',async (e)=>{
                 let cbUbigeo = document.getElementById(e.target.dataset.info);
-                console.log(cbUbigeo);
-
                 if(!cbUbigeo){
                     return
                 }
@@ -512,9 +510,11 @@ class General{
         $('#tabla-detalle ' + $cbDuplicado).select2('destroy');
         let tr = document.getElementById('tabla-detalle').children[document.getElementById('tabla-detalle').children.length - 1];
         const cloneTr = tr.cloneNode(true);
+        let $estadoGuiaVal = document.getElementById($estadoGuia) || $estadoGuia;
+
         for (const i2 of cloneTr.querySelectorAll('input, select')) {
             i2.value = i2.localName === "input" && i2.getAttribute('step') == '0.01' ? "0.00" : "0";
-            if (document.getElementById($estadoGuia).value == '3') {
+            if ($estadoGuiaVal == '3') {
                 i2.required = false;
             }
             if (i2.localName === 'select' || i2.localName === 'textarea'){
@@ -952,6 +952,199 @@ class General{
                     opt.disabled = valorSelectAll >= 0 && valor != seleccionClientes[valorSelectAll] ? true : false;
                 }
             });
+        }
+    }
+    templateDetalle(id, grupo_envio, tipo_envio, embase_embalaje, descripcion, cantidad, kg, largo, ancho, altura, volumen,detalleTabla) {
+        const detalleId = id ? `data-detalle="${id}" data-tipo="old"` : `data-tipo="new"`;
+        let templateGrupoEnvio = "<option></option>";
+        detalleTabla.grupo_envio.forEach(ge => {
+            templateGrupoEnvio += `<option value="${ge}" ${ge == grupo_envio ? 'selected' : ''}>${ge}</option>`;
+        });
+        let templateTipoEnvio = "<option></option>";
+        detalleTabla.tipo_envio.forEach(ge => {
+            templateTipoEnvio += `<option value="${ge}" ${ge == tipo_envio ? 'selected' : ''}>${ge}</option>`;
+        });
+        let templateEnbaseEmba = "<option></option>";
+        detalleTabla.envase_embalaje.forEach(ge => {
+            templateEnbaseEmba += `<option value="${ge}" ${ge == embase_embalaje ? 'selected' : ''}>${ge}</option>`;
+        });
+        return `<tr>
+        <td>
+            <select required data-name="grupo_envio" class="data-anulada form-control form-control-sm select-new-detalle">
+            ${templateGrupoEnvio}
+            </select>
+        </td>
+        <td>
+            <select required data-name="tipo_envio" class="data-anulada form-control form-control-sm select-new-detalle">
+            ${templateTipoEnvio}
+            </select>
+        </td>
+        <td>
+            <textarea data-name="descripcion" class="form-control form-control-sm clear-detalle-guia-text" rows="1">${descripcion}</textarea>
+        </td>
+        <td>
+            <select required data-name="embase_embalaje" class="data-anulada form-control form-control-sm select-new-detalle">
+            ${templateEnbaseEmba}
+            </select>
+        </td>
+        <td>
+            <input required data-name="cantidad" type="number" value="${cantidad}" class="clear-detalle-guia data-anulada-int data-anulada form-control form-control-sm" onchange="calcTotal(event,4,'id_editar_tot_cant')" min="1">
+        </td>
+        <td>
+            <input required data-name="kg" type="number" value="${kg}" class="clear-detalle-guia-decimal data-anulada-decimal data-anulada form-control form-control-sm" onchange="calcTotal(event,5,'id_editar_tot_kg')" min="0.01" step="0.01">
+        </td>
+        <td>
+            <input required data-name="largo" type="number" value="${largo}" class="clear-detalle-guia-decimal data-anulada-decimal data-anulada form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
+        </td>
+        <td>
+            <input required data-name="ancho" type="number" value="${ancho}" class="clear-detalle-guia-decimal data-anulada-decimal data-anulada form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
+        </td>
+        <td>
+            <input required data-name="altura" type="number" value="${altura}" class="clear-detalle-guia-decimal data-anulada-decimal data-anulada form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
+        </td>
+        <td>
+            <input required data-name="volumen" type="number" value="${volumen}" class="clear-detalle-guia-decimal data-anulada-decimal data-anulada form-control form-control-sm" onchange="calcTotal(event,9,'id_editar_tot_vol')" min="0.01" step="0.01">
+        </td>
+        <td>
+            <button type="button" class="btn btn-sm btn-danger eliminar-detalle-guia" ${detalleId}><i class="far fa-trash-alt"></i></button>
+        </td>`
+    }
+    valoresFormatoGuia(valor){
+        return {
+            idTxtNroGuia: 'id_editar__nro_guia',
+            nroGuia: null,
+            max: valor === "1" ? 11 : 7,
+            condicion: valor === "1" ? "[0-9]{3}[-][0-9]{7}" : "[0-9]{7}",
+            textLabel: valor === "1" ? "N° Guía" : "N° OS",
+            valid: valor === "1" ? true : false
+        }
+    }
+    eliminarDetalleGuia(event,$tablaDetalle,valEditarEstado,idGuia){
+        if (event.target.dataset.tipo == 'old') {
+            if (valEditarEstado === '1' && $tablaDetalle.children.length === 1) {
+                return alertify.alert('Alerta', 'Las guías activas deben de tener al menos un detalle');
+            }
+            alertify.confirm('Mensaje', '¿Estás seguro de eliminar este detalle de la guía?, una vez eliminado no se podrá recuperar', async () => {
+                let datos = new FormData();
+                datos.append('situacion_guia', valEditarEstado);
+                datos.append('detalle', event.target.dataset.detalle);
+                datos.append('guia', idGuia);
+                const response = await this.funcfetch('eliminar-detalle-guia', datos);
+                if (response.error) {
+                    return response.error(response.error);
+                }
+                if ($tablaDetalle.children.length > 1) {
+                    event.target.parentElement.parentElement.remove();
+                } else {
+                    this.clearDetalleGuia(this.children.length);
+                }
+                this.recalcularTabla();
+                alertify.success(response.success);
+            }, () => {});
+        } else{
+            if ($tablaDetalle.children.length > 1) {
+                event.target.parentElement.parentElement.remove();
+            } else {
+                this.clearDetalleGuia($tablaDetalle.children.length);
+            }
+            this.recalcularTabla();
+            alertify.success('Detalle de guía eliminada correctamente');
+        }
+    }
+    recalcularTabla() {
+        $(document.querySelector(`[data-name="cantidad"]`)).trigger('change');
+        $(document.querySelector(`[data-name="kg"`)).trigger('change');
+        $(document.querySelector(`[data-name="largo"]`)).trigger('change');
+    }
+
+    clearDetalleGuia(cantidad) {
+        if (cantidad === 1){
+            $('#tabla-detalle tr td button').removeAttr('data-detalle');
+            $('#tabla-detalle tr td button').attr('data-tipo','new');
+        }
+        $('.clear-detalle-guia').val('0');
+        $('.clear-detalle-guia-text').val('');
+        $('.clear-detalle-guia-decimal').val('0.00');
+        $('.select-new-detalle').val("").trigger('change');
+    }
+    actualizarDatos($formularioEditar,tipoCbRemi,idGuia,idEstado,newCliCli,url,modal,$cbCliente,tablaGuias){
+        let datos = new FormData($formularioEditar);
+        let tablaDetalle = document.getElementById('tabla-detalle');
+        const idCliente = tipoCbRemi == 'proveedor' ? $cbCliente.selectedOptions[0].getAttribute('data-id-cliente') : $($cbCliente).val();
+        datos.append('tipo_guia', tipoCbRemi);
+        datos.append('id_guia', idGuia);
+        datos.append('id_cliente_facturacion', idCliente);
+        let detalleUpdate = new Array();
+        let detalleNew = new Array();
+        for (const e of tablaDetalle.children) {
+            let objeto = new Object();
+            let deta = e.querySelectorAll('input, select, textarea');
+            const newOrOld = e.querySelector('button');
+            for (const ele2 of deta) {
+                if (ele2.value && (ele2.value != '0.00' || ele2.value != '0')) {
+                    objeto[ele2.dataset.name] = ele2.value;
+                }
+            }
+            if (!this.isObjEmpty(objeto)) {
+                if (newOrOld && newOrOld.getAttribute('data-tipo') == 'new'){
+                    detalleNew.push(objeto);
+                }
+                if (newOrOld && newOrOld.getAttribute('data-tipo') == 'old') {
+                    objeto.idDetalle = newOrOld.getAttribute('data-detalle'); 
+                    detalleUpdate.push(objeto);
+                }
+            }
+        }
+        if ((!detalleNew.length && !detalleUpdate.length) && idEstado != '3') {
+            alertify.alert('Mensaje', 'Por favor agregue detalles a la guía');
+            return
+        }
+        if (detalleNew.length) {
+            datos.append('detalle_guia_new', JSON.stringify(detalleNew));
+        }
+        if (detalleUpdate.length) {
+            datos.append('detalle_guia_update', JSON.stringify(detalleUpdate));
+        }
+        if (newCliCli) {
+            const nuevoCliente = alertify.confirm('Mensaje', 'Se a detectado un nuevo cliente del cliente. <br> ¿Deseas guardarlo para la proxima vez?', null, null);
+            nuevoCliente.set({
+                'invokeOnCloseOff': true,
+                'closable': false,
+                'labels': {
+                    ok: 'Si',
+                    cancel: 'No'
+                }
+            });
+            nuevoCliente.set('onok', function () {
+                datos.append('add_cli_bool', true);
+                datos.append('add_cli_cli',true);
+                this.updateGuia(datos,url,modal,tablaGuias);
+            });
+            nuevoCliente.set('oncalcel', function () {
+                datos.append('add_cli_bool', false);
+                this.updateGuia(datos,url,modal,tablaGuias);
+            });
+        } else {
+            this.updateGuia(datos,url,modal,tablaGuias);
+        }
+    }
+    async updateGuia(datos,url,modalEditar,tablaGuias) {
+        try {
+            let response = await this.funcfetch(url, datos);
+            if (response.error) {
+                alertify.alert('Error', response.error);
+                return
+            }
+            if (response.alerta) {
+                alertify.alert('Alerta', response.alerta);
+                return
+            }
+            alertify.success(response.success);
+            tablaGuias.draw();
+            $(modalEditar).modal('hide'); 
+        } catch (error) {
+            console.error(error);
+            alertify.alert('Error', error.message);
         }
     }
 }

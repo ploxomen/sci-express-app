@@ -145,6 +145,8 @@ function loadPage(){
     frmCargos.addEventListener('submit',async function(e){
         e.preventDefault();
         let datos = new FormData(this);
+        datos.append('tipo_comprobantes',!$('#id_tipo_comprobantes').val() ? "" : $('#id_tipo_comprobantes').val().join(";"));
+        datos.append('nro_guias',!$('#id_nro_guias').val() ? "" : $('#id_nro_guias').val().join(";"));
         let guiasGuardadas = new Array();
         let guiasNuevas = new Array();
         for (const elemento of document.getElementById('tabla-guias-modal').children) {

@@ -9,8 +9,9 @@ use App\Models\ModeloGuias;
 use App\Models\Tipos\Documentos;
 use App\Models\TrayectoEnvio;
 use App\Models\User;
+use App\Models\Vehiculos;
 use Exception;
-use Illuminate\Contracts\Cache\Store;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -27,6 +28,15 @@ class Gias extends Controller
         $trayecto = TrayectoEnvio::where(['estado' => 1])->get();
         $clientes = Clientes::obtenerCliConProvee();
         $cli_cli = Clientes::obtenerCliDeCli();
+        $nroGuiasSCI = $this->generarNroGuiaSCI();
+        $nro_os = $nroGuiasSCI['nroOS'];
+        $nro_guia_result = $nroGuiasSCI['nroGuia'];
+        $hoy = date('Y-m-d');
+        $antes = date('Y-m-d',strtotime($hoy . '-2 days'));
+        return view('comprobante.guias',compact('nro_guia_result','cli_cli','clientes','departamentos','hoy','trayecto','via_envios', 'nro_os','tipo_documentos','modulos','antes'));
+    }
+    public function generarNroGuiaSCI()
+    {
         $nro_guia = ModeloGuias::select('prefijo','nro_guia')->orderBy('nro_guia', 'desc')->first();
         $nro_os = ModeloGuias::select('nro_guia')->where(['prefijo' => null])->orderBy('nro_guia', 'desc')->first();
         $nro_guia_result = '001-0000001';
@@ -44,9 +54,68 @@ class Gias extends Controller
         }else{
             $nro_os = "0000001";
         }
-        $hoy = date('Y-m-d');
-        $antes = date('Y-m-d',strtotime($hoy . '-2 days'));
-        return view('comprobante.guias',compact('nro_guia_result','cli_cli','clientes','departamentos','hoy','trayecto','via_envios', 'nro_os','tipo_documentos','modulos','antes'));
+        return ['nroOS' => $nro_os, 'nroGuia' => $nro_guia_result];
+    }
+    public function modificacionPreGuias(Request $request)
+    {
+        if(!$request->ajax()){
+            return response()->json(['error' => 'No autorizado']);
+        }
+        switch ($request->accion) {
+            case 'obtener-remitente':
+                return response()->json(['data' => Clientes::getRemitente($request->ruc)]);
+            break;
+            case 'generar-guias':
+                $datos = $request->all();
+                return response()->json(['success' => ModeloGuias::agregarPreGuias($datos,'agregar')]);
+            break;
+            case 'previo-guias':
+                $datos = $request->all();
+                return response()->json(['listaError' => ModeloGuias::agregarPreGuias($datos,'mostrar')]);
+            break;
+        }
+    }
+    public function viewComplearGuias():View
+    {
+        $modulos = User::getModulos(Auth::id());
+        $trayecto = TrayectoEnvio::where(['estado' => 1])->get();
+        $clientes = Clientes::obtenerCliConProvee();
+        $cli_cli = Clientes::obtenerCliDeCli();
+        $via_envios = InformacionAdicional::viaEnvio();
+        $departamentos = (new Ubigeo)->getDepartamentosClientes();
+        $tipo_documentos = Documentos::where('estado', '1')->get();
+        return view('comprobante.completarGuias',compact("modulos","trayecto","clientes","cli_cli","via_envios","departamentos","tipo_documentos"));
+    }
+    public function modificacionCompletarPreGuias(Request $request)
+    {
+        if(!$request->ajax()){
+            return response()->json(['error' => 'No autorizado']);
+        }
+        switch ($request->accion) {
+            case 'consultar-guias':
+                $guias = ModeloGuias::guiasPorCompletar();
+                return datatables()->of($guias)->toJson();
+            break;
+            case 'detalle-guia':
+                return response()->json(ModeloGuias::guiasPorCompletarDetalle($request->guia));
+            break;
+            case 'previo-guias':
+                $datos = $request->all();
+                return response()->json(['listaError' => ModeloGuias::agregarPreGuias($datos,'mostrar')]);
+            break;
+        }
+    }
+    public function viewPreGuias()
+    {
+        $modulos = User::getModulos(Auth::id());
+        $nroGuiasSCI = $this->generarNroGuiaSCI();
+        $nro_os = $nroGuiasSCI['nroOS'];
+        $nro_guia_result = $nroGuiasSCI['nroGuia'];
+        $trayecto = TrayectoEnvio::where(['estado' => 1])->get();
+        $via_envios = InformacionAdicional::viaEnvio();
+        $departamentos = (new Ubigeo)->getDepartamentosClientes();
+        $provincias = (new Ubigeo)->getProvinciasCliente(3926);
+        return view('comprobante.preguia',compact('provincias','departamentos','via_envios','trayecto','modulos','nro_os','nro_guia_result'));
     }
     public function deleteImgGuia(Request $request)
     {
@@ -76,7 +145,10 @@ class Gias extends Controller
     {
         $modulos = User::getModulos(Auth::id());
         $clusters = ModeloCluster::obtenerTodosClusters();
-        return view('retornos.retornosguiasencargado',compact('modulos','clusters'));
+        $vehiculos = Vehiculos::obtenerVehiculos();
+        $dealers = User::obtenerUsuarioRol(7);
+        $conductores = User::obtenerUsuarioRol(6);
+        return view('retornos.retornosguiasencargado',compact('conductores','dealers','vehiculos','modulos','clusters'));
     }
     public function uploadImgDetalleGuia(Request $request)
     {
@@ -107,7 +179,6 @@ class Gias extends Controller
             Storage::disk('guias-img')->delete($filesDb);
             return response()->json(['error' => $ex->getMessage()]);
         }
-        dd($request->all());
     }
     public function guiasRetornadas(Request $request)
     {
@@ -117,6 +188,25 @@ class Gias extends Controller
                 switch ($request->tipo) {
                     case 'mostrar-guias':
                         return datatables()->of(ModeloGuias::mostrarRetornoGuias($request->tipo,$id_usuario))->toJson();
+                    break;
+                    case 'mostrar-guias-programar':
+                        $resultados = [];
+                        $resultados['data'] = ModeloGuias::mostrarGuiasRetornadasParaProgramar($request->fechaLegada,$request->cluster);
+                        if($request->has('completo')){
+                            $resultados['total'] = ModeloGuias::cantidadGuiasRetornadas();
+                        }
+                        return response()->json($resultados);
+                    break;
+                    case 'mostrar-guias-bultos':
+                        return response()->json(['bultos' => ModeloGuias::bultosRetornados($request->retornada)]);
+                    break;
+                    case 'programar-retornos':
+                        $fechaRecojo = $request->dia_recojo;
+                        $detalles = $request->retornos;
+                        $vehiculo = $request->vehiculo;
+                        $dealer = $request->dealer;
+                        $driver = $request->conductor;
+                        return response()->json(ModeloGuias::programarRecojosRetornos($fechaRecojo,Auth::id(),$detalles,$vehiculo,$driver,$dealer));
                     break;
                     case 'cambio-estado':
                         ModeloGuias::cambiarEstadoRetornoGuia($request->cluster, $request->guia, $request->estado);
@@ -201,7 +291,7 @@ class Gias extends Controller
                 unset($datos['detalle_guia_update']);
                 $detallesUpdate = json_decode($request->detalle_guia_update, true);
             }
-            $response = ModeloGuias::updateGuia($idGuia,$datos, $detallesNew, $detallesUpdate, $add_cli_bool);
+            $response = ModeloGuias::updateGuia($idGuia,$datos, $detallesNew, $detallesUpdate, $add_cli_bool,false);
             return response()->json($response);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
@@ -254,6 +344,32 @@ class Gias extends Controller
         if ($request->ajax()) {
             InformacionAdicional::calcularTransito();
             return response()->json(['success' => 'Embarques actualizados correctamente de informados a transito']);
+        }
+    }
+    public function editarCompletarPreGuias(Request $request)
+    {
+        if ($request->ajax()) {
+            $datos = $request->all();
+            $idGuia = $request->id_guia;
+            $add_cli_bool = $request->has('add_cli_bool') ? $request->add_cli_bool : null;
+            $detallesNew = [];
+            $detallesUpdate = [];
+            if (isset($datos['comp_clie'])) {
+                $datos['comp_clie'] = implode(';', $datos['comp_clie']);
+            }
+            if (isset($datos['nro_comp_cli'])) {
+                $datos['nro_comp_cli'] = implode(';', $datos['nro_comp_cli']);
+            }
+            if (isset($datos['detalle_guia_new'])) {
+                unset($datos['detalle_guia_new']);
+                $detallesNew = json_decode($request->detalle_guia_new, true);
+            }
+            if (isset($datos['detalle_guia_update'])) {
+                unset($datos['detalle_guia_update']);
+                $detallesUpdate = json_decode($request->detalle_guia_update, true);
+            }
+            $response = ModeloGuias::updateGuia($idGuia,$datos, $detallesNew, $detallesUpdate, $add_cli_bool,true);
+            return response()->json($response);
         }
     }
     public function addGuia(Request $request)

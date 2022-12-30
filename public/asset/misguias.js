@@ -227,13 +227,13 @@ function loadPage() {
                     if (key == 'detalle' && valor.length && detalleTabla) {
                         let $templateDetalle = "";
                         valor.forEach(de => {
-                            $templateDetalle += templateDetalle(de.id, de.grupo_envio, de.tipo_envio, de.embase_embalaje, !de.descripcion ? '' : de.descripcion, de.cantidad, de.kg, de.largo, de.ancho, de.altura, de.volumen);
+                            $templateDetalle += general.templateDetalle(de.id, de.grupo_envio, de.tipo_envio, de.embase_embalaje, !de.descripcion ? '' : de.descripcion, de.cantidad, de.kg, de.largo, de.ancho, de.altura, de.volumen,detalleTabla);
                         });
                         document.getElementById('tabla-detalle').innerHTML = $templateDetalle;
                         continue;
                     }
                     if (key == 'detalle' && !valor.length && detalleTabla) {
-                        document.getElementById('tabla-detalle').innerHTML = templateDetalle(null, null, null, null, '', 0, '0.00', '0.00', '0.00', '0.00', '0.00');
+                        document.getElementById('tabla-detalle').innerHTML = general.templateDetalle(null, null, null, null, '', 0, '0.00', '0.00', '0.00', '0.00', '0.00',detalleTabla);
                         continue;
                     }
                     if (key == 'prefijo') {
@@ -504,89 +504,13 @@ function loadPage() {
             response.send(datos);
         }
     }
-    document.getElementById('btn-actualizar-guias').onclick = () => document.getElementById('update-guia').click();
-    document.getElementById('update-guia-complete').onsubmit = function(event){
+    document.getElementById('btn-actualizar-guias').onclick = () => document.getElementById('update-guia').click();    
+    const $formEditarGuia = document.getElementById('update-guia-complete');
+    $formEditarGuia.onsubmit = function(event){
         event.preventDefault();
-        let datos = new FormData(this);
-        let tablaDetalle = document.getElementById('tabla-detalle');
-        const idCliente = tipoCbRemi == 'proveedor' ? $cbCliente.selectedOptions[0].getAttribute('data-id-cliente') : $($cbCliente).val();
-        datos.append('tipo_guia', tipoCbRemi);
-        datos.append('id_guia', datosGlobales.idGuia);
-        datos.append('id_cliente_facturacion', idCliente);
-        let detalleUpdate = new Array();
-        let detalleNew = new Array();
-        for (const e of tablaDetalle.children) {
-            let objeto = new Object();
-            let deta = e.querySelectorAll('input, select, textarea');
-            const newOrOld = e.querySelector('button');
-            for (const ele2 of deta) {
-                if (ele2.value && (ele2.value != '0.00' || ele2.value != '0')) {
-                    objeto[ele2.dataset.name] = ele2.value;
-                }
-            }
-            if (!general.isObjEmpty(objeto)) {
-                if (newOrOld && newOrOld.getAttribute('data-tipo') == 'new'){
-                    detalleNew.push(objeto);
-                }
-                if (newOrOld && newOrOld.getAttribute('data-tipo') == 'old') {
-                    objeto.idDetalle = newOrOld.getAttribute('data-detalle'); 
-                    detalleUpdate.push(objeto);
-                }
-            }
-        }
-        if ((!detalleNew.length && !detalleUpdate.length) && document.getElementById('id_estado').value != '3') {
-            alertify.alert('Mensaje', 'Por favor agregue detalles a la guía');
-            return
-        }
-        if (detalleNew.length) {
-            datos.append('detalle_guia_new', JSON.stringify(detalleNew));
-        }
-        if (detalleUpdate.length) {
-            datos.append('detalle_guia_update', JSON.stringify(detalleUpdate));
-        }
-        if (newCliCli) {
-            const nuevoCliente = alertify.confirm('Mensaje', 'Se a detectado un nuevo cliente del cliente. <br> ¿Deseas guardarlo para la proxima vez?', null, null);
-            nuevoCliente.set({
-                'invokeOnCloseOff': true,
-                'closable': false,
-                'labels': {
-                    ok: 'Si',
-                    cancel: 'No'
-                }
-            });
-            nuevoCliente.set('onok', function () {
-                datos.append('add_cli_bool', true);
-                datos.append('add_cli_cli', );
-                updateGuia(datos);
-            });
-            nuevoCliente.set('oncalcel', function () {
-                datos.append('add_cli_bool', false);
-                updateGuia(datos);
-            });
-        } else {
-            updateGuia(datos);
-        }
+        general.actualizarDatos($formEditarGuia,tipoCbRemi,datosGlobales.idGuia,document.getElementById('id_estado').value,newCliCli,'update-total-guia','#editar-guias',$cbCliente,tablaGuias);
     }
-    async function updateGuia(datos) {
-        try {
-            let response = await general.funcfetch('update-total-guia', datos);
-            if (response.error) {
-                alertify.alert('Error', response.error);
-                return
-            }
-            if (response.alerta) {
-                alertify.alert('Alerta', response.alerta);
-                return
-            }
-            alertify.success(response.success);
-            tablaGuias.draw();
-            $('#editar-guias').modal('hide');
-            
-        } catch (error) {
-            console.error(error);
-            alertify.alert('Error', error.message);
-        }
-    }
+    
     $($cbCliente).on('select2:select', async function (e) {
         tipoCbRemi = await general.getDataRemitenteGuia(this, '#id_editar_remi_prov', '#id_editar_remi_dist', '#id_editar_remi_depa', '#id_editar_remi_tipo_docu','#id_editar_id_invitado');
     });
@@ -597,14 +521,7 @@ function loadPage() {
         general.calculoDiasTrancitoCb('#id_editar_remi_depa', '#id_editar_dest_depa', '#id_editar_dest_prov', '#id_editar_dias_tran', '#id_editar_via_envi');
     });
     $(cbOrdenServicio).on('select2:select', function (e) {
-        let datosNroGuia = {
-            idTxtNroGuia: 'id_editar__nro_guia',
-            nroGuia: null,
-            max: $(this).val() === "1" ? 11 : 7,
-            condicion: $(this).val() === "1" ? "[0-9]{3}[-][0-9]{7}" : "[0-9]{7}",
-            textLabel: $(this).val() === "1" ? "N° Guía" : "N° OS",
-            valid: $(this).val() === "1" ? true : false
-        }
+        let datosNroGuia = general.valoresFormatoGuia($(this).val());
         general.changeTipoGuiaFormato(datosNroGuia.idTxtNroGuia, null, datosNroGuia.max, datosNroGuia.condicion, datosNroGuia.textLabel, datosNroGuia.valid);
     });
     $('#id_editar_comp_clie').on('select2:select', function (e) {
@@ -613,115 +530,15 @@ function loadPage() {
     $('#id_editar_nro_comp_cli').on('change.select2', function (e) {
         $('#id_editar_cant_comp').val($(this).val() ? $(this).val().length : 0);
     });
-    function templateDetalle(id, grupo_envio, tipo_envio, embase_embalaje, descripcion, cantidad, kg, largo, ancho, altura, volumen) {
-        const detalleId = id ? `data-detalle="${id}" data-tipo="old"` : `data-tipo="new"`;
-        let templateGrupoEnvio = "<option></option>";
-        detalleTabla.grupo_envio.forEach(ge => {
-            templateGrupoEnvio += `<option value="${ge}" ${ge == grupo_envio ? 'selected' : ''}>${ge}</option>`;
-        });
-        let templateTipoEnvio = "<option></option>";
-        detalleTabla.tipo_envio.forEach(ge => {
-            templateTipoEnvio += `<option value="${ge}" ${ge == tipo_envio ? 'selected' : ''}>${ge}</option>`;
-        });
-        let templateEnbaseEmba = "<option></option>";
-        detalleTabla.envase_embalaje.forEach(ge => {
-            templateEnbaseEmba += `<option value="${ge}" ${ge == embase_embalaje ? 'selected' : ''}>${ge}</option>`;
-        });
-        return `<tr>
-        <td>
-            <select required data-name="grupo_envio" class="data-anulada form-control form-control-sm select-new-detalle">
-            ${templateGrupoEnvio}
-            </select>
-        </td>
-        <td>
-            <select required data-name="tipo_envio" class="data-anulada form-control form-control-sm select-new-detalle">
-            ${templateTipoEnvio}
-            </select>
-        </td>
-        <td>
-            <textarea data-name="descripcion" class="form-control form-control-sm clear-detalle-guia-text" rows="1">${descripcion}</textarea>
-        </td>
-        <td>
-            <select required data-name="embase_embalaje" class="data-anulada form-control form-control-sm select-new-detalle">
-            ${templateEnbaseEmba}
-            </select>
-        </td>
-        <td>
-            <input required data-name="cantidad" type="number" value="${cantidad}" class="clear-detalle-guia data-anulada-int data-anulada form-control form-control-sm" onchange="calcTotal(event,4,'id_editar_tot_cant')" min="1">
-        </td>
-        <td>
-            <input required data-name="kg" type="number" value="${kg}" class="clear-detalle-guia-decimal data-anulada-decimal data-anulada form-control form-control-sm" onchange="calcTotal(event,5,'id_editar_tot_kg')" min="0.01" step="0.01">
-        </td>
-        <td>
-            <input required data-name="largo" type="number" value="${largo}" class="clear-detalle-guia-decimal data-anulada-decimal data-anulada form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
-        </td>
-        <td>
-            <input required data-name="ancho" type="number" value="${ancho}" class="clear-detalle-guia-decimal data-anulada-decimal data-anulada form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
-        </td>
-        <td>
-            <input required data-name="altura" type="number" value="${altura}" class="clear-detalle-guia-decimal data-anulada-decimal data-anulada form-control form-control-sm" onchange="calcVolumen(event)" min="0.01" step="0.01">
-        </td>
-        <td>
-            <input required data-name="volumen" type="number" value="${volumen}" class="clear-detalle-guia-decimal data-anulada-decimal data-anulada form-control form-control-sm" onchange="calcTotal(event,9,'id_editar_tot_vol')" min="0.01" step="0.01">
-        </td>
-        <td>
-            <button type="button" class="btn btn-sm btn-danger eliminar-detalle-guia" ${detalleId}><i class="far fa-trash-alt"></i></button>
-        </td>`
-    }
-    document.getElementById('tabla-detalle').onclick = function (event) {
+    const $detalleGuiaTabla = document.getElementById('tabla-detalle');
+    $detalleGuiaTabla.onclick = function (event) {
         if (event.target.classList.contains('eliminar-detalle-guia')) {
-            if (event.target.dataset.tipo == 'old') {
-                if ($('#id_editar_estado').val() === '1' && this.children.length === 1) {
-                    return alertify.alert('Alerta', 'Las guías activas deben de tener al menos un detalle');
-                }
-                alertify.confirm('Mensaje', '¿Estás seguro de eliminar este detalle de la guía?, una vez eliminado no se podrá recuperar', async () => {
-                    let datos = new FormData();
-                    datos.append('situacion_guia', $('#id_editar_estado').val());
-                    datos.append('detalle', event.target.dataset.detalle);
-                    datos.append('guia', datosGlobales.idGuia);
-                    const response = await general.funcfetch('eliminar-detalle-guia', datos);
-                    if (response.error) {
-                        return response.error(response.error);
-                    }
-                    if (this.children.length > 1) {
-                        event.target.parentElement.parentElement.remove();
-                    } else {
-                        clearDetalleGuia(this.children.length);
-                    }
-                    recalcularTabla();
-                    alertify.success(response.success);
-                }, () => {});
-            } else if (event.target.dataset.tipo == 'new') {
-                if (this.children.length > 1) {
-                    event.target.parentElement.parentElement.remove();
-                } else {
-                    clearDetalleGuia(this.children.length);
-                }
-                recalcularTabla();
-                alertify.success('Detalle de guía eliminada correctamente');
-            }
+            general.eliminarDetalleGuia(event,$detalleGuiaTabla,$('#id_editar_estado').val(),datosGlobales.idGuia);
         }
     }
     document.getElementById('add-new-detalle').onclick = function (event) {
         event.preventDefault();
         general.agregarNuevoDetalleGuia('id_editar_estado', '.select-new-detalle');
-    }
-
-    function recalcularTabla() {
-        $(document.querySelector(`[data-name="cantidad"]`)).trigger('change');
-        $(document.querySelector(`[data-name="kg"`)).trigger('change');
-        $(document.querySelector(`[data-name="largo"]`)).trigger('change');
-    }
-
-    function clearDetalleGuia(cantidad) {
-        if (cantidad === 1){
-            $('#tabla-detalle tr td button').removeAttr('data-detalle');
-            $('#tabla-detalle tr td button').attr('data-tipo','new');
-        }
-        $('.clear-detalle-guia').val('0');
-        $('.clear-detalle-guia-text').val('');
-        $('.clear-detalle-guia-decimal').val('0.00');
-        $('.select-new-detalle').val("").trigger('change');
     }
     $('#id_editar_dest_dist').on('select2:select', function (e) {
         general.getCiudadesFinales($(this).val(), $(this).attr('data-ciudades'));

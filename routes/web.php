@@ -165,8 +165,13 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
     Route::prefix('comprobante')->group(function(){
         Route::prefix('guias')->group(function () {
             Route::get('/', [Gias::class, 'viewGuias'])->name('compGuias');
+            Route::get('pre', [Gias::class, 'viewPreGuias'])->name('generarPreGuias');
             Route::get('obtener-todos', [Gias::class, 'misGuias'])->name('misGuiasTotal');
+            Route::get('completar', [Gias::class, 'viewComplearGuias'])->name('completarPreGuias');
             Route::get('view-retornadas', [Gias::class, 'viewGuiasRetornadas'])->name('verGuiasRetornadas');
+            Route::post('preguias-modificacion', [Gias::class, 'modificacionPreGuias']);
+            Route::post('preguias-completar', [Gias::class, 'modificacionCompletarPreGuias']);
+            Route::post('preguias-completar-editar', [Gias::class, 'editarCompletarPreGuias']);
             Route::post('obtener-asignacion-global', [Gias::class, 'obtenerAsignacionGlobal']);
             Route::post('asignar-global', [Gias::class, 'asignarMuchasGuiasUsuario']);
             Route::post('update-total-guia', [Gias::class, 'updateGuia']);

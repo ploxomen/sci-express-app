@@ -27,7 +27,7 @@
             </div>
             <div class="col-12 col-md-6 col-lg-4 form-group">
                 <label for="id_tipo_comprobantes">Comprobantes</label>
-                <select name="tipo_comprobantes" id="id_tipo_comprobantes" class="simple-select2" multiple required>
+                <select id="id_tipo_comprobantes" class="simple-select2" multiple required>
                     <option></option>
                     <option value="GUIA TRANSPORTISTA">GUIA TRANSPORTISTA</option>
                     <option value="FACTURA">FACTURA</option>
@@ -35,7 +35,7 @@
             </div>
             <div class="col-12 col-md-6 col-xl-3 form-group">
                 <label for="id_nro_guias">N° Comprobantes</label>
-                <select name="nro_guias" id="id_nro_guias" class="form-control cb-mult-nuevo" multiple required>
+                <select id="id_nro_guias" class="form-control cb-mult-nuevo" multiple required>
                 </select>
             </div>
             <div class="form-group col-12 col-md-6 col-xl-3">

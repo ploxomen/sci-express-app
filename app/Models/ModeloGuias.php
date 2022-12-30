@@ -151,14 +151,21 @@ class ModeloGuias extends Model
             'ciudad_destino_final'
         ];
     }
-    public static function updateGuia($idGuia,$guia, $detallesNew, $detallesUpdate, $cli_bool)
+    public static function updateGuia($idGuia,$guia, $detallesNew, $detallesUpdate, $cli_bool,$completar)
     {
+        $condicionalGuia = [
+            'id' => $idGuia
+        ];
+        if($completar){
+            $condicionalGuia['preguia'] = 1;
+            $guia['estado'] = "1";
+        }
         DB::beginTransaction();
         try {
             if (isset($guia['id_invitado']) && $guia['id_invitado'] == 'ninguno') {
                 $guia['id_invitado'] = null;
             }
-            $estadoGeneral = DB::table('guias')->select('situ','estado','prefijo','nro_guia')->where(['id' => $idGuia])->first();
+            $estadoGeneral = DB::table('guias')->select('situ','estado','prefijo','nro_guia')->where($condicionalGuia)->first();
             if(empty($estadoGeneral)){
                 return ['error' => 'La guía u O/S no existe'];
             }
@@ -263,8 +270,11 @@ class ModeloGuias extends Model
             if (isset($guia['add_cli_cli'])) {
                 unset($guia['add_cli_cli']);
             }
-            DB::table('guias')->where('id', '=', $idGuia)->update(['id_invitado' => null,'cc_invitado' => null]);
-            DB::table('guias')->where('id','=',$idGuia)->update($guia);
+            if($completar){
+                $guia['preguia'] = 2;
+            }
+            DB::table('guias')->where($condicionalGuia)->update(['id_invitado' => null,'cc_invitado' => null]);
+            DB::table('guias')->where($condicionalGuia)->update($guia);
             $tot_cant = 0;
             $tot_kg = 0;
             $tot_vol = 0;
@@ -283,7 +293,7 @@ class ModeloGuias extends Model
                 unset($detallesUpdate[$i]['idDetalle']);
                 DB::table('detalle_guias')->where(['id' => $idDetalleGuia,'id_guia' => $idGuia])->update($detallesUpdate[$i]);
             }
-            DB::table('guias')->where(['id' => $idGuia])->update(['tot_cant' => $tot_cant, 'tot_kg' => $tot_kg, 'tot_vol' => $tot_vol]);
+            DB::table('guias')->where($condicionalGuia)->update(['tot_cant' => $tot_cant, 'tot_kg' => $tot_kg, 'tot_vol' => $tot_vol]);
             DB::commit();
             return ['success' => $msj];
         } catch (Exception $ex) {
@@ -295,6 +305,123 @@ class ModeloGuias extends Model
     {
         $image = DB::table('imagenes_guia')->where(['id_guia' => $id_guia, 'id' => $id_img]);
         return ['nomFile' => $image->first('nom_id_file'),'delete' => $image->delete()];
+    }
+    public static function agregarPreGuias(array $datos,string $tipo)
+    {
+        $guiasError = [];
+        $guiasSuccess = [];
+        for ($i=0; $i < count($datos['nroGuia']); $i++) { 
+            if(!empty(self::consultarNroGuia($datos['nroGuia'][$i],$datos['tipo']))){
+                $guiasError[] = [
+                    'nroGuia' => $datos['nroGuia'][$i],
+                    'error' => 'La Guía/OS ya se encuentra registrada'
+                ];
+                continue;
+            }
+            $cluster = self::consultarCluster($datos['departamento'][$i],$datos['provincia'][$i],$datos['distrito'][$i]);
+            if(empty($cluster)){
+                $guiasError[] = [
+                    'nroGuia' => $datos['nroGuia'][$i],
+                    'error' => 'No se encontró cluster para esta Guía/OS'
+                ];
+                continue;
+            }
+            if($tipo == 'agregar'){
+                $datosCliente = Clientes::getRemitente($datos['nroRuc']);
+                if(empty($datosCliente)){
+                    return ['error' => 'No se encontró al remitente'];
+                }
+                $nuevaGuia = [
+                    'fech_emis' => date('Y-m-d'),
+                    'preguia' => 1,
+                    'id_cluster' => $cluster->id,
+                    'id_remitente' =>  $datosCliente->id,
+                    'remi_dire' => $datosCliente->direccion,
+                    'remi_depa' => $datosCliente->dpto,
+                    'remi_prov' => $datosCliente->prov,
+                    'remi_dist' => $datosCliente->dist,
+                    'remi_nro_docu' => $datos['nroRuc'],
+                    'remi_tipo_docu' => 4,
+                    'tray_env' => $datos['trayecto'][$i],
+                    'via_envi' => $datos['traslado'][$i],
+                    'dest_depa' => $datos['departamento'][$i],
+                    'dest_prov' => $datos['provincia'][$i],
+                    'dest_dist' => $datos['distrito'][$i],
+                    'estado' => 1
+                ];
+                if($datos['tipo'] == 'os'){
+                    $nuevaGuia['nro_guia'] = $datos['nroGuia'][$i];
+                }else{
+                    $nuevaGuia['nro_guia'] = intval(explode('-',$datos['nroGuia'][$i])[1]);
+                    $nuevaGuia['prefijo'] = intval(explode('-',$datos['nroGuia'][$i])[0]);
+                }
+                if($datos['tipoFacturacion'] == 'proveedor'){
+                    $newCliente = Clientes::obtenerClienteProveedor($datosCliente->id);
+                    $nuevaGuia['id_cliente_facturacion'] =  $newCliente->id;
+                    $nuevaGuia['tipo_guia'] = 'proveedor';
+                }else if($datos['tipoFacturacion'] == 'cliente'){
+                    $nuevaGuia['id_cliente_facturacion'] =  $datosCliente->id;
+                    $nuevaGuia['tipo_guia'] = 'cliente';
+                }else{
+                    return ['error' => 'No se encontró al remitente'];
+                }
+                $guiasSuccess[] = $nuevaGuia;
+            }
+        }
+        if($tipo == 'agregar'){
+            if(count($guiasSuccess) === 0){
+                return false;
+            }
+            return DB::table('guias')->insert($guiasSuccess);
+        }else{
+            return $guiasError;
+        }
+    }
+    public static function guiasPorCompletar()
+    {
+        $guias = DB::select('CALL sp_preguia_ver_tabla()');
+        foreach ($guias as $guia) {
+            if ($guia->tipoCiudad == 'distrito') {
+                $guia->nombreCiudadFinal = (new Ubigeo())->getNameDistrito($guia->nombreCiudadFinal);
+            }
+            if ($guia->tipoCiudadCluster == 'distrito') {
+                $guia->nombreCiudadCluster = (new Ubigeo())->getNameDistrito($guia->nombreCiudadCluster);
+            }
+        }
+        return $guias;
+    }
+    public static function guiasPorCompletarDetalle(int $idGuia)
+    {
+        $guia = DB::table('guias')->select("id","prefijo","nro_guia","fech_emis","tipo_guia","resp_pago","comp_clie","nro_comp_cli","orde_comp","fech_venc_orde_comp","fech_tras","tray_env","via_envi","via_tras","remi_tipo_docu","remi_nro_docu","id_remitente","remi_dire","remi_depa","remi_prov","remi_dist","dest_tipo_docu","dest_nro_docu","id_destinatario","dest_dire","dest_depa","dest_prov","dest_dist","ciudad_destino_final","dias_tran","cst_mest_env","situ","tot_cant","tot_kg","tot_vol","id_invitado","cc_invitado","valor_complejo_distante","ciudad_alejada")->where(['id' => $idGuia,"estado" => 1, "preguia" => 1])->first();
+        if(empty($guia)){
+            return ['error' => 'no se encontro la gía/os'];
+        }
+        $ubigeo = new Ubigeo();
+        $idCLiente = self::determinarClienteProveedor($guia->tipo_guia,$guia->id_remitente);
+        $guia->listProvRemi = $ubigeo->getProvinciasCliente($guia->remi_depa);
+        $guia->listDistRemi = $ubigeo->getDistritosCliente($guia->remi_prov); 
+        $guia->listProvDest = $ubigeo->getProvinciasCliente($guia->dest_depa);
+        $guia->listDistDest = $ubigeo->getDistritosCliente($guia->dest_prov);
+        $guia->listInvitados = Clientes::obtenerInvitados($idCLiente);
+        $guia->listCc = empty($guia->id_invitado) ? [] : Clientes::centrosCosto($guia->id_invitado, $idCLiente);
+        $guia->ciudadesFinales = DB::table('ciudades')->select('id', 'nombre_ciudad')->where(['ubigeo_distrito' => $guia->dest_dist])->get();
+        $guia->detalle = DB::table('detalle_guias')->where("id_guia",$guia->id)->get();
+        return ['datos' => $guia];
+    }
+    public static function consultarCluster(string $departamento, string $provincia, string $distrito)
+    {
+        return DB::table('cluster AS c')->select("c.*")->join('ciudades_base_cluster AS cb','c.id','=','cb.id_cluster')
+        ->where(['c.departamento_clu' => $departamento, 'c.provincia_clu' => $provincia, 'cb.ubigeo_distrito' => $distrito, 'cb.activo' => 1])->first();
+    }
+    public static function consultarNroGuia(string $nroGuia, string $tipoGuia)
+    {
+        $query = DB::table('guias');
+        if($tipoGuia == "guia"){
+            $query =  $query->where(['prefijo' => intval(explode('-',$nroGuia)[0]), 'nro_guia' => intval(explode('-',$nroGuia)[1])]);
+        }else{
+            $query = $query->where('nro_guia',$nroGuia);
+        }
+        return $query->first();
     }
     public function scopeElimiarDetalleGuia($query,$idGuia,$idDetalleGuia,$estadoActual)
     {
@@ -440,6 +567,52 @@ class ModeloGuias extends Model
             $miguia->listaEstados = InformacionAdicional::situacionEstado();
         }
         return $guias;
+    }
+    public static function mostrarGuiasRetornadasParaProgramar($fechaLlegada,$cluster)
+    {
+        $query = DB::table('retorno_cargo AS rc')->select("rc.id","rc.importe_embarque","rc.nro_guias","rc.tipo_comprobantes","rc.total_bultos","et.empresa")
+        ->selectRaw("LPAD(rc.id,5,'0') AS nroRetorno,DATE_FORMAT(rc.fch_emba,'%d/%m/%Y') AS fechaRetorno, fn_obtener_nombres_clusters(rc.id_cluster) AS nombreCluster,CONCAT(DATE_FORMAT(rc.fecha_llegada,'%d/%m/%Y'),' ',TIME_FORMAT(rc.hr_llegada,'%h:%i %p')) AS fechaHrLlegada")
+        ->join("empresa_transporte AS et","rc.id_empr_tran","=","et.id")
+        ->where(['rc.activo' => 1, 'rc.estado' => 1, 'rc.fecha_llegada' => $fechaLlegada]);
+        if(!empty($cluster)){
+            $idCluster = DB::table('cluster')->where('id_usuario',$cluster)->first();
+            $query = $query->where('id_cluster',$idCluster->id);
+        }
+        return $query->get();
+    }
+    public static function bultosRetornados($idRetorno)
+    {
+        return  DB::table('retorno_cargo')->select("nro_cajas","nro_jabas","nro_cajones","nro_sobres","nro_paquetes","num_otros","detalle_otro")
+        ->where(['activo' => 1, 'estado' => 1,'id' => $idRetorno])->first();
+    }
+    public static function programarRecojosRetornos($fechaRecojo,$usuario,$detalles,$vehiculo,$driver,$dealer)
+    {
+        DB::beginTransaction();
+        try {
+            $idProgramacion = DB::table('programacion_recojo_retornos')->insertGetId(['fechaProgramada' => $fechaRecojo,'usuarioCreado' => $usuario]);
+            $detalles = json_decode($detalles,true);
+            $idsRetornos = [];
+            for ($i=0; $i < count($detalles); $i++) { 
+                $detalles[$i]['idProgramacionRecojo'] = $idProgramacion;
+                $detalles[$i]['idRetornoCargo'] = $detalles[$i]['codigo'];
+                $detalles[$i]['idVehiculo'] = $vehiculo;
+                $detalles[$i]['idConductor'] = $driver;
+                $detalles[$i]['idDealer'] = $dealer;
+                $idsRetornos[] = $detalles[$i]['codigo'];
+                unset($detalles[$i]['codigo']);
+            }
+            DB::table('programacion_detaller_recojo_retornos')->insert($detalles);
+            DB::table('retorno_cargo')->where(['activo' => 1, 'estado' => 1])->whereIn('id',$idsRetornos)->update(['estado' => 2]);
+            DB::commit();
+            return ['success' => 'retornos programados correctamente'];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return ['error' => $th->getMessage()];
+        }
+    }
+    public static function cantidadGuiasRetornadas()
+    {
+        return DB::table('retorno_cargo')->selectRaw("DATE_FORMAT(fecha_llegada,'%d/%m/%Y') AS fechaLlegada")->where(['activo' => 1, 'estado' => 1])->get();
     }
     public static function cambiarEstadoRetornoGuia($id_usuario,$id_guia, $nuevo_estado)
     {

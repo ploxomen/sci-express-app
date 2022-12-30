@@ -1,6 +1,5 @@
 function loadPage(){
     let general = new General();
-    let cbClusters = document.getElementById('cb-clusters');
     const renderListas = function(data){
         let template = `<div>`;
         if(data){
@@ -23,35 +22,12 @@ function loadPage(){
         {data : 'empresa'},
         {data : 'fecha_hr_llegada'}
     ];
-    if(cbClusters){
-        columnsTable.push(
-            {data: 'cluster'}
-        );
-    }
     columnsTable.push(
         {data: 'importe_embarque'},
         {data : 'tipo_comprobantes', render : renderListas},
         {data : 'nro_guias', render : renderListas},
         {data : 'lista_guias',render: renderListas}
     )
-    if(cbClusters){
-        // columnsTable.push(
-        //     {data: 'estadoguia', render : function(data,type,row){
-        //         if(row.id_embarque){
-        //             let template = `<select class="form-control form-control-sm cambio-estado" data-guia="${row.id_guia}" data-cluster="${row.id_cluster}">`;
-        //             row.listaEstados.forEach(l => {
-        //                 if(l.id >= 9 && l.id <= 13){
-        //                     template += `<option ${data == l.id ? 'selected' : ''} value="${l.id}">${l.tipo}</option>`;
-        //                 }
-        //             });
-        //             template += `</select>`;
-        //             return template;
-        //         }else{
-        //             return `<span class="text-danger">${data}</span>`;
-        //         }
-        //     }}
-        // )
-    }
     columnsTable.push({data : 'total_bultos'},
         {data : 'id_embarque', render: function(ndata,type,row){
             if(ndata != 0){
@@ -66,9 +42,6 @@ function loadPage(){
             method: 'POST',
             headers: general.jsonToken,
             data: function(d){
-                if(cbClusters){
-                    d.cluster = $('#cb-clusters').val();
-                }
                 d.tipo = 'mostrar-guias';
             }
         },
@@ -90,53 +63,6 @@ function loadPage(){
     $('#detalle-embarque').on('hidden.bs.modal',function(e){
         $('.clear-text').text('-');
     });
-    if(cbClusters){
-        $('#cb-clusters').on('select2:select',function(e){
-            tablaRetorno.draw();
-        });
-        tablaRetorno.on('draw',function(){
-            $('.cambio-estado').off('change');
-            $('.cambio-estado').on('change',async function(e){
-                let datos = new FormData();
-                datos.append('cluster',this.dataset.cluster);
-                datos.append('estado',this.value);
-                datos.append('tipo','cambio-estado');
-                datos.append('guia',this.dataset.guia);
-                let response = await general.funcfetch(window.location.origin + '/intranet/comprobante/guias/retornadas',datos);
-                if(response.error){
-                    alertify.alert('Error',response.error);
-                    return
-                }
-                alertify.success(response.success);
-            })
-        });
-        tablaRetorno.on('responsive-display', function ( e, datatable, row, showHide, update ) {
-            const tabla = e.target.children[0].children[0];
-            if(tabla.children[8].style.display == 'none'){
-                $('.cambio-estado').off('change');
-                $('.cambio-estado').attr('data-responsive','true');
-                $('.cambio-estado').on('change',async function(e){
-                    let datos = new FormData();
-                    datos.append('cluster',this.dataset.cluster);
-                    datos.append('estado',this.value);
-                    datos.append('tipo','cambio-estado');
-                    datos.append('guia',this.dataset.guia);
-                    let response = await general.funcfetch(window.location.origin + '/intranet/comprobante/guias/retornadas',datos);
-                    if(response.error){
-                        alertify.alert('Error',response.error);
-                        return
-                    }
-                    alertify.success(response.success);
-                })
-            }
-        });
-        tablaRetorno.on('responsive-resize', function ( e, datatable, columns ) {
-            if(columns[8] && $('.cambio-estado').attr('data-responsive') == 'true'){
-                $('.cambio-estado').off('change');
-                $('.cambio-estado').attr('data-responsive','false');
-            }
-        });
-    }
     
 }
 window.addEventListener('DOMContentLoaded',loadPage);
