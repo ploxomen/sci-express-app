@@ -6,12 +6,14 @@ use App\Models\Clientes;
 use App\Models\EstadoSolicitud;
 use App\Models\InformacionAdicional;
 use App\Models\ModeloCluster;
+use App\Models\ModeloGuias;
 use App\Models\ModeloRecojo;
 use App\Models\ModeloSolicitud;
 use App\Models\TrayectoEnvio;
 use App\Models\User;
 use App\Models\Vehiculos;
 use Exception;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -33,6 +35,25 @@ class Recojo extends Controller
         $filtros = InformacionAdicional::obtenerDiasFiltros();
         $modulos = User::getModulos(Auth::id());
         return view('pedidos.misRecojos', compact('filtros', 'modulos'));
+    }
+    public function recojoRetornoCluster():View
+    {
+        $modulos = User::getModulos(Auth::id());
+        $programaciones = ModeloGuias::retornosCargosProgramados(Auth::id());
+        return view('retornos.recojerProgramacion',compact('modulos','programaciones'));
+    }
+    public function accionesRetornoEntrega(Request $request)
+    {
+        if($request->ajax()){
+            switch ($request->tipo) {
+                case 'update-retorno':
+                    return response()->json(ModeloGuias::actualizarRetornosCluster($request->retorno,$request->recogo,Auth::id()));
+                break;
+                case 'finalizar-retorno':
+                    return response()->json(ModeloGuias::terminarRetornosCluster($request->recogo,Auth::id()));
+                break;
+            }
+        }
     }
     public function verRecojosAdmin(Request $request)
     {

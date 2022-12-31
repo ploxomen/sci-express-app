@@ -98,7 +98,9 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
         Route::prefix('recojos')->group(function () {
             Route::get('programar', [Recojo::class, 'viewPediReco'])->name('pedidoRecojoProgramar');
             Route::get('todos',[Recojo::class,'viewRecojoAdmin'])->name('recojoAdmin');
+            Route::get('retornos/cluster', [Recojo::class, 'recojoRetornoCluster'])->name('retornosCluster');
             Route::get('pendientes', [Recojo::class, 'recojoPendiente'])->name('recojoPendiTraba');
+            Route::post('retornos/acciones', [Recojo::class, 'accionesRetornoEntrega']);
             Route::post('mis-recojos', [Recojo::class, 'verRecojosAdmin']);
             Route::post('modificaciones-admin', [Recojo::class, 'modificarAdminRecojo']);
             Route::post('actualizar-trabajador', [Recojo::class, 'actualizarRecoTra']);

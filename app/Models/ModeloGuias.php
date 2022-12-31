@@ -568,6 +568,70 @@ class ModeloGuias extends Model
         }
         return $guias;
     }
+    public static function retornosCargosProgramados($idUsuario)
+    {
+        $programaciones = DB::table("programacion_recojo_retornos AS pr")
+        ->selectRaw("LPAD(pr.id,5,'0') AS nroProgramado,pr.id,GROUP_CONCAT(fn_obtener_nombres(prd.idConductor)) AS conductores,GROUP_CONCAT(fn_obtener_nombres(prd.idDealer)) AS dealers,GROUP_CONCAT(ve.placa) AS vehiculos,DATE_FORMAT(pr.fechaProgramada,'%d/%m/%Y') AS fechaProgramada")
+        ->join("programacion_detaller_recojo_retornos AS prd","pr.id","=","prd.idProgramacionRecojo")
+        ->join("vehiculos AS ve","ve.id","=","prd.idVehiculo")
+        ->where(['prd.estado' => 0])->whereIn("pr.estado",[1,2])->where(function($query) use($idUsuario) {
+            $query->where('prd.idConductor','=',$idUsuario)
+            ->orWhere("prd.idDealer",'=',$idUsuario);
+        })->groupBy("pr.id")->get();
+        foreach ($programaciones as $p) {
+            $p->detalles = self::detalleRetornoCargo($p->id);
+        }
+        return $programaciones;
+    }
+    public static function actualizarRetornosCluster($idRetornos,$idProgramacion,$idUsuario)
+    {
+        $fechaHr = now();
+        DB::beginTransaction();
+        try {
+            $query = self::queryRetornos($idProgramacion,$idUsuario);
+            $actualizar = $query->where('prd.idRetornoCargo',$idRetornos)->update(['rc.estado' =>3,'rc.last_user_update' => $idUsuario,'rc.update_at' => $fechaHr, 'prd.fechaHoraRecojido' => $fechaHr,'pr.estado' => 2]);
+            DB::commit();
+            return ['success' => $actualizar];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return ['error' => $th->getMessage()];
+        }
+    }
+    public static function terminarRetornosCluster($idProgramacion,$idUsuario)
+    {
+        $fechaHr = now();
+        DB::beginTransaction();
+        try {
+            $query = self::queryRetornos($idProgramacion,$idUsuario);
+            $actualizar = $query->update(['rc.estado' =>4,'pr.estado' => 3,'pr.fechaHrTermino' => $fechaHr]);
+            DB::commit();
+            return ['success' => $actualizar];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return ['error' => $th->getMessage()];
+        }        
+    }
+    public static function queryRetornos($idProgramacion,$idUsuario)
+    {
+        return DB::table('programacion_detaller_recojo_retornos AS prd')
+        ->join("retorno_cargo AS rc","prd.idRetornoCargo","=","rc.id")
+        ->join("programacion_recojo_retornos AS pr","pr.id","=","prd.idProgramacionRecojo")
+        ->where(['prd.idProgramacionRecojo' => $idProgramacion,'rc.activo' => 1])
+        ->where(function($query2) use($idUsuario) {
+            $query2->where('prd.idConductor','=',$idUsuario)
+            ->orWhere("prd.idDealer",'=',$idUsuario);
+        })->whereIn('rc.estado',[2,3]);
+    }
+    public static function detalleRetornoCargo($idDetalleRetorno)
+    {
+        return DB::table('programacion_detaller_recojo_retornos AS prd')
+        ->select("rc.id","rc.estado","rc.importe_embarque","rc.tipo_comprobantes","rc.total_bultos","rc.importe_embarque","rc.nro_cajas","rc.nro_jabas","rc.nro_cajones","rc.nro_sobres","rc.nro_paquetes","rc.num_otros","rc.detalle_otro","et.empresa")
+        ->selectRaw("LPAD(rc.id,5,'0') AS nroRetorno,fn_obtener_nombres_clusters(rc.id_cluster) AS nombreCluster,CONCAT(DATE_FORMAT(rc.fecha_llegada,'%d/%m/%Y'),' ',TIME_FORMAT(rc.hr_llegada,'%h:%i %p')) AS fechaHrLlegada,IF(rc.estado = 3,DATE_FORMAT(prd.fechaHoraRecojido,'%d/%m/%Y %h:%i %p'),null) AS fechaHrRecogido")
+        ->join("retorno_cargo AS rc","prd.idRetornoCargo","=","rc.id")
+        ->join("empresa_transporte AS et","et.id","=","rc.id_empr_tran")
+        ->where(['prd.idProgramacionRecojo' => $idDetalleRetorno,'rc.activo' => 1])->whereIn('rc.estado',[2,3])->get();
+
+    }
     public static function mostrarGuiasRetornadasParaProgramar($fechaLlegada,$cluster)
     {
         $query = DB::table('retorno_cargo AS rc')->select("rc.id","rc.importe_embarque","rc.nro_guias","rc.tipo_comprobantes","rc.total_bultos","et.empresa")
