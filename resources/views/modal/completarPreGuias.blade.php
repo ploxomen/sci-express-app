@@ -160,7 +160,7 @@
               </div>
               <div class="form-group col-12 col-lg-5 col-xl-6">
                   <label for="id_editar_id_destinatario">Nombres <small class="text-danger">*</small></label>
-                  <select class="form-control cb-select2-tags disable_estado_2" required name="id_destinatario" id="id_editar_id_destinatario">
+                  <select class="form-control cb-select2-tags" required name="id_destinatario" id="id_editar_id_destinatario">
                       <option></option>
                       @foreach ($cli_cli as $c)
                           <option value="{{$c->id}}">{{$c->nombres}}</option>
@@ -204,7 +204,7 @@
               </div>
               <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
                   <label for="id_editar_ciudad_destino_final">Ciudad Final</label>
-                  <select name="id_ciudad_final" id="id_editar_ciudad_destino_final" data-cli-cli="id_ciudad_final" class="disable_estado_2 form-control simple-select2 cb-dest calculo-dia">
+                  <select name="id_ciudad_final" id="id_editar_ciudad_destino_final" data-distrito="#id_dest_dist" data-cli-cli="id_ciudad_final" class="disable_estado_2 form-control simple-select2 cb-dest calculo-dia">
                   </select>
               </div>
               <div class="col-12">
@@ -216,7 +216,7 @@
               </div>
               <div class="form-group col-12 col-md-6 col-lg-3" id="id-editar-box-complejo-distante" data-texto="#id_editar_ciudad_alejada" data-input="#id_editar_valor_complejo_distante" hidden>
                   <label for="id-tipo-complejo-distante"><span id="id_editar_ciudad_alejada"></span> <small class="text-danger">*</small></label>
-                  <input type="number" min="0" class="form-control" name="valor_complejo_distante" id="id_editar_valor_complejo_distante" disabled>
+                  <input type="number" min="0" class="form-control" name="valor_complejo_distante" id="id_editar_valor_complejo_distante">
               </div>
               <div class="col-12">
                   <h5 class="text-info">DETALLES</h5>

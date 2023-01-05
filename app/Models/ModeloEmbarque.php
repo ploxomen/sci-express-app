@@ -202,7 +202,7 @@ class ModeloEmbarque extends Model
     }
     public static function eliminarManifiestoEmbarque($idEmbarque,$idManifiesto)
     {
-        if(DB::table('embarque_manifiesto')->where(['id_embarque' => $idEmbarque])->count() === 1){
+        if(DB::table('embarque_ciudad_llegada AS ecl')->join("embarque_manifiesto AS em","ecl.id","=", "em.id_embarque_ciudad")->where(['ecl.id_embarque' => $idEmbarque])->count() === 1){
             return ['error' => 'El embarque debe tener al menos un manifiesto'];
         }
        DB::select('CALL sp_embarque_eliminar_manifiesto(?,?)',[$idEmbarque,$idManifiesto]);
@@ -388,7 +388,6 @@ class ModeloEmbarque extends Model
     }
     public static function obtenerEmbarqueArribado($id_embarque,$id_guia,$id_usuario,$tipo,$trayecto)
     {
-        // dd($tipo);
         $result = DB::select('CALL sp_obtener_embarques_arribar(?,?,?,?,?)',[$id_embarque,$id_guia,$id_usuario,$tipo, $trayecto]);
         switch ($tipo) {
             case 'manifiestos':
@@ -396,11 +395,6 @@ class ModeloEmbarque extends Model
                     $mani->prov_dest = (new Ubigeo)->getNameProvincia($mani->prov_dest);
                     $mani->prov_orig = (new Ubigeo)->getNameProvincia($mani->prov_orig);
                     $mani->guias = DB::select('CALL sp_obtener_embarques_arribar(?,?,?,?,?)',[$mani->id,0, $id_usuario, 'obtener-guias', $trayecto]);
-                    if(!empty($mani->guias)){
-                        for ($i=0; $i < count($mani->guias); $i++) {
-                            $mani->guias[$i]->fecha_reparto = date('d/m/Y',strtotime($mani->guias[$i]->fecha_reparto));
-                        }
-                    }
                 }
                 break;
             case 'detalle-guia':
@@ -445,6 +439,8 @@ class ModeloEmbarque extends Model
     {
         DB::beginTransaction();
         try {
+            $cluster = DB::table("cluster")->where('id_usuario',$usuario)->first();
+            $nuevo_retorno['id_cluster'] = $cluster->id;
             $id_retorno = DB::table('retorno_cargo')->insertGetId($nuevo_retorno);
             $guias = [];
             if(count($guias_nuevas) > 0){

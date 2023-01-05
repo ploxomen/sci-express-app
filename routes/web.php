@@ -191,6 +191,7 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
             Route::post('anular-guia', [Gias::class, 'anularGuia']);
             Route::post('mis-guias', [Gias::class, 'obtenerMisGuias']);
             Route::post('obtener-clipro', [Gias::class, 'obtenerCliOrProvDeta']);
+            Route::post('consulta-distante', [Gias::class, 'obtenerComplejoDistante']);
             Route::post('detalle-cli-de-cli', [Gias::class, 'detalleCliDeCli']);
             Route::post('agregar-guia', [Gias::class, 'addGuia']);
         });

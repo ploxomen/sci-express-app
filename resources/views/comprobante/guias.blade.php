@@ -227,7 +227,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_ciudad_destino_final">Ciudad Final</label>
-                    <select name="id_ciudad_final" id="id_ciudad_destino_final" data-cli-cli="id_ciudad_final" class="form-control simple-select2 cb-dest calculo-dia">
+                    <select name="id_ciudad_final" id="id_ciudad_destino_final" data-distrito="#id_dest_dist" data-cli-cli="id_ciudad_final" class="form-control simple-select2 cb-dest calculo-dia">
                     </select>
                 </div>
             </fieldset>

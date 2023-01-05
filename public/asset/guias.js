@@ -132,6 +132,9 @@ function pageLoaded(){
     });
     $('.calculo-dia').on('select2:select',function(){
         general.calculoDiasTrancitoCb('#id_remi_depa','#id_dest_depa','#id_dest_prov','#id_dias_tran', '#id_via_envi');
+        const distrito = $(this).attr("data-cli-cli") == "distrito" ? $(this).val() : $($(this).attr("data-distrito")).val();
+        const tipo = $(this).attr("data-cli-cli") == "distrito" ? "distrito" : "ciudad";
+        general.consultaComplejoDistante(distrito, tipo,"#box-complejo-distante", tipo == "ciudad" ? $(this).val() : null);
     });
     async function addGuia(datos) {
         try {
@@ -160,7 +163,7 @@ function pageLoaded(){
         general.agregarNuevoDetalleGuia('id_estado', '.simple-select2');
     });
     $('#id_dest_nomb').on('select2:select',async function(e){
-        newCliCli = await general.getDataDestGuia(this, '#id_remi_depa', '#id_dest_tipo_docu', '#id_dest_depa', '#id_dest_prov', '#id_dest_dist', '#id_ciudad_destino_final', '#id_dias_tran', '#id_via_envi','#box-complejo-distante');
+        newCliCli = await general.getDataDestGuia(this, '#id_remi_depa', '#id_dest_tipo_docu', '#id_dest_depa', '#id_dest_prov', '#id_dest_dist', '#id_ciudad_destino_final', '#id_dias_tran', '#id_via_envi','#box-complejo-distante',0);
     });
 }
 function calcVolumen(event){
@@ -182,10 +185,11 @@ function calcTotal(event,num,dom){
     }
     const filaTotal = document.getElementById('tabla-detalle');
     let total = 0;
+    let isFloat = false;
     for (let i = 0; i < filaTotal.children.length; i++) {
-        const isFloat = filaTotal.children[i].children[num].children[0].getAttribute('step') == '0.01' ? true : false;
+        isFloat = filaTotal.children[i].children[num].children[0].getAttribute('step') == '0.01' ? true : false;
         total += isFloat ? parseFloat(filaTotal.children[i].children[num].children[0].value) : parseInt(filaTotal.children[i].children[num].children[0].value);
     }
-    document.getElementById(dom).value = total;
+    document.getElementById(dom).value = isFloat ? total.toFixed(2) : total;
 }
 window.addEventListener('DOMContentLoaded',pageLoaded);

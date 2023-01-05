@@ -122,6 +122,7 @@ function loadPage() {
             $(row).addClass(bgTable);
         }
     });
+    let estado = 0;
     const $nroGuia = document.getElementById('titulo-guia-editar'),
         cbOrdenServicio = document.getElementById('id_orden_servicio'),
         txtNGuia = document.getElementById('id_editar__nro_guia'),
@@ -164,6 +165,7 @@ function loadPage() {
                 return
             }
             tipoCbRemi = response.datos.tipo_guia;
+            estado = response.datos.situ;
             $('#editar-guias .simple-select2, #editar-guias .cb-select2-tags, #editar-guias .cb-ubigeo').val("").trigger('change');
             datosGlobales.idGuia = e.target.dataset.guia;
             const { listDistDest, listDistRemi, listProvDest, listProvRemi } = response.datos;
@@ -515,10 +517,13 @@ function loadPage() {
         tipoCbRemi = await general.getDataRemitenteGuia(this, '#id_editar_remi_prov', '#id_editar_remi_dist', '#id_editar_remi_depa', '#id_editar_remi_tipo_docu','#id_editar_id_invitado');
     });
     $('#id_editar_id_destinatario').on('select2:select', async function (e) {
-        newCliCli = await general.getDataDestGuia(this, '#id_editar_remi_depa', '#id_editar_dest_tipo_docu', '#id_editar_dest_depa', '#id_editar_dest_prov', '#id_editar_dest_dist', '#id_editar_ciudad_destino_final', '#id_editar_dias_tran', '#id_editar_via_envi','#id-editar-box-complejo-distante');
+        newCliCli = await general.getDataDestGuia(this, '#id_editar_remi_depa', '#id_editar_dest_tipo_docu', '#id_editar_dest_depa', '#id_editar_dest_prov', '#id_editar_dest_dist', '#id_editar_ciudad_destino_final', '#id_editar_dias_tran', '#id_editar_via_envi','#id-editar-box-complejo-distante',estado);
     });
     $('.calculo-dia').on('select2:select', function () {
         general.calculoDiasTrancitoCb('#id_editar_remi_depa', '#id_editar_dest_depa', '#id_editar_dest_prov', '#id_editar_dias_tran', '#id_editar_via_envi');
+        const distrito = $(this).attr("data-cli-cli") == "distrito" ? $(this).val() : $($(this).attr("data-distrito")).val();
+        const tipo = $(this).attr("data-cli-cli") == "distrito" ? "distrito" : "ciudad";
+        general.consultaComplejoDistante(distrito, tipo, "#id-editar-box-complejo-distante", tipo == "ciudad" ? $(this).val() : null);
     });
     $(cbOrdenServicio).on('select2:select', function (e) {
         let datosNroGuia = general.valoresFormatoGuia($(this).val());
@@ -566,6 +571,7 @@ function loadPage() {
         document.getElementById('id_editar_ciudad_destino_final').innerHTML = "";
         datosGlobales.idGuia = null;
         tipoCbRemi = null;
+        estado = 0;
         newCliCli = false;
     });
     tablaGuias.on('responsive-display', function (e, datatable, row, showHide, update) {

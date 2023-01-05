@@ -177,8 +177,7 @@ function loadPage(){
             return
         }
         $('#guardar-detalles-nuevo').modal("hide");
-        alertify.success(response.success);
-        window.location.reload();
+        alertify.alert("Mensaje", response.success, () => { window.location.reload() });
     });
 }
 window.addEventListener('DOMContentLoaded',loadPage);

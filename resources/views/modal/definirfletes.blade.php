@@ -16,7 +16,7 @@
                   </div>
                   <div class="form-group col-12 col-md-6 col-lg-3">
                       <label for="id_flet_esti">Flete Total <small class="text-danger">*</small></label>
-                      <input type="number" name="flet_esti" id="id_flet_esti" min="0" class="form-control" step="0.01" required>
+                      <input type="number" name="flet_esti" id="id_flet_esti" value="0" min="0" class="form-control" step="0.01" required>
                   </div>
                 </div>
                 <h5 class="text-primary border-bottom pb-2"><i class="fas fa-truck"></i> TERRESTRES</h5>

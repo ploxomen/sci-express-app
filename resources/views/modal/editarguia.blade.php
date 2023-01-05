@@ -175,7 +175,7 @@
             </div>
             <div class="form-group col-12 col-lg-5 col-xl-6">
                 <label for="id_editar_id_destinatario">Nombres <small class="text-danger">*</small></label>
-                <select class="form-control cb-select2-tags disable_estado_2" required name="id_destinatario" id="id_editar_id_destinatario">
+                <select class="form-control cb-select2-tags" required name="id_destinatario" id="id_editar_id_destinatario">
                     <option></option>
                     @foreach ($cli_cli as $c)
                         <option value="{{$c->id}}">{{$c->nombres}}</option>
@@ -219,7 +219,7 @@
             </div>
             <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
                 <label for="id_editar_ciudad_destino_final">Ciudad Final</label>
-                <select name="id_ciudad_final" id="id_editar_ciudad_destino_final" data-cli-cli="id_ciudad_final" class="disable_estado_2 form-control simple-select2 cb-dest calculo-dia">
+                <select name="id_ciudad_final" id="id_editar_ciudad_destino_final" data-distrito="#id_editar_dest_dist" data-cli-cli="id_ciudad_final" class="disable_estado_2 form-control simple-select2 cb-dest calculo-dia">
                 </select>
             </div>
             <div class="col-12">

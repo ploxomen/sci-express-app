@@ -438,6 +438,15 @@ class Gias extends Controller
             }
         }
     }
+    public function obtenerComplejoDistante(Request $request)
+    {
+        if($request->ajax()){
+            $distrito = $request->distrito;
+            $ciudadFinal = $request->has('ciudad') ? $request->ciudad : null;
+            $complejoDistante = Clientes::obtenerComplejoDistante($request->tipo, $distrito, $ciudadFinal);
+            return response()->json(['complejo' => $complejoDistante]);
+        }
+    }
     public function detalleCliDeCli(Request $request)
     {
         try {

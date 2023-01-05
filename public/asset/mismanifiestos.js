@@ -160,6 +160,7 @@ function loadPage(){
         if(e.target.classList.contains('view-guia')) {
             let datos = new FormData();
             datos.append('guia', e.target.dataset.guia);
+            datos.append('tipo', 'detalle');
             let response = await general.funcfetch('./../comprobante/guias/obtener-detalles', datos);
             if (response.error) {
                 alertify.alert('Error', response.error);

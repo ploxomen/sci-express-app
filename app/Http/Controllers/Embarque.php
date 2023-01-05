@@ -198,7 +198,6 @@ class Embarque extends Controller
                         unset($datos['guias_nuevas']);
                         $guias_nuevas = json_decode($request->guias_nuevas,true);
                     }
-                    // dd($datos,$guias_guardadas,$guias_nuevas);
                     $result = ModeloEmbarque::actualizarDevolucionCargo($datos, $guias_nuevas,$guias_guardadas, Auth::id());
                 break;
                 

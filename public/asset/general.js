@@ -630,7 +630,38 @@ class General{
             return tipoCbRemi;
         }
     }
-    async getDataDestGuia(cbBox, idRemitDepa, idDestTipoDocu,idDestDepa ,idDestPorv, idDestDist, idCiudadFinal,idDiasTransito,idViaEnvio,idComplejoDistante){
+    renderComplejoDistante(response, complejoDistante){
+        if (response.complejo && response.complejo.ciudad_alejada != null && response.complejo.ciudad_alejada != 'Ninguno') {
+            complejoDistante.hidden = false;
+            document.querySelector(complejoDistante.dataset.texto).textContent = response.complejo.ciudad_alejada + ' ' + (response.complejo.ciudad_alejada == 'Rural - Alejada' ? '(S/)' : '(%)');
+            document.querySelector(complejoDistante.dataset.input).value = response.complejo.costo_ciudad_alejada;
+            document.querySelector(complejoDistante.dataset.input).disabled = false;
+            document.querySelector(complejoDistante.dataset.input).dataset.tipo = response.complejo.ciudad_alejada;
+        } else {
+            complejoDistante.hidden = true;
+            document.querySelector(complejoDistante.dataset.input).disabled = true;
+        }
+    }
+    async consultaComplejoDistante(distrito, tipo, idComplejoDistante, ciudad = null){
+        let datos = new FormData();
+        datos.append("distrito", distrito);
+        datos.append("tipo",tipo);
+        if (ciudad != null){
+            datos.append("ciudad", ciudad);
+        }
+        try {
+            const response = await this.funcfetch(window.location.origin + "/intranet/comprobante/guias/consulta-distante",datos);
+            if(response.error){
+                return alertify.alert('Error', response.error);
+            }
+            const complejoDistante = document.querySelector(idComplejoDistante);
+            this.renderComplejoDistante(response, complejoDistante);
+        } catch (error) {
+            console.error(error);
+            alertify.error("error al obtener el complejo distante");
+        }
+    }
+    async getDataDestGuia(cbBox, idRemitDepa, idDestTipoDocu,idDestDepa ,idDestPorv, idDestDist, idCiudadFinal,idDiasTransito,idViaEnvio,idComplejoDistante, estado){
         let datos = new FormData();
         datos.append('id', $(cbBox).val());
         datos.append('departamentoOrigen', $(idRemitDepa).find("option:selected").text());
@@ -646,24 +677,15 @@ class General{
             }
             const complejoDistante = document.querySelector(idComplejoDistante);
             if(response.complejo){
-                if (response.complejo.ciudad_alejada != null && response.complejo.ciudad_alejada != 'Ninguno'){
-                    complejoDistante.hidden = false;
-                    document.querySelector(complejoDistante.dataset.texto).textContent = response.complejo.ciudad_alejada + ' ' + (response.complejo.ciudad_alejada == 'Rural - Alejada' ? '(S/)' : '(%)') ;
-                    document.querySelector(complejoDistante.dataset.input).value = response.complejo.costo_ciudad_alejada;
-                    document.querySelector(complejoDistante.dataset.input).disabled = false;
-                    document.querySelector(complejoDistante.dataset.input).dataset.tipo = response.complejo.ciudad_alejada;
-                }else{
-                    complejoDistante.hidden = true;
-                    document.querySelector(complejoDistante.dataset.input).disabled = true;
-                }
+                this.renderComplejoDistante(response,complejoDistante);
             }
-            if (response.prov.length > 0) {
+            if (response.prov.length > 0 && estado < 2) {
                 this.transforData(response.prov, document.querySelector(idDestPorv));
             }
-            if (response.dist.length > 0) {
+            if (response.dist.length > 0 && estado < 2) {
                 this.transforData(response.dist, document.querySelector(idDestDist));
             }
-            if (response.ciudades.length > 0) {
+            if (response.ciudades.length > 0 && estado < 2) {
                 let template2 = "<option></option>";
                 response.ciudades.forEach(c => {
                     template2 += `<option value="${c.id}">${c.nombre_ciudad}</option>`;
@@ -680,8 +702,8 @@ class General{
                     dom.value = valor;
                 }
             }
-            $(idDestDepa).trigger('change');
             $(idDestTipoDocu).trigger('change');
+            $(idDestDepa).trigger('change');
             $(idCiudadFinal).trigger('change');
             if (!response.dias) {
                 document.querySelector(idDiasTransito).value = "";

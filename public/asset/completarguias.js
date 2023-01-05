@@ -40,7 +40,8 @@ function loadPage() {
     let detalleTabla = null,
         idGuia = null,
         newCliCli = false,
-        tipoCbRemi = null;
+        tipoCbRemi = null,
+        estadoGuia = 0;
     general.obtenerDetalleGuia().then(data => {
         detalleTabla = data;
     }).catch(error => {
@@ -64,6 +65,7 @@ function loadPage() {
                     return alertify.error(response.error);
                 }
                 tipoCbRemi = response.datos.tipo_guia;
+                estadoGuia = response.datos.situ;
                 $('#modal-completar-pre-guias .simple-select2, #modal-completar-pre-guias .cb-select2-tags, #modal-completar-pre-guias .cb-ubigeo').val("").trigger('change');
                 idGuia = e.target.dataset.guia;
                 const { listDistDest, listDistRemi, listProvDest, listProvRemi } = response.datos;
@@ -178,6 +180,10 @@ function loadPage() {
         idGuia = null;
         tipoCbRemi = null;
         newCliCli = false;
+        estadoGuia = 0;
+        $('.cb-mult-nuevo').val("").trigger("change");
+        $('#id_editar_cant_comp').val(0);
+
     });
     $(cbOrdenServicio).on('select2:select', function (e) {
         let datosNroGuia = general.valoresFormatoGuia($(this).val());
@@ -190,7 +196,7 @@ function loadPage() {
         tipoCbRemi = await general.getDataRemitenteGuia(this, '#id_editar_remi_prov', '#id_editar_remi_dist', '#id_editar_remi_depa', '#id_editar_remi_tipo_docu','#id_editar_id_invitado');
     });
     $($cbDestinatario).on('select2:select', async function (e) {
-        newCliCli = await general.getDataDestGuia(this, '#id_editar_remi_depa', '#id_editar_dest_tipo_docu', '#id_editar_dest_depa', '#id_editar_dest_prov', '#id_editar_dest_dist', '#id_editar_ciudad_destino_final', '#id_editar_dias_tran', '#id_editar_via_envi','#id-editar-box-complejo-distante');
+        newCliCli = await general.getDataDestGuia(this, '#id_editar_remi_depa', '#id_editar_dest_tipo_docu', '#id_editar_dest_depa', '#id_editar_dest_prov', '#id_editar_dest_dist', '#id_editar_ciudad_destino_final', '#id_editar_dias_tran', '#id_editar_via_envi', '#id-editar-box-complejo-distante', estadoGuia);
     });
     document.getElementById('add-new-detalle').onclick = function (event) {
         event.preventDefault();
@@ -201,6 +207,12 @@ function loadPage() {
             general.eliminarDetalleGuia(event,$detalleGuiaTabla,"1",idGuia);
         }
     }
+    $('.calculo-dia').on('select2:select', function () {
+        general.calculoDiasTrancitoCb('#id_editar_remi_depa', '#id_editar_dest_depa', '#id_editar_dest_prov', '#id_editar_dias_tran', '#id_editar_via_envi');
+        const distrito = $(this).attr("data-cli-cli") == "distrito" ? $(this).val() : $($(this).attr("data-distrito")).val();
+        const tipo = $(this).attr("data-cli-cli") == "distrito" ? "distrito" : "ciudad";
+        general.consultaComplejoDistante(distrito, tipo, "#id-editar-box-complejo-distante", tipo == "ciudad" ? $(this).val() : null);
+    });
     document.getElementById('btn-actualizar-guias').onclick = () => document.getElementById('update-guia').click();    
     const $formEditarGuia = document.getElementById('update-guia-complete');
     $formEditarGuia.onsubmit = function(event){

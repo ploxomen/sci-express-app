@@ -170,7 +170,7 @@ class ModeloGuias extends Model
                 return ['error' => 'La guía u O/S no existe'];
             }
             if($estadoGeneral->situ > 1){
-                $guia['select_comprobantes_update'] = !empty($estadoGeneral->prefijo) ? '1' : '2';
+                $guia['select_comprobantes_update'] = !is_null($estadoGeneral->prefijo) ? '1' : '2';
                 $guia['estado'] = strval($estadoGeneral->estado);
             }
             if (isset($guia['select_comprobantes_update']) && $guia['select_comprobantes_update'] === '1') {
@@ -342,6 +342,8 @@ class ModeloGuias extends Model
                     'remi_dist' => $datosCliente->dist,
                     'remi_nro_docu' => $datos['nroRuc'],
                     'remi_tipo_docu' => 4,
+                    'valor_complejo_distante' => $cluster->costo_ciudad_alejada,
+                    'ciudad_alejada' => $cluster->ciudad_alejada,
                     'tray_env' => $datos['trayecto'][$i],
                     'via_envi' => $datos['traslado'][$i],
                     'dest_depa' => $datos['departamento'][$i],
@@ -410,7 +412,7 @@ class ModeloGuias extends Model
     }
     public static function consultarCluster(string $departamento, string $provincia, string $distrito)
     {
-        return DB::table('cluster AS c')->select("c.*")->join('ciudades_base_cluster AS cb','c.id','=','cb.id_cluster')
+        return DB::table('cluster AS c')->select("c.*","cb.ciudad_alejada","cb.costo_ciudad_alejada")->join('ciudades_base_cluster AS cb','c.id','=','cb.id_cluster')
         ->where(['c.departamento_clu' => $departamento, 'c.provincia_clu' => $provincia, 'cb.ubigeo_distrito' => $distrito, 'cb.activo' => 1])->first();
     }
     public static function consultarNroGuia(string $nroGuia, string $tipoGuia)

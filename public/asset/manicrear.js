@@ -73,7 +73,7 @@ function loadPage() {
                     </tr>`;
                 });
             }else{
-                template = '<tr><td colspan="14" class="text-center">No se encontráron guias pendientes para ser manifestadas</td></tr>'
+                template = '<tr><td colspan="100%" class="text-center">No se encontráron guias pendientes para ser manifestadas</td></tr>'
             }
             tblGuias.innerHTML = template;
             for (const selectGuia of document.querySelectorAll('.select-guias')) {
