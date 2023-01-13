@@ -579,7 +579,7 @@ class ModeloGuias extends Model
         ->where(['prd.estado' => 0])->whereIn("pr.estado",[1,2])->where(function($query) use($idUsuario) {
             $query->where('prd.idConductor','=',$idUsuario)
             ->orWhere("prd.idDealer",'=',$idUsuario);
-        })->groupBy("pr.id")->get();
+        })->groupBy("pr.id", "pr.fechaProgramada")->get();
         foreach ($programaciones as $p) {
             $p->detalles = self::detalleRetornoCargo($p->id);
         }
