@@ -266,27 +266,21 @@
                         </tr>
                     </thead>
                     <tbody id="tabla-detalle">
-                            @for ($i = 0; $i < 1; $i++)
                             <tr>
                                 <td>
                                     <select required data-name="grupo_envio" class="data-anulada form-control form-control-sm simple-select2">
                                         <option value="" hidden>Seleccione una opción</option>
-                                        <option value="MEDICINA" selected>MEDICINA</option>
-                                        <option value="REPUESTOS">REPUESTOS</option>
-                                        <option value="VALORADA">VALORADA</option>
-                                        <option value="OTROS">OTROS</option>
+                                        @foreach ($grupoEnvio as $grupo)
+                                            <option value="{{$grupo}}">{{$grupo}}</option>
+                                        @endforeach
                                     </select>
                                 </td>
                                 <td>
                                     <select required data-name="tipo_envio" class="data-anulada form-control form-control-sm simple-select2">
                                         <option value="" hidden>Seleccione una opción</option>
-                                        <option value="DGR">DGR</option>
-                                        <option value="GENERAL" selected>GENERAL</option>
-                                        <option value="REFRIGERADO">REFRIGERADO</option>
-                                        <option value="VACUNA">VACUNA</option>
-                                        <option value="DOCUMENTOS">DOCUMENTOS</option>
-                                        <option value="EQ COMP. COMUN">EQ COMP. COMUN</option>
-                                        <option value="OTROS">OTROS</option>
+                                        @foreach ($tipoEnvio as $tipoEnvio)
+                                            <option value="{{$tipoEnvio}}">{{$tipoEnvio}}</option>
+                                        @endforeach
                                     </select>
                                 </td>
                                 <td>
@@ -295,32 +289,9 @@
                                 <td>
                                     <select required data-name="embase_embalaje" class="data-anulada form-control form-control-sm simple-select2">
                                         <option></option>
-                                        <option value="EMBASE">A GRANEL</option>
-                                        <option value="EMBALAJE">ATADOS</option>
-                                        <option value="BALDES">BALDES</option>
-                                        <option value="BARRICAS">BARRICAS</option>
-                                        <option value="BIDONES">BIDONES</option>
-                                        <option value="BOBINAS">BOBINAS</option>
-                                        <option value="BOLSAS">BOLSAS</option>
-                                        <option value="BOTELLONES">BOTELLONES</option>
-                                        <option value="CAJAS" selected>CAJAS</option>
-                                        <option value="CAJONES">CAJONES</option>
-                                        <option value="CANASTOS">CANASTOS</option>
-                                        <option value="CANECAS">CANECAS</option>
-                                        <option value="CARRETES">CARRETES</option>
-                                        <option value="CILINDROS">CILINDROS</option>
-                                        <option value="CISTERNAS">CISTERNAS</option>
-                                        <option value="CUÑETES">CUÑETES</option>
-                                        <option value="FARDOS">FARDOS</option>
-                                        <option value="JAULAS">JAULAS</option>
-                                        <option value="LATAS">LATAS</option>
-                                        <option value="PAQUETES">PAQUETES</option>
-                                        <option value="PLATAFORMA">PLATAFORMA</option>
-                                        <option value="ROLLOS">ROLLOS</option>
-                                        <option value="SACOS">SACOS</option>
-                                        <option value="SOBRES">SOBRES</option>
-                                        <option value="TAMBORES">TAMBORES</option>
-                                        <option value="TONELES">TONELES</option>
+                                        @foreach ($embaseEmbalaje as $embase)
+                                            <option value="{{$embase}}">{{$embase}}</option>
+                                        @endforeach
                                     </select>
                                 </td>
                                 <td>
@@ -342,7 +313,6 @@
                                     <input required data-name="volumen" type="number" value="0.00" class="data-anulada data-anulada-decimal form-control form-control-sm" onchange="calcTotal(event,9,'total-vol')" min="0.01" step="0.01">
                                 </td>
                             </tr>
-                            @endfor
                     </tbody>
                     <tfoot>
                         <tr>

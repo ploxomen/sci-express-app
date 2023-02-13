@@ -90,11 +90,19 @@ class InformacionAdicional extends Model
     }
     public static function getTipoEnvio()
     {
-        return ['DGR', 'GENERAL', 'REFRIGERADO', 'VACUNA', 'DOCUMENTOS', 'EQ COMP. COMUN', 'OTROS'];
+        $tipo_envio = DB::table("facturacion_tipo_envio")->select("tipo_envio")->get();
+        $resultado = [];
+        foreach($tipo_envio as $envio){
+            $resultado[] = $envio->tipo_envio;
+        }
+        return $resultado;
+    }
+    public static function rolModuloEditarGuia(){
+        return [1,2,4];
     }
     public static function getEnvaseEmbalaje()
     {
-        return ['EMBASE', 'EMBALAJE', 'BALDES', 'BARRICAS', 'BIDONES', 'BOBINAS', 'BOLSAS', 'BOTELLONES', 'CAJAS', 'CAJONES', 'CANASTOS', 'CANECAS', 'CARRETES', 'CILINDROS', 'CISTERNAS', 'CUÑETES', 'FARDOS', 'JAULAS', 'LATAS', 'PAQUETES', 'PLATAFORMA', 'ROLLOS', 'SACOS', 'SOBRES', 'TAMBORES', 'TONELES'];
+        return ['A GRANEL','ATADOS','BALDES','BALDES', 'BARRICAS', 'BIDONES', 'BOBINAS', 'BOLSAS', 'BOTELLONES', 'CAJAS', 'CAJONES', 'CANASTOS', 'CANECAS', 'CARRETES', 'CILINDROS', 'CISTERNAS','EMBASE', 'EMBALAJE', 'CUÑETES', 'FARDOS', 'JAULAS', 'LATAS', 'PAQUETES','PARIHUELA' ,'PLATAFORMA', 'ROLLOS', 'SACOS', 'SOBRES', 'TAMBORES', 'TONELES'];
     }
     public static function obtenerDiasFiltros()
     {

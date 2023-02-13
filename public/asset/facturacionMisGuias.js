@@ -65,8 +65,13 @@ function loadPage(){
                 }
                 return data;
             }
+        },{
+            data: 'valor_complejo_distante'
+        },{
+            data: 'fact_final'
         }
-        ]
+        ],
+        pageLength : 100
         
     });
     document.getElementById('aplicar-filtros-btn').onclick = function () {  

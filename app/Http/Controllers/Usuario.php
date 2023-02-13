@@ -156,15 +156,20 @@ class Usuario extends Controller
         $tipo_documentos = Documentos::where('estado', '1')->get();
         return view('users.miperfil', compact('modulos', 'tipo_documentos'));
     }
-    public function obtenerRoles(Request $request)
+    public function obtenerRoles()
     {
         try {
-            if ($request->ajax() && Auth::check()) {
-                return response()->json(['roles' => User::getRoles(Auth::id()), 'area' => User::miArea(Auth::id())]);
+            if (!Auth::check()) {
+                return false;
             }
-            return response()->json(['error' => 'No se encontró al usuario']);
+            $adicional = [
+                'area' => User::miArea(Auth::id()),
+                'roles' => User::getRoles(Auth::id())
+            ];
+            setcookie("roles",json_encode($adicional,JSON_FORCE_OBJECT),strtotime("+30 days"),"/");
+            return true;
         } catch (Exception $ex) {
-            return response()->json(['error' => $ex->getMessage()]);
+            return false;
         }
         
     }
@@ -173,15 +178,17 @@ class Usuario extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        setcookie("roles","",time() - 3600);
         return redirect(route('login'));
     }
     public function cambiarRol($id)
     {
+        
         $cambioRol = User::cambiarRol(Auth::id(),$id);
-        if(!$cambioRol){
+        $roles = $this->obtenerRoles();
+        if(!$cambioRol || !$roles){
             return abort(404,'Este rol no se a asignado a tú usuario');
         }
-        
         return redirect(route('home'));
         
     }
@@ -266,6 +273,7 @@ class Usuario extends Controller
                 }
                 User::defaultSelectRol($user->id);
                 $request->session()->regenerate();
+                $this->obtenerRoles();
                 return response()->json(['success' => true]);
             }else{
                 return response()->json(['error' => 'Contraseña temporal incorrecta']);
@@ -287,7 +295,6 @@ class Usuario extends Controller
             $user = User::select("password")->where(['email' => $request->email,'status' => 2])->first();
             if(!empty($user)){
                 if(Hash::check($request->password,$user->password)){
-                    // dd('sii');
                     setcookie('login_first', $request->email,time() + 3600, '/');
                     $message = ['success' => true];
                     return response()->json($message);
@@ -295,12 +302,12 @@ class Usuario extends Controller
             }
             $credenciales = $request->only('email','password');
             $credenciales['status'] = 1;
-
             $remember = $request->has('remember');
             $message = [];
             if(Auth::attempt($credenciales,$remember)){
                 $request->session()->regenerate();
                 User::defaultSelectRol(Auth::id());
+                $this->obtenerRoles();
                 $message = ['success' => true];
             }else{
                 $message = ['not_user' => true];

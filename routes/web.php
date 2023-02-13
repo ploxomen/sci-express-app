@@ -200,6 +200,11 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
         Route::get('guias/mostrar', [Facturacion::class, 'viewFacturacionGuia'])->name('facturacionMisGuias');
         Route::post('guias/ver', [Facturacion::class, 'obtenerFacturacionGuia']);
         Route::get('guias/expor/excel', [Facturacion::class, 'exportarExcelFacturacionGuia'])->name('exportExcelFacturacionGuias');
+        Route::prefix('configuracion')->group(function () {
+            Route::get('cliente', [Facturacion::class, 'viewConfiguracionCliente'])->name('configFacturacionCliente');
+            Route::post('acciones', [Facturacion::class, 'obtenerFacturacionCliente']);
+        });
+
     });
 
     Route::prefix('solicitud')->group(function () {

@@ -6,6 +6,7 @@ use App\Http\Controllers\Ubigeo;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Symfony\Polyfill\Intl\Idn\Info;
 
 class ModeloGuias extends Model
 {
@@ -144,7 +145,6 @@ class ModeloGuias extends Model
             'remi_depa',
             'remi_prov',
             'remi_dist',
-            'id_destinatario',
             'dest_depa',
             'dest_prov',
             'dest_dist',
@@ -201,9 +201,25 @@ class ModeloGuias extends Model
                 $guia['nro_guia'] = intval($guia['nro_guia']);
                 $msj = 'La Orden de Servicio N° <b>' . str_pad($guia['nro_guia'], 7, '0', STR_PAD_LEFT) . '</b> se modificó de manera correcta';
             }
+            $id_cli_cli = $guia['id_destinatario'];
+            $nombreDestinatario = "";
+            if (!empty($cli_bool)) {
+                $nombreDestinatario = $guia['id_destinatario'];
+                $id_cli_cli = DB::table('clientes_de_clientes')->insertGetId([
+                    'tipo_doc' => $guia['dest_tipo_docu'],
+                    'nro_doc' => $guia['dest_nro_docu'],
+                    'nombres' => $nombreDestinatario,
+                    'direccion' => $guia['dest_dire'],
+                    'departamento' => $guia['dest_depa'],
+                    'provincia' => $guia['dest_prov'],
+                    'distrito' => $guia['dest_dist'],
+                    'id_ciudad_final' => empty($guia['id_ciudad_final']) || $guia['id_ciudad_final'] == "null" ? null : $guia['id_ciudad_final']
+                ]);
+            }
+            $guia['id_destinatario'] = $id_cli_cli;
             if($estadoGeneral->situ === 1){
                 $arrayConsulta = [];
-                if (empty($guia['id_ciudad_final'])) {
+                if (empty($guia['id_ciudad_final']) || $guia['id_ciudad_final'] == 'null') {
                     $guia['ciudad_destino_final'] = null;
                     $arrayConsulta = [
                         'ubigeo_distrito' => $guia['dest_dist'],
@@ -211,7 +227,7 @@ class ModeloGuias extends Model
                         'tipo_base' => 'distrito'
                     ];
                 }
-                if (!empty($guia['id_ciudad_final'])) {
+                if (!empty($guia['id_ciudad_final']) && $guia['id_ciudad_final'] != 'null') {
                     $guia['ciudad_destino_final'] = $guia['id_ciudad_final'];
                     $arrayConsulta = [
                         'ubigeo_distrito' => $guia['dest_dist'],
@@ -232,20 +248,7 @@ class ModeloGuias extends Model
                     $guia['via_tras'] = null;
                     $guia['id_cluster'] = null;
                 }
-                $id_cli_cli = $guia['id_destinatario'];
-                if (!empty($cli_bool)) {
-                    $id_cli_cli = DB::table('clientes_de_clientes')->insertGetId([
-                        'tipo_doc' => $guia['dest_tipo_docu'],
-                        'nro_doc' => $guia['dest_nro_docu'],
-                        'nombres' => $guia['id_destinatario'],
-                        'direccion' => $guia['dest_dire'],
-                        'departamento' => $guia['dest_depa'],
-                        'provincia' => $guia['dest_prov'],
-                        'distrito' => $guia['dest_dist'],
-                        'id_ciudad_final' => empty($guia['id_ciudad_final']) ? null : $guia['id_ciudad_final']
-                    ]);
-                }
-                $guia['id_destinatario'] = $id_cli_cli;
+                
             }
             if($estadoGeneral->situ > 1){
                 foreach (self::camposNoCambiados() as $value) {
@@ -295,7 +298,14 @@ class ModeloGuias extends Model
             }
             DB::table('guias')->where($condicionalGuia)->update(['tot_cant' => $tot_cant, 'tot_kg' => $tot_kg, 'tot_vol' => $tot_vol]);
             DB::commit();
-            return ['success' => $msj];
+            $response = ['success' => $msj];
+            if($completar && !empty($cli_bool)){
+                $response['destinatario'] = [
+                    'nombre' => $nombreDestinatario,
+                    'id' => $id_cli_cli
+                ];
+            }
+            return $response;
         } catch (Exception $ex) {
             DB::rollBack();
             return ['error' => $ex->getMessage()];
@@ -331,6 +341,12 @@ class ModeloGuias extends Model
                 if(empty($datosCliente)){
                     return ['error' => 'No se encontró al remitente'];
                 }
+                $ubigeo = new Ubigeo;
+                $transito = InformacionAdicional::obtenerDiasTransito($ubigeo->getNameDepartamento($datosCliente->dpto),$ubigeo->getNameDepartamento($datos['departamento'][$i]),$ubigeo->getNameProvincia($datos['provincia'][$i]),$ubigeo->getNameDistrito($datos['distrito'][$i]));
+                $diasTransito = 1;
+                if(!empty($transito)){
+                    $diasTransito = ($datos['traslado'][$i] == '2' || $datos['traslado'][$i] == '5') ? ceil($transito->total_origen_base_hr_aereo / 24) : ceil($transito->total_hr_origen_destino / 24);
+                }
                 $nuevaGuia = [
                     'fech_emis' => date('Y-m-d'),
                     'preguia' => 1,
@@ -342,6 +358,7 @@ class ModeloGuias extends Model
                     'remi_dist' => $datosCliente->dist,
                     'remi_nro_docu' => $datos['nroRuc'],
                     'remi_tipo_docu' => 4,
+                    'dias_tran' => $diasTransito,
                     'valor_complejo_distante' => $cluster->costo_ciudad_alejada,
                     'ciudad_alejada' => $cluster->ciudad_alejada,
                     'tray_env' => $datos['trayecto'][$i],
@@ -351,6 +368,7 @@ class ModeloGuias extends Model
                     'dest_dist' => $datos['distrito'][$i],
                     'estado' => 1
                 ];
+                
                 if($datos['tipo'] == 'os'){
                     $nuevaGuia['nro_guia'] = $datos['nroGuia'][$i];
                 }else{
@@ -605,7 +623,14 @@ class ModeloGuias extends Model
         DB::beginTransaction();
         try {
             $query = self::queryRetornos($idProgramacion,$idUsuario);
+            $retornos = $query->get();
+            $arrayRetornos = [];
+            foreach ($retornos as $re) {
+                $arrayRetornos[] = $re->idRetornoCargo;
+            }
             $actualizar = $query->update(['rc.estado' =>4,'pr.estado' => 3,'pr.fechaHrTermino' => $fechaHr]);
+            DB::table("detalle_retorno_cargo AS drc")->join("guias AS g","drc.id_guia","=","g.id")
+            ->whereIn("drc.id_retorno_cargo",$arrayRetornos)->update(["g.situ" => 11]);
             DB::commit();
             return ['success' => $actualizar];
         } catch (\Throwable $th) {

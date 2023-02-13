@@ -47,6 +47,19 @@ span,th,td,select,b, select option, input, textarea{
     font-size: 23px;
     color: var(--color-secundario);
 }
+.btn-tabla-facturacion{
+    outline: none;
+    border: none;
+    background: #ffff;
+    padding: 5px;
+    border-radius: 50%;
+    display: block;
+    width: 30px;
+    height: 30px;
+}
+.btn-tabla-facturacion:hover{
+    background: rgba(220, 220, 220, 0.64);
+}
 .badge-notification::before{
     content: attr(data-info);
     display: block;

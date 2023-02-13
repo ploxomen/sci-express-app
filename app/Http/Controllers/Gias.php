@@ -33,7 +33,10 @@ class Gias extends Controller
         $nro_guia_result = $nroGuiasSCI['nroGuia'];
         $hoy = date('Y-m-d');
         $antes = date('Y-m-d',strtotime($hoy . '-2 days'));
-        return view('comprobante.guias',compact('nro_guia_result','cli_cli','clientes','departamentos','hoy','trayecto','via_envios', 'nro_os','tipo_documentos','modulos','antes'));
+        $embaseEmbalaje = InformacionAdicional::getEnvaseEmbalaje();
+        $grupoEnvio = InformacionAdicional::getGrupoEnvio();
+        $tipoEnvio = InformacionAdicional::getTipoEnvio();
+        return view('comprobante.guias',compact('nro_guia_result','cli_cli','clientes','departamentos','hoy','trayecto','via_envios', 'nro_os','tipo_documentos','modulos','antes','embaseEmbalaje','grupoEnvio','tipoEnvio'));
     }
     public function generarNroGuiaSCI()
     {

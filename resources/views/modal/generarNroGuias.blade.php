@@ -24,6 +24,7 @@
                             <th>DEPARTAMENTO</th>
                             <th>PROVINCIA</th>
                             <th>DISTRITO</th>
+                            <th>CIUDAD <br> FINAL</th>
                         </tr>
                     </thead>
                     <tbody id="tablaNuevaGuia">
@@ -63,7 +64,11 @@
                                 </select>
                             </td>
                             <td style="min-width: 150px; max-width: 150px;">
-                                <select class="form-control cb-ubigeo" name="distrito[]" required id="idDestiDist1">
+                                <select class="form-control cb-ubigeo select-ciudad" name="distrito[]" required id="idDestiDist1" data-consulta="ciudad" data-ciudades="#idDestiCiudad1">
+                                </select>
+                            </td>
+                            <td style="min-width: 150px; max-width: 150px;">
+                                <select class="form-control cb-ubigeo" data-consulta="ciudad final" name="ciudadFinal[]" id="idDestiCiudad1">
                                 </select>
                             </td>
                             <td>

@@ -71,7 +71,7 @@ function loadPage(){
         inputOneNuevaGuia.value = $txtNroInicioSCI.value;
         const limite = +$txtCantiGuia.value - 1;
         for (let index = 1; index <= limite; index++) {
-            generarFilasNuevas();            
+            generarFilasNuevas();     
         }
         $('#generar-nro-guias').modal("show");
     });
@@ -83,9 +83,9 @@ function loadPage(){
     function borrarTrTablaGenerarGuias() {
         $('#generar-nro-guias .simple-select2, #generar-nro-guias .cb-ubigeo').select2('destroy');
         [...$tablaNuevaGuia.children].forEach((e,k) => {
-        if(k > 0){
-            e.remove();
-        }
+            if(k > 0){
+                e.remove();
+            }
         });
         for (const elemento of $tablaNuevaGuia.children[0].querySelectorAll("select")) {
             if(elemento.classList.contains("simple-select2")){
@@ -119,7 +119,7 @@ function loadPage(){
             width: '100%',
             placeholder: 'Seleccione una opción'
         });
-        general.selectUbigeoCli($tablaNuevaGuia);
+        // general.selectUbigeoCli($tablaNuevaGuia);
     }
     let $preguiaFormPrevius = document.querySelector("#frmPreGuiaPrevius"),
         $btnPreviusForm = document.querySelector("#btnFormSendPrev"),
@@ -282,6 +282,7 @@ function loadPage(){
                         elemento.id = "idDestiDepart" + nroIdGuias;
                         elemento.dataset.info = "idDestiProv" + nroIdGuias;
                         elemento.dataset.infoDistrito = "idDestiDist" + nroIdGuias;
+                        
                     break;
                     case 'distrito':
                         let template = ""
@@ -292,9 +293,14 @@ function loadPage(){
                         elemento.id = "idDestiProv" + nroIdGuias;
                         elemento.dataset.info = "idDestiDist" + nroIdGuias;
                     break;
-                    default:
+                    case 'ciudad':
                         elemento.innerHTML = "";
                         elemento.id = "idDestiDist" + nroIdGuias;
+                        elemento.dataset.ciudades = "#idDestiCiudad" + nroIdGuias;
+                    break;
+                    default:
+                        elemento.innerHTML = "";
+                        elemento.id = "idDestiCiudad" + nroIdGuias;
                     break;
                 }
             }
@@ -310,8 +316,14 @@ function loadPage(){
             width: '100%',
             placeholder: 'Seleccione una opción'
         });
-        general.selectUbigeoCli($tablaNuevaGuia);
+        $("#idDestiDist" + nroIdGuias).on("select2:select",function(e){
+            general.getCiudadesFinales($(this).val(), $(this).attr('data-ciudades'));
+        });
+        general.selectUbigeoCli(nuevoTr);
     }
+    $('#idDestiDist1').on("select2:select",function(e){
+        general.getCiudadesFinales($(this).val(), $(this).attr('data-ciudades'));
+    });
     function nuevoNumeroGuia(value){
         const radio = document.querySelector(".changeNroSCI:checked");
         let resultado = "";

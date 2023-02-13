@@ -162,5 +162,13 @@ class ModeloCluster extends Model
     {
         return DB::table('cluster AS c')->select('u.id','c.provincia_clu','c.id AS id_cluster','u.name','u.last_name','u.status')->join('usuarios AS u','c.id_usuario','=','u.id')->where(['c.activo' => 1])->get();
     }
+    public static function obtenerCiudadesBase(){
+        $ciudades = DB::table("ciudades_base_cluster AS cl")->select("cl.tipo_base","cl.ubigeo_distrito","c.nombre_ciudad")->leftJoin("ciudades AS c","cl.id_ciudad","=","c.id")
+        ->where(['cl.base' => 1,'cl.activo' => 1])->get();
+        foreach ($ciudades as $ciudad) {
+            $ciudad->nombre_ciudad = mb_strtoupper($ciudad->tipo_base == "distrito" ? (new Ubigeo)->getNameDistrito($ciudad->ubigeo_distrito) : $ciudad->nombre_ciudad,"UTF-8");
+        }
+        return $ciudades;
+    }
     
 }

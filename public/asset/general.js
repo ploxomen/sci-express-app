@@ -16,6 +16,7 @@ class General{
     selectUbigeoCli(element){
         let $cbUbigeos = element.querySelectorAll('.cb-ubigeo');
         for (const element of $cbUbigeos) {
+            
             $(element).on('select2:select',async (e)=>{
                 let cbUbigeo = document.getElementById(e.target.dataset.info);
                 if(!cbUbigeo){
@@ -397,14 +398,18 @@ class General{
             }
             const tipoAreos = ["AEREO","AEREA"];
             const requerido = tipoAreos.indexOf(e.tipo_trayecto) >= 0 ? '' : 'required';
+            const nroGuiaEmbarque = e.prefijo_guia_embarque == null && e.nro_guia_embarque == null ? '' : e.prefijo_guia_embarque.toString().padStart(3, '0') + '-' + e.nro_guia_embarque.toString().padStart(7, '0');
             template += `
                         <li class='informe-ciudades' data-ciudad="${e.id}" data-trayecto="${e.tipo_trayecto}">
                             <div class="form-row">
                                 <div class="form-group col-7 col-lg-4">
                                     <b>Ciudad Base:</b><span> ${e.nombreciudad}</span>
                                 </div>
-                                <div class="form-group col-5 col-lg-8">
+                                <div class="form-group col-5 col-lg-4">
                                     <b>Envio:</b><span> ${e.tipo_trayecto}</span>
+                                </div>
+                                <div class="form-group col-12 col-lg-4">
+                                    <input type="text" required pattern="[0-9]{3}[-][0-9]{7}" id="id_guia_embarque_${e.id}" value="${nroGuiaEmbarque}" maxlength="11" class="form-control form-control-sm informe-embarque" placeholder="N° guía embarque">
                                 </div>
                                 <div class="form-group col-12 col-md-6 col-lg-5">
                                     <label for="id_comprobantes_${e.id}">Comprobantes ${requerido != '' ? '<small class="text-danger">*</small>' : ''}</label>
@@ -441,14 +446,9 @@ class General{
                                 </div>
                                 `
                                 if (e.guiasEmbarque) {
-                                    const nroGuiaEmbarque = e.prefijo_guia_embarque == null && e.nro_guia_embarque == null ? '' : e.prefijo_guia_embarque.toString().padStart(3, '0') + '-' + e.nro_guia_embarque.toString().padStart(7, '0');
                                     template += `
-                                                <div class="col-12 form-group border-top pt-2"></div>
-                                                <div class="col-12 form-group col-md-6 col-lg-8">
-                                                    <h6 class="text-info mb-0">GUÍA DE EMBARQUE - ${e.nombreciudad}</h6>
-                                                </div>
-                                                <div class="col-12 col-md-6 form-group col-lg-4">
-                                                    <input type="text" required pattern="[0-9]{3}[-][0-9]{7}" id="id_guia_embarque_${e.id}" value="${nroGuiaEmbarque}" maxlength="11" class="form-control form-control-sm informe-embarque" placeholder="N° guía embarque">
+                                                <div class="form-group col-12">
+                                                    <span class="text-info">GUÍAS/OS RELACIONADAS CON LA CIUDAD BASE ${e.nombreciudad}</span>
                                                 </div>
                                                 <div class="form-group col-12">
                                                         `
@@ -672,11 +672,11 @@ class General{
                 return false;
             }
             if (!response.datos) {
-                this.clearCliDeCli(idDestTipoDocu, idDestPorv, idDestDist, idCiudadFinal);
+                this.clearCliDeCli(idDestTipoDocu, idDestPorv, idDestDist, idCiudadFinal,estado);
                 return true;
             }
             const complejoDistante = document.querySelector(idComplejoDistante);
-            if(response.complejo){
+            if(response.complejo && estado < 2){
                 this.renderComplejoDistante(response,complejoDistante);
             }
             if (response.prov.length > 0 && estado < 2) {
@@ -696,7 +696,7 @@ class General{
                 if (Object.hasOwnProperty.call(response.datos, key)) {
                     const valor = response.datos[key];
                     const dom = document.querySelector(`[data-cli-cli="${key}"]`);
-                    if (!dom) {
+                    if (!dom || (estado > 1 && key == "departamento")) {
                         continue;
                     }
                     dom.value = valor;
@@ -705,10 +705,11 @@ class General{
             $(idDestTipoDocu).trigger('change');
             $(idDestDepa).trigger('change');
             $(idCiudadFinal).trigger('change');
-            if (!response.dias) {
+            if (!response.dias && estado < 2) {
                 document.querySelector(idDiasTransito).value = "";
                 alertify.error('no se encontró los dias de transito para este destino');
-            }else{
+            }
+            if(response.dias && estado < 2){
                 this.calcularDiasTransito(idViaEnvio, idDiasTransito, response.dias.total_origen_base_hr_aereo, response.dias.total_hr_origen_destino);
             }
             return false;
@@ -736,15 +737,21 @@ class General{
         }
         this.calcularDiasTransito(idViaEnvi, idDiasTran, response.dias.total_origen_base_hr_aereo, response.dias.total_hr_origen_destino);
     }
-    clearCliDeCli(idDestTipoDocu,idDestPorv,idDestDist,idCiudadFinal) {
+    clearCliDeCli(idDestTipoDocu,idDestPorv,idDestDist,idCiudadFinal,estado) {
         for (const e of document.querySelectorAll(`[data-cli-cli]`)) {
+            if(estado >= 2 && ['departamento','provincia','distrito','id_ciudad_final'].indexOf(e.dataset.cliCli) >= 0){
+                continue;
+            }
             e.value = "";
         }
-        $('.cb-dest').val("").trigger("change");
         $(idDestTipoDocu).val("").trigger("change");
-        $(idDestPorv).html("");
-        $(idDestDist).html("");
-        $(idCiudadFinal).html("");
+        if(estado < 2){
+            $('.cb-dest').val("").trigger("change");
+            $(idDestPorv).html("");
+            $(idDestDist).html("");
+            $(idCiudadFinal).html("");
+        }
+        
     }
     calcularDiasTransito(idViaEnvio,domId, aereo, terrestre) {
         let diasEnvio = 0;
@@ -1137,12 +1144,24 @@ class General{
                     cancel: 'No'
                 }
             });
-            nuevoCliente.set('onok', function () {
+            nuevoCliente.set('onok', () => {
                 datos.append('add_cli_bool', true);
                 datos.append('add_cli_cli',true);
+                if(!datos.has('dest_depa')){
+                    datos.append("dest_depa",$('#id_editar_dest_depa').val())
+                }
+                if(!datos.has('dest_prov')){
+                    datos.append("dest_prov",$('#id_editar_dest_prov').val())
+                }
+                if(!datos.has('dest_dist')){
+                    datos.append("dest_dist",$('#id_editar_dest_dist').val())
+                }
+                if(!datos.has('id_ciudad_final') && ($('#id_editar_ciudad_destino_final').val() != null || $('#id_editar_ciudad_destino_final').val() != "")){
+                    datos.append("id_ciudad_final",$('#id_editar_ciudad_destino_final').val())
+                }
                 this.updateGuia(datos,url,modal,tablaGuias);
             });
-            nuevoCliente.set('oncalcel', function () {
+            nuevoCliente.set('oncalcel', ()=>{
                 datos.append('add_cli_bool', false);
                 this.updateGuia(datos,url,modal,tablaGuias);
             });
@@ -1160,6 +1179,9 @@ class General{
             if (response.alerta) {
                 alertify.alert('Alerta', response.alerta);
                 return
+            }
+            if(response.destinatario){
+                document.querySelector("#id_editar_id_destinatario").append(new Option(response.destinatario.nombre,response.destinatario.id)); 
             }
             alertify.success(response.success);
             tablaGuias.draw();

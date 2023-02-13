@@ -108,13 +108,29 @@
                         <button class="btn-info-menu dropdown-toggle"  data-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-user-circle"></i>
                         </button>
+                        @php
+                            if(!isset($_COOKIE['roles'])){
+                                \Auth::logout();
+                                \Request::session()->invalidate();
+                                \Request::session()->regenerateToken();
+                                redirect(route('login'));
+                                die();
+                            }
+                            $roles = json_decode($_COOKIE['roles']);
+                        @endphp
+                        
                         <div class="dropdown-menu dropdown-menu-right">
-                            <span class="dropdown-item-text"><span class="text-primary">Área:</span><br><span id="text_area_index"></span></span>
+                            <span class="dropdown-item-text"><span class="text-primary">Área:</span><br><span id="text_area_index">{{empty($roles->area) ? 'No definido' : $roles->area->area}}</span></span>
                             <div class="dropdown-divider"></div>
                             <h6 class="dropdown-header" id="lista_roles_index">Roles</h6>
+                            @foreach ($roles->roles as $rol)
+                                <a class="dropdown-item {{$rol->active ? "active" : ""}}" href="{{route('cambiarRol',$rol->id)}}">
+                                    <span>{{$rol->rol}}</span>
+                                </a>
+                            @endforeach
                             <h6 class="dropdown-header">Otros</h6>
-                            <a class="dropdown-item" href="{{route('miPerfil')}}">Mi perfil</a>
-                            <a href="{{route('closeSesion')}}" class="dropdown-item">Cerrar sesión</a>
+                            <a class="dropdown-item" href="{{route('miPerfil')}}"><span>Mi perfil</span></a>
+                            <a href="{{route('closeSesion')}}" class="dropdown-item"><span>Cerrar sesión</span></a>
                         </div>
                     </div>
                     

@@ -15,7 +15,7 @@
             <div class="form-group col-12 col-md-6 col-lg-4">
                 <label for="txtNumeroRuc">N° RUC</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" required id="txtNumeroRuc" maxlength="11" minlength="11">
+                    <input type="text" class="form-control" required id="txtNumeroRuc" maxlength="11" minlength="11" value="20300795821">
                     <div class="input-group-prepend">
                         <button type="button" class="btn btn-sm btn-success" id="btnBuscarRemitente" title="Buscar remitente con el número de RUC">
                             <i class="fas fa-search"></i>

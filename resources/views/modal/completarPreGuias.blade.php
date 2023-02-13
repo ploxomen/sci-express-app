@@ -27,7 +27,7 @@
               <div class="form-group col-12 col-md-6 col-lg-3 col-xl-2">
                   <label for="id_editar_resp_pago">Responsable del pago <small class="text-danger">*</small></label>
                   <select name="resp_pago" id="id_editar_resp_pago" class="form-control form-control-sm" required>
-                      <option value="REMITENTE">REMITENTE</option>
+                      <option value="REMITENTE" selected>REMITENTE</option>
                       <option value="DESTINATARIO">DESTINATARIO</option>
                   </select>
               </div>

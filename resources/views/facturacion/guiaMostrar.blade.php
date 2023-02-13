@@ -17,7 +17,6 @@
         <div class="form-group col-12 col-md-6 col-lg-3">
             <label for="id_filtro_cliente">Cliente</label>
             <select name="cliente" id="id_filtro_cliente" class="form-control filtros simple-select2" required>
-                <option value="0">TODOS</option>
                 @foreach ($clientes as $cli)
                     <option value="{{$cli->id}}">{{$cli->nom_cli}}</option>
                 @endforeach
@@ -26,7 +25,6 @@
         <div class="form-group col-12 col-md-6 col-lg-3 col-xl-2">
             <label for="id_tray_env">Via Traslado</label>
             <select name="tray_env" id="id_tray_env" class="form-control filtros simple-select2" required>
-                <option value="0">TODOS</option>
                 @foreach ($via_envios as $via)
                     <option value="{{$via->id}}">{{$via->envio}}</option>
                 @endforeach
@@ -61,6 +59,8 @@
                 <th>Descripcion</th>
                 <th>Peso</th>
                 <th>Peso Volumen</th>
+                <th>Costo<br>Adicional<br>(FAU)</th>
+                <th>FACT<br>Final<br>Servicio</th>
             </tr>
         </thead>
         <tbody></tbody>

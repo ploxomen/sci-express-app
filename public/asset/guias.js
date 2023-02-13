@@ -85,9 +85,7 @@ function pageLoaded(){
             let objeto = new Object();
             let deta = e.querySelectorAll('input, select, textarea');
             for (const ele2 of deta) {
-                if (ele2.value && (ele2.value != '0.00' || ele2.value != '0')){
-                    objeto[ele2.dataset.name] = ele2.value;
-                }
+                objeto[ele2.dataset.name] = ele2.value;
             }
             if(!general.isObjEmpty(objeto)){
                 detalles.push(objeto);

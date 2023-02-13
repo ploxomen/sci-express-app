@@ -63,8 +63,6 @@
     .img-delivery button i{
         color: #ffffff;
     }
-
-
 </style>
 @section('body')
 <section class="p-2 bg-white">
@@ -114,6 +112,7 @@
                 <th>N° Guia</th>
                 <th>Fecha Emis</th>
                 <th>Fecha Tras</th>
+                <th>Comprobantes</th>
                 <th>Días Trans</th>
                 <th>Nom Remi</th>
                 <th>Nom Consig</th>

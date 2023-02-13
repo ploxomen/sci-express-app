@@ -157,6 +157,10 @@ function loadPage() {
                         if (!dom) {
                             continue;
                         }
+                        if(key == 'resp_pago' && valor == null){
+                            $('#id_editar_resp_pago').val("REMITENTE").trigger("change");
+                            continue;
+                        }
                         dom.value = valor;
                     }
                 }
@@ -194,6 +198,7 @@ function loadPage() {
     });
     $($cbCliente).on('select2:select', async function (e) {
         tipoCbRemi = await general.getDataRemitenteGuia(this, '#id_editar_remi_prov', '#id_editar_remi_dist', '#id_editar_remi_depa', '#id_editar_remi_tipo_docu','#id_editar_id_invitado');
+        
     });
     $($cbDestinatario).on('select2:select', async function (e) {
         newCliCli = await general.getDataDestGuia(this, '#id_editar_remi_depa', '#id_editar_dest_tipo_docu', '#id_editar_dest_depa', '#id_editar_dest_prov', '#id_editar_dest_dist', '#id_editar_ciudad_destino_final', '#id_editar_dias_tran', '#id_editar_via_envi', '#id-editar-box-complejo-distante', estadoGuia);

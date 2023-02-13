@@ -37,7 +37,13 @@ function loadPage() {
                 data: 'fecha_emision'
             },
             {
-                data: 'fecha_traslado'
+                data: 'fecha_traslado',
+            },
+            {
+                data: 'nro_comp_cli',
+                render : function(data){
+                    return data.replace(/;/i,"<br>");
+                }
             },
             {
                 data: 'dias_tran'
@@ -510,7 +516,7 @@ function loadPage() {
     const $formEditarGuia = document.getElementById('update-guia-complete');
     $formEditarGuia.onsubmit = function(event){
         event.preventDefault();
-        general.actualizarDatos($formEditarGuia,tipoCbRemi,datosGlobales.idGuia,document.getElementById('id_estado').value,newCliCli,'update-total-guia','#editar-guias',$cbCliente,tablaGuias);
+        general.actualizarDatos($formEditarGuia,tipoCbRemi,datosGlobales.idGuia,document.getElementById('id_editar_estado').value,newCliCli,'update-total-guia','#editar-guias',$cbCliente,tablaGuias);
     }
     
     $($cbCliente).on('select2:select', async function (e) {

@@ -110,25 +110,5 @@ function loadPage(){
     $('.cb-tipo-doc').on('change.select2',function(e){
         general.validarMinMaxTipoDocumento($(this).data('input'),$(this).val());
     });
-    async function obtenerRoles() {  
-        const response = await general.funcfetch(window.location.origin + '/intranet/usuarios/obtener/roles',null);
-        if(response.error){
-            alertify.alert('Error',response.error);
-        }
-        if(response.roles){
-            response.roles.forEach(r => {
-                let botonRol = document.createElement("a");
-                botonRol.className = `dropdown-item ${r.active == 1 ? 'active' : ''}`;
-                botonRol.href = `${window.location.origin + '/intranet/usuarios/cambiar/rol/' + r.id}`;
-                botonRol.text = r.rol;
-                document.getElementById('lista_roles_index').insertAdjacentElement('afterend',botonRol);
-            });
-        }
-        if(response.area){
-            document.getElementById('text_area_index').textContent = response.area.area;
-        }
-        
-    }
-    obtenerRoles();
 }
 window.addEventListener('DOMContentLoaded',loadPage);

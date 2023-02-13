@@ -66,6 +66,7 @@ function loadPage(){
         e.preventDefault();
         let response = await general.funcfetch(window.location.origin + '/intranet/comprobante/guias/actualizar-informes');
         alertify.success(response.success);
+        tablaEmbarques.draw();
     }
     general.obtenerFlestes();
     let listaManifiestos = document.getElementById('lista-manifiestos'),
