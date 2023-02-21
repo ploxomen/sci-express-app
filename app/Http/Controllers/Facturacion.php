@@ -10,6 +10,7 @@ use App\Models\ModeloCluster;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class Facturacion extends Controller
 {
@@ -23,18 +24,52 @@ class Facturacion extends Controller
     }
     public function viewConfiguracionCliente()
     {
-        // $ciudades = ModeloCluster::obtenerCiudadesBase();
-        // $newCiudades = [];
-        // foreach($ciudades as $ciudad){
-        //     $newCiudades[] = ["ciudad" => $ciudad->nombre_ciudad];
-        // }
-        // ModelFacturacion::agregarCiudades($newCiudades);
-        // $ciudades = ModelFacturacion::mostrarCiudades();
-        $clientes = Clientes::getClientesFiles();
+        $clientes = Clientes::getClientesFacturacion();
         $viaEnvio = InformacionAdicional::viaEnvio();
         $modulos = User::getModulos(Auth::id());
-        // dd($clientes);
         return view("facturacion.configuracionCliente",compact("modulos","clientes","viaEnvio"));
+    }
+    public function viewConfiguracionCluster()
+    {
+        $clusters = ModeloCluster::obtenerTodosClustersFacturacion();
+        $modulos = User::getModulos(Auth::id());
+        return view("facturacion.configuracionCluster",compact("modulos","clusters"));
+    }
+    public function facturacionCluster(Request $request)
+    {
+        if(!$request->ajax()){
+            return response()->json(['error' => 'peticion erronea']);
+        }
+        $response = [];
+        switch ($request->tipo) {
+            case 'obtenerFacturacion':
+                $response = ModelFacturacion::obtenerFacturacionCluster($request->cluster);
+            break;
+            case 'agregar-cabecera':
+                $datos = $request->all();
+                unset($datos['tipo']);
+                $response = ModelFacturacion::agregarCabeceraFacClus($datos,Auth::id());
+            break;
+            case 'agregar-valor':
+                $resultado = ModelFacturacion::agregarValorCabeceraCluster($request->cabecera,$request->tipoEnvio,$request->monto);
+                $response = ['success' => $resultado ? 'monto actualizado correctamente' : 'no se actualizo el monto'];
+            break;
+            case 'mostrar-costo-editar':
+                $response = ModelFacturacion::mostrarCabeceraEditarCostoCluster($request->cluster,$request->cabecera);
+            break;
+            case 'editar-cabecera':
+                $datos = $request->all();
+                unset($datos['tipo']);
+                $response = ModelFacturacion::editarCabeceraCluster(Auth::id(),$datos);
+            break;
+            case 'eliminar-costo-editar':
+                $response = ModelFacturacion::eliminarCabeceraCostoCluster($request->cabecera,$request->cluster);
+            break;
+            case 'importarData':
+                $response = ModelFacturacion::importarDatosCluster($request->cluster,$request->cluster2,Auth::id());
+            break;
+        }
+        return response()->json($response);
     }
     public function obtenerFacturacionCliente(Request $request){
         if($request->ajax()){
@@ -44,14 +79,14 @@ class Facturacion extends Controller
                     $response = ModelFacturacion::mostrarFacturacionClientes($request->cliente);
                     break;
                 case 'agregar-cabecera':
-                        $datos = $request->all();
-                        unset($datos['tipo']);
-                        $response = ModelFacturacion::agregarCabecera(Auth::id(),$datos);
-                    break;
+                    $datos = $request->all();
+                    unset($datos['tipo']);
+                    $response = ModelFacturacion::agregarCabecera(Auth::id(),$datos);
+                break;
                 case 'agregar-valor':
                     $datos = $request->all();
                     unset($datos['tipo']);
-                    $response = ModelFacturacion::agregarModificarValorFactCli($request->cabecera,$request->ciudad,$request->monto);
+                    $response = ModelFacturacion::agregarModificarValorFactCli($request->cabecera,$request->ciudad,$request->monto,'0.00',0);
                     if($response){
                         $response = ['success' => 'valor modificado correctamente'];
                     }
@@ -88,6 +123,9 @@ class Facturacion extends Controller
                 break;
                 case 'cambiar-valor-costo':
                     $response = ModelFacturacion::cambiarValorCosto($request->columna,$request->fila,$request->valor);
+                break;
+                case 'importarData':
+                    $response = ModelFacturacion::importarDatos($request->cliente,$request->cliente2,Auth::id(),$request->has('cabecera'));
                 break;
             }
             return response()->json($response);

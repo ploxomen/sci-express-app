@@ -16,6 +16,13 @@ class Clientes extends Model
     {
         return Clientes::select('id','nro_doc','nom_cli')->where(['estado' => 1])->get();
     }
+    public static function getClientesFacturacion()
+    {
+        $clientes = Clientes::select('id','nro_doc','nom_cli')->where(['estado' => 1,'doc_ident' =>4]);
+        $clienteDos = Clientes::select('id','nro_doc','nom_cli')->where(['nro_doc' => 'CLIENTE','nom_cli' =>'PERSONA NATURAL'])->union($clientes)->get();
+        return $clienteDos;
+
+    }
     public static function deleteProveedor($id_proveedor, $id_cliente)
     {
         return DB::table('proveedor_clientes')->where(['id_cliente' => $id_cliente, 'id' => $id_proveedor])->update(['activo' => 0]);

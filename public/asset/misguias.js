@@ -42,6 +42,9 @@ function loadPage() {
             {
                 data: 'nro_comp_cli',
                 render : function(data){
+                    if(data == null || data == ""){
+                        return 'Sin comprobantes';
+                    }
                     return data.replace(/;/i,"<br>");
                 }
             },

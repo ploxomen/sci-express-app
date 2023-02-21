@@ -32,7 +32,7 @@ class ModelFacturacion extends Model
     public static function mostrarFacturacionClientes($idCliente){
         $ciudadesBase = self::mostrarCiudades();
         $cabeceras = DB::table("facturacion_cabezera_cliente AS fc")
-        ->select("fc.id","fc.id_cliente","fc.id_via_envio","fc.numero","fc.tipo_calculo","fc.monto","fc.peso_maximo","fc.descripcion","ve.envio")
+        ->select("fc.id","fc.id_cliente","fc.id_via_envio","fc.numero","fc.tipo_calculo","fc.peso_maximo","fc.descripcion","ve.envio")
         ->join("via_envio AS ve","fc.id_via_envio","=","ve.id")->where("fc.id_cliente",$idCliente)->orderBy("fc.numero")->get();
         $facturacion = [];
         foreach($ciudadesBase as $ciudad){
@@ -60,28 +60,26 @@ class ModelFacturacion extends Model
                 return ['error' => 'No se encontró ningun número base, por favor establesca una base para poder agregar una columna de tipo adicional'];
             }
         }
+        $montoFau = $datos['montofau'];
+        $monto = $datos['monto'];
         $datos['fecha_creada'] = now();
         $datos['usuario_creado'] = $idUsuario;
+        unset($datos['montofau']);
+        unset($datos['monto']);
         $idCabecera = DB::table("facturacion_cabezera_cliente")->insertGetId($datos);
         foreach (self::mostrarCiudades() as $ciudad) {
-            self::agregarModificarValorFactCli($idCabecera,$ciudad->id,$datos['monto']);
+            self::agregarModificarValorFactCli($idCabecera,$ciudad->id,$monto,$montoFau,$ciudad->fau);
         }
         return ['success' => 'Columna agregada correctamente'];
     }
-    public static function agregarModificarValorFactCli($idCabecera,$idCiudad,$monto)
+    public static function agregarModificarValorFactCli($idCabecera,$idCiudad,$monto,$montoFau,$fau)
     {
-        $valor = DB::table("facturacion_cliente_valor")->where(['id_cabecera' => $idCabecera, 'id_ciudad' => $idCiudad]);
-        $response = false;
-        if(!empty($valor->first())){
-            $response = $valor->update(['valor' => $valor]);
-        }else{
-            $response = $valor->insert(['id_cabecera' => $idCabecera, 'id_ciudad' => $idCiudad,'valor' => $monto]);
-        }
+        $response =  DB::table("facturacion_cliente_valor")->updateOrInsert(['id_cabecera' => $idCabecera, 'id_ciudad' => $idCiudad],['valor' => $fau ? $montoFau : $monto]);
         return $response;
     }
     public static function mostrarCabeceraEditar(int $idCabecera, int $idCliente)
     {
-        return ["datos" => DB::table("facturacion_cabezera_cliente")->selectRaw("id_via_envio AS 'lista-via-envio',numero AS 'id_cabecera_numero', tipo_calculo AS 'lista-tipo-cabecera',monto AS 'id-monto-default',peso_maximo AS 'id-kg-base',descripcion AS 'id_descripcion'")->where(['id' => $idCabecera, 'id_cliente' => $idCliente])->first(), "maximo" => self::mostrarMaximoCabecera($idCliente)->numero];
+        return ["datos" => DB::table("facturacion_cabezera_cliente")->selectRaw("id_via_envio AS 'lista-via-envio',numero AS 'id_cabecera_numero', tipo_calculo AS 'lista-tipo-cabecera',peso_maximo AS 'id-kg-base',descripcion AS 'id_descripcion'")->where(['id' => $idCabecera, 'id_cliente' => $idCliente])->first(), "maximo" => self::mostrarMaximoCabecera($idCliente)->numero];
     }
     public static function mostrarMaximoCabecera(int $idCliente)
     {
@@ -119,6 +117,7 @@ class ModelFacturacion extends Model
         $ciudades = ModeloCluster::obtenerCiudadesBase();
         $ciudadesBase = self::mostrarCiudades();
         $ciudadesAgregar = [];
+        $ciudadEliminar = [];
         foreach ($ciudades as $ciudad) {
             $nomCiudad = $ciudad->nombre_ciudad;
             $exist = array_filter($ciudadesBase->toArray(),function($c)use($nomCiudad){
@@ -127,9 +126,22 @@ class ModelFacturacion extends Model
             if(empty($exist)){
                 $ciudadesAgregar[] = ['ciudad' => $nomCiudad];
             }
+            DB::table("facturacion_ciudades")->updateOrInsert([
+                'ciudad' => $nomCiudad
+            ],['fau' => $ciudad->ciudad_alejada != 'Ninguno' ? 1 : 0]);
         }
-        DB::table("facturacion_ciudades")->insert($ciudadesAgregar);
-        return ['ciudades' => $ciudadesAgregar];
+        foreach ($ciudadesBase as $ciudad) {
+            $nomCiudad = $ciudad->ciudad;
+            $exist = array_filter($ciudades->toArray(),function($c)use($nomCiudad){
+                return $c->nombre_ciudad == $nomCiudad;
+            });
+            if(empty($exist)){
+                $ciudadEliminar[] = ['ciudad' => $nomCiudad];
+                DB::table("facturacion_cliente_valor")->where('id_ciudad',$ciudad->id)->delete();
+                DB::table("facturacion_ciudades")->where('id',$ciudad->id)->delete();
+            }
+        }
+        return ['ciudades' => $ciudadesAgregar,'ciudadesEliminar' => $ciudadEliminar];
     }
     public static function valorMaximo()
     {
@@ -213,5 +225,187 @@ class ModelFacturacion extends Model
         }
         return ['success' => true];
     }
-    
+    public static function importarDatosCluster(int $cluster, int $cluster2, int $idUsuario)
+    {
+        $cabeceras = DB::table("facturacion_cluster_cabecera")->where('id_cluster',$cluster)->get();
+        DB::beginTransaction();
+        try {
+            DB::table("facturacion_cluster_valor AS fc")->join("facturacion_cluster_cabecera AS fce","fc.id_cabecera",'=','fce.id')->where(['fce.id_cluster' => $cluster2])->delete();
+            DB::table("facturacion_cluster_cabecera")->where(['id_cluster' => $cluster2])->delete();
+            foreach ($cabeceras as $cabecera) {
+                $cabeceraArray = [
+                    'id_cluster' => $cluster2,
+                    'kg_minimo' => $cabecera->kg_minimo,
+                    'kg_maximo' => $cabecera->kg_maximo,
+                    'kg_base' => $cabecera->kg_base,
+                    'tipo_calculo' => $cabecera->tipo_calculo,
+                    'usuario_creado' => $idUsuario
+                ];
+                $idNewCabecera = DB::table("facturacion_cluster_cabecera")->insertGetId($cabeceraArray);
+                $consultas = DB::table('facturacion_cluster_valor')->where('id_cabecera',$cabecera->id)->get();
+                foreach ($consultas as $consulta) {
+                    $valor = [
+                        'id_cabecera' => $idNewCabecera,
+                        'id_tipo_envio' => $consulta->id_tipo_envio,
+                        'valor' => $consulta->valor
+                    ];
+                    DB::table('facturacion_cluster_valor')->insert($valor);
+                }
+            }
+            DB::commit();
+            return ['success' => 'valores importados correctamente'];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return ['error' => $th->getMessage()];
+        }
+    }
+    public static function importarDatos(int $cliente, int $cliente2, int $idUsuario, bool $cabeceraBool)
+    {
+        $cabeceras = DB::table("facturacion_cabezera_cliente")->where('id_cliente',$cliente)->get();
+        $saveCabeceras = [];
+        DB::beginTransaction();
+        try {
+            DB::table("facturacion_cliente_asignacion AS fc")->join("facturacion_cabecera_envio AS fce","fc.id_cabecera_envio",'=','fce.id')->where(['fce.id_cliente' => $cliente2])->delete();
+            DB::table("facturacion_cliente_valor AS fv")->join("facturacion_cabezera_cliente AS fc","fv.id_cabecera","=",'fc.id')
+            ->where(['fc.id_cliente' => $cliente2])->delete();
+            DB::table("facturacion_cabezera_cliente")->where(['id_cliente' => $cliente2])->delete();
+            foreach ($cabeceras as $cabecera) {
+                $cabeceraArray = [
+                    'id_cliente' => $cliente2,
+                    'id_via_envio' => $cabecera->id_via_envio,
+                    'numero' => $cabecera->numero,
+                    'tipo_calculo' => $cabecera->tipo_calculo,
+                    'peso_maximo' => $cabecera->peso_maximo,
+                    'descripcion' => $cabecera->descripcion,
+                    'usuario_creado' => $idUsuario,
+                    'fecha_creada' => now()
+                ];
+                $idNewCabecera = DB::table("facturacion_cabezera_cliente")->insertGetId($cabeceraArray);
+                $consultas = DB::table('facturacion_cliente_valor')->where('id_cabecera',$cabecera->id)->get();
+                foreach ($consultas as $consulta) {
+                    $valor = [
+                        'id_cabecera' => $idNewCabecera,
+                        'id_ciudad' => $consulta->id_ciudad,
+                        'valor' => $consulta->valor
+                    ];
+                    DB::table('facturacion_cliente_valor')->insert($valor);
+                }
+                if($cabeceraBool){
+                    $saveCabeceras[] = ['cabeceraAnt' => $cabecera->id, 'cabeceraSig' => $idNewCabecera];
+                }
+            }
+            if($cabeceraBool){
+                DB::table("facturacion_cabecera_envio")->where(['id_cliente' => $cliente2])->delete();
+                $cabeceraEnvios = DB::table("facturacion_cabecera_envio")->where(['id_cliente'=>$cliente])->get();
+                foreach ($cabeceraEnvios as $cabeceraEnvi) {
+                    $newCabeceraEnv = [
+                        'id_cliente' => $cliente2,
+                        'id_via_envio' => $cabeceraEnvi->id_via_envio,
+                        'kg_maximo' => $cabeceraEnvi->kg_maximo,
+                        'kg_minimo' => $cabeceraEnvi->kg_minimo,
+                        'user_create' => $idUsuario,
+                        'date_create' => now()
+                    ];
+                    $idCabeceraEnvio = DB::table("facturacion_cabecera_envio")->insertGetId($newCabeceraEnv);
+                    $valoresEnviosSig = DB::table("facturacion_cliente_asignacion")->where('id_cabecera_envio',$cabeceraEnvi->id)->get();
+                    foreach ($valoresEnviosSig as $valEnSig) {
+                        $filtro = array_filter($saveCabeceras,function($val)use($valEnSig){
+                            return $val['cabeceraAnt'] == $valEnSig->id_cabecera_cliente;
+                        });
+                        DB::table("facturacion_cliente_asignacion")->insert([
+                            'id_tipo_envio' => $valEnSig->id_tipo_envio,
+                            'id_cabecera_envio' => $idCabeceraEnvio,
+                            'id_cabecera_cliente' => $saveCabeceras[key($filtro)]['cabeceraSig']
+                        ]);
+                    }
+                }
+            }
+            DB::commit();
+            return ['success' => 'valores importados correctamente'];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return ['error' => $th->getMessage()];
+        }
+    }
+    public static function obtenerFacturacionCluster($idCluster)
+    {
+        $filas = DB::table("facturacion_tipo_envio")->orderBy("tipo_envio")->get();
+        $columnas = DB::table("facturacion_cluster_cabecera AS fce")->where("id_cluster",$idCluster)->orderBy("kg_minimo")->get();
+        $facturacion = [];
+        foreach($filas as $fila){
+            foreach($columnas as $columna){
+                $valor = DB::table("facturacion_cluster_valor")->where(['id_cabecera' => $columna->id,'id_tipo_envio' => $fila->id])->first();
+                $valorVal = empty($valor) ? ["columna" => $columna->id , "fila" => $fila->id, "valor" => "0.00"] : ["columna" => $columna->id, "fila" => $fila->id,"valor" => $valor->valor];
+                $facturacion[] = $valorVal;
+            }
+        }
+        return ['filaEnvio' => $filas, 'columnaEnvio' => $columnas, 'valorEnvio' => $facturacion];
+    }
+    public static function agregarCabeceraFacClus($datos,$idUsuario)
+    {
+        DB::beginTransaction();
+        try {
+            if($datos['tipo_calculo'] == "adicional"){
+                $base = DB::table("facturacion_cluster_cabecera")->where(['id_cluster'=>$datos['id_cluster'],'tipo_calculo' => 'base'])->where('kg_minimo','<',$datos['kg_minimo'])->orderBy("kg_minimo","desc");
+                if(empty($base->first())){
+                    return ['error' => 'No se encontró ninguna columna base, por favor establesca una base para poder agregar una columna de tipo adicional'];
+                }
+            }
+            if(isset($datos['active_infinito'])){
+                $datos['kg_maximo'] = self::valorMaximo();
+                unset($datos['active_infinito']);
+            }
+            $datos['usuario_creado'] = $idUsuario;
+            $idCabecera = DB::table("facturacion_cluster_cabecera")->insertGetId($datos);
+            $tipoEnvios = DB::table("facturacion_tipo_envio")->orderBy("tipo_envio")->get();
+            foreach ($tipoEnvios as $tipoEnvio) {
+                self::agregarValorCabeceraCluster($idCabecera,$tipoEnvio->id,"0.00");
+            }
+            DB::commit();
+            return ['success' => 'columna agregada correctamente'];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return ['error' => $th->getMessage()];
+        }
+        
+    }
+    public static function agregarValorCabeceraCluster($idCabecera,$idTipoEnvio,$valor)
+    {
+        return DB::table("facturacion_cluster_valor")->updateOrInsert(['id_cabecera' => $idCabecera, 'id_tipo_envio' => $idTipoEnvio],['valor' => $valor]);
+    }
+    public static function mostrarCabeceraEditarCostoCluster(int $idCluster, int $idCabecera)
+    {
+        return ['success' => DB::table("facturacion_cluster_cabecera")->select("kg_minimo","kg_maximo","kg_base","tipo_calculo")->where(['id_cluster' => $idCluster,'id' => $idCabecera])->first()];
+    }
+    public static function editarCabeceraCluster(int $idUsuario, array $datos)
+    {
+        if($datos['tipo_calculo'] == "adicional"){
+            $base = DB::table("facturacion_cluster_cabecera")->where(['id_cluster'=>$datos['id_cluster'],'tipo_calculo' => 'base'])->where('kg_minimo','<',$datos['kg_minimo'])->orderBy("kg_minimo","desc");
+            if(empty($base->first())){
+                return ['error' => 'No se encontró ninguna columna base, por favor establesca una base para poder agregar una columna de tipo adicional'];
+            }
+        }
+        $idCabecera = $datos['cabecera'];
+        $idCluster = $datos['id_cluster'];
+        unset($datos['cabecera']);
+        unset($datos['id_cluster']);
+        $datos['usuario_modificado'] = $idUsuario;
+        $datos['fecha_actualizada'] = now();
+        DB::table("facturacion_cluster_cabecera")->where(['id' => $idCabecera, 'id_cluster' => $idCluster])->update($datos);
+        return ["success" => 'cabecera modificada correctamente'];
+    }
+    public static function eliminarCabeceraCostoCluster(int $cabecera, int $idCluster)
+    {
+        DB::beginTransaction();
+        try {   
+            DB::table("facturacion_cluster_valor AS fc")->join("facturacion_cluster_cabecera AS fce","fc.id_cabecera",'=','fce.id')
+            ->where(['fc.id_cabecera' => $cabecera, 'fce.id_cluster' => $idCluster])->delete();
+            DB::table("facturacion_cluster_cabecera")->where(['id' => $cabecera, 'id_cluster' => $idCluster])->delete();
+            DB::commit();
+            return ['success' => 'cabecera eliminada correctamente'];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return ['error' =>$th->getMessage()];
+        }
+    }
 }

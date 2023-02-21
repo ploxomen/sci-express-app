@@ -21,7 +21,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="form-group col-6">
+                <div class="form-group col-4">
                     <label for="lista-tipo-cabecera">Tipo</label>
                     <select id="lista-tipo-cabecera" class="simple-select2" name="tipo_calculo">
                         <option value="normal">Monto Normal</option>
@@ -29,13 +29,17 @@
                         <option value="adicional">Monto adicional</option>
                     </select>
                 </div>
-                <div class="form-group col-6" hidden id="box-kg-base" data-default="#box-default">
+                <div class="form-group col-6" hidden id="box-kg-base" data-default=".box-default">
                     <label for="id-kg-base">Kg Base</label>
                     <input name="peso_maximo" type="number" required disabled class="form-control" step="0.01" id="id-kg-base">
                 </div>
-                <div class="form-group col-6" id="box-default">
-                    <label for="id-monto-default">Monto default</label>
+                <div class="form-group col-4 box-default">
+                    <label for="id-monto-default">Monto Normal</label>
                     <input name="monto" type="number" class="form-control" step="0.01" id="id-monto-default">
+                </div>
+                <div class="form-group col-4 box-default">
+                    <label for="id-monto-default">Monto FAU</label>
+                    <input name="montofau" type="number" class="form-control" step="0.01" id="id-monto-default-fau">
                 </div>
                 <div class="form-group col-12">
                     <label for="id_descripcion">Descripción</label>

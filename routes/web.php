@@ -202,7 +202,9 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
         Route::get('guias/expor/excel', [Facturacion::class, 'exportarExcelFacturacionGuia'])->name('exportExcelFacturacionGuias');
         Route::prefix('configuracion')->group(function () {
             Route::get('cliente', [Facturacion::class, 'viewConfiguracionCliente'])->name('configFacturacionCliente');
+            Route::get('cluster', [Facturacion::class, 'viewConfiguracionCluster'])->name('configFacturacionCluster');
             Route::post('acciones', [Facturacion::class, 'obtenerFacturacionCliente']);
+            Route::post('cluster/acciones', [Facturacion::class, 'facturacionCluster']);
         });
 
     });

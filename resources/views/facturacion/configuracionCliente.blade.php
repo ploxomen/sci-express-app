@@ -23,7 +23,7 @@
             <button type="button" class="btn btn-sm btn-outline-primary" data-toggle="tooltip" id="btn-siguiente-cliente" title="Siguiente cliente" data-tipo="adelante"><i class="fas fa-angle-right"></i></button>
         </div>
     </form>
-    <div class="d-flex mb-3 justify-content-between" style="gap: 10px;">
+    <div class="d-flex mb-3 justify-content-between flex-wrap" style="gap: 10px;">
         <div class="d-flex align-items-center" style="gap: 10px;">
             <div>
                 <div class="cuadro table-primary"></div>
@@ -37,6 +37,10 @@
                 <div class="cuadro table-success"></div>
                 <span>Monto Adicional</span>
             </div>
+            <div>
+                <div class="cuadro table-warning"></div>
+                <span>Ciudad FAU</span>
+            </div>
         </div>
         <div class="d-flex align-items-center justify-content-end" style="gap: 10px;">
             <button type="button" class="btn btn-sm btn-outline-info" data-toggle="tooltip" id="btn-modal-fact-cabecera" title="Agregar cabecera">
@@ -44,6 +48,9 @@
             </button>
             <button type="button" class="btn btn-sm btn-outline-primary" data-toggle="tooltip" id="btn-sincronizar" title="Sincronizar ciudades base">
                 <i class="fas fa-sync-alt"></i>            
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-toggle="tooltip" id="btn-importar" title="Importar configuración a otro cliente">
+                <i class="far fa-copy"></i>
             </button>
         </div>
     </div>
@@ -67,20 +74,8 @@
             <tbody id="facturacion-ciudades-costo"></tbody>
         </table>
     </div>
-    {{-- <form class="py-4">
-        <h6 class="text-center text-info">Via Envío</h6>
-        <div class="form-group d-flex m-auto justify-content-center" style="gap: 10px; max-width: 250px;">
-            <button type="button" class="btn btn-sm btn-outline-primary"><i class="fas fa-angle-left"></i></button>
-            <select id="lista-via-envio" class="simple-select2">
-                @foreach ($viaEnvio as $via)
-                    <option value="{{$via->id}}">{{$via->envio}}</option>
-                @endforeach
-            </select>
-            <button type="button" class="btn btn-sm btn-outline-primary"><i class="fas fa-angle-right"></i></button>
-        </div>
-    </form> --}}
 </section>
 @include('modal.agregarCabeceraFacClien')
 @include('modal.agregarModifCabeceraCosto')
-
+@include('modal.copiarConfigCliente')
 @endsection

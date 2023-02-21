@@ -152,10 +152,6 @@ class General{
         {
             value : 'Complejo - Distante',
             text: 'Complejo - Distante (%)'
-        },
-        {
-            value: 'FAU',
-            text: 'FAU (%)'
         }
     ];
     getProvincias(id_ubigeo_departamento){
@@ -399,6 +395,14 @@ class General{
             const tipoAreos = ["AEREO","AEREA"];
             const requerido = tipoAreos.indexOf(e.tipo_trayecto) >= 0 ? '' : 'required';
             const nroGuiaEmbarque = e.prefijo_guia_embarque == null && e.nro_guia_embarque == null ? '' : e.prefijo_guia_embarque.toString().padStart(3, '0') + '-' + e.nro_guia_embarque.toString().padStart(7, '0');
+            let txtGuiaEmbarque = "";
+            if(e.guiasEmbarque){
+                txtGuiaEmbarque = `
+                <div class="form-group col-12 col-lg-4">
+                    <input type="text" required pattern="[0-9]{3}[-][0-9]{7}" id="id_guia_embarque_${e.id}" value="${nroGuiaEmbarque}" maxlength="11" class="form-control form-control-sm informe-embarque" placeholder="N° guía embarque">
+                </div>
+                `
+            }
             template += `
                         <li class='informe-ciudades' data-ciudad="${e.id}" data-trayecto="${e.tipo_trayecto}">
                             <div class="form-row">
@@ -408,9 +412,7 @@ class General{
                                 <div class="form-group col-5 col-lg-4">
                                     <b>Envio:</b><span> ${e.tipo_trayecto}</span>
                                 </div>
-                                <div class="form-group col-12 col-lg-4">
-                                    <input type="text" required pattern="[0-9]{3}[-][0-9]{7}" id="id_guia_embarque_${e.id}" value="${nroGuiaEmbarque}" maxlength="11" class="form-control form-control-sm informe-embarque" placeholder="N° guía embarque">
-                                </div>
+                                ${txtGuiaEmbarque}
                                 <div class="form-group col-12 col-md-6 col-lg-5">
                                     <label for="id_comprobantes_${e.id}">Comprobantes ${requerido != '' ? '<small class="text-danger">*</small>' : ''}</label>
                                     <select id="id_comprobantes_${e.id}" class="form-control simple-select2 form-control-sm" multiple ${requerido}>

@@ -1,6 +1,6 @@
 function loadPage(){
     let general = new General();
-    $('#lista-clientes').select2({
+    $('#lista-clientes, #lista-clientes-copiar').select2({
         theme : 'bootstrap',
         templateResult: general.tempSeleCli,
         placeholder: 'Seleccione un cliente'
@@ -180,7 +180,7 @@ function loadPage(){
             let template = "";
             $('[data-toggle="tooltip"]').tooltip('dispose');
             response.ciudadesBase.forEach((ci,k) => {
-                template += `<tr id="fila_ciudades_${ci.id}">
+                template += `<tr id="fila_ciudades_${ci.id}" class="${ci.fau ? 'table-warning' : ''}">
                 <td style="min-width: 20px !important;width: 20px !important; max-width: 20px !important;">${k + 1}</td>
                 <td style="width: 120px !important;">${ci.ciudad}</td>`
                 response.cabeceras.forEach(c => {
@@ -283,6 +283,8 @@ function loadPage(){
                         }
                     }
                     $('.simple-select2').trigger("change");
+                    $('#modal-cabecera-cliente .box-default').prop("hidden",true);
+                    $('#modal-cabecera-cliente .box-default input').prop("disabled",true);
                     $('#modal-cabecera-cliente').modal("show");
                 }
             } catch (error) {
@@ -316,22 +318,35 @@ function loadPage(){
     $('#lista-clientes').on("change.select2",function(e){
         numeroCabecera = 0;
         verFacturacionCliente();
+        deshabilitarOpcion();
     });
     $('#lista-tipo-cabecera').on("change.select2",function(e){
         const $base = document.querySelector("#box-kg-base");
         const valor = $(this).val() == "base" ? false : true;
+        if(valor){
+            e.target.parentElement.classList.replace("col-6","col-4");
+        }else{
+            e.target.parentElement.classList.replace("col-4","col-6");
+        }
         $base.hidden = valor;
         $base.children[1].disabled = valor;
-        const $default = document.querySelector($base.dataset.default);
-        const valorArray = !valor ? ["col-6","col-3"] : ["col-3","col-6"];
+        const $default = document.querySelectorAll($base.dataset.default);
+        const valorArray = !valor ? ["col-4","col-6"] : ["col-6","col-4"];
         $base.classList.replace(...valorArray);
-        $default.classList.replace(...valorArray);
-        
+        for (const d of $default) {
+            d.classList.replace(...valorArray);
+        }
     });
     document.querySelector("#btn-modal-fact-cabecera").onclick = function(e){
         $('#modal-cabecera-cliente').modal("show");
         $txtCabeceraNumero.value = numeroCabecera;
     }
+    document.querySelector("#id-monto-default").addEventListener("change",function(e){
+        const input = document.querySelector("#id-monto-default-fau");
+        if(!input.value){
+            input.value = this.value;
+        }
+    });
     function cabeceraMayor(cabeceras){
         if(!cabeceras.length){
             numeroCabecera = 1;
@@ -353,6 +368,8 @@ function loadPage(){
         $txtCabeceraNumero.disabled = true;
         $('#lista-via-envio').val(1).trigger("change");
         document.querySelector("#cabecera-facturacion-cliente-form").reset();
+        $('#modal-cabecera-cliente .box-default').prop("hidden",false);
+        $('#modal-cabecera-cliente .box-default input').prop("disabled",false);
     });
     document.querySelector("#agregar-fact-cliente").onclick = e => document.querySelector("#btn-cabecera-fac-cliente").click();
     document.querySelector("#cabecera-facturacion-cliente-form").onsubmit = async function(e){
@@ -430,12 +447,18 @@ function loadPage(){
             let datos = new FormData();
             datos.append("tipo","sincronizar-ciudades");
             const response = await general.funcfetch("acciones",datos);
+            let temp = "";
             if(response.ciudades && response.ciudades.length){
-                const temp = "Las siguientes siudades han sido agregadas <br><ol class='pl-2' style='columns: 2;-webkit-columns: 2;-moz-columns: 2;'><li>" + response.ciudades.map(c => c.ciudad).join("</li><li>") + "</li></ol>";
+                temp = "Las siguientes ciudades han sido agregadas <br><ol class='pl-2' style='columns: 2;-webkit-columns: 2;-moz-columns: 2;'><li class='text-success'>" + response.ciudades.map(c => c.ciudad).join("</li><li class='text-success'>") + "</li></ol>";
+            }
+            if(response.ciudadesEliminar && response.ciudadesEliminar.length){
+                temp += "Las siguientes ciudades han sido eliminadas <br><ol class='pl-2' style='columns: 2;-webkit-columns: 2;-moz-columns: 2;'><li class='text-danger'>" + response.ciudadesEliminar.map(c => c.ciudad).join("</li><li class='text-danger'>") + "</li></ol>";
+            }
+            if(response.ciudadesEliminar.length || response.ciudades.length){
                 alertify.alert("Mensaje",temp);
                 verFacturacionCliente();
             }
-            if(!response.ciudades.length){
+            if(!response.ciudades.length && !response.ciudadesEliminar.length){
                 alertify.alert("Mensaje","No se encontraron ciudades base de los cluster para ser agregadas a la tabla de facturación");
             }
         },()=>{})
@@ -476,6 +499,41 @@ function loadPage(){
             console.error(error);
             alertify.error("error al agregar la cabecera a la tabla");
         }
+    }
+    function deshabilitarOpcion(){
+        $("#lista-clientes-copiar option").prop("disabled",false);
+        const valorCliente = $("#lista-clientes").val();
+        $("#lista-clientes-copiar option[value='" + valorCliente +"']").prop("disabled",true);
+    }
+    $('#modal-copiar-cliente').on('hide.bs.modal', function (e) {
+        $("#lista-clientes-copiar").val("").trigger("change");
+    });
+    deshabilitarOpcion();
+    document.querySelector("#btn-importar").onclick = e => $('#modal-copiar-cliente').modal("show");
+    document.querySelector("#btnImportarDataCliente").onclick = e => document.querySelector("#btnImportDataCliente").click();
+    const frmCopiData = document.querySelector("#from-copiar-cliente");
+    frmCopiData.onsubmit = function(e){
+        e.preventDefault();
+        const cliente = $( "#lista-clientes option:selected" ).text();
+        const clienteImpor = $( "#lista-clientes-copiar option:selected" ).text();
+        alertify.confirm("Mensaje","Al continuar se importaran los datos del cliente <b>" + cliente + "</b> al cliente <b>" + clienteImpor + "</b>"+ " recuerde que los datos existentes del cliente <b>" + clienteImpor + "</b> seran eliminados.<br>¿Deseas importarlo de todas formas?",async ()=>{
+            let datos = new FormData(this);
+            datos.append("tipo","importarData");
+            datos.append("cliente",$("#lista-clientes").val());
+            try {
+                const response = await general.funcfetch("acciones",datos);
+                if(response.success){
+                    alertify.success(response.success);
+                    $('#modal-copiar-cliente').modal("hide");
+                }
+                if(response.error){
+                    return alertify.alert("Error",response.error);
+                }
+            } catch (error) {
+                console.error(error);
+                alertify.error("error al importar los datos del cliente");
+            }
+        },()=>{});
     }
 }
 window.addEventListener("DOMContentLoaded",loadPage);

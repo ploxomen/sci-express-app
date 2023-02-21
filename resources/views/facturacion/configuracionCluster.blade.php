@@ -1,0 +1,60 @@
+@extends('general.index')
+@section('head')
+    <script src="{{asset('asset/facturacionCluster.js')}}"></script>
+    <title>Configuracion Cluster</title>
+@endsection
+@section('body')
+<div class="my-4">
+    <div class="baner-modulo">
+        <img src="{{asset('asset/img/intranet/configuraciones.png')}}" alt="Imagen de configuracion">
+    </div>
+    <h3 class="text-primary text-center">Configuración Facturación Cluster</h3>
+</div>
+<section class="p-2 bg-white">
+    <form class="my-4">
+        <h6 class="text-center text-info">Cluster</h6>
+        <div class="form-group d-flex m-auto justify-content-center" style="gap: 10px; max-width: 800px;">
+            <button type="button" class="btn btn-sm btn-outline-primary" data-toggle="tooltip" id="btn-anterior-cliente" title="Anterior cluster" data-tipo="atras" disabled><i class="fas fa-angle-left"></i></button>
+            <select id="lista-cluster">
+                @foreach ($clusters as $cluster)
+                    <option value="{{$cluster->id_cluster}}" data-nro="{{$cluster->nomProv}}">{{$cluster->name.' ' . $cluster->last_name}}</option>
+                @endforeach
+            </select>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-toggle="tooltip" id="btn-siguiente-cliente" title="Siguiente cluster" data-tipo="adelante"><i class="fas fa-angle-right"></i></button>
+        </div>
+    </form>
+    <div class="d-flex mb-3 justify-content-between flex-wrap" style="gap: 10px;">
+        <div class="d-flex align-items-center" style="gap: 10px;">
+            <div>
+                <div class="cuadro table-primary"></div>
+                <span>Monto Normal</span>
+            </div>
+            <div>
+                <div class="cuadro table-danger"></div>
+                <span>Monto Base</span>
+            </div>
+            <div>
+                <div class="cuadro table-success"></div>
+                <span>Monto Adicional</span>
+            </div>
+        </div>
+        <div class="d-flex align-items-center justify-content-end" style="gap: 10px;">
+            <button type="button" class="btn btn-sm btn-outline-info" data-toggle="tooltip" id="btn-modal-fact-cabecera" title="Agregar cabecera">
+                <i class="fas fa-plus-circle"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-toggle="tooltip" id="btn-importar" title="Importar configuración a otro cliente">
+                <i class="far fa-copy"></i>
+            </button>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered table-sm mb-4 table-hover">
+            <thead id="cabezara-facturacion-cluster-costo">
+            </thead>
+            <tbody id="facturacion-ciudades-costo"></tbody>
+        </table>
+    </div>
+</section>
+@include('modal.cabeceraCluster')
+@include('modal.copiarConfigCluster')
+@endsection

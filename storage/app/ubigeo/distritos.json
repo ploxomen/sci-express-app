@@ -8,7 +8,17 @@
         "numero_hijos_ubigeo": "0",
         "nivel_ubigeo": "3",
         "id_padre_ubigeo": "2557"
-    }, {
+    }, 
+    {
+        "id_ubigeo": "4586",
+        "nombre_ubigeo": "Bagua",
+        "codigo_ubigeo": "02",
+        "etiqueta_ubigeo": "Bagua, Bagua",
+        "buscador_ubigeo": "bagua bagua",
+        "numero_hijos_ubigeo": "0",
+        "nivel_ubigeo": "3",
+        "id_padre_ubigeo": "2557"
+    },{
         "id_ubigeo": "2560",
         "nombre_ubigeo": "Copallin",
         "codigo_ubigeo": "03",
