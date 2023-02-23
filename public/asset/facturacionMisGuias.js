@@ -57,7 +57,7 @@ function loadPage(){
             {
                 data: 'pesoVolumen',
                 render: function(data,tipo,full){
-                    return pesoVolumen(data, tipo, full);
+                    return pesoVolumen(full.pesoGuia, tipo, data);
                 }
             }, {
                 data: 'valor_complejo_distante',
@@ -77,10 +77,10 @@ function loadPage(){
     const thSelectAll = document.querySelector("#boxCheck");
     const frmFiltros = document.querySelector("#frm-aplicar-filtros");
     function pesoVolumen(data,tipo,full) {  
-        if (data > full.pesoGuia) {
+        if (data > full.pesoVolumen) {
             return '(en blanco)';
         }
-        return data;
+        return full.pesoVolumen;
     }
     function defaultDescripcion(data){
         let template = "No definido";
@@ -221,7 +221,7 @@ function loadPage(){
                         ${g.pesoGuia}
                     </td>
                     <td>
-                        ${pesoVolumen(g.pesoVolumen, null, g)}
+                        ${pesoVolumen(g.pesoGuia, null, g)}
                     </td>
                     <td>
                         ${valorComplejoDist(g.esAlejado,g.valor_complejo_distante)}

@@ -56,6 +56,9 @@ class ModelFacturacion extends Model
             }
             
             $fact = DB::table("facturacion_cliente_valor")->where(['id_ciudad' => $ciudadFacturacion->id,'id_cabecera' => $valor1->id])->first();
+            if(empty($fact)){
+                continue;
+            }
             switch ($valor1->tipo_calculo) {
                 case 'adicional':
                     $fila2 = DB::table("facturacion_cabezera_cliente AS fc")->select("fcc.valor","fc.peso_maximo")
