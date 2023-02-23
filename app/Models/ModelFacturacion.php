@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\DB;
 
 class ModelFacturacion extends Model
 {
-    public static function obtenerGuiasFacturacion($cliente,$traslado,$fechaInicio,$fechaFin)
+    public static function obtenerGuiasFacturacion($cliente,$traslado,$fechaInicio,$fechaFin,$estado)
     {
-        $guias = DB::select('CALL sp_facturacion_ver_guias(?,?,?,?)',[$cliente, $fechaInicio,$fechaFin,$traslado]);
+        $guias = self::obtenerGuiasFactClis($cliente,$traslado,$fechaInicio,$fechaFin,$estado);
         foreach ($guias as $guia) {
             if($guia->tipo_base == 'distrito'){
                 $guia->baseCluster = (new Ubigeo)->getNameDistrito($guia->baseCluster);
@@ -22,6 +22,74 @@ class ModelFacturacion extends Model
             $guia->descripcionGuia = json_decode($guia->descripcionGuia,true);
         }
         return $guias;
+    }
+    public static function obtenerGuiasFactClis($cliente,$traslado,$fechaInicio,$fechaFin,$estado)
+    {
+        return DB::select('CALL sp_facturacion_ver_guias(?,?,?,?,?)',[$cliente, $fechaInicio,$fechaFin,$traslado,$estado]);
+    }
+    public static function calcularGuiasFacturacionCli($idGuia,$idCliente,$viaFacturacion,$distrito,$ciudad)
+    {
+        if(empty($ciudad)){
+            $nombreCiudad = (new Ubigeo)->getNameDistrito($distrito);
+        }else{
+            $ciu = DB::table("ciudades")->where('id',$ciudad)->first();
+            $nombreCiudad = empty($ciu) ? null : $ciu->nombre_ciudad;
+        }
+        $ciudadFacturacion = DB::table("facturacion_ciudades")->where("ciudad",mb_strtoupper($nombreCiudad,"UTF-8"))->first();
+        if(empty($ciudadFacturacion)){
+            return 0;
+        }
+        $cli = DB::table("clientes")->where('id',$idCliente)->first();
+        $idCliente = $cli->doc_ident != 4 ? Clientes::idClienteFacturacionNatural() : $cli->id;
+        $detallesGuias = DB::table("detalle_guias")->where('id_guia',$idGuia)->get();
+        $total = 0;
+        foreach ($detallesGuias as $detalleGuia) {
+            $pesoDetalle = $detalleGuia->volumen > $detalleGuia->kg ? floatval($detalleGuia->volumen) : floatval($detalleGuia->kg);
+            $cabecera1 = DB::table("facturacion_cabecera_envio")->where('id_cliente',$idCliente)->where('id_via_envio',$viaFacturacion)
+            ->whereRaw('? >= kg_minimo',[$pesoDetalle])->whereRaw("? < kg_maximo",[$pesoDetalle])->first();
+            if(empty($cabecera1)){
+                continue;
+            }
+            $valor1 = DB::table("facturacion_cliente_asignacion AS fc")->select("fcc.*")->join("facturacion_cabezera_cliente AS fcc","fc.id_cabecera_cliente","=","fcc.id")->where(['fc.id_tipo_envio' => $detalleGuia->tipo_envio,'fc.id_cabecera_envio' => $cabecera1->id])->first();
+            if(empty($valor1)){
+                continue;
+            }
+            
+            $fact = DB::table("facturacion_cliente_valor")->where(['id_ciudad' => $ciudadFacturacion->id,'id_cabecera' => $valor1->id])->first();
+            switch ($valor1->tipo_calculo) {
+                case 'adicional':
+                    $fila2 = DB::table("facturacion_cabezera_cliente AS fc")->select("fcc.valor","fc.peso_maximo")
+                    ->join("facturacion_cliente_valor AS fcc","fc.id","=","fcc.id_cabecera")->where(['fc.id_cliente' => $idCliente,'fc.tipo_calculo' => 'base','fc.id_via_envio' => $viaFacturacion,'fcc.id_ciudad' => $ciudadFacturacion->id])->where('numero','<',$valor1->numero)->orderBy("fc.numero","desc")->first();
+                    if(!empty($fila2)){
+                        $total = $total + ($fila2->valor + (($pesoDetalle - $fila2->peso_maximo) * $fact->valor));
+                    }
+                break;
+                default:
+                    $total = $total + $fact->valor;
+                break;
+            }
+        }
+        return $total;
+    }
+    public static function sincronizarFacturacionCliente($cliente)
+    {
+        $guias = DB::table("guias")->where(['activo' => 1,'estado' => 1, 'situ' => 11, 'id_cliente_facturacion' => $cliente])->get();
+        self::calcularGuias($guias);
+    }
+    public static function calcularGuias($guias)
+    {
+        foreach ($guias as $guia) {
+            $subTotal = self::calcularGuiasFacturacionCli($guia->id,$guia->id_cliente_facturacion,$guia->via_tras,$guia->dest_dist,$guia->ciudad_destino_final);
+            $total = 0;
+            if($guia->ciudad_alejada == "Complejo - Distante" && !empty($guia->valor_complejo_distante)){
+                $total = $subTotal + (($guia->valor_complejo_distante * $subTotal) / 100);
+            }else if($guia->ciudad_alejada == "Rural - Alejada" && !empty($guia->valor_complejo_distante)){
+                $total = $subTotal + $guia->valor_complejo_distante;
+            }else{
+                $total = $subTotal;
+            }
+            DB::table("guias")->where('id',$guia->id)->update(["fact_final" => $total, 'fact_sub' => $subTotal]);
+        }
     }
     public static function agregarCiudades(array $ciudades){
         return DB::table("facturacion_ciudades")->insert($ciudades);
@@ -234,6 +302,7 @@ class ModelFacturacion extends Model
             DB::table("facturacion_cluster_cabecera")->where(['id_cluster' => $cluster2])->delete();
             foreach ($cabeceras as $cabecera) {
                 $cabeceraArray = [
+                    'id_via_envio' => $cabecera->id_via_envio,
                     'id_cluster' => $cluster2,
                     'kg_minimo' => $cabecera->kg_minimo,
                     'kg_maximo' => $cabecera->kg_maximo,
@@ -330,7 +399,9 @@ class ModelFacturacion extends Model
     public static function obtenerFacturacionCluster($idCluster)
     {
         $filas = DB::table("facturacion_tipo_envio")->orderBy("tipo_envio")->get();
-        $columnas = DB::table("facturacion_cluster_cabecera AS fce")->where("id_cluster",$idCluster)->orderBy("kg_minimo")->get();
+        $columnas = DB::table("facturacion_cluster_cabecera AS fce")->select("fce.*","ve.envio")
+        ->join("via_envio AS ve","fce.id_via_envio","=","ve.id")->where("fce.id_cluster",$idCluster)
+        ->orderBy("fce.id_via_envio")->orderBy("fce.kg_minimo")->get();
         $facturacion = [];
         foreach($filas as $fila){
             foreach($columnas as $columna){
@@ -375,7 +446,7 @@ class ModelFacturacion extends Model
     }
     public static function mostrarCabeceraEditarCostoCluster(int $idCluster, int $idCabecera)
     {
-        return ['success' => DB::table("facturacion_cluster_cabecera")->select("kg_minimo","kg_maximo","kg_base","tipo_calculo")->where(['id_cluster' => $idCluster,'id' => $idCabecera])->first()];
+        return ['success' => DB::table("facturacion_cluster_cabecera")->select("kg_minimo","kg_maximo","kg_base","tipo_calculo","id_via_envio")->where(['id_cluster' => $idCluster,'id' => $idCabecera])->first()];
     }
     public static function editarCabeceraCluster(int $idUsuario, array $datos)
     {
@@ -384,6 +455,10 @@ class ModelFacturacion extends Model
             if(empty($base->first())){
                 return ['error' => 'No se encontró ninguna columna base, por favor establesca una base para poder agregar una columna de tipo adicional'];
             }
+        }
+        if(isset($datos['active_infinito'])){
+            $datos['kg_maximo'] = self::valorMaximo();
+            unset($datos['active_infinito']);
         }
         $idCabecera = $datos['cabecera'];
         $idCluster = $datos['id_cluster'];

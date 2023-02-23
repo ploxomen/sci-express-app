@@ -31,9 +31,10 @@ class Facturacion extends Controller
     }
     public function viewConfiguracionCluster()
     {
+        $viaEnvio = InformacionAdicional::viaEnvio();
         $clusters = ModeloCluster::obtenerTodosClustersFacturacion();
         $modulos = User::getModulos(Auth::id());
-        return view("facturacion.configuracionCluster",compact("modulos","clusters"));
+        return view("facturacion.configuracionCluster",compact("modulos","clusters","viaEnvio"));
     }
     public function facturacionCluster(Request $request)
     {
@@ -134,25 +135,24 @@ class Facturacion extends Controller
     public function obtenerFacturacionGuia(Request $request)
     {
         if($request->ajax()){
-            $clientes = empty($request->cliente) ? 0 : $request->cliente;
-            $trayectos = empty($request->trayecto) ? 0 : $request->trayecto;
-            $fechaIncio = $request->fechaInicio;
-            $fechaFin = $request->fechaFin;
-            $guias = ModelFacturacion::obtenerGuiasFacturacion($clientes,$trayectos,$fechaIncio,$fechaFin);
-            return datatables()->of($guias)->toJson();
-        }
-    }
-    public function actualizarCostosFacturacion(Request $request)
-    {
-        if($request->ajax()){
-            $guias = ModelFacturacion::obtenerGuiasFacturacion($request->clientes,$request->trayectos,$request->fechaIncio,$request->fechaFin);
+            switch ($request->tipo) {
+                case 'consulta':
+                    $clientes = empty($request->cliente) ? 0 : $request->cliente;
+                    $trayectos = empty($request->trayecto) ? 0 : $request->trayecto;
+                    $fechaIncio = $request->fechaInicio;
+                    $fechaFin = $request->fechaFin;
+                    $guias = ModelFacturacion::obtenerGuiasFacturacion($clientes,$trayectos,$fechaIncio,$fechaFin,$request->estado);
+                    return datatables()->of($guias)->toJson();
+                break;
+                case 'calcular':
+                    ModelFacturacion::sincronizarFacturacionCliente($request->cliente);
+                    return response()->json(['success' => 'montos calculados correctamente']);
+                break;
+            }
             
         }
     }
-    public function retornoCostosGuiasFacturacion(int $idGuia)
-    {
-        
-    }
+
     public function exportarExcelFacturacionGuia(Request $request)
     {
         $clientes = empty($request->cliente) ? 0 : $request->cliente;

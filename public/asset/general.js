@@ -98,7 +98,7 @@ class General{
                     <div class="card-body">
                         <div class="form-row">
                             <div class="col-6 col-lg-4"><b class="d-block text-secondary">Grupo Envio</b>${dg.grupo_envio}</div>
-                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Tipo Envio</b>${dg.tipo_envio}</div>
+                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Tipo Envio</b>${dg.nomTipoEnvio}</div>
                             <div class="col-12 col-lg-4"><b class="d-block text-secondary">Embase o Embalaje</b>${dg.embase_embalaje}</div>
                             <div class="col-12"><b class="d-block text-secondary">Descripción</b>${!dg.descripcion ? 'No definido' : dg.descripcion}</div>
                             <div class="col-6 col-lg-4"><b class="d-block text-secondary">Cantidad</b>${dg.cantidad}</div>
@@ -993,7 +993,7 @@ class General{
         });
         let templateTipoEnvio = "<option></option>";
         detalleTabla.tipo_envio.forEach(ge => {
-            templateTipoEnvio += `<option value="${ge}" ${ge == tipo_envio ? 'selected' : ''}>${ge}</option>`;
+            templateTipoEnvio += `<option value="${ge.id}" ${ge.id == tipo_envio ? 'selected' : ''}>${ge.tipo_envio}</option>`;
         });
         let templateEnbaseEmba = "<option></option>";
         detalleTabla.envase_embalaje.forEach(ge => {
@@ -1112,9 +1112,7 @@ class General{
             let deta = e.querySelectorAll('input, select, textarea');
             const newOrOld = e.querySelector('button');
             for (const ele2 of deta) {
-                if (ele2.value && (ele2.value != '0.00' || ele2.value != '0')) {
-                    objeto[ele2.dataset.name] = ele2.value;
-                }
+                objeto[ele2.dataset.name] = ele2.value;
             }
             if (!this.isObjEmpty(objeto)) {
                 if (newOrOld && newOrOld.getAttribute('data-tipo') == 'new'){

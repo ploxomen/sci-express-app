@@ -14,12 +14,16 @@ class Clientes extends Model
 
     public static function getClientesFiles()
     {
-        return Clientes::select('id','nro_doc','nom_cli')->where(['estado' => 1])->get();
+        return Clientes::select('id','nro_doc','nom_cli')->where(['estado' => 1,'doc_ident' => 4])->get();
+    }
+    public static function idClienteFacturacionNatural()
+    {
+        return 14;
     }
     public static function getClientesFacturacion()
     {
         $clientes = Clientes::select('id','nro_doc','nom_cli')->where(['estado' => 1,'doc_ident' =>4]);
-        $clienteDos = Clientes::select('id','nro_doc','nom_cli')->where(['nro_doc' => 'CLIENTE','nom_cli' =>'PERSONA NATURAL'])->union($clientes)->get();
+        $clienteDos = Clientes::select('id','nro_doc','nom_cli')->where('id',self::idClienteFacturacionNatural())->union($clientes)->get();
         return $clienteDos;
 
     }

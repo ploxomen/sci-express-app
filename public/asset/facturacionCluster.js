@@ -63,9 +63,31 @@ function loadPage(){
         template = `
         <tr>
             <th rowspan="2">N°</th>
-            <th rowspan="2">Tipo Envio</th>
-        </tr>
-        <tr>`;
+            <th rowspan="2">Tipo Envio</th>`;
+        let cabeceraEnvio = null;
+        let contadorCabecera = 0;
+        response.columnaEnvio.forEach((c,k) => {
+            if(!cabeceraEnvio){
+                cabeceraEnvio = c.envio;
+                contadorCabecera++;
+            }else{
+                if(cabeceraEnvio != c.envio){
+                    template += `<th colspan="${contadorCabecera}">
+                        ${cabeceraEnvio}
+                    </th>`
+                    contadorCabecera = 1;
+                    cabeceraEnvio = c.envio;
+                }else{
+                    contadorCabecera++;
+                }
+            }
+            if((k+1) == response.columnaEnvio.length && contadorCabecera > 0){
+                template += `<th colspan="${contadorCabecera}">
+                    ${cabeceraEnvio}
+                </th>`
+            }
+        });
+        template += "</tr><tr>";
         response.columnaEnvio.forEach(c => {
             let bgTipoEnv = "text-primary";
             switch (c.tipo_calculo) {

@@ -45,11 +45,11 @@
                 <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add text-info">SEDE ADMINISTRATIVA</legend>
                 <div class="form-group col-12">
                     <label for="id_dir_sede_adr">Dirección</label>
-                    <input type="text" name="dir_sede_adr" id="id_dir_sede_adr" class="form-control clone-value" data-clone="#id_dir_sede_so" required>
+                    <input type="text" name="dir_sede_adr" id="id_dir_sede_adr" class="form-control clone-value require-empresa" data-clone="#id_dir_sede_so">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_dpto_sa">Departamento</label>
-                    <select name="dpto_sa" id="id_dpto_sa" class="form-control cb-ubigeo selected-two" data-selected-two="id_dpto_so" required data-consulta="provincia" data-segunda-info="id_prov_so" data-info="id_prov_sa" data-info-distrito="id_dist_sa" data-info-segundo-distrito="id_dist_so">
+                    <select name="dpto_sa" id="id_dpto_sa" class="form-control cb-ubigeo selected-two require-empresa" data-selected-two="id_dpto_so"  data-consulta="provincia" data-segunda-info="id_prov_so" data-info="id_prov_sa" data-info-distrito="id_dist_sa" data-info-segundo-distrito="id_dist_so">
                         <option value=""></option>
                         @foreach ($dep as $d)
                             <option value="{{$d->id_ubigeo}}">{{$d->nombre_ubigeo}}</option>
@@ -58,11 +58,11 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_prov_sa">Provincia</label>
-                    <select name="prov_sa" id="id_prov_sa" class="form-control cb-ubigeo selected-two" data-selected-two="id_prov_so" required data-consulta="distrito" data-segunda-info="id_dist_so" data-info="id_dist_sa"></select>
+                    <select name="prov_sa" id="id_prov_sa" class="form-control cb-ubigeo selected-two require-empresa" data-selected-two="id_prov_so" data-consulta="distrito" data-segunda-info="id_dist_so" data-info="id_dist_sa"></select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_dist_sa">Distrito</label>
-                    <select name="dist_sa" id="id_dist_sa" class="form-control cb-ubigeo selected-two" data-selected-two="id_dist_so" required></select>
+                    <select name="dist_sa" id="id_dist_sa" class="form-control cb-ubigeo selected-two require-empresa" data-selected-two="id_dist_so"></select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_ctii_sa">CTLF</label>
@@ -75,11 +75,11 @@
                 <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add text-info">SEDE OPERATIVA</legend>
                 <div class="form-group col-12">
                     <label for="id_dir_sede_so">Dirección</label>
-                    <input type="text" name="dir_sede_so" id="id_dir_sede_so" class="form-control" required>
+                    <input type="text" name="dir_sede_so" id="id_dir_sede_so" class="form-control require-empresa">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_dpto_so">Departamento</label>
-                    <select name="dpto_so" id="id_dpto_so" class="form-control cb-ubigeo" required data-consulta="provincia" data-info="id_prov_so" data-info-distrito="id_dist_so">
+                    <select name="dpto_so" id="id_dpto_so" class="form-control cb-ubigeo require-empresa" data-consulta="provincia" data-info="id_prov_so" data-info-distrito="id_dist_so">
                         <option value=""></option>
                         @foreach ($dep as $d)
                             <option value="{{$d->id_ubigeo}}">{{$d->nombre_ubigeo}}</option>
@@ -88,11 +88,11 @@
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_prov_so">Provincia</label>
-                    <select name="prov_so" id="id_prov_so" class="form-control cb-ubigeo" required data-consulta="distrito" data-info="id_dist_so"></select>
+                    <select name="prov_so" id="id_prov_so" class="form-control cb-ubigeo require-empresa" data-consulta="distrito" data-info="id_dist_so"></select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_dist_so">Distrito</label>
-                    <select name="dist_so" id="id_dist_so" class="form-control cb-ubigeo" required></select>
+                    <select name="dist_so" id="id_dist_so" class="form-control cb-ubigeo require-empresa"></select>
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-3">
                     <label for="id_ctii_so">CTLF</label>
@@ -105,11 +105,11 @@
                 <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add text-info">REPRESENTANTE LEGAL</legend>
                 <div class="form-group col-12">
                     <label for="id_nom_rl">Nombres</label>
-                    <input type="text" name="nom_rl" id="id_nom_rl" class="form-control" required>
+                    <input type="text" name="nom_rl" id="id_nom_rl" class="form-control require-empresa">
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_doc_ident_rl">Tipo documento</label>
-                    <select name="doc_ident_rl" id="id_doc_ident_rl" class="form-control simple-select2 cb-tipo-doc" data-input="id_nro_doc_rl" required>
+                    <select name="doc_ident_rl" id="id_doc_ident_rl" class="form-control simple-select2 cb-tipo-doc require-empresa" data-input="id_nro_doc_rl">
                         <option></option>
                         @foreach ($tipo_documentos as $tipo_docu)
                             <option value="{{$tipo_docu->id}}">{{$tipo_docu->tipo}}</option>
@@ -118,7 +118,7 @@
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_nro_doc_rl">N° documento</label>
-                    <input type="text" name="nro_doc_rl" id="id_nro_doc_rl" class="form-control" required>
+                    <input type="text" name="nro_doc_rl" id="id_nro_doc_rl" class="form-control require-empresa">
                 </div>
                 <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="id_tlf_anex_rl">Teléfono</label>
@@ -139,7 +139,7 @@
                 <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add text-info">CONTACTO ADMINISTRATIVO</legend>
                 <div class="form-group col-12">
                     <label for="id_nom_ad">Nombres</label>
-                    <input type="text" name="nom_ad" id="id_nom_ad" class="form-control" required>
+                    <input type="text" name="nom_ad" id="id_nom_ad" class="form-control require-empresa">
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_doc_ident_ad">Tipo documento</label>
@@ -173,7 +173,7 @@
                 <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add text-info">CONTACTO OPERATIVO</legend>
                 <div class="form-group col-12">
                     <label for="id_nom_op">Nombres</label>
-                    <input type="text" name="nom_op" id="id_nom_op" class="form-control" required>
+                    <input type="text" name="nom_op" id="id_nom_op" class="form-control require-empresa">
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_doc_ident_op">Tipo documento</label>
@@ -207,7 +207,7 @@
                 <legend class="bg-white d-inline-block w-auto px-2 border shadow-sm text-left legend-add text-info">CONTACTO PAGOS</legend>
                 <div class="form-group col-12">
                     <label for="id_nom_pg">Nombres</label>
-                    <input type="text" name="nom_pg" id="id_nom_pg" class="form-control" required>
+                    <input type="text" name="nom_pg" id="id_nom_pg" class="form-control require-empresa">
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="id_doc_ident_pg">Tipo documento</label>

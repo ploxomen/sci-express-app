@@ -90,12 +90,7 @@ class InformacionAdicional extends Model
     }
     public static function getTipoEnvio()
     {
-        $tipo_envio = DB::table("facturacion_tipo_envio")->select("tipo_envio")->get();
-        $resultado = [];
-        foreach($tipo_envio as $envio){
-            $resultado[] = $envio->tipo_envio;
-        }
-        return $resultado;
+        return DB::table("facturacion_tipo_envio")->select("id","tipo_envio")->get();
     }
     public static function rolModuloEditarGuia(){
         return [1,2,4];

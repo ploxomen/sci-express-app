@@ -9,7 +9,15 @@
       </div>
       <div class="modal-body">
           <form id="cabecera-facturacion-costo-cluster-form" class="form-row">
-              <div class="form-group col-4">
+              <div class="form-group col-6">
+                <label for="id_cabecera_id_via_envio">Tipo envio</label>
+                <select id="id_cabecera_id_via_envio" class="simple-select2" name="id_via_envio">
+                    @foreach ($viaEnvio as $envio)
+                        <option value="{{$envio->id}}">{{$envio->envio}}</option>
+                    @endforeach
+                </select>
+            </div>
+              <div class="form-group col-6">
                   <label for="id_cabecera_tipo_calculo">Tipo</label>
                   <select id="id_cabecera_tipo_calculo" class="simple-select2" name="tipo_calculo">
                       <option value="normal">Monto Normal</option>

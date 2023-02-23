@@ -82,6 +82,11 @@ function loadPage(){
             },()=>{});
         }
     });
+    $('#id_doc_ident').on("change.select2",function(e){
+        console.log($(this).val());
+        $('.require-empresa').prop("required",$(this).val() == "4" ? true : false);
+        
+    });
     function addProveedor() {
         if(listProv.children.length === 1 && listProv.children[0].dataset.tipo == 'nuevo' && listProv.children[0].hidden){
             general.primerProveedor(false,listProv);

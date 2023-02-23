@@ -172,7 +172,7 @@ class ModeloCluster extends Model
     }
     public static function obtenerCiudadesBase(){
         $ciudades = DB::table("ciudades_base_cluster AS cl")->select("cl.tipo_base","cl.ubigeo_distrito","c.nombre_ciudad","cl.ciudad_alejada")->leftJoin("ciudades AS c","cl.id_ciudad","=","c.id")
-        ->where(['cl.base' => 1,'cl.activo' => 1])->get();
+        ->where(['cl.activo' => 1])->get();
         foreach ($ciudades as $ciudad) {
             $ciudad->nombre_ciudad = mb_strtoupper($ciudad->tipo_base == "distrito" ? (new Ubigeo)->getNameDistrito($ciudad->ubigeo_distrito) : $ciudad->nombre_ciudad,"UTF-8");
         }

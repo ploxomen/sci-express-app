@@ -13,7 +13,7 @@
 @section('body')
 <section class="p-2 bg-white mb-3">
     <h3 class="text-primary"><i class="fas fa-caret-right"></i> Mis Facturacion de guías</h3>
-    <form class="row" id="frm-aplicar-filtros" action="{{route('exportExcelFacturacionGuias')}}">
+    <form class="form-row" id="frm-aplicar-filtros" action="{{route('exportExcelFacturacionGuias')}}">
         <div class="form-group col-12 col-md-6 col-lg-3">
             <label for="id_filtro_cliente">Cliente</label>
             <select name="cliente" id="id_filtro_cliente" class="form-control filtros simple-select2" required>
@@ -22,7 +22,14 @@
                 @endforeach
             </select>
         </div>
-        <div class="form-group col-12 col-md-6 col-lg-3 col-xl-2">
+        <div class="form-group col-12 col-md-6 col-lg-2">
+            <label for="id_estado_estado">Via Traslado</label>
+            <select name="estado" id="id_estado_estado" class="form-control filtros simple-select2" required>
+                <option value="11" selected>CARGO EN CD</option>
+                <option value="12">FACTURADO</option>
+            </select>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-2">
             <label for="id_tray_env">Via Traslado</label>
             <select name="tray_env" id="id_tray_env" class="form-control filtros simple-select2" required>
                 @foreach ($via_envios as $via)
@@ -38,8 +45,9 @@
             <label for="id_fecha_fin">Fecha Fin</label>
             <input type="date" class="form-control"  name="fechaFin"  id="id_fecha_fin" value="{{$fechaFiltros['inicioFiltro']}}" required>
         </div>
-        <div class="form-group col-12 col-md-6 col-xl-2">
+        <div class="form-group col-12 col-md-6 col-xl-1">
             <button type="button" class="btn btn-sm btn-primary mr-1" id="aplicar-filtros-btn" title="Aplicar los filtros"><i class="fas fa-search"></i></button>
+            <button type="button" class="btn btn-sm btn-danger mr-1" id="recalcular-costos" title="Recalcular costos finales"><i class="fas fa-sync-alt"></i></button>
             <button type="submit" class="btn btn-sm btn-success" title="Descargar Excel"><i class="far fa-file-excel"></i></button>
         </div>
     </form>

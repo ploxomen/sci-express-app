@@ -468,7 +468,7 @@ class ModeloGuias extends Model
             $guia[0]->dest_prov = (new Ubigeo)->getNameProvincia($guia[0]->dest_prov);
             $guia[0]->dest_dist = (new Ubigeo)->getNameDistrito($guia[0]->dest_dist);
             $guia[0]->img_list = DB::table('imagenes_guia')->select('nom_id_file','nom_file')->where(['id_guia' => $guia[0]->id])->get();
-            $guia[0]->detalles_guias = DB::table('detalle_guias')->where(['id_guia' => $guia[0]->id])->get();
+            $guia[0]->detalles_guias = DB::table('detalle_guias AS dg')->select("dg.*","fc.tipo_envio AS nomTipoEnvio")->join("facturacion_tipo_envio AS fc","dg.tipo_envio","=","fc.id")->where(['id_guia' => $guia[0]->id])->get();
         }
         return isset($guia[0]) ? $guia[0] : null;
     }
@@ -629,8 +629,15 @@ class ModeloGuias extends Model
                 $arrayRetornos[] = $re->idRetornoCargo;
             }
             $actualizar = $query->update(['rc.estado' =>4,'pr.estado' => 3,'pr.fechaHrTermino' => $fechaHr]);
-            DB::table("detalle_retorno_cargo AS drc")->join("guias AS g","drc.id_guia","=","g.id")
-            ->whereIn("drc.id_retorno_cargo",$arrayRetornos)->update(["g.situ" => 11]);
+            $guiasTemp = DB::table("detalle_retorno_cargo AS drc")->select("g.*","drc.id_guia")->join("guias AS g","drc.id_guia","=","g.id")
+            ->whereIn("drc.id_retorno_cargo",$arrayRetornos);
+            $idsGuias = [];
+            foreach ($guiasTemp->get() as $guia) {
+                $idsGuias[] = $guia->id;
+            }
+            $guiasTemp->update(["g.situ" => 11]);
+            $guias = DB::table("guias")->where(['activo' => 1,'estado' => 1, 'situ' => 11])->whereIn('id',$idsGuias)->get();
+            ModelFacturacion::calcularGuias($guias);
             DB::commit();
             return ['success' => $actualizar];
         } catch (\Throwable $th) {

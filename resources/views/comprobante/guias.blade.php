@@ -278,8 +278,8 @@
                                 <td>
                                     <select required data-name="tipo_envio" class="data-anulada form-control form-control-sm simple-select2">
                                         <option value="" hidden>Seleccione una opción</option>
-                                        @foreach ($tipoEnvio as $tipoEnvio)
-                                            <option value="{{$tipoEnvio}}">{{$tipoEnvio}}</option>
+                                        @foreach ($tipoEnvios as $tipoEnvio)
+                                            <option value="{{$tipoEnvio->id}}">{{$tipoEnvio->tipo_envio}}</option>
                                         @endforeach
                                     </select>
                                 </td>

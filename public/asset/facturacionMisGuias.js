@@ -6,6 +6,8 @@ function loadPage(){
             method: 'POST',
             headers: general.jsonToken,
             data: function (d) {
+                d.tipo = "consulta";
+                d.estado = $('#id_estado_estado').val();
                 d.cliente = $('#id_filtro_cliente').val();
                 d.trayecto = $('#id_tray_env').val();
                 d.fechaInicio = $('#fecha_inicio').val();
@@ -80,8 +82,23 @@ function loadPage(){
     for (const filtro of document.querySelectorAll('.filtros')) {
         $(filtro).on('select2:select', e => {
             tablaFacturacion.draw();
-
-        })
+        });
     }
+    const frmFiltros = document.querySelector("#frm-aplicar-filtros");
+    document.querySelector("#recalcular-costos").addEventListener("click",async function(e){
+        let datos = new FormData(frmFiltros);
+        datos.append("tipo","calcular");
+        try {
+            const response = await general.funcfetch("ver",datos);
+            if(response.error){
+                return alertify.alert("Error",response.error);
+            }
+            tablaFacturacion.draw();
+            return alertify.success(response.success);
+        } catch (error) {
+            console.error(error);
+            alertify.error("error al calcular los montos");
+        }
+    });
 }
 window.addEventListener('DOMContentLoaded',loadPage);
