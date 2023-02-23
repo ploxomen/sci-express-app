@@ -142,11 +142,15 @@ class Facturacion extends Controller
                     $fechaIncio = $request->fechaInicio;
                     $fechaFin = $request->fechaFin;
                     $guias = ModelFacturacion::obtenerGuiasFacturacion($clientes,$trayectos,$fechaIncio,$fechaFin,$request->estado);
-                    return datatables()->of($guias)->toJson();
+                    return $request->response == "normal" ? response()->json(["guias" => $guias]) : datatables()->of($guias)->toJson();
                 break;
                 case 'calcular':
                     ModelFacturacion::sincronizarFacturacionCliente($request->cliente);
                     return response()->json(['success' => 'montos calculados correctamente']);
+                break;
+                case 'facturar':
+                    $data = ModelFacturacion::facturarGuiasClientes(json_decode($request->guias,true),$request->cliente,$request->subtotal,$request->igv,$request->total,Auth::id());
+                    return response()->json($data);
                 break;
             }
             
@@ -157,9 +161,10 @@ class Facturacion extends Controller
     {
         $clientes = empty($request->cliente) ? 0 : $request->cliente;
         $trayectos = empty($request->tray_env) ? 0 : $request->tray_env;
-        $fechaIncio = $request->fechaIncio;
+        $fechaIncio = $request->fechaInicio;
         $fechaFin = $request->fechaFin;
-        $guias = ModelFacturacion::obtenerGuiasFacturacion($clientes, $trayectos, $fechaIncio, $fechaFin);
+        $estado = $request->estado;
+        $guias = ModelFacturacion::obtenerGuiasFacturacion($clientes, $trayectos, $fechaIncio, $fechaFin,$estado);
         return \Excel::download(new FacturacionGuiaExport($guias), 'facturacion-guias.xlsx');
     }
 }

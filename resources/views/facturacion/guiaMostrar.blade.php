@@ -31,7 +31,7 @@
         </div>
         <div class="form-group col-12 col-md-6 col-lg-2">
             <label for="id_tray_env">Via Traslado</label>
-            <select name="tray_env" id="id_tray_env" class="form-control filtros simple-select2" required>
+            <select name="trayecto" id="id_tray_env" class="form-control simple-select2" required>
                 @foreach ($via_envios as $via)
                     <option value="{{$via->id}}">{{$via->envio}}</option>
                 @endforeach
@@ -39,7 +39,7 @@
         </div>
         <div class="form-group col-6 col-lg-3 col-xl-2">
             <label for="fecha_inicio">Fecha Inicio</label>
-            <input type="date" class="form-control" name="fechaIncio" id="fecha_inicio" value="{{$fechaFiltros['finFiltro']}}" required>
+            <input type="date" class="form-control" name="fechaInicio" id="fecha_inicio" value="{{$fechaFiltros['finFiltro']}}" required>
         </div>
         <div class="form-group col-6 col-lg-3 col-xl-2">
             <label for="id_fecha_fin">Fecha Fin</label>
@@ -52,10 +52,41 @@
         </div>
     </form>
 </section>
-    <section class="p-2 bg-white">
-   <table class="table table-sm table-bordered table-sm" id="tabla-guias">
+<section class="py-1 px-2 mb-3" id="boxInfoCostos">
+    <div class="d-flex justify-content-center flex-wrap text-center align-items-center" style="gap: 15px;">
+        <div class="dinero bg-white p-2 border">
+            <b class="d-block">SUBTOTAL</b>
+            <i class="far fa-money-bill-alt text-success"></i>
+            <span id="moneySubTotal" style="font-size: 15px !important;"></span>
+        </div>
+        <div class="dinero bg-white p-2 border">
+            <b class="d-block">I.G.V</b>
+            <i class="far fa-money-bill-alt text-danger"></i>
+            <span id="moneyIgv" style="font-size: 15px !important;"></span>
+        </div>
+        <div class="dinero bg-white p-2 border">
+            <b class="d-block">TOTAL</b>
+            <i class="fas fa-hand-holding-usd text-primary"></i>
+            <span id="moneyTotal" style="font-size: 15px !important;"></span>
+        </div>
+        <div class="dinero p-2">
+            <button class="btn btn-sm btn-primary" id="btn-facturar">
+                <i class="fas fa-shopping-cart"></i>
+                Facturar
+            </button>
+        </div>
+    </div>
+</section>
+<section class="p-2 bg-white">
+    <table class="table table-sm table-bordered table-sm" id="tabla-guias">
         <thead>
             <tr>
+                <th id="boxCheck">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="selectAll">
+                        <label class="custom-control-label" for="selectAll"></label>
+                    </div>
+                </th>
                 <th>Fecha de<br>Emision</th>
                 <th>N° de Guía</th>
                 <th>Destinatario / Nombres</th>
@@ -65,7 +96,7 @@
                 <th>Ciudad Final</th>
                 <th>Complejo Distante</th>
                 <th>Descripcion</th>
-                <th>Peso</th>
+                <th>Peso Kg.</th>
                 <th>Peso Volumen</th>
                 <th>Costo<br>Adicional<br>(FAU)</th>
                 <th>FACT<br>Final<br>Servicio</th>

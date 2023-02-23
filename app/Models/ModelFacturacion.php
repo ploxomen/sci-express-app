@@ -76,6 +76,38 @@ class ModelFacturacion extends Model
         $guias = DB::table("guias")->where(['activo' => 1,'estado' => 1, 'situ' => 11, 'id_cliente_facturacion' => $cliente])->get();
         self::calcularGuias($guias);
     }
+    public static function facturarGuiasClientes($guias,$cliente,$subtotal,$igv,$total, $idUsuario)
+    {
+        DB::beginTransaction();
+        try {
+            $guiasAdd = [];
+            foreach ($guias as $guia) {
+                $g = DB::table("guias")->where(['id' => $guia['idGuia'],'id_cliente_facturacion' => $cliente,'activo' => 1, 'situ' => 11, 'estado' => 1]);
+                $gg = $g->first();
+                if(!empty($gg)){
+                    $guiasAdd[] = ['id_cliente' => $gg->id];
+                    $g->update(['situ' => 12]);
+                }
+            }
+            if(count($guiasAdd) > 0){
+                $idFactFianl = DB::table("facturacion_cliente_final")->insertGetId([
+                    'sub_total' => $subtotal,
+                    'igv' => $igv,
+                    'total' => $total,
+                    'usuario_creado' => $idUsuario
+                ]);
+                foreach ($guiasAdd as $key => $value) {
+                    $guiasAdd[$key]['id_facturacion_final'] = $idFactFianl;
+                }
+                DB::table("facturacion_cliente_final_detalle")->insert($guiasAdd);
+            }
+            DB::commit();
+            return ['success' => 'guias facturadas de forma correcta'];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return ['error' => $th->getMessage()];
+        }
+    }
     public static function calcularGuias($guias)
     {
         foreach ($guias as $guia) {

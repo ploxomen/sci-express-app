@@ -271,7 +271,7 @@
                                     <select required data-name="grupo_envio" class="data-anulada form-control form-control-sm simple-select2">
                                         <option value="" hidden>Seleccione una opción</option>
                                         @foreach ($grupoEnvio as $grupo)
-                                            <option value="{{$grupo}}">{{$grupo}}</option>
+                                            <option value="{{$grupo}}" {{$grupo == "MEDICINA" ? "selected" : ""}}>{{$grupo}}</option>
                                         @endforeach
                                     </select>
                                 </td>
@@ -279,7 +279,7 @@
                                     <select required data-name="tipo_envio" class="data-anulada form-control form-control-sm simple-select2">
                                         <option value="" hidden>Seleccione una opción</option>
                                         @foreach ($tipoEnvios as $tipoEnvio)
-                                            <option value="{{$tipoEnvio->id}}">{{$tipoEnvio->tipo_envio}}</option>
+                                            <option value="{{$tipoEnvio->id}}" {{$tipoEnvio->id == "2" ? "selected" : ""}}>{{$tipoEnvio->tipo_envio}}</option>
                                         @endforeach
                                     </select>
                                 </td>
@@ -290,7 +290,7 @@
                                     <select required data-name="embase_embalaje" class="data-anulada form-control form-control-sm simple-select2">
                                         <option></option>
                                         @foreach ($embaseEmbalaje as $embase)
-                                            <option value="{{$embase}}">{{$embase}}</option>
+                                            <option value="{{$embase}}" {{$embase == "CAJAS" ? "selected" : ""}}>{{$embase}}</option>
                                         @endforeach
                                     </select>
                                 </td>
