@@ -198,7 +198,9 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
     });
     Route::prefix('facturacion')->group(function () {
         Route::get('guias/mostrar', [Facturacion::class, 'viewFacturacionGuia'])->name('facturacionMisGuias');
+        Route::get('cluster/mostrar', [Facturacion::class, 'viewFacturacionCluster'])->name('facturacionMisClusters');
         Route::post('guias/ver', [Facturacion::class, 'obtenerFacturacionGuia']);
+        Route::post('cluster/ver', [Facturacion::class, 'obtenerFacturacionClusterFac']);
         Route::get('guias/expor/excel', [Facturacion::class, 'exportarExcelFacturacionGuia'])->name('exportExcelFacturacionGuias');
         Route::prefix('configuracion')->group(function () {
             Route::get('cliente', [Facturacion::class, 'viewConfiguracionCliente'])->name('configFacturacionCliente');

@@ -4,7 +4,8 @@ function loadPage(){
     function changeFuctionCb() {
         thSelectAll.hidden = true;
         if (tablaFacturacion){
-            tablaFacturacion.destroy();
+            tablaFacturacion.draw();
+            return
         }
         tablaFacturacion = $('#tabla-guias').DataTable({
             ajax: {
@@ -52,22 +53,25 @@ function loadPage(){
                 }
             },
             {
-                data: 'pesoGuia'
+                data: 'pesoGuia',
+                render : function(data){
+                    return !isNaN(parseFloat(data)) ? parseFloat(data) : 0;
+                }
             },
             {
                 data: 'pesoVolumen',
                 render: function(data,tipo,full){
-                    return pesoVolumen(full.pesoGuia, tipo, data);
+                    return general.pesoVolumen(data, tipo, full);
                 }
             }, {
                 data: 'valor_complejo_distante',
                 render : function(data,tipo,full){
-                    return valorComplejoDist(full.esAlejado,data);
+                    return general.valorComplejoDist(full.esAlejado,data);
                 }
             }, {
                 data: 'fact_final',
                 render : function(data){
-                    return moneyFormat(data);
+                    return general.moneyFormat(data);
                 }
             }
             ],
@@ -76,12 +80,6 @@ function loadPage(){
     }
     const thSelectAll = document.querySelector("#boxCheck");
     const frmFiltros = document.querySelector("#frm-aplicar-filtros");
-    function pesoVolumen(data,tipo,full) {  
-        if (data > full.pesoVolumen) {
-            return '(en blanco)';
-        }
-        return full.pesoVolumen;
-    }
     function defaultDescripcion(data){
         let template = "No definido";
         if (data && data.length > 0) {
@@ -98,6 +96,7 @@ function loadPage(){
         return template;
     }
     const boxInfoCostos = document.querySelector("#boxInfoCostos");
+    const boxNunGuias = document.querySelector("#boxNumGuias");
     function changeValue(valor){
         if (valor == "11") {
             if (tablaFacturacion) {
@@ -106,8 +105,10 @@ function loadPage(){
             }
             changeFacturacionCb();
             boxInfoCostos.hidden = false;
+            boxNunGuias.hidden = false;
         } else {
             selectorAll.checked = false;
+            boxNunGuias.hidden = true;
             boxInfoCostos.hidden = true;
             tablaConsulta.innerHTML = "";
             changeFuctionCb();
@@ -129,7 +130,7 @@ function loadPage(){
                 idGuia : check.dataset.guia
             });
         }
-        alertify.confirm("Mensaje", "Estas a punto de facturar " + guias.length + " guias. ¿Estás seguro de continuar?<br>" + `<div class="text-right"><div class="mb-1"><b>SUBTOTAL: </b>${moneyFormat(datosCostos.subtotal)}</div><div class="mb-1"><b>I.G.V: </b>${moneyFormat(datosCostos.igv)}</div><div class="mb-1"><b>TOTAL: </b>${moneyFormat(datosCostos.total)}</div></div>`,async ()=>{
+        alertify.confirm("Mensaje", "Estas a punto de facturar " + guias.length + " guias. ¿Estás seguro de continuar?<br>" + `<div class="text-right"><div class="mb-1"><b>SUBTOTAL: </b>${general.moneyFormat(datosCostos.subtotal)}</div><div class="mb-1"><b>I.G.V: </b>${general.moneyFormat(datosCostos.igv)}</div><div class="mb-1"><b>TOTAL: </b>${general.moneyFormat(datosCostos.total)}</div></div>`,async ()=>{
             let datos = new FormData();
             datos.append("tipo","facturar");
             datos.append("cliente", $('#id_filtro_cliente').val());
@@ -161,9 +162,9 @@ function loadPage(){
         }
         datosCostos.igv = ((datosCostos.total * 18)/100).toFixed(2);
         datosCostos.subtotal = datosCostos.total - datosCostos.igv;
-        document.querySelector("#moneySubTotal").textContent = moneyFormat(datosCostos.subtotal);
-        document.querySelector("#moneyIgv").textContent = moneyFormat(datosCostos.igv);
-        document.querySelector("#moneyTotal").textContent = moneyFormat(datosCostos.total);
+        document.querySelector("#moneySubTotal").textContent = general.moneyFormat(datosCostos.subtotal);
+        document.querySelector("#moneyIgv").textContent = general.moneyFormat(datosCostos.igv);
+        document.querySelector("#moneyTotal").textContent = general.moneyFormat(datosCostos.total);
     }
     const selectorAll = document.querySelector("#selectAll");
     selectorAll.addEventListener("change", event => marcarTodosCheckbox(event.target.checked));
@@ -173,7 +174,8 @@ function loadPage(){
         }
         calcularValores();
     }
-
+    const totalGuiasFacturar = document.querySelector("#totalFacturar");
+    const guiasMostradas = document.querySelector("#guiasMostradas");
     async function changeFacturacionCb(){
         thSelectAll.hidden = false;
         let datos = new FormData(frmFiltros);
@@ -181,6 +183,8 @@ function loadPage(){
         datos.append("response","normal");
         try {
             const response = await general.funcfetch("ver",datos);
+            totalGuiasFacturar.textContent = response.totalGuias;
+            guiasMostradas.textContent = response.guias.length;
             let template = "";
             response.guias.forEach(g => {
                 template += `<tr>
@@ -218,16 +222,16 @@ function loadPage(){
                         ${defaultDescripcion(g.descripcionGuia)}
                     </td>
                     <td>
-                        ${g.pesoGuia}
+                        ${!isNaN(parseFloat(g.pesoGuia)) ? parseFloat(g.pesoGuia) : 0}
                     </td>
                     <td>
-                        ${pesoVolumen(g.pesoGuia, null, g)}
+                        ${general.pesoVolumen(g.pesoGuia, null, g)}
                     </td>
                     <td>
-                        ${valorComplejoDist(g.esAlejado,g.valor_complejo_distante)}
+                        ${general.valorComplejoDist(g.esAlejado,g.valor_complejo_distante)}
                     </td>
                     <td>
-                        ${moneyFormat(g.fact_final)}
+                        ${general.moneyFormat(g.fact_final)}
                     </td>
                 </tr>`
             });
@@ -252,24 +256,6 @@ function loadPage(){
             selectorAll.checked = true;
         }
         calcularValores();
-    }
-    function valorComplejoDist(tipo,valor){
-        valor = !valor || valor == "" ? "0.00" : parseFloat(valor);
-        console.log(valor);
-        let tipoDs = "Ninguno";
-        if (tipo == "Complejo - Distante"){
-            tipoDs = valor + " %";
-        } else if (tipo == "Rural - Alejada"){
-            tipoDs = moneyFormat(valor);
-        }
-        return tipoDs;
-    }
-    function moneyFormat(monedaVal){
-        let moneda = !monedaVal || monedaVal == "" ? 0.00 : parseFloat(monedaVal);
-        return (moneda).toLocaleString("es-PE",{
-            style: 'currency',
-            currency: 'PEN'
-        })
     }
     changeFacturacionCb();
     document.getElementById('aplicar-filtros-btn').onclick = function () {  

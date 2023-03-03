@@ -150,11 +150,25 @@ class ModeloEmbarque extends Model
     {
         DB::beginTransaction();
         try {
-            DB::table('embarque_manifiesto AS em')->join('manifiesto AS m','em.id_manifiesto','=','m.id')
-            ->join('detalle_manifiesto AS dm', 'dm.id_manifiesto', '=', 'm.id')
+            DB::table('embarque_ciudad_llegada AS ec')
+            ->join('embarque_manifiesto AS em', 'em.id_embarque_ciudad', '=', 'ec.id')
+            ->join("detalle_manifiesto AS dm","dm.id_manifiesto","=","em.id_manifiesto")
+            ->join("manifiesto AS m","m.id","=","em.id_manifiesto")
             ->join('guias AS g', 'g.id', '=', 'dm.id_guia')
-            ->where(['em.id_embarque' => $idEmbarque])->update(['m.estado' => 1 ,'g.situ' => 2]);
-            DB::table('embarque')->where(['id' => $idEmbarque])->delete();
+            ->where(['ec.id_embarque' => $idEmbarque])->update(['m.estado' => 1 ,'g.situ' => 2]);
+            DB::table('embarque_manifiesto AS em')
+            ->join('embarque_ciudad_llegada AS ec', 'em.id_embarque_ciudad', '=', 'ec.id')
+            ->where(['ec.id_embarque' => $idEmbarque])->delete();
+            DB::table('embarque_fletes AS em')
+            ->join('embarque_ciudad_llegada AS ec', 'em.id_embarque_ciudad', '=', 'ec.id')
+            ->where(['ec.id_embarque' => $idEmbarque])->delete();
+            DB::table('embarque_ciudad_llegada AS ec')
+            ->where(['ec.id_embarque' => $idEmbarque])->delete();
+            DB::table('transporte_embarque AS te')
+            ->join('embarque AS e', 'e.id', '=', 'te.id_list_emba')
+            ->where(['e.id' => $idEmbarque])->delete();
+            DB::table('embarque AS e')
+            ->where(['e.id' => $idEmbarque])->delete();
             DB::commit();
             return ['success' => 'Embarque eliminado correctamente'];
         } catch (Exception $ex) {
@@ -205,13 +219,51 @@ class ModeloEmbarque extends Model
         if(DB::table('embarque_ciudad_llegada AS ecl')->join("embarque_manifiesto AS em","ecl.id","=", "em.id_embarque_ciudad")->where(['ecl.id_embarque' => $idEmbarque])->count() === 1){
             return ['error' => 'El embarque debe tener al menos un manifiesto'];
         }
-       DB::select('CALL sp_embarque_eliminar_manifiesto(?,?)',[$idEmbarque,$idManifiesto]);
-       return ['success' => 'Manifiesto eliminado correctamente'];
+        DB::select('CALL sp_embarque_eliminar_manifiesto(?,?)',[$idEmbarque,$idManifiesto]);
+        return ['success' => 'Manifiesto eliminado correctamente'];
     }
     public static function agregarManifiestoEmbarque($idEmbarque, $idManifiesto)
     {
-        DB::select('CALL sp_embarque_agregar_manifiesto(?,?)', [$idEmbarque, $idManifiesto]);
-        return ['success' => 'Manifiesto agregado correctamente'];
+        DB::beginTransaction();
+        try {
+            $manifiesto = DB::table("manifiesto")->where(["id" => $idManifiesto,"estado" => 1])->first();
+            if(empty($manifiesto)){
+                return ['error' => 'El manifiesto no existe o ya a sido embarcado'];
+            }
+            $cluster = DB::table("ciudades_base_cluster")->where(["base" => 1 , "activo" => 1, "id_cluster" => $manifiesto->id_cluster])->first();
+            if(empty($cluster)){
+                return ['error' => 'No se encontró ciudad base para el cluster relacionado al manifiesto'];
+            }
+            $ciudadLlegada = DB::table("embarque_ciudad_llegada")->where(["id_ciudad" => $cluster->id_ciudad, "ubigeo_distrito" => $cluster->ubigeo_distrito, "tipo_base" => empty($cluster->id_ciudad) ? "distrito" : "ciudad","id_embarque" => $idEmbarque, 'tipo_trayecto' => $manifiesto->via_envio])->first();
+            $idCiudadLlegada = null;
+            if(empty($ciudadLlegada)){
+                $idCiudadLlegada = DB::table("embarque_ciudad_llegada")->insertGetId([
+                    'id_embarque' => $idEmbarque,
+                    'id_ciudad' => $cluster->id_ciudad,
+                    'ubigeo_distrito' => $cluster->ubigeo_distrito,
+                    'tipo_trayecto' => $manifiesto->via_envio
+                ]);
+            }else{
+                $idCiudadLlegada = $ciudadLlegada->id;
+            }
+            $flete = DB::table("embarque_fletes")->where(['id_embarque_ciudad' => $idCiudadLlegada,'id_cluster' => $cluster->id_cluster])->first();
+            if(empty($flete)){
+                DB::table("embarque_fletes")->insert([
+                    'id_cluster' => $cluster->id_cluster,
+                    'id_embarque_ciudad' => $idCiudadLlegada,
+                    'estado' => 2
+                ]);
+            }
+            DB::table("embarque_manifiesto")->insert(['id_embarque_ciudad' => $idCiudadLlegada,'id_manifiesto' => $idManifiesto]);
+            DB::table("manifiesto AS m")->join("detalle_manifiesto AS dm","dm.id","=","m.id")
+            ->join("guias AS g","g.id","=","dm.id_guia")->where(["m.id" => $idManifiesto,"m.estado" => 1])
+            ->update(['g.situ' => 3,'m.estado' => 2]);
+            DB::commit();
+            return ['success' => 'Manifiesto agregado correctamente'];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return ['error' => $th->getMessage()];
+        }
     }
     public static function misEmbarquesFiltros($fechaInicio,$fechaFin,$driver,$dealer,$vehiculo,$estado,$idEmbarque)
     {

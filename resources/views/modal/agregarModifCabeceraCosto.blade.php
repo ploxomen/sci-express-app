@@ -10,20 +10,20 @@
         <div class="modal-body">
             <form id="cabecera-facturacion-costo-cliente-form" class="form-row">
                 <div class="form-group col-4">
-                    <label for="id_cabecera_minimo_costo">Kg. Mínimo</label>
-                    <input type="number" required class="form-control" name="kg_minimo" id="id_cabecera_minimo_costo" min="0" step="0.01">
-                </div>
-                <div class="form-group col-4">
-                    <label for="id_cabecera_maximo_costo">Kg. Máximo</label>
-                    <input type="number" required class="form-control" name="kg_maximo" id="id_cabecera_maximo_costo" step="0.01">
-                </div>
-                <div class="form-group col-4">
                     <label for="id_via_envio_costo">Via Envio</label>
                     <select id="id_via_envio_costo" class="simple-select2" name="id_via_envio" required>
                         @foreach ($viaEnvio as $via)
                             <option value="{{$via->id}}">{{$via->envio}}</option>
                         @endforeach
                     </select>
+                </div>
+                <div class="form-group col-4">
+                    <label for="id_cabecera_minimo_costo">Kg. Mínimo</label>
+                    <input type="number" required class="form-control" name="kg_minimo" id="id_cabecera_minimo_costo" min="0" step="0.01">
+                </div>
+                <div class="form-group col-4">
+                    <label for="id_cabecera_maximo_costo">Kg. Máximo</label>
+                    <input type="number" required class="form-control" name="kg_maximo" id="id_cabecera_maximo_costo" step="0.01">
                 </div>
                 <div class="form-group col-12">
                     <div class="custom-control custom-switch">

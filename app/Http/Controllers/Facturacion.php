@@ -22,6 +22,14 @@ class Facturacion extends Controller
         $via_envios = InformacionAdicional::viaEnvio();
         return view('facturacion.guiaMostrar', compact('modulos', 'fechaFiltros', 'clientes', 'via_envios'));
     }
+    public function viewFacturacionCluster()
+    {
+        $fechaFiltros = InformacionAdicional::obtenerDiasFiltros();
+        $modulos = User::getModulos(Auth::id());
+        $via_envios = InformacionAdicional::viaEnvio();
+        $clusters = ModeloCluster::obtenerTodosClustersFacturacion();
+        return view("facturacion.clusterMostra",compact('modulos', 'fechaFiltros', 'clusters', 'via_envios'));
+    }
     public function viewConfiguracionCliente()
     {
         $clientes = Clientes::getClientesFacturacion();
@@ -51,12 +59,28 @@ class Facturacion extends Controller
                 unset($datos['tipo']);
                 $response = ModelFacturacion::agregarCabeceraFacClus($datos,Auth::id());
             break;
+            case 'mostrar-editar-cluster':
+                $response = ModelFacturacion::mostrarCabeceraEditarCluster($request->cabecera,$request->cluster);
+            break;
+            case 'editar-cabecera-cluster':
+                $datos = $request->all();
+                unset($datos['tipo']);
+                $response = ModelFacturacion::editarCabeceraClusterCiudad(Auth::id(),$datos);
+            break;
+            case 'agregar-cabecera-cluster':
+                $datos = $request->all();
+                unset($datos['tipo']);
+                $response = ModelFacturacion::agregarCabeceraClusterCiudad(Auth::id(),$datos);
+            break;
             case 'agregar-valor':
-                $resultado = ModelFacturacion::agregarValorCabeceraCluster($request->cabecera,$request->tipoEnvio,$request->monto);
+                $resultado = ModelFacturacion::agregarValorCabeceraCluster($request->cabecera,$request->ciudad,$request->monto);
                 $response = ['success' => $resultado ? 'monto actualizado correctamente' : 'no se actualizo el monto'];
             break;
             case 'mostrar-costo-editar':
                 $response = ModelFacturacion::mostrarCabeceraEditarCostoCluster($request->cluster,$request->cabecera);
+            break;
+            case 'eliminar-cabecera-cluster':
+                $response = ModelFacturacion::eliminarCabeceraCluster($request->cabecera,$request->cluster);
             break;
             case 'editar-cabecera':
                 $datos = $request->all();
@@ -66,8 +90,11 @@ class Facturacion extends Controller
             case 'eliminar-costo-editar':
                 $response = ModelFacturacion::eliminarCabeceraCostoCluster($request->cabecera,$request->cluster);
             break;
+            case 'cambiar-valor-costo':
+                $response = ModelFacturacion::cambiarValorCostoCluster($request->columna,$request->fila,$request->valor);
+            break;
             case 'importarData':
-                $response = ModelFacturacion::importarDatosCluster($request->cluster,$request->cluster2,Auth::id());
+                $response = ModelFacturacion::importarDatosCluster($request->cluster,$request->cluster2,Auth::id(),$request->has("cabecera"));
             break;
         }
         return response()->json($response);
@@ -132,6 +159,27 @@ class Facturacion extends Controller
             return response()->json($response);
         }
     }
+    public function obtenerFacturacionClusterFac(Request $request)
+    {
+        if(!$request->ajax()){
+            return response()->json(['error' => 'peticion invalida']);
+        }
+        switch ($request->tipo) {
+            case 'consultaProvincias':
+                $response = ModelFacturacion::obtenerProvinciasCluster($request->cluster);
+            break;
+            case 'consulta':
+                $response = ModelFacturacion::obtenerProvinciasCluster($request->cluster);
+                $guias = ModelFacturacion::obtenerGuiasFacturacionCluster($request->cluster,$request->trayecto,$request->fechaInicio,$request->fechaFin,$request->estado);
+                return $request->response == "normal" ? response()->json(["guias" => $guias, "totalGuias" => ModelFacturacion::totalGuiasAfacturarCluster($request->cluster)]) : datatables()->of($guias)->toJson();
+            break;
+            case 'calcular':
+                ModelFacturacion::sincronizarFacturacionCluster($request->cluster);
+                return response()->json(['success' => 'montos calculados correctamente']);
+            break;
+        }
+        return response()->json($response);
+    }
     public function obtenerFacturacionGuia(Request $request)
     {
         if($request->ajax()){
@@ -142,7 +190,7 @@ class Facturacion extends Controller
                     $fechaIncio = $request->fechaInicio;
                     $fechaFin = $request->fechaFin;
                     $guias = ModelFacturacion::obtenerGuiasFacturacion($clientes,$trayectos,$fechaIncio,$fechaFin,$request->estado);
-                    return $request->response == "normal" ? response()->json(["guias" => $guias]) : datatables()->of($guias)->toJson();
+                    return $request->response == "normal" ? response()->json(["guias" => $guias, "totalGuias" => ModelFacturacion::cantidadGuiasAFacturar($clientes,$trayectos)->count()]) : datatables()->of($guias)->toJson();
                 break;
                 case 'calcular':
                     ModelFacturacion::sincronizarFacturacionCliente($request->cliente);

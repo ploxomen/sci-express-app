@@ -18,6 +18,12 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="form-group col-12">
+                  <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input" id="idInclTabAsig" name="cabecera" checked>
+                      <label class="custom-control-label" for="idInclTabAsig">Incluir tabla asignación de costos</label>
+                  </div>
+              </div>
                 <input type="submit" id="btnImportDataCliente" hidden>
             </form>
         </div>

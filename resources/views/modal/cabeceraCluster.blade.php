@@ -9,22 +9,14 @@
       </div>
       <div class="modal-body">
           <form id="cabecera-facturacion-costo-cluster-form" class="form-row">
-              <div class="form-group col-6">
+              <div class="form-group col-4">
                 <label for="id_cabecera_id_via_envio">Tipo envio</label>
-                <select id="id_cabecera_id_via_envio" class="simple-select2" name="id_via_envio">
+                <select id="id_cabecera_id_via_envio" class="simple-select2" name="id_via_envio" required>
                     @foreach ($viaEnvio as $envio)
                         <option value="{{$envio->id}}">{{$envio->envio}}</option>
                     @endforeach
                 </select>
             </div>
-              <div class="form-group col-6">
-                  <label for="id_cabecera_tipo_calculo">Tipo</label>
-                  <select id="id_cabecera_tipo_calculo" class="simple-select2" name="tipo_calculo">
-                      <option value="normal">Monto Normal</option>
-                      <option value="base">Monto Base</option>
-                      <option value="adicional">Monto adicional</option>
-                  </select>
-              </div>
               <div class="form-group col-4">
                   <label for="id_cabecera_kg_minimo">Kg. Mínimo</label>
                   <input type="number" required class="form-control" name="kg_minimo" id="id_cabecera_kg_minimo" min="0" step="0.01">
@@ -33,10 +25,6 @@
                   <label for="id_cabecera_kg_maximo">Kg. Máximo</label>
                   <input type="number" required class="form-control" name="kg_maximo" id="id_cabecera_kg_maximo" step="0.01">
               </div>
-              <div class="form-group col-4" hidden>
-                <label for="id_cabecera_kg_base">Kg. Base</label>
-                <input type="number" disabled required class="form-control" name="kg_base" id="id_cabecera_kg_base" step="0.01">
-            </div>
               <div class="form-group col-12">
                   <div class="custom-control custom-switch">
                       <input type="checkbox" name="active_infinito" class="custom-control-input" id="checkInfinito">

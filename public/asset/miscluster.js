@@ -61,15 +61,18 @@ function loadPage(){
                         <div class="form-group col-6 col-lg-3">
                             <select class="form-control cb-ubigeo" required data-ciudades="#id_ciudad_old_destino_${h.id}" data-idciudad="${h.id}" id="id_distrito_old_clu_${h.id}">${templateDist}</select>
                         </div>
-                        <div class="form-group col-6 col-lg-3">
+                        <div class="form-group col-6 col-lg-2">
                             <select class="form-control cb-select2-tags" id="id_ciudad_old_destino_${h.id}">${tempCity}</select>
                         </div>
-                        <div class="form-group col-6 col-sm-6 col-lg-3">
+                        <div class="form-group col-6 col-sm-6 col-lg-2">
                             <select required class="form-control simple-select2" id="opcion-alejado-old-destino-${h.id}" data-costo="#costo-old-alejado-${h.id}">${tempRemoteCity}</select>
                         </div>
                         <div class="form-group col-6 col-sm-4 col-lg-2">
-                            <input type="number" placeholder="S/ ó %" id="costo-old-alejado-${h.id}" step="0.01" min="0" class="form-control form-control-sm" value="${h.costo_ciudad_alejada}">
+                            <input type="number" placeholder="FAU" id="costo-old-alejado-${h.id}" step="0.01" min="0" class="form-control form-control-sm txtFau" value="${h.costo_ciudad_alejada}">
                         </div>
+                        <div class="form-group col-6 col-sm-4 col-lg-2">
+                          <input type="number" placeholder="MOV" id="costo-old-mov-${h.id}" value="${h.mov1}" step="0.01" min="0" class="form-control form-control-sm txtMov1">
+                      </div>
                         <div class="form-group col-12 col-sm-2 col-lg-1 text-right">
                             <input type="radio" name="destino_final" class="selection-base" ${h.base ? 'checked' : ''}>
                             <button type="button" class="btn btn-danger btn-sm btn-delete-destino"><i class="far fa-trash-alt"></i></button>
@@ -189,7 +192,8 @@ function loadPage(){
                     ciudad_base : $(ciudades).find('.selection-base').prop("checked") ? 1 : 0,
                     id_ciudad : $(ciudades).attr('data-type') == 'old' ? $(ciudades).attr('data-ciudad') : null,
                     ciudad_alejada : $(ciudades).find('.simple-select2').val(),
-                    costo_ciudad_alejada: $(ciudades).find('.form-control-sm').val()
+                    mov1 : $(ciudades).find('.txtMov1').val(),
+                    costo_ciudad_alejada: $(ciudades).find('.txtFau').val()
                 }
                 ciudades.dataset.type == 'new' ? agregarCiudades.push(valores) : actualizarCiudades.push(valores);
             }

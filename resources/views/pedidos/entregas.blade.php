@@ -47,9 +47,9 @@
             <div class="form-group col-12 col-md-6 col-lg-3">
                 <label for="nombre_cluster">Clusters</label>
                 <select id="nombre_cluster" class="form-control simple-select2 cb-filtros">
-                    <option value="0">TODOS</option>
+                    <option value="0" data-nro="TODOS">TODOS</option>
                     @foreach ($clusters as $clu)
-                        <option value="{{$clu->id_cluster}}">{{mb_strtoupper($clu->name,'UTF-8')}} {{mb_strtoupper($clu->last_name,'UTF-8')}}</option>
+                        <option value="{{$clu->id_cluster}}" data-nro="{{$clu->nombreProvincia}}">{{mb_strtoupper($clu->name,'UTF-8')}} {{mb_strtoupper($clu->last_name,'UTF-8')}}</option>
                     @endforeach
                 </select>
             </div>

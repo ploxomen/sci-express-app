@@ -23,15 +23,15 @@
             </select>
         </div>
         <div class="form-group col-12 col-md-6 col-lg-2">
-            <label for="id_estado_estado">Via Traslado</label>
+            <label for="id_estado_estado">Estado</label>
             <select name="estado" id="id_estado_estado" class="form-control filtros simple-select2" required>
                 <option value="11" selected>CARGO EN CD</option>
                 <option value="12">FACTURADO</option>
             </select>
         </div>
         <div class="form-group col-12 col-md-6 col-lg-2">
-            <label for="id_tray_env">Via Traslado</label>
-            <select name="trayecto" id="id_tray_env" class="form-control simple-select2" required>
+            <label for="id_tray_env">Via Traslado (Facturación)</label>
+            <select name="trayecto" id="id_tray_env" class="form-control filtros simple-select2" required>
                 @foreach ($via_envios as $via)
                     <option value="{{$via->id}}">{{$via->envio}}</option>
                 @endforeach
@@ -78,6 +78,11 @@
     </div>
 </section>
 <section class="p-2 bg-white">
+    <div class="form-group" id="boxNumGuias">
+        <p class="mb-0 text-primary"><b>Total guías a facturar: </b><span id="totalFacturar"></span></p>
+        <p><b>Guías mostradas: </b><span id="guiasMostradas"></span></p>
+    </div>
+    <div class="table-responsive">
     <table class="table table-sm table-bordered table-sm" id="tabla-guias">
         <thead>
             <tr>
@@ -104,5 +109,6 @@
         </thead>
         <tbody></tbody>
     </table>
+    </div>
 </section>
 @endsection

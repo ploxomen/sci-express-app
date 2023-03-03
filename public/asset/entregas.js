@@ -1,6 +1,11 @@
 function loadPage(){
     const general = new General();
     const cbCluster = document.getElementById('nombre_cluster');
+    $('#nombre_cluster').select2({
+        theme : 'bootstrap',
+        templateResult: general.tempSeleCli,
+        placeholder: 'Seleccione un cliente'
+    });
     let tablaEntrega = $('#tabla-entrega').DataTable({
         ajax : {
             url: window.location.origin + '/intranet/pedidos/entrega/lista',
@@ -76,6 +81,7 @@ function loadPage(){
             }else{
                 document.getElementById('id_detalle_entreg').innerHTML = "";
             }
+            document.querySelector("#tituloEmergenteGuia").textContent = "Campos emergentes / " + response.success.tipoGuia + " N° " + response.success.nro_guia; 
             $('#modal-detalle-entregas .simple-select2').trigger("change");
             $('#modal-detalle-entregas').modal("show");
         }

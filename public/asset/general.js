@@ -898,6 +898,29 @@ class General{
         });
         return idClientes;
     }
+    moneyFormat(monedaVal){
+        let moneda = !monedaVal || monedaVal == "" ? 0.00 : parseFloat(monedaVal);
+        return (moneda).toLocaleString("es-PE",{
+            style: 'currency',
+            currency: 'PEN'
+        })
+    }
+    pesoVolumen(data,tipo,full) {  
+        if (data > full.pesoVolumen) {
+            return '(en blanco)';
+        }
+        return full.pesoVolumen;
+    }
+    valorComplejoDist(tipo,valor){
+        valor = !valor || valor == "" ? "0.00" : parseFloat(valor);
+        let tipoDs = "Ninguno";
+        if (tipo == "Complejo - Distante"){
+            tipoDs = valor + " %";
+        } else if (tipo == "Rural - Alejada"){
+            tipoDs = this.moneyFormat(valor);
+        }
+        return tipoDs;
+    }
     nuevoCiuadaAlejada(contadorLi,ulListCiudad){
         $('#lista-destino-final .cb-ubigeo, #lista-destino-final .cb-select2-tags, #lista-destino-final .simple-select2').select2('destroy');
         const liPrimero = ulListCiudad.children[0];
@@ -908,9 +931,11 @@ class General{
         liDuplicado.querySelector(".cb-ubigeo").setAttribute('id','id_distrito_new_clu_' + contadorLi);
         liDuplicado.querySelector(".cb-ubigeo").setAttribute('data-ciudades','#id_ciudad_new_destino_' + contadorLi);
         liDuplicado.querySelector(".cb-select2-tags").setAttribute('id','id_ciudad_new_destino_' + contadorLi);
-        liDuplicado.querySelector("input").id = "costo-new-alejado-" + contadorLi;
-        liDuplicado.querySelector("input").value = "";
-        liDuplicado.querySelector("input").disabled = true;
+        liDuplicado.querySelector(".txtFau").id = "costo-new-alejado-" + contadorLi;
+        liDuplicado.querySelector(".txtFau").value = "";
+        liDuplicado.querySelector(".txtFau").disabled = true;
+        liDuplicado.querySelector(".txtMov1").id = "costo-new-mov-" + contadorLi;
+        liDuplicado.querySelector(".txtMov1").value = "";
         liDuplicado.querySelector(".selection-base").checked = false;
         for (const element of liDuplicado.querySelectorAll("select")) {
             element.value = "";

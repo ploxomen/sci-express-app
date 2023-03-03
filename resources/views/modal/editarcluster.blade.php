@@ -79,7 +79,8 @@
                                 <span class="text-info">Distrito</span> / 
                                 <span class="text-info">Ciudad</span> / 
                                 <span class="text-info">Zona Complejo Distante</span> / 
-                                <span class="text-info">Costo</span>
+                                <span class="text-info">Costo FAU</span> /
+                                <span class="text-info" title="Movilidad a cobrar">Mov 1</span>
                             </b>
                         </div>
                         <ol id="lista-destino-final" class="pl-3"></ol>

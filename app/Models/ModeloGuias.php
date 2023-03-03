@@ -26,7 +26,7 @@ class ModeloGuias extends Model
                     return ['alerta' => 'La guía N° <b>' . $guia['nro_guia'] . '</b> ya se encuentra registrada, por favor intente con otro número'];
                 }
                 if ($guia['estado'] == '1' || $guia['estado'] == '2') {
-                    if (DB::table('relacion_guias_embarque')->where(['nro_guia_embarque' => $nro_guia[1], 'prefijo_guia_embarque' => $nro_guia[0]])->count() > 0) {
+                    if (DB::table('embarque_ciudad_llegada')->where(['nro_guia_embarque' => $nro_guia[1], 'prefijo_guia_embarque' => $nro_guia[0]])->count() > 0) {
                         return ['alerta' => 'Para registrar la guía N° <b>' . $guia['nro_guia'] . '</b> debe de ser una guía inactiva.'];
                     }
                 }
@@ -63,16 +63,18 @@ class ModeloGuias extends Model
                 ];
             }
             if($guia['estado'] != '3'){
-                $id_cluster = DB::table('ciudades_base_cluster')->select('id_cluster')
+                $id_cluster = DB::table('ciudades_base_cluster')->select('id_cluster','mov1')
                 ->where($arrayConsulta)
                 ->first();
                 if (empty($id_cluster)) {
                     return ['alerta' => 'No se encontraron clusters para la ciudad o distrito del destino final, favor de agregar en el modulo de mis cluster'];
                 }
+                $mov1 = $id_cluster->mov1;
                 $guia['id_cluster'] = $id_cluster->id_cluster;
             }else{
                 $guia['via_tras'] = null;
                 $guia['id_cluster'] = null;
+                $mov1 = null;
             }
             $id_cli_cli = $guia['id_destinatario'];
             if(!empty($cli_bool)){
@@ -100,6 +102,7 @@ class ModeloGuias extends Model
             if (isset($guia['add_cli_cli'])) {
                 unset($guia['add_cli_cli']);
             }
+            $guia['fact_cluster_mov1'] = $mov1;
             $guia['id_destinatario'] = $id_cli_cli;
             $id_guia = DB::table('guias')->insertGetId($guia);
             $tot_cant = 0;
@@ -182,7 +185,7 @@ class ModeloGuias extends Model
                     return ['alerta' => 'La guía N° <b>' . $guia['nro_guia'] . '</b> ya se encuentra registrada, por favor intente con otro número'];
                 }
                 if ($guia['estado'] === '1' || $guia['estado'] === '2') {
-                    if (DB::table('relacion_guias_embarque')->where(['nro_guia_embarque' => $nro_guia[1], 'prefijo_guia_embarque' => $nro_guia[0]])->count() > 0) {
+                    if (DB::table('embarque_ciudad_llegada')->where(['nro_guia_embarque' => $nro_guia[1], 'prefijo_guia_embarque' => $nro_guia[0]])->count() > 0) {
                         return ['alerta' => 'Para registrar la guía N° <b>' . $guia['nro_guia'] . '</b> debe de ser una guía inactiva.'];
                     }
                 }
@@ -754,7 +757,7 @@ class ModeloGuias extends Model
     }
     public static function actualizarEntrega($cluster,$guia,$datos)
     {
-        DB::table('guias')->where(['id_cluster' => $cluster, 'id' => $guia,'situ' => 7])->orWhere(['situ' => 8, 'situ' => 14])->update($datos);
+        DB::table('guias')->where(['id_cluster' => $cluster, 'id' => $guia,'activo' => 1, 'estado' => 1])->orWhere(['situ' => 7,'situ' => 8, 'situ' => 14])->update($datos);
         return 'Entrega actualizada con exito';
     }
     public static function filterComprobantes($stringComprobante)

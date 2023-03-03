@@ -39,12 +39,14 @@ function loadPage(){
             const ubigeo = ciudades.querySelector('.cb-ubigeo');
             const ciudad = ciudades.querySelector('.cb-select2-tags');
             const alejada = ciudades.querySelector(".simple-select2");
-            const costoCiudad = ciudades.querySelector("input[type='number']");
+            const costoCiudad = ciudades.querySelector(".txtFau");
+            const mov = ciudades.querySelector(".txtMov1");
             const base = ciudades.querySelectorAll(`input:checked`).length ? 1 : 0;
             ciudadesDestino.push({
                 distrito : $(ubigeo).val(),
                 ciudad : $(ciudad).val(),
                 ciudad_base :  base,
+                mov1: mov.value,
                 ciudad_alejada : $(alejada).val(),
                 costo_ciudad_alejada : $(costoCiudad).val(),
             })

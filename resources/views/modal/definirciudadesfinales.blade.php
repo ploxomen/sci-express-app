@@ -16,7 +16,8 @@
                     <span class="text-info">Distrito</span> / 
                     <span class="text-info">Ciudad</span> / 
                     <span class="text-info">Zona Complejo Distante</span> / 
-                    <span class="text-info">Costo</span>
+                    <span class="text-info">Costo FAU</span> /
+                    <span class="text-info" title="Movilidad a cobrar">Mov 1</span>
                 </b>
             </div>
             <ol id="lista-destino-final" class="pl-3">
@@ -25,14 +26,17 @@
                       <div class="form-group col-6 col-lg-3">
                           <select class="form-control cb-ubigeo" required data-ciudades="#id_ciudad_new_destino_1" data-idciudad="1" id="id_distrito_new_clu_1"></select>
                       </div>
-                      <div class="form-group col-6 col-lg-3">
+                      <div class="form-group col-6 col-lg-2">
                           <select class="form-control cb-select2-tags" id="id_ciudad_new_destino_1"></select>
                       </div>
-                      <div class="form-group col-6 col-sm-6 col-lg-3">
+                      <div class="form-group col-6 col-sm-6 col-lg-2">
                           <select required class="form-control simple-select2" id="opcion-alejado-new-destino-1" data-costo="#costo-new-alejado-1"></select>
                       </div>
                       <div class="form-group col-6 col-sm-4 col-lg-2">
-                          <input type="number" placeholder="S/ ó %" id="costo-new-alejado-1" disabled required step="0.01" min="0" class="form-control form-control-sm">
+                          <input type="number" placeholder="FAU" id="costo-new-alejado-1" disabled required step="0.01" min="0" class="form-control form-control-sm txtFau">
+                      </div>
+                        <div class="form-group col-6 col-sm-4 col-lg-2">
+                          <input type="number" placeholder="MOV" id="costo-new-mov-1" step="0.01" min="0" class="form-control form-control-sm txtMov1">
                       </div>
                       <div class="form-group col-12 col-sm-2 col-lg-1 text-right">
                           <input type="radio" checked name="destino_final" class="selection-base">

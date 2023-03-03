@@ -223,6 +223,10 @@ function loadPage() {
                         $(dom).val(valor.split(';'));
                         continue;
                     }
+                    if(key == 'id_remitente'){
+                        document.querySelector(`#id_editar_id_remitente option[value='${valor}'][data-type='${response.datos.tipo_guia}'`).selected = true;
+                        continue;
+                    }
                     if (key == 'ciudad_alejada' && valor != null){
                         $boxComplejo.hidden = false;
                         dom.textContent = valor;

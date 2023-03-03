@@ -49,6 +49,7 @@ class ModeloCluster extends Model
                     'tipo_base' => !empty($valor->ciudad) ? 'ciudad' : 'distrito', 
                     'ubigeo_distrito' => $valor->distrito, 
                     'id_ciudad' => null,
+                    'mov1' => $valor->mov1,
                     'ciudad_alejada' => $valor->ciudad_alejada,
                     'costo_ciudad_alejada' => floatval($valor->costo_ciudad_alejada),
                     'base' => $valor->ciudad_base
@@ -78,7 +79,7 @@ class ModeloCluster extends Model
         $datos = DB::select('CALL sp_mis_clusters(?)',[$id]);
         if($id != 0 && isset($datos[0])){
             $datos[0]->lista_provincia_clu = (new Ubigeo)->getProvinciasCliente($datos[0]->departamento_clu);
-            $datos[0]->ciudades = DB::table('ciudades_base_cluster')->select('id','tipo_base','ubigeo_distrito','id_ciudad','base', 'ciudad_alejada', 'costo_ciudad_alejada')->where(['id_cluster' => $datos[0]->cluster_id,'activo' => 1])->get();
+            $datos[0]->ciudades = DB::table('ciudades_base_cluster')->select('id','tipo_base','ubigeo_distrito','mov1','id_ciudad','base', 'ciudad_alejada', 'costo_ciudad_alejada')->where(['id_cluster' => $datos[0]->cluster_id,'activo' => 1])->get();
             foreach ($datos[0]->ciudades as $city) {
                 $city->listCity = DB::table('ciudades')->select('id','nombre_ciudad')->where(['ubigeo_distrito' => $city->ubigeo_distrito])->get();
             }
@@ -111,6 +112,7 @@ class ModeloCluster extends Model
                     'ubigeo_distrito' => $valor_agregar->distrito,
                     'id_ciudad' => null,
                     'base' => $valor_agregar->ciudad_base,
+                    'mov1' => $valor_agregar->mov1,
                     'ciudad_alejada' => $valor_agregar->ciudad_alejada,
                     'costo_ciudad_alejada' => !empty($valor_agregar->costo_ciudad_alejada) ? $valor_agregar->costo_ciudad_alejada : 0
                 ];
@@ -131,10 +133,10 @@ class ModeloCluster extends Model
                     'ubigeo_distrito' => $valor_actualizar->distrito,
                     'id_ciudad' => null,
                     'base' => $valor_actualizar->ciudad_base,
+                    'mov1' => $valor_actualizar->mov1,
                     'ciudad_alejada' => $valor_actualizar->ciudad_alejada,
                     'costo_ciudad_alejada' => !empty($valor_actualizar->costo_ciudad_alejada) ? $valor_actualizar->costo_ciudad_alejada : 0
                 ];
-                // dd($ciudad_actua);
                 if (!empty($valor_actualizar->ciudad)) {
                     $exist_ciudad = DB::table('ciudades')->select('id')->where(['ubigeo_distrito' => $valor_actualizar->distrito, 'id' => $valor_actualizar->ciudad])->first();
                     if (empty($exist_ciudad)) {
@@ -160,19 +162,34 @@ class ModeloCluster extends Model
     }
     public static function obtenerTodosClusters()
     {
-        return DB::table('cluster AS c')->select('u.id','c.provincia_clu','c.id AS id_cluster','u.name','u.last_name','u.status')->join('usuarios AS u','c.id_usuario','=','u.id')->where(['c.activo' => 1])->get();
+        $clusters = DB::table('cluster AS c')->select('u.id','c.provincia_clu','c.id AS id_cluster','u.name','u.last_name','u.status')->join('usuarios AS u','c.id_usuario','=','u.id')->where(['c.activo' => 1])->get();
+        foreach ($clusters as $cluster) {
+            $cluster->nombreProvincia = mb_strtoupper((new Ubigeo)->getNameProvincia($cluster->provincia_clu),"UTF-8");
+        }
+        return $clusters;
     }
     public static function obtenerTodosClustersFacturacion()
     {
-        $clusters = DB::table('cluster AS c')->select('c.provincia_clu','c.id AS id_cluster','u.name','u.last_name','u.status')->join('usuarios AS u','c.id_usuario','=','u.id')->where(['c.activo' => 1])->groupBy("u.name","u.last_name")->get();
+        $clusters = DB::table('cluster AS c')->select('c.provincia_clu','c.id AS id_cluster','u.name','u.last_name','u.status')->join('usuarios AS u','c.id_usuario','=','u.id')->where("u.status","!=",0)->groupBy("u.type_document","u.n_document","u.name","u.last_name")->get();
         foreach ($clusters as $cluster) {
             $cluster->nomProv = mb_strtoupper((new Ubigeo())->getNameProvincia($cluster->provincia_clu),'UTF-8');
         }
         return $clusters;
     }
-    public static function obtenerCiudadesBase(){
-        $ciudades = DB::table("ciudades_base_cluster AS cl")->select("cl.tipo_base","cl.ubigeo_distrito","c.nombre_ciudad","cl.ciudad_alejada")->leftJoin("ciudades AS c","cl.id_ciudad","=","c.id")
-        ->where(['cl.activo' => 1])->get();
+    public static function obtenerCiudadesBase(int $idCluster = null){
+        $ciudades = DB::table("ciudades_base_cluster AS cl")->select("cl.tipo_base","cl.ubigeo_distrito","c.nombre_ciudad","cl.ciudad_alejada")->leftJoin("ciudades AS c","cl.id_ciudad","=","c.id")->where(['cl.activo' => 1]);
+        if(!empty($idCluster)){
+            $ciudades = $ciudades->where('cl.id_cluster',$idCluster);
+        }
+        $ciudades = $ciudades->get();
+        foreach ($ciudades as $ciudad) {
+            $ciudad->nombre_ciudad = mb_strtoupper($ciudad->tipo_base == "distrito" ? (new Ubigeo)->getNameDistrito($ciudad->ubigeo_distrito) : $ciudad->nombre_ciudad,"UTF-8");
+        }
+        return $ciudades;
+    }
+    public static function ciudadesClusters($idsClusters)
+    {
+        $ciudades = DB::table("ciudades_base_cluster AS cl")->select("cl.id","cl.id_ciudad","cl.tipo_base","cl.ubigeo_distrito","c.nombre_ciudad","cl.ciudad_alejada")->leftJoin("ciudades AS c","cl.id_ciudad","=","c.id")->where(['cl.activo' => 1])->whereIn("cl.id_cluster",$idsClusters)->get();
         foreach ($ciudades as $ciudad) {
             $ciudad->nombre_ciudad = mb_strtoupper($ciudad->tipo_base == "distrito" ? (new Ubigeo)->getNameDistrito($ciudad->ubigeo_distrito) : $ciudad->nombre_ciudad,"UTF-8");
         }

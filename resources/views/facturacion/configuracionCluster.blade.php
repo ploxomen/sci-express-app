@@ -37,15 +37,32 @@
                 <div class="cuadro table-success"></div>
                 <span>Monto Adicional</span>
             </div>
+            <div>
+                <div class="cuadro table-warning"></div>
+                <span>Ciudad FAU</span>
+            </div>
         </div>
         <div class="d-flex align-items-center justify-content-end" style="gap: 10px;">
-            <button type="button" class="btn btn-sm btn-outline-info" data-toggle="tooltip" id="btn-modal-fact-cabecera" title="Agregar cabecera">
+            <button type="button" class="btn btn-sm btn-outline-info" data-toggle="tooltip" id="btn-fact-cabecera" title="Agregar cabecera">
                 <i class="fas fa-plus-circle"></i>
             </button>
             <button type="button" class="btn btn-sm btn-outline-danger" data-toggle="tooltip" id="btn-importar" title="Importar configuración a otro cliente">
                 <i class="far fa-copy"></i>
             </button>
         </div>
+    </div>
+    <div class="table-responsive mb-4">
+        <table class="table table-sm table-bordered table-sm mb-4 table-hover">
+            <thead id="cabezara-facturacion-cluster">
+            </thead>
+            <tbody id="facturacion-ciudades"></tbody>
+        </table>
+    </div>
+    <h5 class="text-center text-primary">Tabla Asignación Costos</h5>
+    <div class="d-flex align-items-center justify-content-end mb-3" style="gap: 10px;">
+        <button type="button" class="btn btn-sm btn-outline-info" data-toggle="tooltip" id="btn-modal-fact-cabecera" title="Agregar cabecera">
+            <i class="fas fa-plus-circle"></i>
+        </button>
     </div>
     <div class="table-responsive">
         <table class="table table-sm table-bordered table-sm mb-4 table-hover">
@@ -55,6 +72,7 @@
         </table>
     </div>
 </section>
+@include('modal.agregarCabeceraFacClien',['nombre' => "Cluster"])
 @include('modal.cabeceraCluster')
 @include('modal.copiarConfigCluster')
 @endsection

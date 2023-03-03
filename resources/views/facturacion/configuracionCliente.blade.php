@@ -75,7 +75,7 @@
         </table>
     </div>
 </section>
-@include('modal.agregarCabeceraFacClien')
+@include('modal.agregarCabeceraFacClien',['nombre' => "Cliente"])
 @include('modal.agregarModifCabeceraCosto')
 @include('modal.copiarConfigCliente')
 @endsection

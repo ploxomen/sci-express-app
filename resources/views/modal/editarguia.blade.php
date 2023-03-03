@@ -233,6 +233,10 @@
                 <label for="id-tipo-complejo-distante"><span id="id_editar_ciudad_alejada"></span> <small class="text-danger">*</small></label>
                 <input type="number" min="0" class="form-control" name="valor_complejo_distante" id="id_editar_valor_complejo_distante" disabled>
             </div>
+            <div class="form-group col-12 col-md-6 col-lg-3">
+                <label for="id_editar_fact_cluster_mov1" title="Movilidad cluster">MOV</label>
+                <input type="number" min="0" step="0.01" class="form-control form-control-sm" name="fact_cluster_mov1" id="id_editar_fact_cluster_mov1">
+            </div>
             <div class="col-12">
                 <h5 class="text-info">ARRIBO CLUSTER</h5>
             </div>
