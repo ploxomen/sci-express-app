@@ -23,15 +23,30 @@ class ModelFacturacion extends Model
         }
         return $guias;
     }
+    public static function verDetalleGuia($idGuia)
+    {
+        return DB::table("detalle_guias AS dg")->select("dg.grupo_envio","dg.descripcion","dg.embase_embalaje","ft.tipo_envio","dg.cantidad","dg.kg","dg.volumen")
+        ->join("facturacion_tipo_envio AS ft","ft.id","=","dg.tipo_envio")
+        ->where(['dg.id_guia'=>$idGuia])->get();
+    }
     public static function totalGuiasAfacturarCluster($cluster)
     {
         $idsCluster = self::obtenerClustersIguales($cluster);
         return DB::table("guias AS g")->whereIn("g.id_cluster",$idsCluster)->where(['g.activo' => 1,'g.estado' => 1])->where('g.situ','>=',11)->where('g.situ','!=',14)->where("g.estado_fact_cluster",0)->count();
     }
+    public static function facturarGuiasClusters($guias)
+    {
+        foreach ($guias as $guia) {
+            $query = DB::table("guias")->where(['id' => $guia['idGuia'],'activo' => 1,'estado' => 1, 'estado_fact_cluster' => 0])->where('situ','>=',11);
+            $query->increment('fact_cluster_total',floatval($guia['mov2']));
+            $query->update(["fact_cluster_mov2" => $guia['mov2'],'estado_fact_cluster' => 1]);            
+        }
+        return ['success' => 'guias facturadas correctamente'];
+    }
     public static function obtenerGuiasFacturacionCluster($cluster,$traslado,$fechaInicio,$fechaFin,$estado)
     {
         $idsCluster = self::obtenerClustersIguales($cluster);
-        $guias = DB::table("guias AS g")->select("g.id","ec.tipo_base AS tipoBaseCluster","g.comp_clie","g.nro_comp_cli","cc.nombres AS nomDest","c.nom_cli","g.tot_kg","g.tot_vol AS pesoVolumen","g.fact_cluster_mov1","g.fact_cluster_mov2","g.fact_cluster_sub","g.fact_cluster_total")->selectRaw("DATE_FORMAT(g.fech_emis,'%d/%m/%Y') AS fechaEmision,IF(g.prefijo IS NULL, LPAD(g.nro_guia,7,'0'), CONCAT(LPAD(g.prefijo,3,'0'),'-',LPAD(g.nro_guia,7,'0'))) AS nroGuia,IF(ec.tipo_base = 'ciudad',ci.nombre_ciudad,ec.ubigeo_distrito) AS baseCluster,IF(g.ciudad_destino_final IS NULL,g.dest_dist,ci2.nombre_ciudad) AS nomCiudadFinal,IF(g.ciudad_destino_final IS NULL,'distrito','ciudad') AS tipoFinal")
+        $guias = DB::table("guias AS g")->select("g.id","ec.tipo_base AS tipoBaseCluster","g.comp_clie","g.nro_comp_cli","cc.nombres AS nomDest","c.nom_cli","g.tot_kg","g.tot_vol AS pesoVolumen","g.fact_cluster_mov1","g.fact_cluster_mov2","g.fact_cluster_sub","g.fact_cluster_total","g.tot_cant")->selectRaw("DATE_FORMAT(g.fech_emis,'%d/%m/%Y') AS fechaEmision,IF(g.prefijo IS NULL, LPAD(g.nro_guia,7,'0'), CONCAT(LPAD(g.prefijo,3,'0'),'-',LPAD(g.nro_guia,7,'0'))) AS nroGuia,IF(ec.tipo_base = 'ciudad',ci.nombre_ciudad,ec.ubigeo_distrito) AS baseCluster,IF(g.ciudad_destino_final IS NULL,g.dest_dist,ci2.nombre_ciudad) AS nomCiudadFinal,IF(g.prefijo IS NULL, 'OS', 'GUIA') AS tipoGuiaNom,IF(g.ciudad_destino_final IS NULL,'distrito','ciudad') AS tipoFinal")
         ->leftJoin("clientes_de_clientes AS cc","g.id_destinatario","=","cc.id")
         ->leftJoin("clientes AS c","c.id","=","g.id_cliente_facturacion")
         ->leftJoin("detalle_manifiesto AS dm","dm.id_guia","=","g.id")
@@ -39,7 +54,7 @@ class ModelFacturacion extends Model
         ->leftJoin("embarque_ciudad_llegada AS ec","ec.id","=","em.id_embarque_ciudad")
         ->leftJoin("ciudades AS ci","ci.id","=","ec.id_ciudad")
         ->leftJoin("ciudades AS ci2","ci2.id","=","g.ciudad_destino_final")
-        ->whereIn("g.id_cluster",$idsCluster)->where(['g.activo' => 1,'g.estado' => 1,'g.via_tras' => $traslado])->where('g.situ','>=',$estado)->where('g.situ','!=',14)->where("g.estado_fact_cluster",$estado == "11" ? 0 : 1)->whereBetween('g.fech_emis',[$fechaInicio,$fechaFin])->groupBy("g.id")->get();
+        ->whereIn("g.id_cluster",$idsCluster)->where(['g.activo' => 1,'g.estado' => 1,'g.via_tras' => $traslado])->where('g.situ','>=',11)->where('g.situ','!=',14)->where("g.estado_fact_cluster",$estado == "11" ? 0 : 1)->whereBetween('g.fech_emis',[$fechaInicio,$fechaFin])->groupBy("g.id")->get();
         foreach ($guias as $guia) {
             $guia->baseCluster = $guia->tipoBaseCluster == "distrito" ? (new Ubigeo)->getNameDistrito($guia->baseCluster) : $guia->baseCluster;
             $guia->nomCiudadFinal = $guia->tipoFinal == "distrito" ? (new Ubigeo)->getNameDistrito($guia->nomCiudadFinal) : $guia->nomCiudadFinal;

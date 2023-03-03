@@ -116,8 +116,8 @@ function loadPage(){
         }
         template = `
             <tr>
-                <th rowspan="2">N°</th>
-                <th rowspan="2">Tipo Envio</th>
+                <th rowspan="2" scope="col">N°</th>
+                <th rowspan="2" scope="col">Tipo Envio</th>
             `;
         let cabeceraEnvio = null;
         let contadorCabecera = 0;
@@ -127,7 +127,7 @@ function loadPage(){
                 contadorCabecera++;
             }else{
                 if(cabeceraEnvio != c.envio){
-                    template += `<th colspan="${contadorCabecera}">
+                    template += `<th colspan="${contadorCabecera}" scope="col">
                         ${cabeceraEnvio}
                     </th>`
                     contadorCabecera = 1;
@@ -137,7 +137,7 @@ function loadPage(){
                 }
             }
             if((k+1) == response.columnaEnvio.length && contadorCabecera > 0){
-                template += `<th colspan="${contadorCabecera}">
+                template += `<th colspan="${contadorCabecera}" scope="col">
                     ${cabeceraEnvio}
                 </th>`
             }
@@ -145,7 +145,7 @@ function loadPage(){
         template += "</tr><tr>";
         response.columnaEnvio.forEach(c => {
             const boxInfinifo = infinito == c.kg_maximo ? `<i class="fas fa-infinity"></i>` : `<span id="text_kg_max_${c.id}">${c.kg_maximo}</span>`;
-            template +=`<th id="columna_cabecera_costo_${c.id}">
+            template +=`<th id="columna_cabecera_costo_${c.id}" scope="col">
                     <div class="d-flex justify-content-center" style="gap:5px;">
                         <div class="text-center">
                             <span id="text_kg_mini_${c.id}">${c.kg_minimo}</span>
@@ -182,7 +182,7 @@ function loadPage(){
             response.ciudadesBase.forEach((ci,k) => {
                 template += `<tr id="fila_ciudades_${ci.id}" class="${ci.fau ? 'table-warning' : ''}">
                 <td style="min-width: 20px !important;width: 20px !important; max-width: 20px !important;">${k + 1}</td>
-                <td style="width: 120px !important;">${ci.ciudad}</td>`
+                <td class="sticki" style="width: 120px !important;">${ci.ciudad}</td>`
                 response.cabeceras.forEach(c => {
                     const index = response.valores.findIndex(w => w.ciudad === ci.id && w.cabecera == c.id);
                     if(index >= 0){
@@ -194,8 +194,8 @@ function loadPage(){
             $tablaFacturacion.innerHTML = template;
             template = `
             <tr>
-                <th rowspan="2">N°</th>
-                <th rowspan="2">Ciudades</th>
+                <th rowspan="2" scope="col">N°</th>
+                <th rowspan="2" scope="col" class="sticki">Ciudades</th>
             `;
             let cabeceraEnvio = null;
             let contadorCabecera = 0;
@@ -205,7 +205,7 @@ function loadPage(){
                     contadorCabecera++;
                 }else{
                     if(cabeceraEnvio != c.envio){
-                        template += `<th colspan="${contadorCabecera}">
+                        template += `<th colspan="${contadorCabecera}" scope="col">
                             ${cabeceraEnvio}
                         </th>`
                         contadorCabecera = 1;
@@ -215,7 +215,7 @@ function loadPage(){
                     }
                 }
                 if((k+1) == response.cabeceras.length && contadorCabecera > 0){
-                    template += `<th colspan="${contadorCabecera}">
+                    template += `<th colspan="${contadorCabecera}" scope="col">
                         ${cabeceraEnvio}
                     </th>`
                 }
@@ -231,7 +231,7 @@ function loadPage(){
                         colorCabecera = "text-success";
                     break;
                 }
-                template +=`<th id="columna_cabecera_${c.id}">
+                template +=`<th id="columna_cabecera_${c.id}" scope="col">
                   <a href="javascript:void(0)" data-toggle="tooltip" title="${c.descripcion == null || c.descripcion == "" ? 'Sin descripción' : c.descripcion}" class="text-center ${colorCabecera}">${c.numero}</a>
                   <div class="d-flex justify-content-center" style="gap:5px;">
                     <button class="btn-tabla-facturacion btn-editar-cabecera" data-cabecera="${c.id}">

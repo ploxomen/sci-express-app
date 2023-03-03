@@ -47,14 +47,20 @@ function loadPage(){
             {
                 data: 'tot_kg',
                 render : function(data,tipo,full){
-                    return general.pesoVolumen(data,null,full);
+                    return general.pesoVolumenCluster(data,full.pesoVolumen);
                 }
             }, 
             {
-                data: 'fact_cluster_mov1'
+                data: 'fact_cluster_mov1',
+                render : function(data){
+                    return general.moneyFormat(data);
+                }
             },
             {
-                data: 'fact_cluster_mov2'
+                data: 'fact_cluster_mov2',
+                render : function(data){
+                    return general.moneyFormat(data);
+                }
             },
             {
                 data: 'fact_cluster_total',
@@ -69,6 +75,7 @@ function loadPage(){
     const thSelectAll = document.querySelector("#boxCheck");
     const frmFiltros = document.querySelector("#frm-aplicar-filtros");
     const boxInfoCostos = document.querySelector("#boxInfoCostos");
+    const boxInfoTable = document.querySelector("#boxNumGuias");
     function changeValue(valor){
         if (valor == "11") {
             if (tablaFacturacion) {
@@ -77,9 +84,11 @@ function loadPage(){
             }
             changeFacturacionCb();
             boxInfoCostos.hidden = false;
+            boxInfoTable.hidden = false;
         } else {
             selectorAll.checked = false;
             boxInfoCostos.hidden = true;
+            boxInfoTable.hidden = true;
             tablaConsulta.innerHTML = "";
             changeFuctionCb();
         }
@@ -88,6 +97,9 @@ function loadPage(){
     const guiasMostradas = document.querySelector("#guiasMostradas");
     const tablaConsulta = document.querySelector("#tabla-guias").querySelector("tbody");
     let datosCostos = {
+        facturacion : 0.00,
+        mov1 : 0.00,
+        mov2 : 0.00,
         subtotal : 0.00,
         igv : 0.00,
         total : 0.00
@@ -99,7 +111,8 @@ function loadPage(){
         let guias = [];
         for (const check of tablaConsulta.querySelectorAll(`input[type="checkbox"]:checked`)) {
             guias.push({
-                idGuia : check.dataset.guia
+                idGuia : check.dataset.guia,
+                mov2 : check.dataset.mov2
             });
         }
         alertify.confirm("Mensaje", "Estas a punto de facturar " + guias.length + " guias. ¿Estás seguro de continuar?<br>" + `<div class="text-right"><div class="mb-1"><b>SUBTOTAL: </b>${general.moneyFormat(datosCostos.subtotal)}</div><div class="mb-1"><b>I.G.V: </b>${general.moneyFormat(datosCostos.igv)}</div><div class="mb-1"><b>TOTAL: </b>${general.moneyFormat(datosCostos.total)}</div></div>`,async ()=>{
@@ -125,6 +138,7 @@ function loadPage(){
         },()=>{})
     }
     function calcularValores(){
+        datosCostos.facturacion = 0.00;
         datosCostos.subtotal = 0.00;
         datosCostos.igv = 0.00;
         datosCostos.mov1 = 0.00;
@@ -136,11 +150,12 @@ function loadPage(){
             let mov1 = !isNaN(parseFloat(check.dataset.mov1)) ? parseFloat(check.dataset.mov1) : 0;
             datosCostos.mov2 += mov2;
             datosCostos.mov1 += mov1;
-            datosCostos.subtotal += value;
-            datosCostos.total += value + mov2 + mov1;
+            datosCostos.facturacion += value;
         }
+        document.querySelector("#moneyFacturacion").textContent = general.moneyFormat(datosCostos.facturacion);
+        datosCostos.total = datosCostos.mov2 + datosCostos.mov1 + datosCostos.facturacion;
         datosCostos.igv = ((datosCostos.total * 18)/100).toFixed(2);
-        datosCostos.subtotal = datosCostos.total - datosCostos.igv;
+        datosCostos.subtotal = (datosCostos.total - datosCostos.igv).toFixed(2);
         document.querySelector("#moneySubTotal").textContent = general.moneyFormat(datosCostos.subtotal);
         document.querySelector("#moneyMov1").textContent = general.moneyFormat(datosCostos.mov1);
         document.querySelector("#moneyMov2").textContent = general.moneyFormat(datosCostos.mov2);
@@ -153,6 +168,9 @@ function loadPage(){
             valor = 0;
             e.target.value = "0.00";
         }
+        const total = isNaN(parseFloat(e.target.dataset.total)) ? 0 : parseFloat(e.target.dataset.total);
+        e.target.dataset.total = total + valor;
+        e.target.parentElement.parentElement.children[12].textContent = general.moneyFormat(e.target.dataset.total);
         e.target.parentElement.parentElement.querySelector(".input-check").dataset.mov2 = valor.toFixed(2);
         calcularValores();
     }
@@ -175,7 +193,13 @@ function loadPage(){
             guiasMostradas.textContent = response.guias.length;
             let template = "";
             response.guias.forEach(g => {
-                template += `<tr>
+                let gbTr = "";
+                if (g.tipoGuiaNom == "OS") {
+                    gbTr = "table-warning";
+                }else if(g.tipoGuiaNom == "GUIA" && g.cantidad == 1){
+                    gbTr = "table-primary";
+                }
+                template += `<tr class="${gbTr}">
                     <td>
                         <div class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input input-check" id="selectCheckbox${g.id}" data-guia="${g.id}" data-valor="${g.fact_cluster_sub}" data-mov1="${g.fact_cluster_mov1}" data-mov2="${g.fact_cluster_mov2}">
@@ -186,7 +210,7 @@ function loadPage(){
                         ${g.fechaEmision}
                     </td>
                     <td>
-                        ${g.nroGuia}
+                        <a href="javascript:void(0)" class="select-detalle" data-guia="${g.id}" data-tipoguia="${g.tipoGuiaNom}" data-nroguia="${g.nroGuia}">${g.nroGuia}</a>
                     </td>
                     <td>
                         ${g.nom_cli}
@@ -195,7 +219,7 @@ function loadPage(){
                         ${g.comp_clie}
                     </td>
                     <td>
-                        ${g.nro_comp_cli}
+                        ${!g.nro_comp_cli ? "NINGUNO" : g.nro_comp_cli}
                     </td>
                     <td>
                         ${g.baseCluster}
@@ -207,13 +231,13 @@ function loadPage(){
                         ${g.nomCiudadFinal}
                     </td>
                     <td>
-                        ${general.pesoVolumen(g.tot_kg, null, g)}
+                        ${general.pesoVolumenCluster(g.tot_kg,g.pesoVolumen)}
                     </td>
                     <td>
                         ${general.moneyFormat(g.fact_cluster_mov1)}
                     </td>
                     <td>
-                        <input type="number" class="form-control form-control-sm change-mov2" value="${g.fact_cluster_mov2}" step="0.01" min="0">
+                        <input type="number" class="form-control form-control-sm change-mov2" value="${!g.fact_cluster_mov2 ? "0.00" : g.fact_cluster_mov2}" data-total="${g.fact_cluster_total}" step="0.01" min="0">
                     </td>
                     <td>
                         ${general.moneyFormat(g.fact_cluster_total)}
@@ -231,13 +255,60 @@ function loadPage(){
             for (const ea of document.querySelectorAll(".change-mov2")) {
                 ea.addEventListener("change",changeMov2);
             }
+            for (const verDetalle of document.querySelectorAll(".select-detalle")) {
+                verDetalle.addEventListener("click",verDetalleGuia);
+            }
         } catch (error) {
             alertify.error("error al obtener las guias en cd");
             console.error(error);
         }
     }
+    $('#detalle-guia-modal').on("hidden.bs.modal",function(e){
+        setTimeout(() => {
+            if(tr){
+                tr.classList.remove("table-active");
+                tr = null;
+            }
+        }, 500);
+    });
+    let tr = null;
+    async function verDetalleGuia(e){
+        let datos = new FormData(frmFiltros);
+        datos.append("tipo", "detalle");
+        datos.append("guia", e.target.dataset.guia);
+        tr = e.target.parentElement.parentElement;
+        tr.classList.add("table-active");
+        try {
+            const response = await general.funcfetch("ver",datos);
+            if(response.success){
+                let template = "";
+                response.success.forEach(dg => {
+                    template +=`<div class="card mb-2">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Grupo Envio</b>${dg.grupo_envio}</div>
+                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Tipo Envio</b>${dg.tipo_envio}</div>
+                            <div class="col-12 col-lg-4"><b class="d-block text-secondary">Embase o Embalaje</b>${dg.embase_embalaje}</div>
+                            <div class="col-12"><b class="d-block text-secondary">Descripción</b>${!dg.descripcion ? 'No definido' : dg.descripcion}</div>
+                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Cantidad</b>${dg.cantidad}</div>
+                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Kg</b>${dg.kg}</div>
+                            <div class="col-6 col-lg-4"><b class="d-block text-secondary">Volumen</b>${dg.volumen}</div>
+                        </div>
+                    </div>
+                </div>`
+                });
+                document.querySelector("#tituloDetalleModal").textContent = "Detalle de la "+ e.target.dataset.tipoguia +" - N° " + e.target.dataset.nroguia;
+                document.querySelector("#bodyDetalleGuiaModal").innerHTML = template;
+                return $('#detalle-guia-modal').modal("show");
+            }
+            alertify.error("no se encontro el detalle de la guía/os");
+        } catch (error) {
+            tr.classList.remove("table-active");
+            console.error(error);
+            alertify.error("error al obtener el detalle de la guía/os");
+        }
+    }
     function changeValueInput(e){
-        console.log(tablaConsulta.querySelectorAll(`input[type="checkbox"]:checked`).length,tablaConsulta.querySelectorAll(`input[type="checkbox"]`).length);
         if (tablaConsulta.querySelectorAll(`input[type="checkbox"]:checked`).length != tablaConsulta.querySelectorAll(`input[type="checkbox"]`).length){
             selectorAll.checked = false;
         }else{
@@ -245,8 +316,6 @@ function loadPage(){
         }
         calcularValores();
     }
-    
-    
     changeFacturacionCb();
     document.getElementById('aplicar-filtros-btn').onclick = function () {  
         changeValue($('#id_estado_estado').val())

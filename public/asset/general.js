@@ -905,11 +905,21 @@ class General{
             currency: 'PEN'
         })
     }
-    pesoVolumen(data,tipo,full) {  
-        if (data > full.pesoVolumen) {
+    pesoVolumen(data,tipo,full) {
+        const kg = isNaN(parseFloat(data)) ? 0 : parseFloat(data);
+        const volumen = isNaN(parseFloat(full.pesoVolumen)) ? 0 : parseFloat(full.pesoVolumen);
+        if (kg > volumen) {
             return '(en blanco)';
         }
-        return full.pesoVolumen;
+        return volumen;
+    }
+    pesoVolumenCluster(nkg,nvolumen){
+        const kg = isNaN(parseFloat(nkg)) ? 0 : parseFloat(nkg);
+        const volumen = isNaN(parseFloat(nvolumen)) ? 0 : parseFloat(nvolumen);
+        if (kg > volumen) {
+            return kg;
+        }
+        return volumen;
     }
     valorComplejoDist(tipo,valor){
         valor = !valor || valor == "" ? "0.00" : parseFloat(valor);

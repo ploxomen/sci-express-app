@@ -177,6 +177,14 @@ class Facturacion extends Controller
                 ModelFacturacion::sincronizarFacturacionCluster($request->cluster);
                 return response()->json(['success' => 'montos calculados correctamente']);
             break;
+            case 'facturar':
+                ModelFacturacion::facturarGuiasClusters(json_decode($request->guias,true));
+                return response()->json(['success' => 'guias facturadas correctamente']);
+            break;
+            case 'detalle':
+                $guias = ModelFacturacion::verDetalleGuia($request->guia);
+                return response()->json(['success' => $guias]);
+            break;
         }
         return response()->json($response);
     }

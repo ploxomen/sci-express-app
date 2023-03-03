@@ -54,15 +54,19 @@
 </section>
 <section class="py-1 px-2 mb-3" id="boxInfoCostos">
     <div class="d-flex justify-content-center flex-wrap text-center align-items-center" style="gap: 15px;">
-        
+        <div class="dinero bg-white p-2 border">
+            <b class="d-block">FACTURACION</b>
+            <i class="far fa-money-bill-alt text-warning"></i>
+            <span id="moneyFacturacion" style="font-size: 15px !important;"></span>
+        </div>
         <div class="dinero bg-white p-2 border">
             <b class="d-block" title="Movilidad asignada al cluster">MOV 1</b>
-            <i class="far fa-money-bill-alt text-secondary"></i>
+            <i class="fas fa-truck-pickup text-secondary"></i>
             <span id="moneyMov1" style="font-size: 15px !important;"></span>
         </div>
         <div class="dinero bg-white p-2 border">
             <b class="d-block" title="Movilidad asignada al cluster en la facturacion">MOV 2</b>
-            <i class="far fa-money-bill-alt text-info"></i>
+            <i class="fas fa-truck-pickup text-info"></i>
             <span id="moneyMov2" style="font-size: 15px !important;"></span>
         </div>
         <div class="dinero bg-white p-2 border">
@@ -89,9 +93,24 @@
     </div>
 </section>
 <section class="p-2 bg-white">
-    <div class="form-group" id="boxNumGuias">
-        <p class="mb-0 text-primary"><b>Total guías a facturar: </b><span id="totalFacturar"></span></p>
-        <p><b>Guías mostradas: </b><span id="guiasMostradas"></span></p>
+    <div id="boxNumGuias">
+        <div class="form-group">
+            <p class="mb-0 text-primary"><b>Total guías a facturar: </b><span id="totalFacturar"></span></p>
+            <p class="mb-0"><b>Guías mostradas: </b><span id="guiasMostradas"></span></p>
+        </div>
+        <div class="d-flex align-items-center" style="gap: 10px;">
+            <div>
+                <div class="cuadro table-warning"></div>
+                <span>Ordenes de Servicio</span>
+            </div>
+            <div>
+                <div class="cuadro table-primary"></div>
+                <span>Guias con bulto igual a 1</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <b>Las guías sin pintar son aquellas que el bulto es mayor a 1</b>
+        </div>
     </div>
     <div class="table-responsive">
     <table class="table table-sm table-bordered table-sm" id="tabla-guias">
@@ -121,4 +140,5 @@
     </table>
 </div>
 </section>
+@include('modal.verDetalleGuia')
 @endsection

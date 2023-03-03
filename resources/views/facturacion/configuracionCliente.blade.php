@@ -4,6 +4,24 @@
     <title>Configuracion Cliente</title>
 @endsection
 @section('body')
+<style>
+    .tabla-cliente thead{ 
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background-color: #ffffff;
+    }
+    .tabla-cliente{
+        border-spacing: 0 !important;
+        border-collapse: separate !important;
+    }
+    table .sticki{
+        position: sticky;
+        left: 0;
+        background-color: #ffffff;
+    }
+    
+</style>
 <div class="my-4">
     <div class="baner-modulo">
         <img src="{{asset('asset/img/intranet/configuraciones.png')}}" alt="Imagen de configuracion">
@@ -54,8 +72,8 @@
             </button>
         </div>
     </div>
-    <div class="table-responsive mb-4">
-        <table class="table table-sm table-bordered table-sm mb-4 table-hover">
+    <div class="table-responsive mb-4" style="max-height: 650px;overflow: auto;">
+        <table class="table table-sm tabla-cliente table-bordered table-sm mb-4 table-hover" style="">
             <thead id="cabezara-facturacion-cliente">
             </thead>
             <tbody id="facturacion-ciudades"></tbody>
