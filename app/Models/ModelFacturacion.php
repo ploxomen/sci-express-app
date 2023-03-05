@@ -69,7 +69,7 @@ class ModelFacturacion extends Model
     public static function calcularGuiaFacturacionCluster($idGuia,$distritoDest,$ciudadDest,$idsCluster,$viaFacturacion)
     {
         $tipoCiudad = empty($ciudadDest) ? "distrito" : "ciudad";
-        $ciudadesCluster = DB::table("ciudades_base_cluster")->where(["tipo_base" => $tipoCiudad,"ubigeo_distrito" => $distritoDest])->whereIn("id_cluster",$idsCluster);
+        $ciudadesCluster = DB::table("ciudades_base_cluster")->where(["tipo_base" => $tipoCiudad,"activo" => 1,"ubigeo_distrito" => $distritoDest])->whereIn("id_cluster",$idsCluster);
         if($tipoCiudad == "ciudad"){
             $ciudadesCluster = $ciudadesCluster->where("id_ciudad",$idsCluster);
         }
@@ -672,7 +672,7 @@ class ModelFacturacion extends Model
         if(empty($nombreCluster)){
             return null;
         }
-        $clustes = DB::table("usuarios AS u")->select("u.*","c.id AS idCluster")->join("cluster AS c","u.id","=","c.id_usuario")->where(['u.name' => $nombreCluster->name,'u.last_name' => $nombreCluster->last_name,'u.n_document' => $nombreCluster->n_document, 'u.type_document' => $nombreCluster->type_document])->where("u.status","!=",0)->get();
+        $clustes = DB::table("usuarios AS u")->select("u.*","c.id AS idCluster")->join("cluster AS c","u.id","=","c.id_usuario")->where(['u.name' => $nombreCluster->name,'u.last_name' => $nombreCluster->last_name,'u.n_document' => $nombreCluster->n_document, 'u.type_document' => $nombreCluster->type_document])->get();
         $idsClusters = [];
         foreach ($clustes as $cluster) {
             $idsClusters[] = $cluster->idCluster;
