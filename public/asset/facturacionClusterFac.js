@@ -37,10 +37,11 @@ function loadPage(){
             {
                 data: 'nro_comp_cli'
             },
+            
+            {data:'nomDest'},
             {
                 data: 'baseCluster'
             },
-            {data:'nomDest'},
             {
                 data: 'nomCiudadFinal'
             },
@@ -163,15 +164,18 @@ function loadPage(){
         document.querySelector("#moneyTotal").textContent = general.moneyFormat(datosCostos.total);
     }
     function changeMov2(e) {
-        let valor = isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value);
+        const tr = e.target.parentElement.parentElement;
+        const checkbox = tr.querySelector("input[type='checkbox']");
+        let valor = isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value).toFixed(2);
         if(valor < 0){
             valor = 0;
-            e.target.value = "0.00";
+            e.target.value = valor;
         }
-        const total = isNaN(parseFloat(e.target.dataset.total)) ? 0 : parseFloat(e.target.dataset.total);
-        e.target.dataset.total = total + valor;
-        e.target.parentElement.parentElement.children[12].textContent = general.moneyFormat(e.target.dataset.total);
-        e.target.parentElement.parentElement.querySelector(".input-check").dataset.mov2 = valor.toFixed(2);
+        const subTotal = isNaN(parseFloat(checkbox.dataset.valor)) ? 0 : parseFloat(checkbox.dataset.valor);
+        const mov1 = isNaN(parseFloat(checkbox.dataset.mov1)) ? 0 : parseFloat(checkbox.dataset.mov1);
+        const total = subTotal + mov1 + valor;
+        tr.children[12].textContent = general.moneyFormat(total);
+        checkbox.dataset.mov2 = valor;
         calcularValores();
     }
     const selectorAll = document.querySelector("#selectAll");
@@ -222,10 +226,10 @@ function loadPage(){
                         ${!g.nro_comp_cli ? "NINGUNO" : g.nro_comp_cli}
                     </td>
                     <td>
-                        ${g.baseCluster}
+                        ${g.nomDest}
                     </td>
                     <td>
-                        ${g.nomDest}
+                        ${g.baseCluster}
                     </td>
                     <td>
                         ${g.nomCiudadFinal}
@@ -237,7 +241,7 @@ function loadPage(){
                         ${general.moneyFormat(g.fact_cluster_mov1)}
                     </td>
                     <td>
-                        <input type="number" class="form-control form-control-sm change-mov2" value="${!g.fact_cluster_mov2 ? "0.00" : g.fact_cluster_mov2}" data-total="${g.fact_cluster_total}" step="0.01" min="0">
+                        <input type="number" class="form-control form-control-sm change-mov2" value="${!g.fact_cluster_mov2 ? "0.00" : g.fact_cluster_mov2}" step="0.01" min="0">
                     </td>
                     <td>
                         ${general.moneyFormat(g.fact_cluster_total)}

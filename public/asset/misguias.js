@@ -102,7 +102,7 @@ function loadPage() {
                     }
                     let template = ``;
                     full.listSoli.forEach(sol => {
-                        template += `<option value="${sol.id}" ${data == sol.id ? 'selected' : ''} ${sol.id < 10 ? 'disabled' : ''}>${sol.tipo}</option>`;
+                        template += `<option value="${sol.id}" ${data == sol.id ? 'selected' : ''}>${sol.tipo}</option>`;
                     });
                     return `<select data-guia="${full.id}" class="form-control form-control-sm cb-estado-change">${template}</select>`;
                 }

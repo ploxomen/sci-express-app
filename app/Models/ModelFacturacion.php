@@ -766,11 +766,10 @@ class ModelFacturacion extends Model
             DB::rollBack();
             return ['error' => $th->getMessage()];
         }
-        
     }
-    public static function agregarValorCabeceraCluster($idCabecera,$idCiudad,$valor)
+    public static function agregarValorCabeceraCluster($idCabecera,$tipoEnvio,$valor)
     {
-        return DB::table("facturacion_cluster_ciudades_valor")->updateOrInsert(['id_cabecera' => $idCabecera, 'id_ciudad' => $idCiudad],['valor' => $valor]);
+        return DB::table("facturacion_cluster_valor")->updateOrInsert(['id_cabecera' => $idCabecera, 'id_tipo_envio' => $tipoEnvio],['id_cabecera_ciudades' => $valor]);
     }
     public static function mostrarCabeceraEditarCostoCluster(int $idCluster, int $idCabecera)
     {

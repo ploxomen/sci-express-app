@@ -180,9 +180,10 @@ function loadPage(){
             let template = "";
             $('[data-toggle="tooltip"]').tooltip('dispose');
             response.ciudadesBase.forEach((ci,k) => {
+                const bgTd = ci.fau ? 'table-warning' : 'table-light';
                 template += `<tr id="fila_ciudades_${ci.id}" class="${ci.fau ? 'table-warning' : ''}">
-                <td style="min-width: 20px !important;width: 20px !important; max-width: 20px !important;">${k + 1}</td>
-                <td class="sticki" style="width: 120px !important;">${ci.ciudad}</td>`
+                <td class="${bgTd}" style="min-width: 20px !important;width: 20px !important; max-width: 20px !important;">${k + 1}</td>
+                <td class="sticki ${bgTd}" style="width: 120px !important;">${ci.ciudad}</td>`
                 response.cabeceras.forEach(c => {
                     const index = response.valores.findIndex(w => w.ciudad === ci.id && w.cabecera == c.id);
                     if(index >= 0){
@@ -195,7 +196,7 @@ function loadPage(){
             template = `
             <tr>
                 <th rowspan="2" scope="col">N°</th>
-                <th rowspan="2" scope="col" class="sticki">Ciudades</th>
+                <th rowspan="2" scope="col" class="sticki table-light">Ciudades</th>
             `;
             let cabeceraEnvio = null;
             let contadorCabecera = 0;

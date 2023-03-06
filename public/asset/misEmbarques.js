@@ -346,6 +346,7 @@ function loadPage(){
         let informes = [];
         for (const informe of document.querySelectorAll('.informe-ciudades')) {
             const idCiudad = informe.dataset.ciudad;
+            const guiaEmbarque = informe.querySelector("#id_guia_embarque_" + idCiudad);
             informes.push({
                 ciudadBase : idCiudad,
                 trayecto: informe.dataset.trayecto,
@@ -355,7 +356,7 @@ function loadPage(){
                 empresaTransporte: $('#empresa_trasporte_' + idCiudad).val(),
                 fechaLlegada: informe.querySelector('#id_fecha_llegada_' + idCiudad).value,
                 hrLlegada: informe.querySelector('#id_hr_llegada_' + idCiudad).value,
-                guiasEmbarque: informe.querySelector("#id_guia_embarque_" + idCiudad).value
+                guiasEmbarque: guiaEmbarque ? guiaEmbarque.value : null
             });
         }
         if(!informes.length){

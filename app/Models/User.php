@@ -207,38 +207,33 @@ class User extends Authenticatable
             break;
             case 5:
                 //RECOJOS PARA HOY CONDUCTOR 
-                // $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE r.id_conductor = ? AND s.dia_recojo = ? AND s.estado IN(2,3)";
-                // $resultado = DB::select($query,[$id_user,date('Y-m-d')]);
-                // $resultado = $resultado[0]->total;
-                $resultado = 5;
+                $query = "SELECT DISTINCT(COUNT(r.id)) AS total FROM recojo r INNER JOIN recojo_detalle rd ON r.id = rd.id_recojo WHERE rd.id_conductor = ? AND r.fecha_recojo = ? AND r.estado IN(1,2)";
+                $resultado = DB::select($query,[$id_user,date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+                // $resultado = 5;
             break;
             case 6:
                 //RECOJOS PARA HOY DEALER 
-                // $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE r.id_dealer = ? AND s.dia_recojo = ? AND s.estado IN(2,3)";
-                // $resultado = DB::select($query, [$id_user, date('Y-m-d')]);
-                // $resultado = $resultado[0]->total;
-                $resultado = 5;
+                $query = "SELECT DISTINCT(COUNT(r.id)) AS total FROM recojo r INNER JOIN recojo_detalle rd ON r.id = rd.id_recojo WHERE rd.id_dealer = ? AND r.fecha_recojo = ? AND r.estado IN(1,2)";
+                $resultado = DB::select($query, [$id_user, date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
             break;
             case 7:
                 //TOTAL RECOJOS DEALER 
-                // $resultado = DB::table('solicitud AS s')->leftJoin('recojo AS r', 's.id', '=', 'r.id_solicitud')->where(['r.id_dealer' => $id_user])->count();
-                $resultado = 5;
+                $resultado = DB::table('recojo_detalle AS rd')->leftJoin('recojo AS r', 'r.id', '=', 'rd.id_recojo')->where(['rd.id_dealer' => $id_user])->groupBy('rd.id_recojo')->count();
             break;
             case 8:
                 //TOTAL RECOJOS CONDUCTOR 
-                // $resultado = DB::table('solicitud AS s')->leftJoin('recojo AS r', 's.id', '=', 'r.id_solicitud')->where(['r.id_conductor' => $id_user])->count();
-                $resultado = 5;
+                $resultado = DB::table('recojo_detalle AS rd')->leftJoin('recojo AS r', 'r.id', '=', 'rd.id_recojo')->where(['rd.id_conductor' => $id_user])->groupBy('rd.id_recojo')->count();
                 break;
             case 9:
                 //EMBARQUE PARA HOY CONDUCTOR 
-                // $resultado = DB::table('embarque')->where(['id_cond' => $id_user,'estado' => 2, 'fch_emba' => date('Y-m-d'), 'activo' => 1])->count();
-                $resultado = 5;
+                $resultado = DB::table('embarque')->where(['id_cond' => $id_user,'completado' => 0, 'fch_emba' => date('Y-m-d'), 'activo' => 1])->count();
             break;
             case 10:
                 //EMBARQUE PARA HOY DEALER 
-                // $n = DB::select('CALL sp_obtener_embarques_cluster(?,?,?)',[$id_user,date('Y-m-d'),1]);
-                // $resultado = $n[0]->total;
-                $resultado = 5;
+                $n = DB::select('CALL sp_obtener_embarques_cluster(?,?,?)',[$id_user,date('Y-m-d'),1]);
+                $resultado = $n[0]->total;
             break;
             case 11:
                 //EMBARQUEs ASIGNADOS CONDUCTOR 
@@ -251,9 +246,8 @@ class User extends Authenticatable
             break;
             case 13:
                 //INFORMES PENDIENTES SOLO PARA DEALER
-                // $n = DB::select('CALL sp_obtener_informes_pendientes(?)',[$id_user]);
-                // $resultado = $n[0]->total;
-                $resultado = 5;
+                $n = DB::select('CALL sp_obtener_informes_pendientes(?)',[$id_user]);
+                $resultado = $n[0]->total;
             break;
             case 14:
                 //GUIAS POR ARRIBAR PARA CONFIRMAR CLUSTER
@@ -313,19 +307,19 @@ class User extends Authenticatable
             break;
             case 24:
                 //RECOJOS DEL DIA PROGRAMADOS 
-                $query = "SELECT COUNT(*) AS total FROM solicitud WHERE dia_recojo = ? AND activo = 1 AND estado IN(1,2)";
+                $query = "SELECT COUNT(*) AS total FROM solicitud WHERE dia_recojo = ? AND activo = 1 AND estado >= 1";
                 $resultado = DB::select($query, [date('Y-m-d')]);
                 $resultado = $resultado[0]->total;
                 break;
             case 25:
                 //RECOJOS PROGRAMADOS 
-                $query = "SELECT COUNT(*) AS total FROM solicitud WHERE activo = 1 AND estado IN(2,3)";
+                $query = "SELECT COUNT(*) AS total FROM solicitud WHERE activo = 1 AND estado >= 2";
                 $resultado = DB::select($query);
                 $resultado = $resultado[0]->total;
                 break;
             case 26:
                 //RECOJOS EFECTUADOS 
-                $query = "SELECT COUNT(*) AS total FROM solicitud WHERE activo = 1 AND estado = 4";
+                $query = "SELECT COUNT(*) AS total FROM solicitud WHERE activo = 1 AND estado >= 4";
                 $resultado = DB::select($query);
                 $resultado = $resultado[0]->total;
             break;
@@ -335,19 +329,17 @@ class User extends Authenticatable
             break;
             case 28:
                 //EMBARQUES PENDIENTES
-                // $resultado = DB::table('embarque')->where(['activo' => 1, 'estado' => 1])->count();
-                $resultado = 5;
+                $resultado = DB::table('embarque')->where(['activo' => 1, 'completado' => 0])->count();
             break;
             case 29:
                 //EMBARQUES EFECTUADOS
-                // $query = "SELECT COUNT(*) AS total FROM embarque WHERE activo = 1 AND estado IN(3,4,5,6)";
-                // $resultado = DB::select($query);
-                $resultado = 5;            
+                $query = "SELECT COUNT(*) AS total FROM embarque WHERE activo = 1 AND completado IN(1,2,3,4,5)";
+                $resultado = DB::select($query);
+                $resultado = $resultado[0]->total;
             break;
             case 30:
                 //EMBARQUES POR INFORMAR
-                // $resultado = DB::table('embarque')->where(['activo' => 1, 'estado' => 3])->count();
-                $resultado = 5;
+                $resultado = DB::table('embarque')->where(['activo' => 1, 'completado' => 1])->count();
             break;
             case 31:
                 //TODAS LAS GUIAS ENTREGADAS EN DESTINO FINAL
@@ -363,29 +355,28 @@ class User extends Authenticatable
             break;
             case 33:
                 //TODOS LOS RECOJOS DE HOY MANAGER
-                // $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE s.estado IN(2,3,4) AND s.activo = 1 AND s.dia_recojo = ?";
-                // $resultado = DB::select($query,[date('Y-m-d')]);
-                // $resultado = $resultado[0]->total;
-                $resultado = 5;
+                $query = "SELECT DISTINCT(COUNT(r.id)) AS total FROM recojo r INNER JOIN recojo_detalle rd ON r.id = rd.id_recojo WHERE r.activo = 1 AND r.fecha_recojo = ?";
+                $resultado = DB::select($query,[date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
             break;
             case 34:
                 //TODOS LOS RECOJOS CONCRETADOS DE HOY MANAGER
-                // $query = "SELECT COUNT(*) AS total FROM solicitud s LEFT JOIN recojo r ON s.id = r.id_solicitud WHERE s.estado = 4 AND s.activo = 1 AND s.dia_recojo = ?";
-                // $resultado = DB::select($query, [date('Y-m-d')]);
-                // $resultado = $resultado[0]->total;
-                $resultado = 5;
+                $query = "SELECT DISTINCT(COUNT(r.id)) AS total FROM recojo r INNER JOIN recojo_detalle rd ON r.id = rd.id_recojo WHERE r.activo = 1 AND r.fecha_recojo = ? AND r.estado = 3";
+                $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
             break;
             case 35:
                 //TODOS LOS EMBARQUES DE HOY MANAGER
-                // $query = "SELECT COUNT(*) AS total FROM embarque WHERE estado IN(1,2,3,4) AND activo = 1 AND fch_emba = ?";
-                // $resultado = DB::select($query, [date('Y-m-d')]);
-                $resultado = 5;
+                $query = "SELECT COUNT(*) AS total FROM embarque WHERE activo >= 1 AND fch_emba = ?";
+                $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
             break;
             case 36:
                 //TODOS LOS EMBARQUES CONCRETADOS DE HOY MANAGER
-                // $query = "SELECT COUNT(*) AS total FROM embarque WHERE estado = 4 AND activo = 1 AND fch_emba = ?";
-                // $resultado = DB::select($query, [date('Y-m-d')]);
-                $resultado = 5;
+                $query = "SELECT COUNT(*) AS total FROM embarque WHERE completado >= 3 AND activo = 1 AND fch_emba = ?";
+                $resultado = DB::select($query, [date('Y-m-d')]);
+                $resultado = $resultado[0]->total;
+
             break;
             case 37:
                 //TODAS LAS ENTREGAS DE HOY MANAGER

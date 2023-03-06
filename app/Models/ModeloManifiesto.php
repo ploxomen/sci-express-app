@@ -54,6 +54,16 @@ class ModeloManifiesto extends Model
     {
         return DB::table('manifiesto')->select('id','via_envio')->where(['activo' => 1,'estado' => 1])->get();
     }
+    public static function actualizarGuiasAtravezManifiesto(int $idManifiesto, int $estado)
+    {
+        $estadoGuia = $estado;
+        if($estado === 1 || $estado === 2){
+            $estadoGuia++;
+        }else if($estado === 3 || $estado === 4){
+            $estadoGuia = 4;
+        }
+        DB::table("detalle_manifiesto AS dm")->join("guias AS g","dm.id_guia","=","g.id")->where(['dm.id_manifiesto' => $idManifiesto,'g.estado' => 1,'g.activo' => 1])->whereBetween('g.situ',[2,6])->update(['g.situ' => $estadoGuia]);
+    }
     public static function obtenerTodosManifiestos($fechaInicio,$fechaFin,$trayecto,$provOrigen,$provFinal,$cluster,$estado,$id)
     {
         $manifiestos = DB::select('CALL sp_manifiesto_obtener(?,?,?,?,?,?,?,?)',[$fechaInicio,$fechaFin,$trayecto,$provOrigen,$provFinal,$cluster,$estado,$id]);

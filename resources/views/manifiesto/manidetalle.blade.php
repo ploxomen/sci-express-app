@@ -31,7 +31,7 @@
         </div>
         <div class="form-group col-12 col-md-4 col-lg-2">
             <label for="id_status">Trayecto</label>
-            <select id="cb-trayectos" class="form-control simple-select2">
+            <select id="cb-trayectos" class="form-control filtro simple-select2">
                 <option value="todos">TODOS</option>
                 @foreach ($trayectos as $trayecto)
                     <option value="{{$trayecto->id}}">{{$trayecto->tipo}}</option>
@@ -40,7 +40,7 @@
         </div>
         <div class="form-group col-6 col-md-4 col-lg-2">
             <label for="id_status">Provincia Origen</label>
-            <select id="cb-provincia-origen" class="form-control simple-select2">
+            <select id="cb-provincia-origen" class="form-control filtro simple-select2">
                 <option value="todos">TODOS</option>
                 @foreach ($departamentoProv as $depart)
                     <optgroup label="{{$depart['nom_ubigeo_dep']}}">
@@ -53,7 +53,7 @@
         </div>
         <div class="form-group col-6 col-md-4 col-lg-2">
             <label for="id_status">Provincia Destino</label>
-            <select id="cb-provincia-final" class="form-control simple-select2">
+            <select id="cb-provincia-final" class="form-control filtro simple-select2">
                 <option value="todos">TODOS</option>
                 @foreach ($departamentoProv as $depart)
                     <optgroup label="{{$depart['nom_ubigeo_dep']}}">
@@ -66,7 +66,7 @@
         </div>
         <div class="form-group col-12 col-md-4 col-lg-2">
             <label for="id_situacion_g">Nombre de Cluster</label>
-            <select id="cb-cluster" class="form-control simple-select2">
+            <select id="cb-cluster" class="form-control filtro simple-select2">
                 <option value="todos">TODOS</option>
                 @foreach ($clusters as $clu)
                     <option value="{{$clu->id}}">{{$clu->name}} {{$clu->last_name}}</option>
@@ -75,7 +75,7 @@
         </div>
         <div class="form-group col-12 col-md-4 col-lg-2">
             <label for="id_situacion_g">Situación Manifiesto</label>
-            <select id="cb-estado" class="form-control simple-select2">
+            <select id="cb-estado" class="form-control filtro simple-select2">
                 <option value="todos">TODOS</option>
                 @foreach ($situacionManifiesto as $mani)
                     <option value="{{$mani->id}}">{{$mani->tipo}}</option>

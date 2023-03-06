@@ -74,7 +74,7 @@ function loadPage(){
             alertify.success('responsable cambiado correctamente');
         });
     });
-    $('.simple-select2').on('select2:select',function(){
+    $('.filtro').on('select2:select',function(){
         tablaMisManifiestos.draw();
     });
     document.getElementById('filtro-manifiesto').onsubmit = e =>{
@@ -144,6 +144,17 @@ function loadPage(){
                         domcontent.value = element;
                     }
                 }
+                if (response.success[0].existEmbarque){
+                    for (const opt of document.querySelectorAll("#informe_num_estado option")) {
+                        if (+opt.value === 1){
+                            opt.setAttribute("disabled","disabled");
+                        }
+                        if (+opt.value > 1){
+                            opt.removeAttribute("disabled");
+                        }
+                    }
+                }
+                $('#informe_num_estado').trigger("change");
                 $('#manifiesto-editar').modal('show');
             }
             let templateGuia = "";
@@ -227,12 +238,26 @@ function loadPage(){
         datosGlobales.listaGuiasManifiesto = 0;
         datosGlobales.listaGuias = 0;
         cbTrayecto.disabled = true;
+        for (const opt of document.querySelectorAll("#informe_num_estado option")) {
+            if (+opt.value === 1) {
+                opt.removeAttribute("disabled");
+            }
+            if (+opt.value > 1) {
+                opt.setAttribute("disabled","disabled");
+            }
+        }
     });
     document.getElementById('update-manifiesto-form').onsubmit = function(e){
         e.preventDefault();
         let datos = new FormData(this);
+        let msgChangeEstado = "";
+        if (+datos.get('num_estado') != datosGlobales.estadoManifieso){
+            msgChangeEstado = "Se a detectado el cambio de estado en este manifiesto, al aceptar se actualizaran tambien los estados de aquellas <b>GUIAS/OS</b> que aún no están en <b>REPARTO</b><br>.";
+        }else{
+            datos.delete('num_estado');
+        }
         datos.append('manifiesto', datosGlobales.idManifiesto);
-        alertify.confirm('Mensaje', '¿Estás seguro de actualizar los datos este manifiesto?', async () => {
+        alertify.confirm('Mensaje', msgChangeEstado + '¿Estás seguro de actualizar los datos este manifiesto?', async () => {
             const response = await general.funcfetch('actualizar', datos);
             if(response.success){
                 alertify.success(response.success);
