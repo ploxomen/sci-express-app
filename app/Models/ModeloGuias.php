@@ -264,9 +264,7 @@ class ModeloGuias extends Model
             if (isset($guia['id_guia'])) {
                 unset($guia['id_guia']);
             }
-            if(isset($guia['id_ciudad_final'])){
-                unset($guia['id_ciudad_final']);
-            }
+            unset($guia['id_ciudad_final']);
             if (isset($guia['add_cli_bool'])) {
                 unset($guia['add_cli_bool']);
             }
