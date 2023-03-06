@@ -8,7 +8,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <form class="row" id="update-manifiesto-form">
+        <form class="form-row" id="update-manifiesto-form">
             <div class="form-group col-6">
                 <label for="informe_fech_mani">Fecha Manifiesto</label>
                 <input type="date" name="fech_mani" id="informe_fech_mani" class="form-control" required>
@@ -20,13 +20,21 @@
                   <option value="AEREO">AEREO</option>
                 </select>
             </div>
-            <div class="form-group col-6">
+            <div class="form-group col-6 col-md-4">
                 <label for="informe_nom_prov_orig">Provincia Origen</label>
                 <input type="text" disabled id="informe_nom_prov_orig" class="form-control">
             </div>
-            <div class="form-group col-6">
+            <div class="form-group col-6 col-md-4">
                 <label for="informe_nom_prov_dest">Provincia Destino</label>
                 <input type="text" disabled id="informe_nom_prov_dest" class="form-control">
+            </div>
+            <div class="form-group col-12 col-md-4">
+                <label for="informe_num_estado">Estado</label>
+                <select name="num_estado" class="simple-select2" id="informe_num_estado">
+                  @foreach ($situacionManifiesto as $mani)
+                      <option value="{{$mani->id}}" {{$mani->id > 1 ? "disabled" : ""}}>{{$mani->tipo}}</option>
+                  @endforeach
+                </select>
             </div>
             <div class="form-group col-12">
                 <label for="informe_clusters">Cluster</label>

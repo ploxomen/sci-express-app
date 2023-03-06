@@ -59,11 +59,16 @@ class Manifiesto extends Controller
     public function actualizarManifiesto(Request $request)
     {
         try {
-            ModeloManifiesto::where(['id_cluster' => $request->id_cluster, 'id' => $request->manifiesto])->update([
+            $manifiesto = ModeloManifiesto::where(['id_cluster' => $request->id_cluster, 'id' => $request->manifiesto]);
+            $manifiesto->update([
                 'user_update' => Auth::id(),
                 'fech_mani' => $request->fech_mani,
                 'date_update' => date('Y-m-d H:i:s')
             ]);
+            if($request->has("num_estado")){
+                $manifiesto->update(['estado' => $request->num_estado]);
+                ModeloManifiesto::actualizarGuiasAtravezManifiesto($request->manifiesto,intval($request->num_estado));
+            }
             return response()->json(['success' => 'Manifiesto modificado correctamente']);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);

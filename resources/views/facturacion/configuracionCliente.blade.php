@@ -18,7 +18,6 @@
     table .sticki{
         position: sticky;
         left: 0;
-        background-color: #ffffff;
     }
     
 </style>
