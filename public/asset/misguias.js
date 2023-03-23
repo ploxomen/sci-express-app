@@ -18,119 +18,7 @@ function loadPage() {
         placeholder: 'Seleccione una opción'
     })
     const tblDetalleGuia = document.getElementById('tabla-detalle-guias');
-    let tablaGuias = $('#tabla-guias').DataTable({
-        ajax: {
-            url: 'mis-guias',
-            method: 'POST',
-            headers: general.jsonToken,
-            data: function (d) {
-                d.estado = $('#estado_guias').val();
-                d.tipo = $('#id_tipo').val();
-                d.fechaInicio = $('#fecha_inicio').val();
-                d.fechaFin = $('#id_fecha_fin').val();
-            }
-        },
-        columns: [{
-                data: 'nro_guia'
-            },
-            {
-                data: 'fecha_emision'
-            },
-            {
-                data: 'fecha_traslado',
-            },
-            {
-                data: 'nro_comp_cli',
-                render : function(data){
-                    if(data == null || data == ""){
-                        return 'Sin comprobantes';
-                    }
-                    return data.replace(/;/i,"<br>");
-                }
-            },
-            {
-                data: 'dias_tran'
-            },
-            {
-                data: 'nom_remi'
-            },
-            {
-                data: 'nom_dest'
-            },
-            {
-                data: 'ciudad_base_cluster'
-            },
-            {
-                data: 'ciudad_final'
-            },
-            {
-                data: 'listClusters',
-                render: function (data, type, row) {
-                    if (row.guia_tipo == 'INACTIVA' || row.guia_tipo == 'ANULADA') {
-                        return '<span class="text-danger">Sin acciones</span>';
-                    }
-                    let tempClust = `<option></option>`;
-                    if (data) {
-                        data.forEach(c => {
-                            tempClust += `<option value="${c.id_cluster}" ${row.id_cluster == c.id_cluster ? 'selected' : ''}>${c.nombres_completos}</option>`;
-                        });
-                    }
-                    return `<select data-guia="${row.id}" ${row.situ >= 5 ? 'disabled' : ''} class="form-control form-control-sm cb-clustes">${tempClust}</select>`;
-                }
-            },
-            {
-                data: 'id_asignado',
-                searchable: false,
-                render: function (data, type, full) {
-                    if (full.guia_tipo == 'INACTIVA' || full.guia_tipo == 'ANULADA') {
-                        return '<span class="text-danger">Sin acciones</span>'
-                    }
-                    let tempUsu = `<option></option>`;
-                    for (let i = 0; i < full.listUsu.length; i++) {
-                        tempUsu += `<option value="${full.listUsu[i].id}" ${full.listUsu[i].status != 1 ? 'disabled' : ''} ${data == full.listUsu[i].id ? 'selected' : ''}>${full.listUsu[i].name} ${full.listUsu[i].last_name}</option>`;
-                    }
-                    return `<select data-guia="${full.id}" ${full.situ != 1 ? 'disabled' : ''} class="form-control form-control-sm cb-usuarios">${tempUsu}</select>`;
-                }
-            },
-            {
-                data: 'situ',
-                searchable: false,
-                orderable: false,
-                render: function (data, type, full) {
-                    if (full.guia_tipo == 'INACTIVA' || full.guia_tipo == 'ANULADA') {
-                        return '<span class="text-danger">Sin acciones</span>'
-                    }
-                    let template = ``;
-                    full.listSoli.forEach(sol => {
-                        template += `<option value="${sol.id}" ${data == sol.id ? 'selected' : ''}>${sol.tipo}</option>`;
-                    });
-                    return `<select data-guia="${full.id}" class="form-control form-control-sm cb-estado-change">${template}</select>`;
-                }
-            },
-            {
-                data: 'guia_tipo'
-            },
-            {
-                data: 'id',
-                searchable: false,
-                orderable: false,
-                name: 'id',
-                render: function (data, type, full) {
-                    let temButtons = `<div class="d-flex justify-content-center flex-wrap" style="gap:5px;"><button data-toggle="tooltip" title="Visualizar solicitud" data-guia="${data}" class="btn btn-sm btn-secondary view-guia"><i class="far fa-eye"></i></button><button data-guia="${data}" class="btn btn-sm btn-primary editar-guia"><i class="fas fa-pen"></i></button>`;
-                    if (full.guia_tipo != 'ANULADA') {
-                        temButtons += `<button data-toggle="tooltip" title="Anular guia" data-guia="${data}" class="btn btn-sm btn-danger delete-guia"><i class="fas fa-trash-alt"></i></button></div>`;
-                    } else {
-                        temButtons += '</div>';
-                    }
-                    return temButtons;
-                }
-            }
-        ],
-        createdRow: function (row, data) {
-            let bgTable = !data.id_asignado && data.guia_tipo == 'ACTIVA' ? 'table-warning' : '';
-            $(row).addClass(bgTable);
-        }
-    });
+    let tablaGuias = null;
     let estado = 0;
     const $nroGuia = document.getElementById('titulo-guia-editar'),
         cbOrdenServicio = document.getElementById('id_orden_servicio'),
@@ -587,125 +475,468 @@ function loadPage() {
         estado = 0;
         newCliCli = false;
     });
-    tablaGuias.on('responsive-display', function (e, datatable, row, showHide, update) {
-        const tabla = e.target.children[0].children[0];
-        if (tabla.children[8].style.display == 'none') {
-            $('.cb-clustes').off('change');
-            $('.cb-clustes').attr('data-responsive', 'true');
-            $('.cb-clustes').on('change', async function () {
-                let datos = new FormData();
-                datos.append('id_guia', $(this).attr('data-guia'));
-                datos.append('id_cluster', $(this).val());
-                let response = await general.funcfetch('cambiar-cluster', datos);
-                if (response.error) {
-                    alertify.alert('Error', response.error);
-                    return
-                }
-                alertify.success(response.success);
-            });
-        }
-        if (tabla.children[9].style.display == 'none') {
-            $('.cb-usuarios').off('change');
-            $('.cb-usuarios').attr('data-responsive', 'true');
-            $('.cb-usuarios').on('change', async function (event) {
-                let datos = new FormData();
-                datos.append('id_guia', event.target.dataset.guia);
-                datos.append('id_user', $(this).val());
-                let response = await general.funcfetch('asignar-personal', datos);
-                if (response.error) {
-                    alertify.alert('Mensaje', response.error);
-                    return
-                }
-                document.getElementById('total-por-procesar-guias').textContent = response.procesar;
-                alertify.success(response.success);
-            });
-        }
-        if (tabla.children[10].style.display == 'none') {
-            $('.cb-estado-change').off('change');
-            $('.cb-estado-change').attr('data-responsive', 'true');
-            $('.cb-estado-change').on('change', async function () {
-                let datos = new FormData();
-                datos.append('id_guia', $(this).attr('data-guia'));
-                datos.append('estado', $(this).val());
-                let response = await general.funcfetch('cambiar-estado', datos);
-                if (response.error) {
-                    alertify.alert('Error', response.error);
-                    return
-                }
-                alertify.success(response.success);
-            })
-        }
-    });
-    tablaGuias.on('draw.dt', function () {
-        $('.cb-usuarios').select2({
-            theme: 'bootstrap',
-            width: '100%',
-            placeholder: 'Seleccione una opción'
-        }).on('select2:select', async function (event) {
-            let datos = new FormData();
-            datos.append('id_guia', event.target.dataset.guia);
-            datos.append('id_user', $(this).val());
-            let response = await general.funcfetch('asignar-personal', datos);
-            if (response.error) {
-                alertify.alert('Mensaje', response.error);
-                return
-            }
-            document.getElementById('total-por-procesar-guias').textContent = response.procesar;
-            alertify.success(response.success);
-        });
-        $('.cb-clustes').select2({
-            theme: 'bootstrap',
-            width: '100%',
-            placeholder: 'Seleccione una opción'
-        }).on('select2:select', async function (event) {
-            let datos = new FormData();
-            datos.append('id_guia', $(this).attr('data-guia'));
-            datos.append('id_cluster', $(this).val());
-            let response = await general.funcfetch('cambiar-cluster', datos);
-            if (response.error) {
-                alertify.alert('Error', response.error);
-                return
-            }
-            alertify.success(response.success);
-        });
-        $('.cb-estado-change').select2({
-            theme: 'bootstrap',
-            width: '100%',
-            placeholder: 'Seleccione una opción'
-        }).on('select2:select', async function (event) {
-            let datos = new FormData();
-            datos.append('id_guia', $(this).attr('data-guia'));
-            datos.append('estado', $(this).val());
-            let response = await general.funcfetch('cambiar-estado', datos);
-            if (response.error) {
-                alertify.alert('Error', response.error);
-                return
-            }
-            alertify.success(response.success);
-        });
-    });
-    tablaGuias.on('responsive-resize', function (e, datatable, columns) {
-        if (columns[8] && $('.cb-clustes').attr('data-responsive') == 'true') {
-            $('.cb-clustes').off('change');
-            $('.cb-clustes').attr('data-responsive', 'false');
-        }
-        if (columns[9] && $('.cb-usuarios').attr('data-responsive') == 'true') {
-            $('.cb-usuarios').off('change');
-            $('.cb-usuarios').attr('data-responsive', 'false');
-        }
-        if (columns[10] && $('.cb-estado-change').attr('data-responsive') == 'true') {
-            $('.cb-estado-change').off('change');
-            $('.cb-estado-change').attr('data-responsive', 'false');
-        }
-    });
     for (const filtros of document.querySelectorAll('.cb-filtros')) {
         filtros.addEventListener('change', function (e) {
-            tablaGuias.draw();
+            if(!tablaGuias){
+                tablaGuias = $('#tabla-guias').DataTable({
+                    ajax: {
+                        url: 'mis-guias',
+                        method: 'POST',
+                        headers: general.jsonToken,
+                        data: function (d) {
+                            d.estado = $('#estado_guias').val();
+                            d.tipo = $('#id_tipo').val();
+                            d.fechaInicio = $('#fecha_inicio').val();
+                            d.fechaFin = $('#id_fecha_fin').val();
+                        }
+                    },
+                    columns: [{
+                            data: 'nro_guia'
+                        },
+                        {
+                            data: 'fecha_emision'
+                        },
+                        {
+                            data: 'fecha_traslado',
+                        },
+                        {
+                            data: 'nro_comp_cli',
+                            render : function(data){
+                                if(data == null || data == ""){
+                                    return 'Sin comprobantes';
+                                }
+                                return data.replace(/;/i,"<br>");
+                            }
+                        },
+                        {
+                            data: 'dias_tran'
+                        },
+                        {
+                            data: 'nom_remi'
+                        },
+                        {
+                            data: 'nom_dest'
+                        },
+                        {
+                            data: 'ciudad_base_cluster'
+                        },
+                        {
+                            data: 'ciudad_final'
+                        },
+                        {
+                            data: 'listClusters',
+                            render: function (data, type, row) {
+                                if (row.guia_tipo == 'INACTIVA' || row.guia_tipo == 'ANULADA') {
+                                    return '<span class="text-danger">Sin acciones</span>';
+                                }
+                                let tempClust = `<option></option>`;
+                                if (data) {
+                                    data.forEach(c => {
+                                        tempClust += `<option value="${c.id_cluster}" ${row.id_cluster == c.id_cluster ? 'selected' : ''}>${c.nombres_completos}</option>`;
+                                    });
+                                }
+                                return `<select data-guia="${row.id}" ${row.situ >= 5 ? 'disabled' : ''} class="form-control form-control-sm cb-clustes">${tempClust}</select>`;
+                            }
+                        },
+                        {
+                            data: 'id_asignado',
+                            searchable: false,
+                            render: function (data, type, full) {
+                                if (full.guia_tipo == 'INACTIVA' || full.guia_tipo == 'ANULADA') {
+                                    return '<span class="text-danger">Sin acciones</span>'
+                                }
+                                let tempUsu = `<option></option>`;
+                                for (let i = 0; i < full.listUsu.length; i++) {
+                                    tempUsu += `<option value="${full.listUsu[i].id}" ${full.listUsu[i].status != 1 ? 'disabled' : ''} ${data == full.listUsu[i].id ? 'selected' : ''}>${full.listUsu[i].name} ${full.listUsu[i].last_name}</option>`;
+                                }
+                                return `<select data-guia="${full.id}" ${full.situ != 1 ? 'disabled' : ''} class="form-control form-control-sm cb-usuarios">${tempUsu}</select>`;
+                            }
+                        },
+                        {
+                            data: 'situ',
+                            searchable: false,
+                            orderable: false,
+                            render: function (data, type, full) {
+                                if (full.guia_tipo == 'INACTIVA' || full.guia_tipo == 'ANULADA') {
+                                    return '<span class="text-danger">Sin acciones</span>'
+                                }
+                                let template = ``;
+                                full.listSoli.forEach(sol => {
+                                    template += `<option value="${sol.id}" ${data == sol.id ? 'selected' : ''}>${sol.tipo}</option>`;
+                                });
+                                return `<select data-guia="${full.id}" class="form-control form-control-sm cb-estado-change">${template}</select>`;
+                            }
+                        },
+                        {
+                            data: 'guia_tipo'
+                        },
+                        {
+                            data: 'id',
+                            searchable: false,
+                            orderable: false,
+                            name: 'id',
+                            render: function (data, type, full) {
+                                let temButtons = `<div class="d-flex justify-content-center flex-wrap" style="gap:5px;"><button data-toggle="tooltip" title="Visualizar solicitud" data-guia="${data}" class="btn btn-sm btn-secondary view-guia"><i class="far fa-eye"></i></button><button data-guia="${data}" class="btn btn-sm btn-primary editar-guia"><i class="fas fa-pen"></i></button>`;
+                                if (full.guia_tipo != 'ANULADA') {
+                                    temButtons += `<button data-toggle="tooltip" title="Anular guia" data-guia="${data}" class="btn btn-sm btn-danger delete-guia"><i class="fas fa-trash-alt"></i></button></div>`;
+                                } else {
+                                    temButtons += '</div>';
+                                }
+                                return temButtons;
+                            }
+                        }
+                    ],
+                    createdRow: function (row, data) {
+                        let bgTable = !data.id_asignado && data.guia_tipo == 'ACTIVA' ? 'table-warning' : '';
+                        $(row).addClass(bgTable);
+                    }
+                });
+                tablaGuias.on('responsive-display', function (e, datatable, row, showHide, update) {
+                    const tabla = e.target.children[0].children[0];
+                    if (tabla.children[8].style.display == 'none') {
+                        $('.cb-clustes').off('change');
+                        $('.cb-clustes').attr('data-responsive', 'true');
+                        $('.cb-clustes').on('change', async function () {
+                            let datos = new FormData();
+                            datos.append('id_guia', $(this).attr('data-guia'));
+                            datos.append('id_cluster', $(this).val());
+                            let response = await general.funcfetch('cambiar-cluster', datos);
+                            if (response.error) {
+                                alertify.alert('Error', response.error);
+                                return
+                            }
+                            alertify.success(response.success);
+                        });
+                    }
+                    if (tabla.children[9].style.display == 'none') {
+                        $('.cb-usuarios').off('change');
+                        $('.cb-usuarios').attr('data-responsive', 'true');
+                        $('.cb-usuarios').on('change', async function (event) {
+                            let datos = new FormData();
+                            datos.append('id_guia', event.target.dataset.guia);
+                            datos.append('id_user', $(this).val());
+                            let response = await general.funcfetch('asignar-personal', datos);
+                            if (response.error) {
+                                alertify.alert('Mensaje', response.error);
+                                return
+                            }
+                            document.getElementById('total-por-procesar-guias').textContent = response.procesar;
+                            alertify.success(response.success);
+                        });
+                    }
+                    if (tabla.children[10].style.display == 'none') {
+                        $('.cb-estado-change').off('change');
+                        $('.cb-estado-change').attr('data-responsive', 'true');
+                        $('.cb-estado-change').on('change', async function () {
+                            let datos = new FormData();
+                            datos.append('id_guia', $(this).attr('data-guia'));
+                            datos.append('estado', $(this).val());
+                            let response = await general.funcfetch('cambiar-estado', datos);
+                            if (response.error) {
+                                alertify.alert('Error', response.error);
+                                return
+                            }
+                            alertify.success(response.success);
+                        })
+                    }
+                });
+                tablaGuias.on('draw.dt', function () {
+                    $('.cb-usuarios').select2({
+                        theme: 'bootstrap',
+                        width: '100%',
+                        placeholder: 'Seleccione una opción'
+                    }).on('select2:select', async function (event) {
+                        let datos = new FormData();
+                        datos.append('id_guia', event.target.dataset.guia);
+                        datos.append('id_user', $(this).val());
+                        let response = await general.funcfetch('asignar-personal', datos);
+                        if (response.error) {
+                            alertify.alert('Mensaje', response.error);
+                            return
+                        }
+                        document.getElementById('total-por-procesar-guias').textContent = response.procesar;
+                        alertify.success(response.success);
+                    });
+                    $('.cb-clustes').select2({
+                        theme: 'bootstrap',
+                        width: '100%',
+                        placeholder: 'Seleccione una opción'
+                    }).on('select2:select', async function (event) {
+                        let datos = new FormData();
+                        datos.append('id_guia', $(this).attr('data-guia'));
+                        datos.append('id_cluster', $(this).val());
+                        let response = await general.funcfetch('cambiar-cluster', datos);
+                        if (response.error) {
+                            alertify.alert('Error', response.error);
+                            return
+                        }
+                        alertify.success(response.success);
+                    });
+                    $('.cb-estado-change').select2({
+                        theme: 'bootstrap',
+                        width: '100%',
+                        placeholder: 'Seleccione una opción'
+                    }).on('select2:select', async function (event) {
+                        let datos = new FormData();
+                        datos.append('id_guia', $(this).attr('data-guia'));
+                        datos.append('estado', $(this).val());
+                        let response = await general.funcfetch('cambiar-estado', datos);
+                        if (response.error) {
+                            alertify.alert('Error', response.error);
+                            return
+                        }
+                        alertify.success(response.success);
+                    });
+                });
+                tablaGuias.on('responsive-resize', function (e, datatable, columns) {
+                    if (columns[8] && $('.cb-clustes').attr('data-responsive') == 'true') {
+                        $('.cb-clustes').off('change');
+                        $('.cb-clustes').attr('data-responsive', 'false');
+                    }
+                    if (columns[9] && $('.cb-usuarios').attr('data-responsive') == 'true') {
+                        $('.cb-usuarios').off('change');
+                        $('.cb-usuarios').attr('data-responsive', 'false');
+                    }
+                    if (columns[10] && $('.cb-estado-change').attr('data-responsive') == 'true') {
+                        $('.cb-estado-change').off('change');
+                        $('.cb-estado-change').attr('data-responsive', 'false');
+                    }
+                });
+            }else{
+                tablaGuias.draw();
+            }
         });
     }
     document.getElementById('frm-aplicar-filtros').addEventListener('submit', (e) => {
         e.preventDefault();
-        tablaGuias.draw();
+        if(!tablaGuias){
+            tablaGuias = $('#tabla-guias').DataTable({
+                ajax: {
+                    url: 'mis-guias',
+                    method: 'POST',
+                    headers: general.jsonToken,
+                    data: function (d) {
+                        d.estado = $('#estado_guias').val();
+                        d.tipo = $('#id_tipo').val();
+                        d.fechaInicio = $('#fecha_inicio').val();
+                        d.fechaFin = $('#id_fecha_fin').val();
+                    }
+                },
+                columns: [{
+                        data: 'nro_guia'
+                    },
+                    {
+                        data: 'fecha_emision'
+                    },
+                    {
+                        data: 'fecha_traslado',
+                    },
+                    {
+                        data: 'nro_comp_cli',
+                        render : function(data){
+                            if(data == null || data == ""){
+                                return 'Sin comprobantes';
+                            }
+                            return data.replace(/;/i,"<br>");
+                        }
+                    },
+                    {
+                        data: 'dias_tran'
+                    },
+                    {
+                        data: 'nom_remi'
+                    },
+                    {
+                        data: 'nom_dest'
+                    },
+                    {
+                        data: 'ciudad_base_cluster'
+                    },
+                    {
+                        data: 'ciudad_final'
+                    },
+                    {
+                        data: 'listClusters',
+                        render: function (data, type, row) {
+                            if (row.guia_tipo == 'INACTIVA' || row.guia_tipo == 'ANULADA') {
+                                return '<span class="text-danger">Sin acciones</span>';
+                            }
+                            let tempClust = `<option></option>`;
+                            if (data) {
+                                data.forEach(c => {
+                                    tempClust += `<option value="${c.id_cluster}" ${row.id_cluster == c.id_cluster ? 'selected' : ''}>${c.nombres_completos}</option>`;
+                                });
+                            }
+                            return `<select data-guia="${row.id}" ${row.situ >= 5 ? 'disabled' : ''} class="form-control form-control-sm cb-clustes">${tempClust}</select>`;
+                        }
+                    },
+                    {
+                        data: 'id_asignado',
+                        searchable: false,
+                        render: function (data, type, full) {
+                            if (full.guia_tipo == 'INACTIVA' || full.guia_tipo == 'ANULADA') {
+                                return '<span class="text-danger">Sin acciones</span>'
+                            }
+                            let tempUsu = `<option></option>`;
+                            for (let i = 0; i < full.listUsu.length; i++) {
+                                tempUsu += `<option value="${full.listUsu[i].id}" ${full.listUsu[i].status != 1 ? 'disabled' : ''} ${data == full.listUsu[i].id ? 'selected' : ''}>${full.listUsu[i].name} ${full.listUsu[i].last_name}</option>`;
+                            }
+                            return `<select data-guia="${full.id}" ${full.situ != 1 ? 'disabled' : ''} class="form-control form-control-sm cb-usuarios">${tempUsu}</select>`;
+                        }
+                    },
+                    {
+                        data: 'situ',
+                        searchable: false,
+                        orderable: false,
+                        render: function (data, type, full) {
+                            if (full.guia_tipo == 'INACTIVA' || full.guia_tipo == 'ANULADA') {
+                                return '<span class="text-danger">Sin acciones</span>'
+                            }
+                            let template = ``;
+                            full.listSoli.forEach(sol => {
+                                template += `<option value="${sol.id}" ${data == sol.id ? 'selected' : ''}>${sol.tipo}</option>`;
+                            });
+                            return `<select data-guia="${full.id}" class="form-control form-control-sm cb-estado-change">${template}</select>`;
+                        }
+                    },
+                    {
+                        data: 'guia_tipo'
+                    },
+                    {
+                        data: 'id',
+                        searchable: false,
+                        orderable: false,
+                        name: 'id',
+                        render: function (data, type, full) {
+                            let temButtons = `<div class="d-flex justify-content-center flex-wrap" style="gap:5px;"><button data-toggle="tooltip" title="Visualizar solicitud" data-guia="${data}" class="btn btn-sm btn-secondary view-guia"><i class="far fa-eye"></i></button><button data-guia="${data}" class="btn btn-sm btn-primary editar-guia"><i class="fas fa-pen"></i></button>`;
+                            if (full.guia_tipo != 'ANULADA') {
+                                temButtons += `<button data-toggle="tooltip" title="Anular guia" data-guia="${data}" class="btn btn-sm btn-danger delete-guia"><i class="fas fa-trash-alt"></i></button></div>`;
+                            } else {
+                                temButtons += '</div>';
+                            }
+                            return temButtons;
+                        }
+                    }
+                ],
+                createdRow: function (row, data) {
+                    let bgTable = !data.id_asignado && data.guia_tipo == 'ACTIVA' ? 'table-warning' : '';
+                    $(row).addClass(bgTable);
+                }
+            });
+            tablaGuias.on('responsive-display', function (e, datatable, row, showHide, update) {
+                const tabla = e.target.children[0].children[0];
+                if (tabla.children[8].style.display == 'none') {
+                    $('.cb-clustes').off('change');
+                    $('.cb-clustes').attr('data-responsive', 'true');
+                    $('.cb-clustes').on('change', async function () {
+                        let datos = new FormData();
+                        datos.append('id_guia', $(this).attr('data-guia'));
+                        datos.append('id_cluster', $(this).val());
+                        let response = await general.funcfetch('cambiar-cluster', datos);
+                        if (response.error) {
+                            alertify.alert('Error', response.error);
+                            return
+                        }
+                        alertify.success(response.success);
+                    });
+                }
+                if (tabla.children[9].style.display == 'none') {
+                    $('.cb-usuarios').off('change');
+                    $('.cb-usuarios').attr('data-responsive', 'true');
+                    $('.cb-usuarios').on('change', async function (event) {
+                        let datos = new FormData();
+                        datos.append('id_guia', event.target.dataset.guia);
+                        datos.append('id_user', $(this).val());
+                        let response = await general.funcfetch('asignar-personal', datos);
+                        if (response.error) {
+                            alertify.alert('Mensaje', response.error);
+                            return
+                        }
+                        document.getElementById('total-por-procesar-guias').textContent = response.procesar;
+                        alertify.success(response.success);
+                    });
+                }
+                if (tabla.children[10].style.display == 'none') {
+                    $('.cb-estado-change').off('change');
+                    $('.cb-estado-change').attr('data-responsive', 'true');
+                    $('.cb-estado-change').on('change', async function () {
+                        let datos = new FormData();
+                        datos.append('id_guia', $(this).attr('data-guia'));
+                        datos.append('estado', $(this).val());
+                        let response = await general.funcfetch('cambiar-estado', datos);
+                        if (response.error) {
+                            alertify.alert('Error', response.error);
+                            return
+                        }
+                        alertify.success(response.success);
+                    })
+                }
+            });
+            tablaGuias.on('draw.dt', function () {
+                $('.cb-usuarios').select2({
+                    theme: 'bootstrap',
+                    width: '100%',
+                    placeholder: 'Seleccione una opción'
+                }).on('select2:select', async function (event) {
+                    let datos = new FormData();
+                    datos.append('id_guia', event.target.dataset.guia);
+                    datos.append('id_user', $(this).val());
+                    let response = await general.funcfetch('asignar-personal', datos);
+                    if (response.error) {
+                        alertify.alert('Mensaje', response.error);
+                        return
+                    }
+                    document.getElementById('total-por-procesar-guias').textContent = response.procesar;
+                    alertify.success(response.success);
+                });
+                $('.cb-clustes').select2({
+                    theme: 'bootstrap',
+                    width: '100%',
+                    placeholder: 'Seleccione una opción'
+                }).on('select2:select', async function (event) {
+                    let datos = new FormData();
+                    datos.append('id_guia', $(this).attr('data-guia'));
+                    datos.append('id_cluster', $(this).val());
+                    let response = await general.funcfetch('cambiar-cluster', datos);
+                    if (response.error) {
+                        alertify.alert('Error', response.error);
+                        return
+                    }
+                    alertify.success(response.success);
+                });
+                $('.cb-estado-change').select2({
+                    theme: 'bootstrap',
+                    width: '100%',
+                    placeholder: 'Seleccione una opción'
+                }).on('select2:select', async function (event) {
+                    let datos = new FormData();
+                    datos.append('id_guia', $(this).attr('data-guia'));
+                    datos.append('estado', $(this).val());
+                    let response = await general.funcfetch('cambiar-estado', datos);
+                    if (response.error) {
+                        alertify.alert('Error', response.error);
+                        return
+                    }
+                    alertify.success(response.success);
+                });
+            });
+            tablaGuias.on('responsive-resize', function (e, datatable, columns) {
+                if (columns[8] && $('.cb-clustes').attr('data-responsive') == 'true') {
+                    $('.cb-clustes').off('change');
+                    $('.cb-clustes').attr('data-responsive', 'false');
+                }
+                if (columns[9] && $('.cb-usuarios').attr('data-responsive') == 'true') {
+                    $('.cb-usuarios').off('change');
+                    $('.cb-usuarios').attr('data-responsive', 'false');
+                }
+                if (columns[10] && $('.cb-estado-change').attr('data-responsive') == 'true') {
+                    $('.cb-estado-change').off('change');
+                    $('.cb-estado-change').attr('data-responsive', 'false');
+                }
+            });
+        }else{
+            tablaGuias.draw();
+        }
     });
     $('#id_editar_estado').on('change', function (e) {
         general.changeTipoGuia(this.value);

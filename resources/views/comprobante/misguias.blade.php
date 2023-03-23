@@ -125,7 +125,11 @@
                 <th>Acciones</th>
             </tr>
         </thead>
-        <tbody id="tabla-detalle-guias"></tbody>
+        <tbody id="tabla-detalle-guias">
+            <tr>
+                <td colspan="100%" class="text-center">Sin resultados</td>
+            </tr>
+        </tbody>
     </table>
 </section>
 @include('modal.detalleguiatodos')

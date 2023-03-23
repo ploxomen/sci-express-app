@@ -12,6 +12,7 @@ use App\Models\ModeloSolicitud;
 use App\Models\TrayectoEnvio;
 use App\Models\User;
 use App\Models\Vehiculos;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -29,6 +30,20 @@ class Recojo extends Controller
         $trayectos = TrayectoEnvio::where(['estado' => 1])->get();
         $clusters = ModeloCluster::obtenerTodosClusters();
         return view('pedidos.recojos',compact('clusters','vehiculos','conductores', 'dealers','clientes', 'trayectos','modulos'));
+    }
+    public function reportesRecojo($tipo,$fechaInicio,$fechaFin)
+    {
+        // dd($tipo,$fechaInicio,$fechaFin);
+        switch ($tipo) {
+            case 'pdf':
+                $reporte = Pdf::loadView("pedidos.reportes.recojosPdf",["resultado" => 1])->setPaper('a4', 'landscape');
+                return $reporte->stream();
+            break;
+            
+            default:
+                # code...
+                break;
+        }
     }
     public function viewRecojoAdmin(Request $request)
     {

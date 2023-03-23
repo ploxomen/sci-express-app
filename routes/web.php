@@ -109,6 +109,8 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
             Route::post('obtener-programacion', [Solicitud::class, 'obtenerParaProgramar']);
             Route::post('modificar', [Recojo::class, 'modificarRecojo']);
             Route::post('modificar-estados', [Recojo::class, 'modificarEstados']);
+            Route::get('reporte/{tipo}/{fechaInicio}/{fechaFin}', [Recojo::class, 'reportesRecojo']);
+
         });
         Route::prefix('embarque')->group(function () {
             Route::get('todos', [Embarque::class, 'viewEmbarquesTodo'])->name('misEmbarques');

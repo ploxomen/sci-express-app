@@ -13,7 +13,7 @@
 @section('body')
 <section class="p-3 bg-white mb-4">
     <h3 class="text-primary"><i class="fas fa-caret-right"></i> Mis Recojos</h3>
-    <form class="row mb-4" id="filtro-ver-solicitudes">
+    <form class="form-row mb-4" id="filtro-ver-solicitudes">
         <div class="form-group col-12 col-md-6 col-lg-3">
             <label for="filtro_solicitud_inicio">Fecha inicio</label>
             <input type="date" class="form-control" value="{{$filtros['finFiltro']}}" id="filtro_recojo_inicio">
@@ -22,7 +22,7 @@
             <label for="filtro_solicitud_fin">Fecha fin</label>
             <input type="date" class="form-control" value="{{$filtros['inicioFiltro']}}" id="filtro_recojo_fin">
         </div>
-        <div class="form-group col-12 col-md-6 col-lg-3">
+        <div class="form-group col-12 col-md-6 col-lg-2">
             <label for="estado_soli">Estado</label>
             <select class="form-control cb-filtros" id="estado_recojo">
                 <option value="4" selected>TODOS</option>
@@ -31,8 +31,19 @@
                 <option value="3">TERMINADO</option>
             </select>
         </div>
-        <div class="form-group col-12 col-md-6 col-lg-3">
+        <div class="form-group col-12 col-md-6 col-lg-1 text-center">
             <button type="submit" class="btn btn-sm btn-light mr-1" title="Aplicar los filtros"><i class="fas fa-search"></i></button>
+        </div>
+        <div class="form-group col-12 col-md-6 col-lg-2">
+            <div class="btn-group">
+                <button class="btn btn-sm btn-outline-info dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                    <i class="far fa-folder"></i> Reportes
+                </button>
+                <div class="dropdown-menu">
+                  <a class="dropdown-item reporte-general" data-tipo="excel" href="#"><i class="far fa-file-excel text-success"></i> Excel</a>
+                  <a class="dropdown-item reporte-general" data-tipo="pdf" href="#"><i class="far fa-file-pdf text-danger"></i> PDF</a>
+                </div>
+              </div>
         </div>
     </form>
 </section>

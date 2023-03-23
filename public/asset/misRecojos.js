@@ -49,6 +49,11 @@ function loadPage(){
             }
         }]
     });
+    for (const reporte of document.querySelectorAll(".reporte-general")) {
+        reporte.addEventListener("click",function(e){
+            window.open(window.origin +"/intranet/pedidos/recojos/reporte/"+this.dataset.tipo+"/" +$('#filtro_recojo_inicio').val() + "/" +$('#filtro_recojo_fin').val(),"_blank");
+        });
+    }
     document.getElementById('filtro-ver-solicitudes').onsubmit = function(e){
         e.preventDefault();
         tablaRecojos.draw();
