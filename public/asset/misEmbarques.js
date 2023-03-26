@@ -369,7 +369,11 @@ function loadPage(){
         }
         alertify.success(response.success);
         $('#modal-informe-embarque').modal('hide');
-
+    }
+    for (const reporte of document.querySelectorAll(".reporte-general")) {
+        reporte.addEventListener("click", function (e) {
+            window.open(window.origin + "/intranet/pedidos/embarque/reporte/" + this.dataset.tipo + "/" + $('#fecha_inicio').val() + "/" + $('#id_fecha_fin').val(), "_blank");
+        });
     }
 
 }

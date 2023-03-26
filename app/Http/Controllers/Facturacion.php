@@ -10,7 +10,7 @@ use App\Models\ModeloCluster;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Facturacion extends Controller
 {
@@ -221,6 +221,6 @@ class Facturacion extends Controller
         $fechaFin = $request->fechaFin;
         $estado = $request->estado;
         $guias = ModelFacturacion::obtenerGuiasFacturacion($clientes, $trayectos, $fechaIncio, $fechaFin,$estado);
-        return \Excel::download(new FacturacionGuiaExport($guias), 'facturacion-guias.xlsx');
+        return Excel::download(new FacturacionGuiaExport($guias), 'facturacion-guias.xlsx');
     }
 }

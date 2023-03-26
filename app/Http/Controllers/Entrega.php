@@ -2,25 +2,48 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\Reportes;
+use App\Models\Clientes;
 use App\Models\EmpresaTransporte;
+use App\Models\InformacionAdicional;
 use App\Models\ModeloCluster;
 use App\Models\ModeloEmbarque;
 use App\Models\ModeloGuias;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Entrega extends Controller
 {
    public function viewEntrega()
    {
-        $modulos = User::getModulos(Auth::id());
-        $clusters = ModeloCluster::obtenerTodosClusters();
-        $nro_pendients = User::obtenerDatosHome(null,22);
-        return view('pedidos.entregas',compact('modulos','clusters', 'nro_pendients'));
+      $modulos = User::getModulos(Auth::id());
+      $clusters = ModeloCluster::obtenerTodosClusters();
+      $nro_pendients = User::obtenerDatosHome(null,22);
+      $fechaFiltros = InformacionAdicional::obtenerDiasFiltros();
+      $clientes = Clientes::obtenerCliConProvee();
+      return view('pedidos.entregas',compact('modulos','clusters', 'nro_pendients', 'fechaFiltros', 'clientes'));
+   }
+   public function reporteEntregas($tipo, $fechaInicio, $fechaFin, $cliente)
+   {
+      ini_set('memory_limit', '1024M');
+      $cliente = $cliente == "todos" ? 0 : intval($cliente);
+      switch ($tipo) {
+         case 'pdf':
+            $datos = ModeloEmbarque::reporteEntregas($fechaInicio, $fechaFin, $cliente);
+            $reporte = Pdf::loadView("pedidos.reportes.entregasPdf", ["resultados" => $datos, 'fechaIni' => date('d/m/Y', strtotime($fechaInicio)), 'fechaFi' => date('d/m/Y', strtotime($fechaFin))])->setPaper('a4', 'landscape');
+            return $reporte->stream("entregas_" . $fechaInicio . "_" . $fechaFin . ".pdf");
+            break;
+         case 'excel':
+            $datos = ModeloEmbarque::reporteEntregas($fechaInicio, $fechaFin, $cliente);
+            return Excel::download(new Reportes('pedidos.reportes.entregasExcel', $datos, "LISTA DE ENTREGAS DESDE" . date('d/m/Y', strtotime($fechaInicio)) . " HASTA " . date('d/m/Y', strtotime($fechaFin))), "entregas_" . $fechaInicio . "_" . $fechaFin . ".xls");
+            break;
+      }
    }
    public function actualizarEntrega(Request $request)
    {

@@ -38,7 +38,9 @@ function loadPage() {
                     return
                 }
                 alertify.success(response.success);
-                tablaGuias.draw();
+                if(tablaGuias){
+                    tablaGuias.draw();
+                }
             }, () => {});
         }
         if (e.target.classList.contains('view-guia')) {
@@ -266,7 +268,9 @@ function loadPage() {
             const response = await general.funcfetch('asignar-global', datos);
             if(response.success){
                 alertify.success(response.success);
-                tablaGuias.draw();
+                if (tablaGuias) {
+                    tablaGuias.draw();
+                }
                 document.getElementById('total-por-procesar-guias').textContent = response.porAsignar;
                 $('#modal-asignar-masivo').modal('hide');
             }
@@ -825,7 +829,8 @@ function loadPage() {
             });
             tablaGuias.on('responsive-display', function (e, datatable, row, showHide, update) {
                 const tabla = e.target.children[0].children[0];
-                if (tabla.children[8].style.display == 'none') {
+                console.log(tabla);
+                if (tabla.children[9].style.display == 'none') {
                     $('.cb-clustes').off('change');
                     $('.cb-clustes').attr('data-responsive', 'true');
                     $('.cb-clustes').on('change', async function () {
@@ -840,7 +845,7 @@ function loadPage() {
                         alertify.success(response.success);
                     });
                 }
-                if (tabla.children[9].style.display == 'none') {
+                if (tabla.children[10].style.display == 'none') {
                     $('.cb-usuarios').off('change');
                     $('.cb-usuarios').attr('data-responsive', 'true');
                     $('.cb-usuarios').on('change', async function (event) {
@@ -856,7 +861,7 @@ function loadPage() {
                         alertify.success(response.success);
                     });
                 }
-                if (tabla.children[10].style.display == 'none') {
+                if (tabla.children[11].style.display == 'none') {
                     $('.cb-estado-change').off('change');
                     $('.cb-estado-change').attr('data-responsive', 'true');
                     $('.cb-estado-change').on('change', async function () {

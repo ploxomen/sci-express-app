@@ -47,6 +47,7 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
         Route::post('editar-obtener', [Manifiesto::class, 'obtenerUnManifiesto']);
         Route::post('eliminar-guia', [Manifiesto::class, 'eliminarGuiaManifiesto']);
         Route::post('agregar-guia-manual', [Manifiesto::class, 'agregarGuiaManual']);
+        Route::get('reporte/{tipo}/{fechaInicio}/{fechaFin}', [Manifiesto::class, 'reportesManifiesto']);
     });
     Route::prefix('vehiculos')->group(function () {
         Route::get('todos', [Embarque::class, 'viewVehiculos'])->name('viewVehiculos');
@@ -136,6 +137,7 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
             Route::post('obtener-informe-detalle', [Embarque::class, 'obtenerInfoEmbDeta']);
             Route::post('agregar-informe', [Embarque::class, 'agregarInforme']);
             Route::post('obtener-guias-embarque-informe', [Embarque::class, 'obtenerGuiasEmbarque']);
+            Route::get('reporte/{tipo}/{fechaInicio}/{fechaFin}', [Embarque::class, 'reportesEmbarque']);
         });
         Route::prefix('llegada')->group(function () {
             Route::get('/', [Llegada::class, 'viewLlegada'])->name('pedidoLlegada');
@@ -150,6 +152,7 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
             Route::get('/', [Entrega::class, 'viewEntrega'])->name('pedidoEntrega');
             Route::post('lista', [Entrega::class, 'listaEntregas']);
             Route::post('actualizar', [Entrega::class, 'actualizarEntrega']);
+            Route::get('reporte/{tipo}/{fechaInicio}/{fechaFin}/{cliente}', [Entrega::class, 'reporteEntregas']);
         });
     });
     Route::prefix('flete')->group(function () {

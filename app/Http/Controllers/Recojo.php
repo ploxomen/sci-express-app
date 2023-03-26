@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\Reportes;
 use App\Models\Clientes;
 use App\Models\EstadoSolicitud;
 use App\Models\InformacionAdicional;
@@ -17,6 +18,7 @@ use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Recojo extends Controller
 {
@@ -33,16 +35,17 @@ class Recojo extends Controller
     }
     public function reportesRecojo($tipo,$fechaInicio,$fechaFin)
     {
-        // dd($tipo,$fechaInicio,$fechaFin);
+        ini_set('memory_limit', '1024M');
         switch ($tipo) {
             case 'pdf':
-                $reporte = Pdf::loadView("pedidos.reportes.recojosPdf",["resultado" => 1])->setPaper('a4', 'landscape');
-                return $reporte->stream();
+                $datos = ModeloRecojo::reporteRecojos($fechaInicio,$fechaFin);
+                $reporte = Pdf::loadView("pedidos.reportes.recojosPdf",["resultados" => $datos,'fechaIni' => date('d/m/Y',strtotime($fechaInicio)),'fechaFi' => date('d/m/Y',strtotime($fechaFin))])->setPaper('a4', 'landscape');
+                return $reporte->stream("recojos_".$fechaInicio."_".$fechaFin.".pdf");
             break;
-            
-            default:
-                # code...
-                break;
+            case 'excel':
+                $datos = ModeloRecojo::reporteRecojos($fechaInicio, $fechaFin);
+                return Excel::download(new Reportes('pedidos.reportes.recojosExcel',$datos, "LISTA DE RECOJOS DESDE". date('d/m/Y', strtotime($fechaInicio)). " HASTA ". date('d/m/Y', strtotime($fechaFin))), "recojos_" . $fechaInicio . "_" . $fechaFin . ".xls");
+            break;
         }
     }
     public function viewRecojoAdmin(Request $request)

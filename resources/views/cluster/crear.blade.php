@@ -82,6 +82,12 @@
                 <label for="id_provincia_clu">Provincia <small class="text-danger">*</small></label>
                 <select class="form-control cb-ubigeo" id="id_provincia_clu" name="provincia_clu" data-consulta="distrito" data-info="id_distrito_new_clu_1" required></select>
             </div>
+            <div class="col-12 form-group">
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" name="facturacionCluster" class="custom-control-input" id="facturacionCluster">
+                    <label class="custom-control-label" for="facturacionCluster">Facturación Kg</label>
+                </div>
+            </div>
             <div class="from-group col-12">
                 <button class="btn btn-success" type="submit">Siguiente</button>
                 <button class="btn btn-danger" type="reset">Limpiar</button>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\Reportes;
 use App\Models\EmpresaTransporte;
 use App\Models\InformacionAdicional;
 use App\Models\ModeloEmbarque;
@@ -9,9 +10,11 @@ use App\Models\ModeloGuias;
 use App\Models\ModeloManifiesto;
 use App\Models\User;
 use App\Models\Vehiculos;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Embarque extends Controller
 {
@@ -44,6 +47,21 @@ class Embarque extends Controller
             return response()->json($manifiestos);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function reportesEmbarque($tipo,$fechaInicio,$fechaFin)
+    {
+        ini_set('memory_limit', '1024M');
+        switch ($tipo) {
+            case 'pdf':
+                $datos = ModeloEmbarque::reportesEmbarque($fechaInicio, $fechaFin);
+                $reporte = Pdf::loadView("embarque.reportes.embarquePdf", ["resultados" => $datos, 'fechaIni' => date('d/m/Y', strtotime($fechaInicio)), 'fechaFi' => date('d/m/Y', strtotime($fechaFin))])->setPaper('a4', 'landscape');
+                return $reporte->stream("embarques_" . $fechaInicio . "_" . $fechaFin . ".pdf");
+                break;
+            case 'excel':
+                $datos = ModeloEmbarque::reportesEmbarque($fechaInicio, $fechaFin);
+                return Excel::download(new Reportes('embarque.reportes.embarqueExcel', $datos, "LISTA DE EMBARQUE DESDE" . date('d/m/Y', strtotime($fechaInicio)) . " HASTA " . date('d/m/Y', strtotime($fechaFin))), "embarques_" . $fechaInicio . "_" . $fechaFin . ".xls");
+                break;
         }
     }
     public function eliminarManifiestoEmbarque(Request $request)

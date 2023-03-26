@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\Reportes;
 use App\Models\InformacionAdicional;
 use App\Models\ModeloCluster;
 use App\Models\ModeloGuias;
@@ -9,9 +10,11 @@ use App\Models\ModeloManifiesto;
 use App\Models\Tipos\Documentos;
 use App\Models\TrayectoEnvio;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Manifiesto extends Controller
 {
@@ -81,6 +84,21 @@ class Manifiesto extends Controller
             return response()->json($result);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
+        }
+    }
+    public function reportesManifiesto($tipo, $fechaInicio, $fechaFin)
+    {
+        ini_set('memory_limit', '1024M');
+        switch ($tipo) {
+            case 'pdf':
+                $datos = ModeloManifiesto::reportesManifiestos($fechaInicio, $fechaFin);
+                $reporte = Pdf::loadView("manifiesto.reportes.manifiestoPdf", ["resultados" => $datos, 'fechaIni' => date('d/m/Y', strtotime($fechaInicio)), 'fechaFi' => date('d/m/Y', strtotime($fechaFin))])->setPaper('a4', 'landscape');
+                return $reporte->stream("manifiestos_" . $fechaInicio . "_" . $fechaFin . ".pdf");
+                break;
+            case 'excel':
+                $datos = ModeloManifiesto::reportesManifiestos($fechaInicio, $fechaFin);
+                return Excel::download(new Reportes('manifiesto.reportes.manifiestoExcel', $datos, "LISTA DE MANIFIESTOS DESDE" . date('d/m/Y', strtotime($fechaInicio)) . " HASTA " . date('d/m/Y', strtotime($fechaFin))), "recojos_" . $fechaInicio . "_" . $fechaFin . ".xls");
+                break;
         }
     }
     public function eliminarGuiaManifiesto(Request $request)

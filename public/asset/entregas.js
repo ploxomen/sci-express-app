@@ -47,6 +47,11 @@ function loadPage(){
             $(row).addClass(bgTable);
         }
     });
+    for (const reporte of document.querySelectorAll(".reporte-general")) {
+        reporte.addEventListener("click", function (e) {
+            window.open(window.origin + "/intranet/pedidos/entrega/reporte/" + this.dataset.tipo + "/" + $('#fecha_inicio').val() + "/" + $('#fecha_fin').val() + "/" + $('#remitente_filtro').val(), "_blank");
+        });
+    }
     document.getElementById('cuerpo-entregas').addEventListener('click',async function(e){
         if(e.target.classList.contains('detalle-entregas')){
             let datos = new FormData();

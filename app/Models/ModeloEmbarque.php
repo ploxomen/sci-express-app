@@ -241,7 +241,8 @@ class ModeloEmbarque extends Model
                     'id_embarque' => $idEmbarque,
                     'id_ciudad' => $cluster->id_ciudad,
                     'ubigeo_distrito' => $cluster->ubigeo_distrito,
-                    'tipo_trayecto' => $manifiesto->via_envio
+                    'tipo_trayecto' => $manifiesto->via_envio,
+                    'tipo_base' => $cluster->tipo_base
                 ]);
             }else{
                 $idCiudadLlegada = $ciudadLlegada->id;
@@ -276,7 +277,6 @@ class ModeloEmbarque extends Model
         }  
         return $embarques;
     }
-
     public static function actualizarEmbarque($id_embarque,$id_user,$empresas)
     {
         DB::beginTransaction();
@@ -519,9 +519,22 @@ class ModeloEmbarque extends Model
             DB::rollBack();
         }
     }
+    public static function reportesEmbarque($fechaInicio,$fechaFin)
+    {
+        $reportes = DB::select('CALL sp_reportes_embarques(?,?)', [$fechaInicio, $fechaFin]);
+        foreach ($reportes as $reporte) {
+            $reporte->prov_orig = (new Ubigeo)->getNameProvincia($reporte->prov_orig);
+            $reporte->prov_dest = (new Ubigeo)->getNameProvincia($reporte->prov_dest);
+        }
+        return $reportes;
+    }
     public static function actualizarGuiaLlegadas($id_embarque,$id_manifiesto,$id_guia,$estado, $texto,$situacion,$incidencia,$flete,$usuario)
     {
         return DB::select('CALL sp_actualizar_llegadas_guias(?,?,?,?,?,?,?,?,?)',[$id_embarque, $id_manifiesto,$id_guia,$estado,$texto, $situacion, $incidencia,$flete, $usuario]);
+    }
+    public static function reporteEntregas($fechaInico,$fechaFin,$cliente)
+    {
+        return DB::select('CALL sp_reportes_entregas(?,?,?)', [$fechaInico, $fechaFin, $cliente]);
     }
     public static function obtenerGuiasRepartoConfirmado($fecha_confirmado,$fecha_reparto,$esto_guia,$cluster, $ciudad_final, $tipo_ciudad)
     {

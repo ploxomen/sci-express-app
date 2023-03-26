@@ -31,6 +31,11 @@ class ModeloRecojo extends Model
         }
         return $solicitudes;
     }
+    public static function reporteRecojos($fechaInicio,$fechaFin)
+    {
+        return DB::select('CALL sp_reportes_recojos(?,?)', [$fechaInicio, $fechaFin]);
+
+    }
     public static function verRecojos($fechaIncio,$fechaFin,$estado)
     {
         return DB::select('CALL sp_ver_recojos(?,?,?)',[$fechaIncio,$fechaFin,$estado]);

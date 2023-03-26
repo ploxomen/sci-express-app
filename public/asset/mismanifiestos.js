@@ -180,6 +180,11 @@ function loadPage(){
             general.verDetalleGuia(response.datos);
         }
     });
+    for (const reporte of document.querySelectorAll(".reporte-general")) {
+        reporte.addEventListener("click", function (e) {
+            window.open(window.origin + "/intranet/manifiesto/reporte/" + this.dataset.tipo + "/" + $('#fecha_inicio').val() + "/" + $('#id_fecha_fin').val(), "_blank");
+        });
+    }
     document.getElementById('manifiesto-editar').onclick = e => {
         const getClass = e.target.classList;
         if (getClass.contains('eliminar-guia') || getClass.contains('agregar-guia')) {

@@ -64,6 +64,18 @@ class ModeloManifiesto extends Model
         }
         DB::table("detalle_manifiesto AS dm")->join("guias AS g","dm.id_guia","=","g.id")->where(['dm.id_manifiesto' => $idManifiesto,'g.estado' => 1,'g.activo' => 1])->whereBetween('g.situ',[2,6])->update(['g.situ' => $estadoGuia]);
     }
+    public static function reportesManifiestos($fechaInicio, $fechaFin)
+    {
+        $manifiestos = DB::select('CALL sp_reportes_manifiestos(?,?)', [$fechaInicio, $fechaFin]);
+        foreach ($manifiestos as $manifiesto) {
+            if ($manifiesto->tipo_base == 'distrito') {
+                $manifiesto->nombreBase = (new Ubigeo)->getNameDistrito($manifiesto->nombreBase);
+            }
+            $manifiesto->prov_orig = (new Ubigeo)->getNameProvincia($manifiesto->prov_orig);
+            $manifiesto->prov_dest = (new Ubigeo)->getNameProvincia($manifiesto->prov_dest);
+        }
+        return $manifiestos;
+    }
     public static function obtenerTodosManifiestos($fechaInicio,$fechaFin,$trayecto,$provOrigen,$provFinal,$cluster,$estado,$id)
     {
         $manifiestos = DB::select('CALL sp_manifiesto_obtener(?,?,?,?,?,?,?,?)',[$fechaInicio,$fechaFin,$trayecto,$provOrigen,$provFinal,$cluster,$estado,$id]);

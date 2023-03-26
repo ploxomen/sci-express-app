@@ -28,6 +28,44 @@
     </div>
     <form class="bg-white p-2 mb-3">
         <div class="form-row">
+            <div class="col-12">
+                <h4 class="text-primary"><i class="fas fa-caret-right"></i> Filtros Reporte</h4>
+            </div>
+            <div class="form-group col-12 col-md-6 col-lg-3">
+                <label for="fecha_confirmacion">Fecha Inicio</label>
+                <input id="fecha_inicio" type="date" class="form-control" value="{{$fechaFiltros['finFiltro']}}">
+            </div>
+            <div class="form-group col-12 col-md-6 col-lg-3">
+                <label for="fecha_reparto">Fecha Fin</label>
+                <input id="fecha_fin" type="date" class="form-control" value="{{$fechaFiltros['inicioFiltro']}}">
+            </div>
+            <div class="form-group col-12 col-md-6 col-lg-4">
+                <label for="id_remi_nomb">Remitente</label>
+                <select class="form-control simple-select2" id="remitente_filtro">
+                    <option value="todos">TODOS</option>
+                    @foreach ($clientes as $cli)
+                        <option value="{{$cli->id}}">{{$cli->nom_cli}}</option>                       
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group col-md-6 col-lg-2">
+                <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-info dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            <i class="far fa-folder"></i> Reportes
+                        </button>
+                        <div class="dropdown-menu">
+                        <a class="dropdown-item reporte-general" data-tipo="excel" href="#"><i class="far fa-file-excel text-success"></i> Excel</a>
+                        <a class="dropdown-item reporte-general" data-tipo="pdf" href="#"><i class="far fa-file-pdf text-danger"></i> PDF</a>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </form>
+    <form class="bg-white p-2 mb-3">
+        <div class="form-row">
+            <div class="col-12">
+                <h4 class="text-primary"><i class="fas fa-caret-right"></i> Filtros Tabla</h4>
+            </div>
             <div class="form-group col-12 col-md-6 col-lg-3">
                 <label for="fecha_confirmacion">Fecha de Confirmación</label>
                 <input id="fecha_confirmacion" type="date" class="form-control change-entrega-fecha">
@@ -57,7 +95,7 @@
     </form>
     <div class="bg-white p-2 mb-3">
         <div class="form-group d-flex justify-content-between flex-wrap">
-            <h3 class="text-primary">De Guías</h3>
+            <h4 class="text-primary"><i class="fas fa-caret-right"></i> De Guías</h4>
             <div class="d-flex align-items-center">
                 <label for="lista-entregas" class="mr-3">Por entregar</label>
                 <input type="text" id="lista-entregas" readonly class="form-control mw-100" value="{{$nro_pendients}}">

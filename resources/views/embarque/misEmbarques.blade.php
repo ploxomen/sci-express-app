@@ -69,9 +69,28 @@
             </select>
         </div>
         <div class="form-group col-12">
-            <button type="button" class="btn btn-sm btn-success" id="btn-actualizar-guias" title="Actualizar embarques de informado a transito"><i class="fas fa-sync-alt"></i></button>
-            <button type="submit" class="btn btn-sm btn-primary" title="Aplicar los filtros"><i class="fas fa-search"></i></button>
+            <div class="d-flex" style="gap: 5px;">
+                <div>
+                    <button type="button" class="btn btn-sm btn-success" id="btn-actualizar-guias" title="Actualizar embarques de informado a transito"><i class="fas fa-sync-alt"></i></button>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-sm btn-primary" title="Aplicar los filtros"><i class="fas fa-search"></i></button>
+                </div>
+                <div>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-info dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            <i class="far fa-folder"></i> Reportes
+                        </button>
+                        <div class="dropdown-menu">
+                        <a class="dropdown-item reporte-general" data-tipo="excel" href="#"><i class="far fa-file-excel text-success"></i> Excel</a>
+                        <a class="dropdown-item reporte-general" data-tipo="pdf" href="#"><i class="far fa-file-pdf text-danger"></i> PDF</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
         </div>
+        
     </form>
     <div class="form-group">
         <table class="table table-sm table-bordered" id="tabla-embarques">

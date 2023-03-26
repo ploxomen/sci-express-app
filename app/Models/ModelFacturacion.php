@@ -66,7 +66,7 @@ class ModelFacturacion extends Model
     {
         return DB::select('CALL sp_facturacion_ver_guias(?,?,?,?,?)',[$cliente, $fechaInicio,$fechaFin,$traslado,$estado]);
     }
-    public static function calcularGuiaFacturacionCluster($idGuia,$distritoDest,$ciudadDest,$idsCluster,$viaFacturacion)
+    public static function calcularGuiaFacturacionCluster($idGuia,$distritoDest,$ciudadDest,$idsCluster,$viaFacturacion,$pesoFact)
     {
         $tipoCiudad = empty($ciudadDest) ? "distrito" : "ciudad";
         $ciudadesCluster = DB::table("ciudades_base_cluster")->where(["tipo_base" => $tipoCiudad,"activo" => 1,"ubigeo_distrito" => $distritoDest])->whereIn("id_cluster",$idsCluster);
@@ -81,8 +81,10 @@ class ModelFacturacion extends Model
         $total = 0;
         
         foreach ($detallesGuias as $detalleGuia) {
-            
             $pesoDetalle = $detalleGuia->volumen > $detalleGuia->kg ? floatval($detalleGuia->volumen) : floatval($detalleGuia->kg);
+            if($pesoFact === 1){
+                $pesoDetalle = floatval($detalleGuia->kg);
+            }
             $cabecera1 = DB::table("facturacion_cluster_cabecera AS fa")->select("fcc.*")
             ->join("facturacion_cluster_valor AS fc","fa.id","=","fc.id_cabecera")
             ->join("facturacion_cluster_ciudades_cabecera AS fcc","fc.id_cabecera_ciudades","=","fcc.id")
@@ -160,8 +162,9 @@ class ModelFacturacion extends Model
     public static function sincronizarFacturacionCluster($idCluster)
     {
         $idsCluster = self::obtenerClustersIguales($idCluster);
+        $clusterKg = DB::table("cluster")->find($idCluster);
         $guias = DB::table("guias")->where(['activo' => 1,'estado' => 1, 'situ' => 11,'estado_fact_cluster' => 0])->whereIn("id_cluster",$idsCluster)->get();
-        self::calcularGuiasClu($guias,$idsCluster);
+        self::calcularGuiasClu($guias,$idsCluster,$clusterKg->facturacion_peso);
     }
     public static function sincronizarFacturacionCliente($cliente)
     {
@@ -201,10 +204,10 @@ class ModelFacturacion extends Model
         }
     }
     
-    public static function calcularGuiasClu($guias,$idsCluster)
+    public static function calcularGuiasClu($guias,$idsCluster,$pesoFact)
     {
         foreach ($guias as $guia) {
-            $subTotal = self::calcularGuiaFacturacionCluster($guia->id,$guia->dest_dist,$guia->ciudad_destino_final,$idsCluster,$guia->via_tras);
+            $subTotal = self::calcularGuiaFacturacionCluster($guia->id,$guia->dest_dist,$guia->ciudad_destino_final,$idsCluster,$guia->via_tras,$pesoFact);
             $total2 = $subTotal + floatval($guia->fact_cluster_mov1);
             $total = $total2 + floatval($guia->fact_cluster_mov2);
             DB::table("guias")->where('id',$guia->id)->update(["fact_cluster_sub" => $subTotal, 'fact_cluster_total' => $total]);

@@ -44,6 +44,10 @@ class Cluster extends Controller
                 return response()->json(['error' => 'Petición invalida']);
             }
             $datos = $request->all();
+            $datos['facturacion_peso'] = $request->has("facturacionCluster") ? 1 : 0;
+            if(isset($datos['facturacionCluster'])){
+                unset($datos['facturacionCluster']);
+            }
             $datos_ciudades = json_decode($request->destino_final);
             $datoUsuario = [];
             foreach ($datos as $key => $value) {
@@ -95,6 +99,7 @@ class Cluster extends Controller
             if ($request->has('destino_final')) {
                 unset($datos['destino_final']);
             }
+            $datos['facturacion_peso'] = $request->has('facturacion_peso') ? 1 : 0;
             $resultado = ModeloCluster::updateCluster($id_cluster,$datos,$actualizar_ciudades,$eliminar_ciudades,$agregar_ciudades);
             return response()->json($resultado);
         } catch (Exception $ex) {

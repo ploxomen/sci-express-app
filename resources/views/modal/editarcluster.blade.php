@@ -69,6 +69,12 @@
                         <label for="">Provincia <small class="text-danger">*</small></label>
                         <select class="form-control cb-ubigeo" id="id_provincia_clu" data-combo="lista_provincia_clu" name="provincia_clu" data-consulta="distrito"  data-info="id_distrito_clu" required></select>
                     </div>
+                    <div class="col-12 form-group">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" name="facturacion_peso" class="custom-control-input" id="id_facturacion_peso">
+                            <label class="custom-control-label" for="id_facturacion_peso">Facturación Kg</label>
+                        </div>
+                    </div>
                     <div class="form-group col-12">
                         <h5 class="text-primary">Ciudades de destino</h5>
                         <div class="form-group text-right">

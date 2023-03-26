@@ -100,6 +100,10 @@ function loadPage(){
                             $(dom).val(valor.split(';')).trigger('change');
                         }
                     }
+                    if (key == 'facturacion_peso'){
+                        dom.checked = valor ? true : false;
+                        continue;
+                    }
                     dom.value = valor;
                 }
             }
@@ -225,6 +229,7 @@ function loadPage(){
     });
     $('#modal-editar-cluster').on('hidden.bs.modal', function (e) {
         ciudadesEliminadas = [];
+        document.querySelector("#id_facturacion_peso").checked = false;
     });
 }
 window.addEventListener('DOMContentLoaded',loadPage);
