@@ -1,7 +1,9 @@
 @extends('general.index')
 @section('head')
     <title>Inicio</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @if ($rol_user->id_rol == 1)
+        <script src="{{asset('asset/home/manager.js')}}"></script>
+    @endif
 @endsection
 @section('body')
     <style>

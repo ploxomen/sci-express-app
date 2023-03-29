@@ -16,6 +16,7 @@
             <th>Total<br>Bultos</th>
             <th>Fecha Reparto</th>
             <th>Fecha Entrega</th>
+            <th>KPI</th>
             <th>Situación<br>Reparto</th>
             <th>Incidencia Reparto</th>
             <th>Detalle Incidencia Reparto</th>
@@ -42,6 +43,7 @@
                 <td>{{$resultado->totalBultos}}</td>
                 <td>{{$resultado->fechaReparto}}</td>
                 <td>{{$resultado->fechaEntregado}}</td>
+                <td>{{$resultado->kpi}}</td>
                 <td>{{$resultado->situacionDuranteEnvio}}</td>
                 <td>{{$resultado->incidenciaDuranteEnvio}}</td>
                 <td>{{$resultado->textoIncidencia}}</td>

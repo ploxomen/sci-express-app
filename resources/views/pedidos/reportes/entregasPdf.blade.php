@@ -1,14 +1,7 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>    
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Reporte de recojos</title>
-</head>
-<body>
-    <h2 class="text-center">LISTA DE ENTREGAS DESDE {{$fechaIni}} HASTA {{$fechaFi}}</h2>
-    @include('pedidos.reportes.estilos')
+@extends('general.indexReportePdf')
+@section('titulo','Reporte de entregas')
+@section('body')
+    <span class="titlo-principal">LISTA DE ENTREGAS DESDE {{$fechaIni}} HASTA {{$fechaFi}}</span>
     <table border="1" class="tabla">
         <thead>
             <tr>
@@ -22,6 +15,7 @@
                 <th>Total<br>Bultos</th>
                 <th>Fecha Reparto</th>
                 <th>Fecha Entrega</th>
+                <th>KPI</th>
                 <th>Situación<br>Reparto</th>
                 <th>Estado<br>Entrega</th>
                 <th>N°<br>Visitas</th>
@@ -46,6 +40,7 @@
                     <td>{{$resultado->totalBultos}}</td>
                     <td>{{$resultado->fechaReparto}}</td>
                     <td>{{$resultado->fechaEntregado}}</td>
+                    <td>{{$resultado->kpi}}</td>
                     <td>{{$resultado->situacionDuranteEnvio}}</td>
                     <td>{{$resultado->estadoEntregado}}</td>
                     <td>{{$resultado->nroVisitas}}</td>
@@ -53,5 +48,4 @@
             @endforeach
         </tbody>
     </table>
-</body>
-</html>
+@endsection

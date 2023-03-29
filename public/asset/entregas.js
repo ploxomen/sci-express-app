@@ -1,7 +1,7 @@
 function loadPage(){
     const general = new General();
     const cbCluster = document.getElementById('nombre_cluster');
-    $('#nombre_cluster').select2({
+    $('#nombre_cluster, #nombre_cluster_filtro').select2({
         theme : 'bootstrap',
         templateResult: general.tempSeleCli,
         placeholder: 'Seleccione un cliente'
@@ -49,7 +49,7 @@ function loadPage(){
     });
     for (const reporte of document.querySelectorAll(".reporte-general")) {
         reporte.addEventListener("click", function (e) {
-            window.open(window.origin + "/intranet/pedidos/entrega/reporte/" + this.dataset.tipo + "/" + $('#fecha_inicio').val() + "/" + $('#fecha_fin').val() + "/" + $('#remitente_filtro').val(), "_blank");
+            window.open(window.origin + "/intranet/pedidos/entrega/reporte/" + this.dataset.tipo + "/" + $('#fecha_inicio').val() + "/" + $('#fecha_fin').val() + "/" + $('#remitente_filtro').val() + "/" + $('#nombre_cluster_filtro').val(), "_blank");
         });
     }
     document.getElementById('cuerpo-entregas').addEventListener('click',async function(e){

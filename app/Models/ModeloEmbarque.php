@@ -156,19 +156,15 @@ class ModeloEmbarque extends Model
             ->join("manifiesto AS m","m.id","=","em.id_manifiesto")
             ->join('guias AS g', 'g.id', '=', 'dm.id_guia')
             ->where(['ec.id_embarque' => $idEmbarque])->update(['m.estado' => 1 ,'g.situ' => 2]);
-            DB::table('embarque_manifiesto AS em')
-            ->join('embarque_ciudad_llegada AS ec', 'em.id_embarque_ciudad', '=', 'ec.id')
-            ->where(['ec.id_embarque' => $idEmbarque])->delete();
-            DB::table('embarque_fletes AS em')
-            ->join('embarque_ciudad_llegada AS ec', 'em.id_embarque_ciudad', '=', 'ec.id')
-            ->where(['ec.id_embarque' => $idEmbarque])->delete();
-            DB::table('embarque_ciudad_llegada AS ec')
-            ->where(['ec.id_embarque' => $idEmbarque])->delete();
-            DB::table('transporte_embarque AS te')
-            ->join('embarque AS e', 'e.id', '=', 'te.id_list_emba')
-            ->where(['e.id' => $idEmbarque])->delete();
-            DB::table('embarque AS e')
-            ->where(['e.id' => $idEmbarque])->delete();
+            $query = "DELETE ef FROM embarque e INNER JOIN embarque_ciudad_llegada ecl ON e.id = ecl.id_embarque INNER JOIN embarque_fletes ef ON ef.id_embarque_ciudad = ecl.id WHERE e.id = ?";
+            DB::delete($query,[$idEmbarque]);
+            $query = "DELETE em FROM embarque e INNER JOIN embarque_ciudad_llegada ecl ON e.id = ecl.id_embarque INNER JOIN embarque_manifiesto em ON em.id_embarque_ciudad = ecl.id WHERE e.id = ?";
+            DB::delete($query, [$idEmbarque]);
+            $query = "DELETE ecl FROM embarque e INNER JOIN embarque_ciudad_llegada ecl ON e.id = ecl.id_embarque WHERE e.id = ?";
+            DB::delete($query, [$idEmbarque]);
+            $query = "DELETE te FROM embarque e INNER JOIN transporte_embarque te ON te.id_list_emba = e.id WHERE e.id = ?";
+            DB::delete($query, [$idEmbarque]);
+            DB::table('embarque')->where(['id' => $idEmbarque])->delete();
             DB::commit();
             return ['success' => 'Embarque eliminado correctamente'];
         } catch (Exception $ex) {
@@ -532,9 +528,9 @@ class ModeloEmbarque extends Model
     {
         return DB::select('CALL sp_actualizar_llegadas_guias(?,?,?,?,?,?,?,?,?)',[$id_embarque, $id_manifiesto,$id_guia,$estado,$texto, $situacion, $incidencia,$flete, $usuario]);
     }
-    public static function reporteEntregas($fechaInico,$fechaFin,$cliente)
+    public static function reporteEntregas($fechaInico,$fechaFin,$cliente,$cluster)
     {
-        return DB::select('CALL sp_reportes_entregas(?,?,?)', [$fechaInico, $fechaFin, $cliente]);
+        return DB::select('CALL sp_reportes_entregas(?,?,?,?)', [$fechaInico, $fechaFin, $cliente,$cluster]);
     }
     public static function obtenerGuiasRepartoConfirmado($fecha_confirmado,$fecha_reparto,$esto_guia,$cluster, $ciudad_final, $tipo_ciudad)
     {

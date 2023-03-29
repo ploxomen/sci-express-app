@@ -17,6 +17,9 @@ use App\Http\Controllers\Usuario;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->prefix('intranet')->group(function (){
+    Route::prefix('home')->group(function () {
+        Route::post('manager', [Usuario::class, 'filtrosManager']);
+    });
     Route::prefix('cliente')->group(function(){
         Route::get('solicitud/agregar', [Clientes::class, 'agregarSolicitudCliente'])->name('solicitudCliente');
         Route::get('agregar-modificar',[Clientes::class,'viewAgreModi'])->name('cliAgreModi');
@@ -152,7 +155,7 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
             Route::get('/', [Entrega::class, 'viewEntrega'])->name('pedidoEntrega');
             Route::post('lista', [Entrega::class, 'listaEntregas']);
             Route::post('actualizar', [Entrega::class, 'actualizarEntrega']);
-            Route::get('reporte/{tipo}/{fechaInicio}/{fechaFin}/{cliente}', [Entrega::class, 'reporteEntregas']);
+            Route::get('reporte/{tipo}/{fechaInicio}/{fechaFin}/{cliente}/{cluster}', [Entrega::class, 'reporteEntregas']);
         });
     });
     Route::prefix('flete')->group(function () {

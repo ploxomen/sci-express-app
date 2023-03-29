@@ -38,9 +38,10 @@ class Recojo extends Controller
         ini_set('memory_limit', '1024M');
         switch ($tipo) {
             case 'pdf':
+                
                 $datos = ModeloRecojo::reporteRecojos($fechaInicio,$fechaFin);
                 $reporte = Pdf::loadView("pedidos.reportes.recojosPdf",["resultados" => $datos,'fechaIni' => date('d/m/Y',strtotime($fechaInicio)),'fechaFi' => date('d/m/Y',strtotime($fechaFin))])->setPaper('a4', 'landscape');
-                return $reporte->stream("recojos_".$fechaInicio."_".$fechaFin.".pdf");
+                return $reporte->download("recojos_".$fechaInicio."_".$fechaFin.".pdf");
             break;
             case 'excel':
                 $datos = ModeloRecojo::reporteRecojos($fechaInicio, $fechaFin);

@@ -56,7 +56,7 @@ class Embarque extends Controller
             case 'pdf':
                 $datos = ModeloEmbarque::reportesEmbarque($fechaInicio, $fechaFin);
                 $reporte = Pdf::loadView("embarque.reportes.embarquePdf", ["resultados" => $datos, 'fechaIni' => date('d/m/Y', strtotime($fechaInicio)), 'fechaFi' => date('d/m/Y', strtotime($fechaFin))])->setPaper('a4', 'landscape');
-                return $reporte->stream("embarques_" . $fechaInicio . "_" . $fechaFin . ".pdf");
+                return $reporte->download("embarques_" . $fechaInicio . "_" . $fechaFin . ".pdf");
                 break;
             case 'excel':
                 $datos = ModeloEmbarque::reportesEmbarque($fechaInicio, $fechaFin);

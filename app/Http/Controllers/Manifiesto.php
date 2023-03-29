@@ -93,7 +93,7 @@ class Manifiesto extends Controller
             case 'pdf':
                 $datos = ModeloManifiesto::reportesManifiestos($fechaInicio, $fechaFin);
                 $reporte = Pdf::loadView("manifiesto.reportes.manifiestoPdf", ["resultados" => $datos, 'fechaIni' => date('d/m/Y', strtotime($fechaInicio)), 'fechaFi' => date('d/m/Y', strtotime($fechaFin))])->setPaper('a4', 'landscape');
-                return $reporte->stream("manifiestos_" . $fechaInicio . "_" . $fechaFin . ".pdf");
+                return $reporte->download("manifiestos_" . $fechaInicio . "_" . $fechaFin . ".pdf");
                 break;
             case 'excel':
                 $datos = ModeloManifiesto::reportesManifiestos($fechaInicio, $fechaFin);

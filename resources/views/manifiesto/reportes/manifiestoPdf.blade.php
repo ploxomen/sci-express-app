@@ -1,14 +1,7 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>    
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Manifiestos</title>
-</head>
-<body>
-    <h2 class="text-center">LISTA DE MANIFIESTOS DESDE {{$fechaIni}} HASTA {{$fechaFi}}</h2>
-    @include('pedidos.reportes.estilos')
+@extends('general.indexReportePdf')
+@section('titulo','Reporte de manifiestos')
+@section('body')
+    <span class="titlo-principal">LISTA DE MANIFIESTOS DESDE {{$fechaIni}} HASTA {{$fechaFi}}</span>
     <table border="1" class="tabla">
         <thead>
             <tr>
@@ -57,5 +50,4 @@
             @endforeach
         </tbody>
     </table>
-</body>
-</html>
+@endsection

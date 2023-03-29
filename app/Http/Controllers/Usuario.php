@@ -18,15 +18,18 @@ class Usuario extends Controller
     {
         $modulos = User::getModulos(Auth::id());
         $rol_user = User::obtenerRolActivo(Auth::id());
+        $nombreMes = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","setiembre","octubre","noviembre","diciembre"];
+        // dd($nombreMes, date('m'));
         switch ($rol_user->id_rol) {
             case '1':
                 $datos = [
-                    'totalrecojo' => User::obtenerDatosHome(null, 33),
-                    'recojoconcretado' => User::obtenerDatosHome(null, 34),
-                    'totalembarque' => User::obtenerDatosHome(null, 35),
-                    'embarqueconcretado' => User::obtenerDatosHome(null, 36),
-                    'totalentregas' => User::obtenerDatosHome(null, 37),
-                    'entregasconcretadas' => User::obtenerDatosHome(null, 38)
+                    'recojoTotal' => User::obtenerDatosHome(null, 33),
+                    'recojoPendiente' => User::obtenerDatosHome(null, 34),
+                    'embarqueTotal' => User::obtenerDatosHome(null, 35),
+                    'embarquePendiente' => User::obtenerDatosHome(null, 36),
+                    'entregaTotal' => User::obtenerDatosHome(null, 37),
+                    'entregaPendiente' => User::obtenerDatosHome(null, 38),
+                    'mes' => $nombreMes[intval(date('m')) - 1]
                 ];
             break;
             case '2':
@@ -106,6 +109,20 @@ class Usuario extends Controller
             break;
         }
         return view('users.home',compact('modulos', 'datos', 'rol_user'));
+    }
+    public function filtrosManager(Request $request)
+    {
+        if ($request->ajax()) {
+            $datos = [
+                'recojo_total' => User::filtrosManager(33,$request->fecha),
+                'recojo_completado' => User::filtrosManager( 34,$request->fecha),
+                'embarque_total' => User::filtrosManager(35,$request->fecha),
+                'embarque_completado' => User::filtrosManager(36,$request->fecha),
+                'entregas_total' => User::filtrosManager(37,$request->fecha),
+                'entregas_completado' => User::filtrosManager(38,$request->fecha)
+            ];
+            return response()->json($datos);
+        }
     }
     public function getCentroCosto(Request $request)
     {

@@ -31,20 +31,29 @@
             <div class="col-12">
                 <h4 class="text-primary"><i class="fas fa-caret-right"></i> Filtros Reporte</h4>
             </div>
-            <div class="form-group col-12 col-md-6 col-lg-3">
-                <label for="fecha_confirmacion">Fecha Inicio</label>
+            <div class="form-group col-6 col-lg-2">
+                <label for="fecha_inicio">Fecha Inicio</label>
                 <input id="fecha_inicio" type="date" class="form-control" value="{{$fechaFiltros['finFiltro']}}">
             </div>
-            <div class="form-group col-12 col-md-6 col-lg-3">
-                <label for="fecha_reparto">Fecha Fin</label>
+            <div class="form-group col-6 col-lg-2">
+                <label for="fecha_fin">Fecha Fin</label>
                 <input id="fecha_fin" type="date" class="form-control" value="{{$fechaFiltros['inicioFiltro']}}">
             </div>
-            <div class="form-group col-12 col-md-6 col-lg-4">
-                <label for="id_remi_nomb">Remitente</label>
+            <div class="form-group col-6 col-lg-3">
+                <label for="remitente_filtro">Remitente</label>
                 <select class="form-control simple-select2" id="remitente_filtro">
                     <option value="todos">TODOS</option>
                     @foreach ($clientes as $cli)
                         <option value="{{$cli->id}}">{{$cli->nom_cli}}</option>                       
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group col-6 col-lg-3">
+                <label for="nombre_cluster_filtro">Clusters</label>
+                <select id="nombre_cluster_filtro" class="form-control simple-select2 cb-filtros">
+                    <option value="todos" data-nro="TODOS">TODOS</option>
+                    @foreach ($clusters as $clu)
+                        <option value="{{$clu->id_cluster}}" data-nro="{{$clu->nombreProvincia}}">{{mb_strtoupper($clu->name,'UTF-8')}} {{mb_strtoupper($clu->last_name,'UTF-8')}}</option>
                     @endforeach
                 </select>
             </div>

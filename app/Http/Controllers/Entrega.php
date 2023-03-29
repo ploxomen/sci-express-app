@@ -29,18 +29,20 @@ class Entrega extends Controller
       $clientes = Clientes::obtenerCliConProvee();
       return view('pedidos.entregas',compact('modulos','clusters', 'nro_pendients', 'fechaFiltros', 'clientes'));
    }
-   public function reporteEntregas($tipo, $fechaInicio, $fechaFin, $cliente)
+   public function reporteEntregas($tipo, $fechaInicio, $fechaFin, $cliente,$cluster)
    {
       ini_set('memory_limit', '1024M');
       $cliente = $cliente == "todos" ? 0 : intval($cliente);
+      $cluster = $cluster == "todos" ? 0 : intval($cluster);
       switch ($tipo) {
          case 'pdf':
-            $datos = ModeloEmbarque::reporteEntregas($fechaInicio, $fechaFin, $cliente);
+            
+            $datos = ModeloEmbarque::reporteEntregas($fechaInicio, $fechaFin, $cliente, $cluster);
             $reporte = Pdf::loadView("pedidos.reportes.entregasPdf", ["resultados" => $datos, 'fechaIni' => date('d/m/Y', strtotime($fechaInicio)), 'fechaFi' => date('d/m/Y', strtotime($fechaFin))])->setPaper('a4', 'landscape');
-            return $reporte->stream("entregas_" . $fechaInicio . "_" . $fechaFin . ".pdf");
+            return $reporte->download("entregas_" . $fechaInicio . "_" . $fechaFin . ".pdf");
             break;
          case 'excel':
-            $datos = ModeloEmbarque::reporteEntregas($fechaInicio, $fechaFin, $cliente);
+            $datos = ModeloEmbarque::reporteEntregas($fechaInicio, $fechaFin, $cliente, $cluster);
             return Excel::download(new Reportes('pedidos.reportes.entregasExcel', $datos, "LISTA DE ENTREGAS DESDE" . date('d/m/Y', strtotime($fechaInicio)) . " HASTA " . date('d/m/Y', strtotime($fechaFin))), "entregas_" . $fechaInicio . "_" . $fechaFin . ".xls");
             break;
       }

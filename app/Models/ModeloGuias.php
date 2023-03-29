@@ -18,14 +18,14 @@ class ModeloGuias extends Model
         DB::beginTransaction();
         try {
             if($guia['select_comprobantes'] == 'nro_guia'){
-                if (strlen(trim($guia['nro_guia'])) > 11 && strpos($guia['nro_guia'], '-') != 3) {
+                if (strlen(trim($guia['nro_guia'])) != 11 && strpos($guia['nro_guia'], '-') != 3) {
                     return ['alerta' => 'La guía N° ' . $guia['nro_guia'] . ' no está con el formato solicitado'];
                 }
                 $nro_guia = explode('-', trim($guia['nro_guia']));
-                if (DB::table('guias')->where(['nro_guia' => $nro_guia[1], 'prefijo' => $nro_guia[0]])->count() > 0) {
+                if (DB::table('guias')->where(['nro_guia' => intval($nro_guia[1]), 'prefijo' => intval($nro_guia[0])])->count() > 0) {
                     return ['alerta' => 'La guía N° <b>' . $guia['nro_guia'] . '</b> ya se encuentra registrada, por favor intente con otro número'];
                 }
-                if ($guia['estado'] == '1' || $guia['estado'] == '2') {
+                if ($guia['estado'] == '1' ||   $guia['estado'] == '2') {
                     if (DB::table('embarque_ciudad_llegada')->where(['nro_guia_embarque' => $nro_guia[1], 'prefijo_guia_embarque' => $nro_guia[0]])->count() > 0) {
                         return ['alerta' => 'Para registrar la guía N° <b>' . $guia['nro_guia'] . '</b> debe de ser una guía inactiva.'];
                     }
@@ -35,7 +35,7 @@ class ModeloGuias extends Model
                 $msj = 'La guía N° <b>' . $guia['prefijo'] . '-' .$guia['nro_guia'] . '</b> se creó de manera correcta';
             }
             if ($guia['select_comprobantes'] == 'nro_or') {
-                if(strlen(trim($guia['nro_guia'])) > 7) {
+                if(strlen(trim($guia['nro_guia'])) != 7) {
                     return ['alerta' => 'La Orden de Servicio N° ' . $guia['nro_guia'] . ' no está con el formato solicitado'];
                 }
                 if (DB::table('guias')->where(['nro_guia' => intval($guia['nro_guia']), 'prefijo' => null])->count() > 0) {
@@ -438,7 +438,9 @@ class ModeloGuias extends Model
     {
         $query = DB::table('guias');
         if($tipoGuia == "guia"){
-            $query =  $query->where(['prefijo' => intval(explode('-',$nroGuia)[0]), 'nro_guia' => intval(explode('-',$nroGuia)[1])]);
+            $prefijo = intval(explode('-', $nroGuia)[0]);
+            $nro = intval(explode('-', $nroGuia)[1]);
+            $query =  $query->where(['prefijo' => $prefijo, 'nro_guia' => $nro]);
         }else{
             $query = $query->where('nro_guia',$nroGuia);
         }

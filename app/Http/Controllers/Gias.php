@@ -36,7 +36,6 @@ class Gias extends Controller
         $embaseEmbalaje = InformacionAdicional::getEnvaseEmbalaje();
         $grupoEnvio = InformacionAdicional::getGrupoEnvio();
         $tipoEnvios = InformacionAdicional::getTipoEnvio();
-        // dd($tipoEnvios);
         return view('comprobante.guias',compact('nro_guia_result','cli_cli','clientes','departamentos','hoy','trayecto','via_envios', 'nro_os','tipo_documentos','modulos','antes','embaseEmbalaje','grupoEnvio','tipoEnvios'));
     }
     public function generarNroGuiaSCI()
@@ -245,7 +244,7 @@ class Gias extends Controller
     }
     public function obtenerAsignacionGlobal()
     {
-        $guiasPorAsignar = ModeloGuias::selectRaw("DATE_FORMAT(fech_emis,'%d/%m/%Y') AS fecha_emision,id,prefijo,nro_guia")->where(['id_asignado' => null,'activo' => 1, 'situ' => 1, 'estado' => 1])->get();
+        $guiasPorAsignar = ModeloGuias::selectRaw("DATE_FORMAT(fech_emis,'%d/%m/%Y') AS fecha_emision,id,prefijo,nro_guia")->where(['id_asignado' => null,'activo' => 1, 'situ' => 1, 'estado' => 1])->groupBy("id")->get();
         return response()->json(['guias' => $guiasPorAsignar]);
     }
     public function misGuias()
