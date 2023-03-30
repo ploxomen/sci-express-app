@@ -24,7 +24,7 @@
                         <input type="date" name="fecha_hr_entregado" id="id_modal_fecha_entrega" class="form-control" {{$disabled}} >
                     </div>
                     <div class="form-group col-12 col-md-6">
-                        <label for="id_modal_situacion_durante_envio">Situación Repeparto</label>
+                        <label for="id_modal_situacion_durante_envio">Situación Reparto</label>
                         <select id="id_modal_situacion_durante_envio" {{$disabled}} name="situacion_durante_envio" class="form-control simple-select2">
                             <option></option>
                             <option value="CONFORME">CONFORME</option>
@@ -32,7 +32,7 @@
                         </select>
                     </div>
                     <div class="form-group col-12 col-md-6">
-                        <label for="id_modal_incidencia_durante_envio">Incidencia Rep</label>
+                        <label for="id_modal_incidencia_durante_envio">Incidencia Reparto</label>
                         <select id="id_modal_incidencia_durante_envio" {{$disabled}} name="incidencia_durante_envio" class="form-control simple-select2">
                             <option></option>
                             <option value="DAÑO PARCIAL">DAÑO PARCIAL</option>

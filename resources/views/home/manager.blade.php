@@ -29,7 +29,7 @@
                     </div>
                 </div>
                 <div id="box_ninguno_progress_recojo_total">
-                    <h6>No se encontraron embarques programados</h6>
+                    <h6>No se encontraron recojos programados</h6>
                 </div>
             </div>
             <div class="form-group p-1">
@@ -67,7 +67,7 @@
                     </div>
                 </div>
                 <div id="box_ninguno_progress_entregas_total">
-                    <h6>No se encontraron embarques programados</h6>
+                    <h6>No se encontraron entregqas programadas</h6>
                 </div>
             </div>
         </div>
