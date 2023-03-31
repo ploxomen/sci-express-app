@@ -46,6 +46,8 @@
         @php
             $nombreImagen = public_path("asset/img/logo_sci_express.png");
             $imagenBase64 = "data:image/png;base64," . base64_encode(file_get_contents($nombreImagen));
+            $nombreImagenAlmar = public_path("asset/img/logo almar.png");
+            $imagenBase64Almar = "data:image/png;base64," . base64_encode(file_get_contents($nombreImagenAlmar));
         @endphp
         <table class="tabla">
             <tr>
@@ -53,7 +55,7 @@
                     <img src="{{$imagenBase64}}" alt="" width="150px">
                 </td>
                 <td class="text-right">
-                    <img src="{{$imagenBase64}}" alt="" width="150px">
+                    <img src="{{$imagenBase64Almar}}" alt="" width="150px">
                 </td>
             </tr>
         </table>
