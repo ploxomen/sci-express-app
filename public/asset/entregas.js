@@ -13,8 +13,8 @@ function loadPage(){
             headers: general.jsonToken,
             data: function(d){
                 d.tipo = 'consulta';
-                d.fecha_confirmacion = $('#fecha_confirmacion').val();
-                d.fecha_reparto = $('#fecha_reparto').val();
+                d.fechaIncioReparto = $('#fechaIncioReparto').val();
+                d.fechaFinReparto = $('#fechaFinReparto').val();
                 d.estado_guia = $('#estado_guia').val();
                 if(cbCluster){
                     d.nombre_cluster = $('#nombre_cluster').val();

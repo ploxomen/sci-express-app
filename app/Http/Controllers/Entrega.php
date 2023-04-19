@@ -71,15 +71,15 @@ class Entrega extends Controller
       if($request->ajax()){
          switch ($request->tipo) {
             case 'consulta':
-               $fecha_confirmacion = $request->fecha_confirmacion == null ? "" : $request->fecha_confirmacion;
-               $fecha_reparto = $request->fecha_reparto == null ? "" : $request->fecha_reparto;
+               $fechaInicoReparto = $request->fechaIncioReparto;
+               $fechaFinReparto = $request->fechaFinReparto;
                $cluster = $request->has('nombre_cluster') ? $request->nombre_cluster : 0;
                if(!$request->has('nombre_cluster')){
                   $cluster = (ModeloCluster::getCodigoCluster(Auth::id()))->id;
                }
                $ciudad_final = $request->has('ciudad_final') ? $request->ciudad_final : "";
                $tipo_ciudad = $request->has('tipo_ciudad') ? $request->tipo_ciudad : "";
-               $query = ModeloEmbarque::obtenerGuiasRepartoConfirmado($fecha_confirmacion, $fecha_reparto, $request->estado_guia, $cluster,$ciudad_final,$tipo_ciudad);
+               $query = ModeloEmbarque::obtenerGuiasRepartoConfirmado($fechaInicoReparto, $fechaFinReparto, $request->estado_guia, $cluster,$ciudad_final,$tipo_ciudad);
                return datatables()->of($query)->toJson();               
             break;
             case 'kpi':

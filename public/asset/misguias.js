@@ -539,7 +539,7 @@ function loadPage() {
                                         tempClust += `<option value="${c.id_cluster}" ${row.id_cluster == c.id_cluster ? 'selected' : ''}>${c.nombres_completos}</option>`;
                                     });
                                 }
-                                return `<select data-guia="${row.id}" ${row.situ >= 5 ? 'disabled' : ''} class="form-control form-control-sm cb-clustes">${tempClust}</select>`;
+                                return `<select data-guia="${row.id}" class="form-control form-control-sm cb-clustes">${tempClust}</select>`;
                             }
                         },
                         {
@@ -771,7 +771,7 @@ function loadPage() {
                                     tempClust += `<option value="${c.id_cluster}" ${row.id_cluster == c.id_cluster ? 'selected' : ''}>${c.nombres_completos}</option>`;
                                 });
                             }
-                            return `<select data-guia="${row.id}" ${row.situ >= 5 ? 'disabled' : ''} class="form-control form-control-sm cb-clustes">${tempClust}</select>`;
+                            return `<select data-guia="${row.id}" class="form-control form-control-sm cb-clustes">${tempClust}</select>`;
                         }
                     },
                     {
@@ -946,6 +946,11 @@ function loadPage() {
     $('#id_editar_estado').on('change', function (e) {
         general.changeTipoGuia(this.value);
     });
+    for (const reporte of document.querySelectorAll(".reporte-general")) {
+        reporte.addEventListener("click", function (e) {
+            window.open(window.origin + "/intranet/comprobante/guias/reporte/" + this.dataset.tipo + "/" + $('#fecha_inicio').val() + "/" + $('#id_fecha_fin').val() + "/" + $("#estado_guias").val(), "_blank");
+        });
+    }
 }
 
 function calcVolumen(event) {

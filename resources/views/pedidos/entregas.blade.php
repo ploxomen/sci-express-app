@@ -76,12 +76,12 @@
                 <h4 class="text-primary"><i class="fas fa-caret-right"></i> Filtros Tabla</h4>
             </div>
             <div class="form-group col-12 col-md-6 col-lg-3">
-                <label for="fecha_confirmacion">Fecha de Confirmación</label>
-                <input id="fecha_confirmacion" type="date" class="form-control change-entrega-fecha">
+                <label for="fechaIncioReparto">Fecha Inicio Reparto</label>
+                <input id="fechaIncioReparto" type="date" class="form-control change-entrega-fecha">
             </div>
             <div class="form-group col-12 col-md-6 col-lg-3">
-                <label for="fecha_reparto">Fecha de Reparto</label>
-                <input id="fecha_reparto" type="date" class="form-control change-entrega-fecha">
+                <label for="fechaFinReparto">Fecha Fin Reparto</label>
+                <input id="fechaFinReparto" type="date" class="form-control change-entrega-fecha">
             </div>
             <div class="form-group col-12 col-md-6 col-lg-3">
                 <label for="estado_guia">Situación Guía</label>

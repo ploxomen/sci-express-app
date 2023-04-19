@@ -63,7 +63,12 @@ function loadPage(){
     }
     obtenerEmbarquesPorLlegar(0,0,'embarques',llenarTablaEmbarque);
     if(cbCluster){
-        $('#cb-clusters').on('select2:select',function(e){
+        $('#cb-clusters').select2({
+            theme: 'bootstrap',
+            templateResult: general.tempSeleCli,
+            width: '100%',
+            placeholder: 'Seleccione un cliente'
+        }).on('select2:select',function(e){
             tablaMani.innerHTML = `<tr><td colspan="9" class="text-center">Seleccione un embarque</td></tr>`;
             obtenerEmbarquesPorLlegar(0,0,'embarques',llenarTablaEmbarque);
         });

@@ -67,16 +67,16 @@
 @section('body')
 <section class="p-2 bg-white">
     <h3 class="text-primary"><i class="fas fa-caret-right"></i> Mis guias</h3>
-    <form class="row" id="frm-aplicar-filtros">
-        <div class="form-group col-6 col-lg-3 col-xl-2">
+    <form class="form-row" id="frm-aplicar-filtros">
+        <div class="form-group col-6 col-lg-4 col-xl-2">
             <label for="fecha_inicio">Fecha Inicio</label>
             <input type="date" class="form-control" id="fecha_inicio" value="{{$fechaFiltros['finFiltro']}}" required>
         </div>
-        <div class="form-group col-6 col-lg-3 col-xl-2">
+        <div class="form-group col-6 col-lg-4 col-xl-2">
             <label for="id_fecha_fin">Fecha Fin</label>
             <input type="date" class="form-control" id="id_fecha_fin" value="{{$fechaFiltros['inicioFiltro']}}" required>
         </div>
-        <div class="form-group col-12 col-md-6 col-lg-3 col-xl-2">
+        <div class="form-group col-12 col-md-6 col-lg-4">
             <label for="estado_guias">Status</label>
             <select class="form-control cb-filtros" id="estado_guias">
                 <option value="0" selected>TODOS</option>
@@ -85,7 +85,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="form-group col-12 col-md-6 col-lg-3 col-xl-2">
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-2">
             <label for="id_tipo">Tipo</label>
             <select class="form-control cb-filtros" id="id_tipo">
                 <option value="0" selected>TODOS</option>
@@ -94,9 +94,18 @@
                 <option value="3">INACTIVA</option>
             </select>
         </div>
-        <div class="form-group col-12 col-md-6 col-xl-2">
-            <button type="submit" class="btn btn-sm btn-primary" title="Aplicar los filtros"><i class="fas fa-search"></i></button>
-            <button type="button" class="btn btn-sm btn-secondary" title="Asignación masiva" id="view-lista-guias"><i class="fas fa-globe-asia"></i></button>
+        <div class="form-group col-12 col-md-6 col-lg-4 col-xl-2">
+            <button type="submit" class="btn btn-sm btn-light" title="Aplicar los filtros"><i class="fas fa-search"></i></button>
+            <button type="button" class="btn btn-sm btn-light" title="Asignación masiva" id="view-lista-guias"><i class="fas fa-globe-asia"></i></button>
+            <div class="btn-group">
+                <button class="btn btn-sm btn-outline-info dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                    <i class="far fa-folder"></i> Reportes
+                </button>
+                <div class="dropdown-menu">
+                <a class="dropdown-item reporte-general" data-tipo="excel" href="#"><i class="far fa-file-excel text-success"></i> Excel</a>
+                <a class="dropdown-item reporte-general" data-tipo="pdf" href="#"><i class="far fa-file-pdf text-danger"></i> PDF</a>
+                </div>
+            </div>
         </div>
         <div class="form-group col-12">
             <span class="text-info">Total N° Guías/OS sin asignar: <span id="total-por-procesar-guias">{{$nro_por_asignar[0]->total}}</span></span>

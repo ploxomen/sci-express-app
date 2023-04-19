@@ -532,9 +532,9 @@ class ModeloEmbarque extends Model
     {
         return DB::select('CALL sp_reportes_entregas(?,?,?,?)', [$fechaInico, $fechaFin, $cliente,$cluster]);
     }
-    public static function obtenerGuiasRepartoConfirmado($fecha_confirmado,$fecha_reparto,$esto_guia,$cluster, $ciudad_final, $tipo_ciudad)
+    public static function obtenerGuiasRepartoConfirmado($fechaInicioReparto,$fechaFinReparto,$esto_guia,$cluster, $ciudad_final, $tipo_ciudad)
     {
-        return DB::select('CALL sp_obtener_guias_reparto_entrega(?,?,?,?,?,?,?)',[$fecha_confirmado, $fecha_reparto, $esto_guia, $cluster,'consulta',$ciudad_final,$tipo_ciudad]);
+        return DB::select('CALL sp_obtener_guias_reparto_entrega(?,?,?,?,?,?,?)',[$fechaInicioReparto,$fechaFinReparto, $esto_guia, $cluster,'consulta',$ciudad_final,$tipo_ciudad]);
     }
     public static function obtenerDetalleGuiaEditarEmbarque($id_guia,$id_cluster)
     {

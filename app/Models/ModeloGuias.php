@@ -594,7 +594,7 @@ class ModeloGuias extends Model
     public static function retornosCargosProgramados($idUsuario)
     {
         $programaciones = DB::table("programacion_recojo_retornos AS pr")
-        ->selectRaw("LPAD(pr.id,5,'0') AS nroProgramado,pr.id,GROUP_CONCAT(fn_obtener_nombres(prd.idConductor)) AS conductores,GROUP_CONCAT(fn_obtener_nombres(prd.idDealer)) AS dealers,GROUP_CONCAT(ve.placa) AS vehiculos,DATE_FORMAT(pr.fechaProgramada,'%d/%m/%Y') AS fechaProgramada")
+        ->selectRaw("LPAD(pr.id,5,'0') AS nroProgramado,pr.id,GROUP_CONCAT(DISTINCT fn_obtener_nombres(prd.idConductor)) AS conductores,GROUP_CONCAT(DISTINCT fn_obtener_nombres(prd.idDealer)) AS dealers,GROUP_CONCAT(ve.placa) AS vehiculos,DATE_FORMAT(pr.fechaProgramada,'%d/%m/%Y') AS fechaProgramada")
         ->join("programacion_detaller_recojo_retornos AS prd","pr.id","=","prd.idProgramacionRecojo")
         ->join("vehiculos AS ve","ve.id","=","prd.idVehiculo")
         ->where(['prd.estado' => 0])->whereIn("pr.estado",[1,2])->where(function($query) use($idUsuario) {
@@ -724,6 +724,8 @@ class ModeloGuias extends Model
         $resultado = DB::select('CALL sp_obtener_guias_todos(?,?,?,?)',[$estado,$tipo,$fechaInicio,$fechaFin]);
         $estados = InformacionAdicional::situacionEstado();
         $usuarios = User::obtenerUsuarioRol(3);
+        $url = storage_path('app/ubigeo/distritos.json');
+        $distritos = json_decode(file_get_contents($url));
         $clusters = DB::table('cluster AS c')->select('c.id','u.name','u.last_name')->leftJoin('usuarios AS u','c.id_usuario','=','u.id')->where('u.status','!=','0')->get();
         foreach ($resultado as $guia) {
             $arrayConsulta = [];
@@ -745,15 +747,41 @@ class ModeloGuias extends Model
             ->where($arrayConsulta)->groupBy('id_cluster')->get();
             $guia->listClusters = self::filtrarClusters($clusters, $filtroClusters);
             if($guia->tipo_ciudad_base_cluster == 'distrito'){
-                $guia->ciudad_base_cluster = (new Ubigeo)->getNameDistrito($guia->ciudad_base_cluster);
+                $guia->ciudad_base_cluster = self::buscarDistritoNombre($distritos,$guia->ciudad_base_cluster);
             }
             if($guia->tipo_ciudad_final == 'distrito'){
-                $guia->ciudad_final = (new Ubigeo)->getNameDistrito($guia->ciudad_final);
+                $guia->ciudad_final = self::buscarDistritoNombre($distritos, $guia->ciudad_final);
             }
             $guia->listSoli = $estados;
             $guia->listUsu = $usuarios;
         }
         return $resultado;
+    }
+    public static function reporteGuias($estado, $fechaInicio, $fechaFin)
+    {
+        $resultado = DB::select('CALL sp_reportes_guias(?,?,?)', [$estado, $fechaInicio, $fechaFin]);
+        $url = storage_path('app/ubigeo/distritos.json');
+        $distritos = json_decode(file_get_contents($url));
+        foreach ($resultado as $guia) {
+            if ($guia->tipo_ciudad_base_cluster == 'distrito') {
+                $guia->ciudad_base_cluster = self::buscarDistritoNombre($distritos, $guia->ciudad_base_cluster);
+            }
+            if ($guia->tipo_ciudad_final == 'distrito') {
+                $guia->ciudad_final = self::buscarDistritoNombre($distritos, $guia->ciudad_final);
+            }
+        }
+        return $resultado;
+    }
+    public static function buscarDistritoNombre($distritos,$nombreUbigeo)
+    {
+        foreach ($distritos as $k => $distrito) {
+            foreach ($distrito as $data) {
+                if ($data->id_ubigeo == $nombreUbigeo) {
+                    return $data->nombre_ubigeo;
+                }
+            }
+        }
+        return '';
     }
     public static function actualizarEntrega($cluster,$guia,$datos)
     {

@@ -202,6 +202,7 @@ Route::middleware('auth')->prefix('intranet')->group(function (){
             Route::post('consulta-distante', [Gias::class, 'obtenerComplejoDistante']);
             Route::post('detalle-cli-de-cli', [Gias::class, 'detalleCliDeCli']);
             Route::post('agregar-guia', [Gias::class, 'addGuia']);
+            Route::get('reporte/{tipo}/{fechaInicio}/{fechaFin}/{estado}', [Gias::class, 'reporteGuias']);
         });
     });
     Route::prefix('facturacion')->group(function () {

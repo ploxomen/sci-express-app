@@ -27,10 +27,10 @@
             <div class="form-group col-6 col-sm-3 col-lg-5 col-xl-5">
                 <div class="ml-lg-auto" style="width: 100%; max-width: 350px;">
                     <label for="cb-clusters">Clusters</label>
-                    <select id="cb-clusters" class="simple-select2">
-                        <option value="0">Todos</option>
+                    <select id="cb-clusters" class="form-control">
+                        <option value="0"  data-nro="Todos">Todos</option>
                         @foreach ($clusters as $clu)
-                            <option value="{{$clu->id}}">{{$clu->name}} {{$clu->last_name}}</option>
+                            <option value="{{$clu->id_cluster}}" data-nro="{{$clu->nombreProvincia}}">{{mb_strtoupper($clu->name,'UTF-8')}} {{mb_strtoupper($clu->last_name,'UTF-8')}}</option>
                         @endforeach
                     </select>
                 </div>

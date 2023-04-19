@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\Reportes;
 use App\Models\Clientes;
 use App\Models\InformacionAdicional;
 use App\Models\ModeloCluster;
@@ -10,12 +11,14 @@ use App\Models\Tipos\Documentos;
 use App\Models\TrayectoEnvio;
 use App\Models\User;
 use App\Models\Vehiculos;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Gias extends Controller
 {
@@ -333,6 +336,22 @@ class Gias extends Controller
         if($request->ajax()){
             $guias = ModeloGuias::mostrarTodasGuias($request->estado,$request->tipo,$request->fechaInicio,$request->fechaFin);
             return datatables()->of($guias)->toJson();
+        }
+    }
+    public function reporteGuias($tipo,$fechaInicio,$fechaFin,$estado)
+    {
+        ini_set('memory_limit', '1024M');
+        $estado = $estado == "0" ? 0 : intval($estado);
+        switch ($tipo) {
+            case 'pdf':
+                $datos = ModeloGuias::reporteGuias($estado, $fechaInicio, $fechaFin);
+                $reporte = Pdf::loadView("comprobante.reportes.guiasPdf", ["resultados" => $datos, 'fechaIni' => date('d/m/Y', strtotime($fechaInicio)), 'fechaFi' => date('d/m/Y', strtotime($fechaFin))])->setPaper('a4', 'landscape');
+                return $reporte->download("guiasOS_" . $fechaInicio . "_" . $fechaFin . ".pdf");
+                break;
+            case 'excel':
+                $datos = ModeloGuias::reporteGuias($estado, $fechaInicio, $fechaFin);
+                return Excel::download(new Reportes('comprobante.reportes.guiasExcel', $datos, "LISTA DE GUÍAS/OS DESDE" . date('d/m/Y', strtotime($fechaInicio)) . " HASTA " . date('d/m/Y', strtotime($fechaFin))), "entregas_" . $fechaInicio . "_" . $fechaFin . ".xls");
+                break;
         }
     }
     public function cambiarCluster(Request $request)
