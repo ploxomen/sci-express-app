@@ -100,6 +100,7 @@
                 <th>Base Cluster</th>
                 <th>Ciudad Final</th>
                 <th>Complejo Distante</th>
+                <th>Tipo Envío</th>
                 <th>Descripcion</th>
                 <th>Peso Kg.</th>
                 <th>Peso Volumen</th>

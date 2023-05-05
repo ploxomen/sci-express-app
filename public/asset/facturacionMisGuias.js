@@ -47,6 +47,12 @@ function loadPage(){
                 data: 'esAlejado'
             },
             {
+                data: 'tipoEnvio',
+                render: function (data) {
+                    return defaultDescripcion(data);
+                }
+            },
+            {
                 data: 'descripcionGuia',
                 render: function(data){
                     return defaultDescripcion(data);
@@ -217,6 +223,9 @@ function loadPage(){
                     </td>
                     <td>
                         ${g.esAlejado}
+                    </td>
+                    <td>
+                        ${defaultDescripcion(g.tipoEnvio)}
                     </td>
                     <td>
                         ${defaultDescripcion(g.descripcionGuia)}

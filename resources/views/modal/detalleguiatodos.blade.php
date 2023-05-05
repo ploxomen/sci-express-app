@@ -68,14 +68,6 @@
                 <b class="text-secondary">Día Transito: </b>
                 <span id="id_dias_tran"></span>
             </div>
-            <div class="form-group col-md-12 col-lg-4">
-                <b class="text-secondary">Fecha Reparto: </b>
-                <span id="id_fecha_reparto"></span>
-            </div>
-             <div class="form-group col-12">
-                <b class="text-secondary">Fecha Entregado: </b>
-                <span id="id_fecha_hr_entregado"></span>
-            </div>
             <div class="col-12">
                 <h5 class="text-info">REMITENTE</h5>
             </div>
@@ -139,7 +131,7 @@
                 <span id="id_dest_dire"></span>
             </div>
            <div class="col-12">
-                <h5 class="text-info">ENVIO CLUSTER</h5>
+                <h5 class="text-info">DURANTE ARRIBO - LLEGADA</h5>
             </div>
             <div class="form-group col-12 col-md-6">
                 <b class="text-secondary">Situación:</b>
@@ -156,11 +148,15 @@
             <div class="col-12">
                 <h5 class="text-info">DURANTE REPARTO</h5>
             </div>
-            <div class="form-group col-12 col-md-6">
+            <div class="form-group col-12 col-md-6 col-lg-4">
                 <b class="text-secondary">Situación:</b>
                 <span id="id_situacion_durante_envio"></span>
             </div>
-            <div class="form-group col-12 col-md-6">
+            <div class="form-group col-12 col-md-6 col-lg-4">
+                <b class="text-secondary">Fecha Reparto: </b>
+                <span id="id_fecha_reparto"></span>
+            </div>
+            <div class="form-group col-12 col-md-6 col-lg-4">
                 <b class="text-secondary">Incidencia:</b>
                 <span id="id_incidencia_durante_envio"></span>
             </div>
@@ -174,6 +170,10 @@
             <div class="form-group col-12 col-md-6 col-lg-4">
                 <b class="text-secondary">Status:</b>
                 <span id="id_estado_entregado"></span>
+            </div>
+            <div class="form-group col-12 col-md-6 col-lg-4">
+                <b class="text-secondary">Fecha Entregado: </b>
+                <span id="id_fecha_hr_entregado"></span>
             </div>
             <div class="form-group col-12 col-md-6 col-lg-4">
                 <b class="text-secondary">N° visitas:</b>

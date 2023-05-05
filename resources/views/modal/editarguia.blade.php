@@ -70,7 +70,6 @@
                 <label for="id_editar_orde_comp">Orden de compra</label>
                 <input type="text" class="form-control-sm form-control" name="orde_comp" id="id_editar_orde_comp">
             </div>
-            
             <div class="col-12">
                 <h5 class="text-info">TRASLADO</h5>
             </div>
@@ -238,7 +237,7 @@
                 <input type="number" min="0" step="0.01" class="form-control form-control-sm" name="fact_cluster_mov1" id="id_editar_fact_cluster_mov1">
             </div>
             <div class="col-12">
-                <h5 class="text-info">ARRIBO CLUSTER</h5>
+                <h5 class="text-info">DURANTE ARRIBO - LLEGADA</h5>
             </div>
             <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
                 <label for="id_editar_situacion_envio">Situación</label>

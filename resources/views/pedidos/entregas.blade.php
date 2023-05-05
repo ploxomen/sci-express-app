@@ -89,6 +89,7 @@
                     <option value="0" selected>TODOS</option>
                     <option value="7">REPARTO</option>
                     <option value="8">ENTREG Y CONF</option>
+                    <option value="14">NO ENTREGADO AL DESTINATARIO</option>
                 </select>
             </div>
             <div class="form-group col-12 col-md-6 col-lg-3">

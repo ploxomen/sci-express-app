@@ -594,7 +594,7 @@ class ModeloGuias extends Model
     public static function retornosCargosProgramados($idUsuario)
     {
         $programaciones = DB::table("programacion_recojo_retornos AS pr")
-        ->selectRaw("LPAD(pr.id,5,'0') AS nroProgramado,pr.id,GROUP_CONCAT(DISTINCT fn_obtener_nombres(prd.idConductor)) AS conductores,GROUP_CONCAT(DISTINCT fn_obtener_nombres(prd.idDealer)) AS dealers,GROUP_CONCAT(ve.placa) AS vehiculos,DATE_FORMAT(pr.fechaProgramada,'%d/%m/%Y') AS fechaProgramada")
+        ->selectRaw("LPAD(pr.id,5,'0') AS nroProgramado,pr.id,GROUP_CONCAT(DISTINCT fn_obtener_nombres(prd.idConductor)) AS conductores,GROUP_CONCAT(DISTINCT fn_obtener_nombres(prd.idDealer)) AS dealers,GROUP_CONCAT(DISTINCT ve.placa) AS vehiculos,DATE_FORMAT(pr.fechaProgramada,'%d/%m/%Y') AS fechaProgramada")
         ->join("programacion_detaller_recojo_retornos AS prd","pr.id","=","prd.idProgramacionRecojo")
         ->join("vehiculos AS ve","ve.id","=","prd.idVehiculo")
         ->where(['prd.estado' => 0])->whereIn("pr.estado",[1,2])->where(function($query) use($idUsuario) {
