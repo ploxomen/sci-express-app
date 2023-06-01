@@ -19,6 +19,7 @@ class ModelFacturacion extends Model
             if (is_null($guia->ciudadFinal)) {
                 $guia->ciudadFinal = (new Ubigeo)->getNameDistrito($guia->dest_dist);
             }
+            $guia->facturacionSunat = DB::table("facturacion_cliente_final AS fcf")->select("fcf.nro_factura")->join("facturacion_cliente_final_detalle AS fcfd","fcf.id","=","fcfd.id_facturacion_final")->where('fcfd.id_cliente',$guia->id)->first();
             $guia->descripcionGuia = json_decode($guia->descripcionGuia,true);
             $guia->tipoEnvio = json_decode($guia->tipoEnvio, true);
         }
@@ -35,14 +36,23 @@ class ModelFacturacion extends Model
         $idsCluster = self::obtenerClustersIguales($cluster);
         return DB::table("guias AS g")->whereIn("g.id_cluster",$idsCluster)->where(['g.activo' => 1,'g.estado' => 1])->where('g.situ','>=',11)->where('g.situ','!=',14)->where("g.estado_fact_cluster",0)->count();
     }
-    public static function facturarGuiasClusters($guias)
+    public static function facturarGuiasClusters($guias,$datosClusterFinal)
     {
-        foreach ($guias as $guia) {
-            $query = DB::table("guias")->where(['id' => $guia['idGuia'],'activo' => 1,'estado' => 1, 'estado_fact_cluster' => 0])->where('situ','>=',11);
-            $query->increment('fact_cluster_total',floatval($guia['mov2']));
-            $query->update(["fact_cluster_mov2" => $guia['mov2'],'estado_fact_cluster' => 1]);            
+        DB::beginTransaction();
+        try {
+            $facturacionCluster = DB::table("facturacion_cluster_final")->insertGetId($datosClusterFinal);
+            foreach ($guias as $guia) {
+                $query = DB::table("guias")->where(['id' => $guia['idGuia'], 'activo' => 1, 'estado' => 1, 'estado_fact_cluster' => 0])->where('situ', '>=', 11);
+                $query->increment('fact_cluster_total', floatval($guia['mov2']));
+                $query->update(["fact_cluster_mov2" => $guia['mov2'], 'estado_fact_cluster' => 1]);
+                DB::table("facturacion_cluster_final_detalle")->insert(['id_facturacion_final_cluster' => $facturacionCluster,'id_guia' => $guia['idGuia']]);
+            }
+            DB::commit();
+            return ['success' => 'guias facturadas correctamente'];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return ['error' => $th->getMessage()];
         }
-        return ['success' => 'guias facturadas correctamente'];
     }
     public static function obtenerGuiasFacturacionCluster($cluster,$traslado,$fechaInicio,$fechaFin,$estado)
     {
@@ -80,36 +90,41 @@ class ModelFacturacion extends Model
         }
         $detallesGuias = DB::table("detalle_guias")->where('id_guia',$idGuia)->get();
         $total = 0;
-        
-        foreach ($detallesGuias as $detalleGuia) {
-            $pesoDetalle = $detalleGuia->volumen > $detalleGuia->kg ? floatval($detalleGuia->volumen) : floatval($detalleGuia->kg);
-            if($pesoFact === 1){
-                $pesoDetalle = floatval($detalleGuia->kg);
+        $pesoDetalle = 0;
+        $tipoEnvio = null;
+        foreach ($detallesGuias as $k => $detalleGuia) {
+            if (!$k) {
+                $tipoEnvio = $detalleGuia->tipo_envio;
             }
-            $cabecera1 = DB::table("facturacion_cluster_cabecera AS fa")->select("fcc.*")
-            ->join("facturacion_cluster_valor AS fc","fa.id","=","fc.id_cabecera")
-            ->join("facturacion_cluster_ciudades_cabecera AS fcc","fc.id_cabecera_ciudades","=","fcc.id")
-            ->whereIn('fa.id_cluster',$idsCluster)->where('fa.id_via_envio',$viaFacturacion)
-            ->whereRaw('? > fa.kg_minimo',[$pesoDetalle])->whereRaw("? <= fa.kg_maximo",[$pesoDetalle])->where(['fc.id_tipo_envio' => $detalleGuia->tipo_envio])->first();
-            if(empty($cabecera1)){
-                continue;
+            if ($pesoFact === 1) {
+                $pesoDetalle += floatval($detalleGuia->kg);
+            }else{
+                $pesoDetalle += $detalleGuia->volumen > $detalleGuia->kg ? floatval($detalleGuia->volumen) : floatval($detalleGuia->kg);
             }
-            $fact = DB::table("facturacion_cluster_ciudades_valor")->where(['id_ciudad' => $ciudadesCluster->id,'id_cabecera' => $cabecera1->id])->first();
-            if(empty($fact)){
-                continue;
-            }
-            switch ($cabecera1->tipo_calculo) {
-                case 'adicional':
-                    $fila2 = DB::table("facturacion_cluster_ciudades_cabecera AS fc")->select("fcc.valor","fc.peso_maximo")
-                    ->join("facturacion_cluster_ciudades_valor AS fcc","fc.id","=","fcc.id_cabecera")->where(['fc.tipo_calculo' => 'base','fc.id_via_envio' => $viaFacturacion,'fcc.id_ciudad' => $ciudadesCluster->id])->whereIn("fc.id_cluster",$idsCluster)->where('fc.numero','<',$cabecera1->numero)->orderBy("fc.numero","desc")->first();
-                    if(!empty($fila2)){
-                        $total = $total + ($fila2->valor + (($pesoDetalle - $fila2->peso_maximo) * $fact->valor));
-                    }
-                break;
-                default:
-                    $total = $total + $fact->valor;
-                break;
-            }
+        }
+        $cabecera1 = DB::table("facturacion_cluster_cabecera AS fa")->select("fcc.*")
+        ->join("facturacion_cluster_valor AS fc","fa.id","=","fc.id_cabecera")
+        ->join("facturacion_cluster_ciudades_cabecera AS fcc","fc.id_cabecera_ciudades","=","fcc.id")
+        ->whereIn('fa.id_cluster',$idsCluster)->where('fa.id_via_envio',$viaFacturacion)
+        ->whereRaw('? > fa.kg_minimo',[$pesoDetalle])->whereRaw("? <= fa.kg_maximo",[$pesoDetalle])->where(['fc.id_tipo_envio' => $tipoEnvio])->first();
+        if(empty($cabecera1)){
+            return 0;
+        }
+        $fact = DB::table("facturacion_cluster_ciudades_valor")->where(['id_ciudad' => $ciudadesCluster->id,'id_cabecera' => $cabecera1->id])->first();
+        if(empty($fact)){
+            return 0;
+        }
+        switch ($cabecera1->tipo_calculo) {
+            case 'adicional':
+                $fila2 = DB::table("facturacion_cluster_ciudades_cabecera AS fc")->select("fcc.valor","fc.peso_maximo")
+                ->join("facturacion_cluster_ciudades_valor AS fcc","fc.id","=","fcc.id_cabecera")->where(['fc.tipo_calculo' => 'base','fc.id_via_envio' => $viaFacturacion,'fcc.id_ciudad' => $ciudadesCluster->id])->whereIn("fc.id_cluster",$idsCluster)->where('fc.numero','<',$cabecera1->numero)->orderBy("fc.numero","desc")->first();
+                if(!empty($fila2)){
+                    $total = $total + ($fila2->valor + (($pesoDetalle - $fila2->peso_maximo) * $fact->valor));
+                }
+            break;
+            default:
+                $total = $total + $fact->valor;
+            break;
         }
         return $total;
     }
@@ -194,7 +209,7 @@ class ModelFacturacion extends Model
         $guias = DB::table("guias")->where(['activo' => 1,'estado' => 1, 'situ' => 11, 'id_cliente_facturacion' => $cliente])->get();
         self::calcularGuias($guias);
     }
-    public static function facturarGuiasClientes($guias,$cliente,$subtotal,$igv,$total, $idUsuario)
+    public static function facturarGuiasClientes($guias,$nroFactura,$fechaEmision,$cliente,$subtotal,$igv,$total, $idUsuario)
     {
         DB::beginTransaction();
         try {
@@ -209,6 +224,8 @@ class ModelFacturacion extends Model
             }
             if(count($guiasAdd) > 0){
                 $idFactFianl = DB::table("facturacion_cliente_final")->insertGetId([
+                    'nro_factura' => $nroFactura,
+                    'fecha_emision' => $fechaEmision,
                     'sub_total' => $subtotal,
                     'igv' => $igv,
                     'total' => $total,
@@ -226,7 +243,10 @@ class ModelFacturacion extends Model
             return ['error' => $th->getMessage()];
         }
     }
-    
+    public function reporteFacturacionCluster($idCluster,$fechaInicio,$fechaFin)
+    {
+        # code...
+    }
     public static function calcularGuiasClu($guias,$idsCluster,$pesoFact)
     {
         foreach ($guias as $guia) {

@@ -3,14 +3,14 @@
         <tr></tr>
         <tr>
             <th></th>
-            <th></th>
-            <th colspan="9" style="text-align: center;">FACTURACION DE GUÍAS</th>
+            <th colspan="12" style="text-align: center;">FACTURACION DE GUÍAS</th>
         </tr>
         <tr>
             <th></th>
             <th>N°</th>
             <th>Fecha de <br>Servicio</th>
             <th>G_SCI</th>
+            <th>N° Facturación SUNAT</th>
             <th>Consig_Prov</th>
             <th>Tipo_Doc_Cliente</th>
             <th>No_Doc_Cliente</th>
@@ -29,6 +29,7 @@
                 <td>{{$kg + 1}}</td>
                 <td>{{$guia->fechaEmision}}</td>
                 <td>{{$guia->nroGuia}}</td>
+                <td>{{empty($guia->facturacionSunat) || (isset($guia->facturacionSunat->nro_factura) && empty($guia->facturacionSunat->nro_factura))  ? 'No establecido' : $guia->facturacionSunat->nro_factura}}</td>
                 <td>{{$guia->destinatario}}</td>
                 <td>{{$guia->comp_clie}}</td>
                 <td>{{$guia->nro_comp_cli}}</td>
@@ -41,8 +42,9 @@
                         if(!empty($guia->descripcionGuia) && count($guia->descripcionGuia) > 0){
                             $template = "";
                             foreach ($guia->descripcionGuia as $kd => $d) {
-                                if($d != 'null' && $d != null){
-                                    $template .= $d ;
+                                //para el servidor la condicional es esta $d[0] != 'null' && $d[0] != null
+                                if($d != null){
+                                    $template .= $d[0];
                                     if(($kd + 1) < count($guia->descripcionGuia)){
                                         $template .= "<br>";
                                     }

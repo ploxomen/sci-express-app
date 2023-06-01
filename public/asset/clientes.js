@@ -83,7 +83,6 @@ function loadPage(){
         }
     });
     $('#id_doc_ident').on("change.select2",function(e){
-        console.log($(this).val());
         $('.require-empresa').prop("required",$(this).val() == "4" ? true : false);
         
     });

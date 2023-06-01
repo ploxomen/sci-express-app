@@ -178,8 +178,10 @@ class Facturacion extends Controller
                 return response()->json(['success' => 'montos calculados correctamente']);
             break;
             case 'facturar':
-                ModelFacturacion::facturarGuiasClusters(json_decode($request->guias,true));
-                return response()->json(['success' => 'guias facturadas correctamente']);
+                $datos = $request->only("subtotal", "total", "igv", "mov_1", "mov_2","nro_factura","fecha_emision");
+                $datos['usuario_creado'] = Auth::id();
+                $response = ModelFacturacion::facturarGuiasClusters(json_decode($request->guias,true), $datos);
+                return response()->json($response);
             break;
             case 'detalle':
                 $guias = ModelFacturacion::verDetalleGuia($request->guia);
@@ -205,7 +207,7 @@ class Facturacion extends Controller
                     return response()->json(['success' => 'montos calculados correctamente']);
                 break;
                 case 'facturar':
-                    $data = ModelFacturacion::facturarGuiasClientes(json_decode($request->guias,true),$request->cliente,$request->subtotal,$request->igv,$request->total,Auth::id());
+                    $data = ModelFacturacion::facturarGuiasClientes(json_decode($request->guias,true),$request->nroFactura,$request->fechaFactura,$request->cliente,$request->subtotal,$request->igv,$request->total,Auth::id());
                     return response()->json($data);
                 break;
             }

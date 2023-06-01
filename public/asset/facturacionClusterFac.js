@@ -116,14 +116,24 @@ function loadPage(){
                 mov2 : check.dataset.mov2
             });
         }
-        alertify.confirm("Mensaje", "Estas a punto de facturar " + guias.length + " guias. ¿Estás seguro de continuar?<br>" + `<div class="text-right"><div class="mb-1"><b>SUBTOTAL: </b>${general.moneyFormat(datosCostos.subtotal)}</div><div class="mb-1"><b>I.G.V: </b>${general.moneyFormat(datosCostos.igv)}</div><div class="mb-1"><b>TOTAL: </b>${general.moneyFormat(datosCostos.total)}</div></div>`,async ()=>{
+        alertify.confirm("Mensaje", `Ingrese el número de liquidación y la fecha de emisión<br><form class="form-row my-2"><div class="col-12 col-md-6"><label for="nroFacutracionGuiaSunat">N° Liquidación</label><input type="text" class="form-control" id="nroFacutracionGuiaSunat"></div><div class="col-12 col-md-6"><label for="fechaFacutracionGuiaSunat">Fecha emisión</label><input type="date" class="form-control" id="fechaFacutracionGuiaSunat"></div></form><div class="my-2">Estas a punto de facturar ${guias.length} guía(s). ¿Estás seguro de continuar y concluir con la facturación?</div><div class="text-right"><div class="mb-1"><b>SUBTOTAL: </b>${general.moneyFormat(datosCostos.subtotal)}</div><div class="mb-1"><b>I.G.V: </b>${general.moneyFormat(datosCostos.igv)}</div><div class="mb-1"><b>TOTAL: </b>${general.moneyFormat(datosCostos.total)}</div></div>`,async ()=>{
             let datos = new FormData();
+            if($('#nroFacutracionGuiaSunat').val() == ""){
+                return alertify.error("por favor ingrese el número de liquidación");
+            }
+            if($('#fechaFacutracionGuiaSunat').val() == "" || !$('#fechaFacutracionGuiaSunat').val()){
+                return alertify.error("por favor ingrese correctamente la fecha de emisión");
+            }
+            datos.append("nro_factura",$('#nroFacutracionGuiaSunat').val());
+            datos.append("fecha_emision",$('#fechaFacutracionGuiaSunat').val());
             datos.append("tipo","facturar");
-            datos.append("cliente", $('#id_filtro_cliente').val());
+            datos.append("cliente", $('#id_filtro_cluster').val());
             datos.append("guias",JSON.stringify(guias));
             datos.append("subtotal", datosCostos.subtotal);
             datos.append("total", datosCostos.total);
             datos.append("igv", datosCostos.igv);
+            datos.append("mov_1", datosCostos.mov1);
+            datos.append("mov_2", datosCostos.mov2);
             try {
                 const response = await general.funcfetch("ver",datos);
                 if(response.error){
@@ -136,7 +146,7 @@ function loadPage(){
                 alertify.error("error al facturar las guias");
             }
 
-        },()=>{})
+        },()=>{}).set('closable', false)
     }
     function calcularValores(){
         datosCostos.facturacion = 0.00;
@@ -200,7 +210,7 @@ function loadPage(){
                 let gbTr = "";
                 if (g.tipoGuiaNom == "OS") {
                     gbTr = "table-warning";
-                }else if(g.tipoGuiaNom == "GUIA" && g.cantidad == 1){
+                }else if(g.tipoGuiaNom == "GUIA" && g.tot_cant == 1){
                     gbTr = "table-primary";
                 }
                 template += `<tr class="${gbTr}">

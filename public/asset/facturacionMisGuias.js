@@ -136,8 +136,16 @@ function loadPage(){
                 idGuia : check.dataset.guia
             });
         }
-        alertify.confirm("Mensaje", "Estas a punto de facturar " + guias.length + " guias. ¿Estás seguro de continuar?<br>" + `<div class="text-right"><div class="mb-1"><b>SUBTOTAL: </b>${general.moneyFormat(datosCostos.subtotal)}</div><div class="mb-1"><b>I.G.V: </b>${general.moneyFormat(datosCostos.igv)}</div><div class="mb-1"><b>TOTAL: </b>${general.moneyFormat(datosCostos.total)}</div></div>`,async ()=>{
+        alertify.confirm("Mensaje", `Ingrese el número de factura y la fecha de emisión<br><form class="form-row my-2"><div class="col-12 col-md-6"><label for="nroFacutracionGuiaSunat">N° Facturación</label><input type="text" class="form-control" id="nroFacutracionGuiaSunat"></div><div class="col-12 col-md-6"><label for="fechaFacutracionGuiaSunat">Fecha emisión</label><input type="date" class="form-control" id="fechaFacutracionGuiaSunat"></div></form><div class="my-2">Estas a punto de facturar ${guias.length} guía(s). ¿Estás seguro de continuar y concluir con la facturación?</div><div class="text-right"><div class="mb-1"><b>SUBTOTAL: </b>${general.moneyFormat(datosCostos.subtotal)}</div><div class="mb-1"><b>I.G.V: </b>${general.moneyFormat(datosCostos.igv)}</div><div class="mb-1"><b>TOTAL: </b>${general.moneyFormat(datosCostos.total)}</div></div>`,async (event)=>{
             let datos = new FormData();
+            if($('#nroFacutracionGuiaSunat').val() == ""){
+                return alertify.error("por favor ingrese el número de factura");
+            }
+            if($('#fechaFacutracionGuiaSunat').val() == "" || !$('#fechaFacutracionGuiaSunat').val()){
+                return alertify.error("por favor ingrese correctamente la fecha de emisión");
+            }
+            datos.append("nroFactura",$('#nroFacutracionGuiaSunat').val());
+            datos.append("fechaFactura",$('#fechaFacutracionGuiaSunat').val());
             datos.append("tipo","facturar");
             datos.append("cliente", $('#id_filtro_cliente').val());
             datos.append("guias",JSON.stringify(guias));
@@ -156,7 +164,7 @@ function loadPage(){
                 alertify.error("error al facturar las guias");
             }
 
-        },()=>{})
+        },()=>{}).set('closable', false)
     }
     function calcularValores(){
         datosCostos.subtotal = 0.00;
