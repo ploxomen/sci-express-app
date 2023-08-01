@@ -30,7 +30,13 @@ class Llegada extends Controller
         try {
             $id_embarque = $request->has('embarque') ? $request->embarque : 0;
             $id_guia = $request->has('guia') ? $request->guia : 0;
-            $id_usuario = $request->has('id_cluster') ? $request->id_cluster : Auth::id();
+            $id_usuario = $request->has('id_cluster') ? $request->id_cluster : ModeloCluster::where(['id_usuario' => Auth::id(),'activo' => 1])->first();
+            if(is_null($id_usuario)){
+                return response()->json(['error' => 'No se encontró el cluster']);
+            }
+            if(!$request->has('id_cluster')){
+                $id_usuario = $id_usuario->id;
+            }
             $trayecto = $request->has('trayecto') ? $request->trayecto : "";
             return response()->json(['resultados' => ModeloEmbarque::obtenerEmbarqueArribado($id_embarque,$id_guia, $id_usuario,$request->tipo, $trayecto)]);
         } catch (Exception $ex) {
