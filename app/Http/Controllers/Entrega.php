@@ -71,8 +71,8 @@ class Entrega extends Controller
       if($request->ajax()){
          switch ($request->tipo) {
             case 'consulta':
-               $fechaInicoReparto = $request->fechaIncioReparto;
-               $fechaFinReparto = $request->fechaFinReparto;
+               $fechaInicoReparto = empty($request->fechaIncioReparto) ? "" : $request->fechaIncioReparto;
+               $fechaFinReparto = empty($request->fechaFinReparto) ? "" : $request->fechaFinReparto;
                $cluster = $request->has('nombre_cluster') ? $request->nombre_cluster : 0;
                if(!$request->has('nombre_cluster')){
                   $cluster = (ModeloCluster::getCodigoCluster(Auth::id()))->id;
