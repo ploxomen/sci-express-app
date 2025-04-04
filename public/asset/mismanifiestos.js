@@ -49,7 +49,7 @@ function loadPage(){
                 data: 'id',
                 render: function (data, type, row) {
                 let template = "";
-                row.guias_asociadas.forEach((v,k) => {
+                row.guias_asociadas?.forEach((v,k) => {
                     template += `<small class="badge badge-pill badge-dark m-1 cursor-pointer view-guia" data-guia="${v.id}">${v.nro}</small>`;
                 });
                 return template;
