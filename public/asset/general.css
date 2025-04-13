@@ -93,7 +93,7 @@ table thead tr th{
     top: 0;
     left: 0;
     width: 300px;
-    transition: width .5s ease-in-out;
+    transition: all .5s ease-in-out;
     bottom: 0;
     z-index: 2;
     overflow-y: auto;
@@ -123,8 +123,6 @@ table thead tr th{
     vertical-align: middle !important;
 }
 .navegacion ul > li {
-    border-top-left-radius: 30px;
-    border-bottom-left-radius: 30px;
     position: relative;
     white-space: nowrap;
     overflow-x: hidden;
@@ -142,6 +140,7 @@ table thead tr th{
 }
 .menu-small{
     width: 50px;
+    transition: all .5s ease-in-out;
 }
 .menu-small + .panel,
 .menu-small ~ .cuerpo-panel{
@@ -160,7 +159,7 @@ table thead tr th{
 }
 .hover-menu:hover
 {
-    background: var(--color-secundario);
+    background: #ffffff;
 }
 .hover-menu:hover a {
     color: var(--color-principal);
@@ -179,10 +178,10 @@ table thead tr th{
     width: 100%;
     visibility: visible;
 }
-.menu-small .menu-desplegable:hover{
+.menu-small .menu-desplegable a:hover{
     background: var(--color-secundario);
 }
-.menu-small .menu-desplegable:hover a{
+.menu-small .menu-desplegable a:hover{
     color: var(--color-principal);
 }
 .content-mi-info{
@@ -220,11 +219,8 @@ table thead tr th{
 .menu-small .menu .sub-menu a{
     color: #246DE3;
 }
-.active-menu{
-    padding-bottom: 0; 
-}
-.active-menu{
-    padding-bottom: 10px;
+.active-panel > .fa-angle-down{
+    transition: all .2s ease-in-out;
 }
 .active-menu > .fa-angle-down{
     transform-origin: center;

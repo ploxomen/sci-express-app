@@ -2,9 +2,11 @@ function loadPage(){
     let $navegacion = document.getElementById('navegacion');
     let general = new General();
     $navegacion.addEventListener('click',function(e){
-        e.stopPropagation();
         let element = e.target;
         if(element.classList.contains('active-panel')){
+            for (const active of document.querySelectorAll(".active-panel")) {
+                if(active != element) active.classList.remove("active-menu")
+            }
             element.classList.toggle('active-menu');
         }
     })
