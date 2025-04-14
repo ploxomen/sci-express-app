@@ -21,24 +21,22 @@ class Embarque extends Controller
     public function viewListEmba(Request $request)
     {
         $hoy = date('Y-m-d');
-        $modulos = User::getModulos(Auth::id());
         $ciudadesBase = InformacionAdicional::obtenerCiudadBaseEmbarcar(Auth::id());
         $dealers = User::obtenerUsuarioRol(7);
         $conductores = User::obtenerUsuarioRol(6);
         $vehiculos = Vehiculos::obtenerVehiculos();
         $transportes = EmpresaTransporte::obtenerTransportes();
         $diasAtras = date('Y-m-d',strtotime(date('Y-m-d') . "- 2 days"));
-        return view('pedidos.listaembarque',compact('diasAtras','dealers', 'conductores', 'ciudadesBase', 'vehiculos', 'transportes','hoy','modulos'));
+        return view('pedidos.listaembarque',compact('diasAtras','dealers', 'conductores', 'ciudadesBase', 'vehiculos', 'transportes','hoy'));
     }
     public function viewEmbarquesTodo()
     {
-        $modulos = User::getModulos(Auth::id());
         $fechaFiltros = InformacionAdicional::obtenerDiasFiltros();
         $dealers = User::obtenerUsuarioRol(7);
         $conductores = User::obtenerUsuarioRol(6);
         $vehiculos = Vehiculos::obtenerVehiculos();
         $transportes = EmpresaTransporte::obtenerTransportes();
-        return view('embarque.misEmbarques',compact('modulos', 'transportes','fechaFiltros', 'dealers', 'conductores', 'vehiculos'));
+        return view('embarque.misEmbarques',compact( 'transportes','fechaFiltros', 'dealers', 'conductores', 'vehiculos'));
     }
     public function agregarManifiestoEmbarque(Request $request)
     {
@@ -136,8 +134,7 @@ class Embarque extends Controller
     }
     public function vistaEmpresa()
     {
-        $modulos = User::getModulos(Auth::id());
-        return view('empresatransporte', compact('modulos'));
+        return view('empresatransporte');
     }
     public function obtenerEmpresas(Request $request)
     {
@@ -246,9 +243,8 @@ class Embarque extends Controller
     public function transporteEmbarque(Request $request)
     {
         $embarques = ModeloEmbarque::embarcarTrabajador(0,Auth::id(),'embarque');
-        $modulos = User::getModulos(Auth::id());
         $hoy = strtotime(date('Y-m-d'));
-        return view('pedidos.embarquemanifiesto',compact('hoy','modulos','embarques'));
+        return view('pedidos.embarquemanifiesto',compact('hoy','embarques'));
     }
     public function actualizarEmbarque(Request $request)
     {
@@ -327,8 +323,7 @@ class Embarque extends Controller
     }
     public function viewVehiculos(Request $request)
     {
-        $modulos = User::getModulos(Auth::id());
-        return view('vehiculos',compact('modulos'));
+        return view('vehiculos');
     }
     public function obtenerVehiculosTransporte(Request $request)
     {

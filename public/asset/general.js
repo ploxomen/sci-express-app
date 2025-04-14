@@ -5,10 +5,10 @@ class General{
         'X-CSRF-TOKEN' : this.token,
         'X-Requested-With' : 'XMLHttpRequest'
     }
-    async funcfetch(url,dato){
+    async funcfetch(url,dato,method = 'POST'){
         let response = await fetch(url,{
             headers: this.jsonToken,
-            method: 'POST',
+            method,
             body: dato
         })
         return response.json();

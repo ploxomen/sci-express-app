@@ -7,7 +7,6 @@ use App\Models\Clientes;
 use App\Models\InformacionAdicional;
 use App\Models\ModelFacturacion;
 use App\Models\ModeloCluster;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -17,32 +16,28 @@ class Facturacion extends Controller
     public function viewFacturacionGuia()
     {
         $fechaFiltros = InformacionAdicional::obtenerDiasFiltros();
-        $modulos = User::getModulos(Auth::id());
         $clientes = Clientes::where(['estado' => 1])->get();
         $via_envios = InformacionAdicional::viaEnvio();
-        return view('facturacion.guiaMostrar', compact('modulos', 'fechaFiltros', 'clientes', 'via_envios'));
+        return view('facturacion.guiaMostrar', compact( 'fechaFiltros', 'clientes', 'via_envios'));
     }
     public function viewFacturacionCluster()
     {
         $fechaFiltros = InformacionAdicional::obtenerDiasFiltros();
-        $modulos = User::getModulos(Auth::id());
         $via_envios = InformacionAdicional::viaEnvio();
         $clusters = ModeloCluster::obtenerTodosClustersFacturacion();
-        return view("facturacion.clusterMostra",compact('modulos', 'fechaFiltros', 'clusters', 'via_envios'));
+        return view("facturacion.clusterMostra",compact( 'fechaFiltros', 'clusters', 'via_envios'));
     }
     public function viewConfiguracionCliente()
     {
         $clientes = Clientes::getClientesFacturacion();
         $viaEnvio = InformacionAdicional::viaEnvio();
-        $modulos = User::getModulos(Auth::id());
-        return view("facturacion.configuracionCliente",compact("modulos","clientes","viaEnvio"));
+        return view("facturacion.configuracionCliente",compact("clientes","viaEnvio"));
     }
     public function viewConfiguracionCluster()
     {
         $viaEnvio = InformacionAdicional::viaEnvio();
         $clusters = ModeloCluster::obtenerTodosClustersFacturacion();
-        $modulos = User::getModulos(Auth::id());
-        return view("facturacion.configuracionCluster",compact("modulos","clusters","viaEnvio"));
+        return view("facturacion.configuracionCluster",compact("clusters","viaEnvio"));
     }
     public function facturacionCluster(Request $request)
     {

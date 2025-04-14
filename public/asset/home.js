@@ -81,6 +81,18 @@ function loadPage(){
             }
         })
     }
+    if($('.cb-caserios')){
+        $('.cb-caserios').on('select2:select',async function(e){
+            let datosn = new FormData();
+            datosn.append('distrito',$(this).val());
+            let response = await general.funcfetch(window.location.origin + '/intranet/ubigeo/ciudades',datosn);
+            let template = `<option></option>`;
+            response.ciudades.forEach(c => {
+                template += `<option value="${c.id}">${c.nombre_ciudad}</option>`;
+            });
+            document.querySelector($(this).attr('data-ciudades')).innerHTML = template;
+        });
+    }
     function transforData(data,cbUbigeo){
         let template = `<option value=""></option>`;
         data.forEach(e => {

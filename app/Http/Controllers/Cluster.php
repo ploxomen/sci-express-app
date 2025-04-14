@@ -14,19 +14,16 @@ class Cluster extends Controller
 {
     public function crearCluster()
     {
-        $modulos = User::getModulos(Auth::id());
         $departamentos = (new Ubigeo)->getDepartamentosClientes();
-        return view('cluster.crear',compact('departamentos','modulos'));
+        return view('cluster.crear',compact('departamentos'));
     }
     public function mostrarClusters()
     {
-        $modulos = User::getModulos(Auth::id());
         $departamentos = (new Ubigeo)->getDepartamentosClientes();
-        return view('cluster.misclusters', compact('departamentos', 'modulos'));
+        return view('cluster.misclusters', compact('departamentos'));
     }
     public function entregasClusters(Request $request)
     {
-        $modulos = User::getModulos(Auth::id());
         $id_cluster = ModeloCluster::getCodigoCluster(Auth::id());
         if(empty($id_cluster)){
             return abort(404);
@@ -34,7 +31,7 @@ class Cluster extends Controller
         $ciudadesFinales = ModeloCluster::obtenerCiudadesFinales($id_cluster->id);
         $nro_pendients = User::obtenerDatosHome(Auth::id(), 15);
         $kpis = ModeloEmbarque::calculoKpi($id_cluster->id);
-        return view('pedidos.entregascluster', compact('ciudadesFinales', 'modulos', 'nro_pendients', 'kpis'));
+        return view('pedidos.entregascluster', compact('ciudadesFinales', 'nro_pendients', 'kpis'));
 
     }
     public function agregarNuevoCluster(Request $request)

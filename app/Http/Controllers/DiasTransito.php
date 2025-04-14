@@ -13,8 +13,7 @@ class DiasTransito extends Controller
     public function viewDiasTransito(): View
     {
         $departamentos = (new Ubigeo)->getDepartamentosClientes();
-        $modulos = User::getModulos(Auth::id());
-        return view('embarque.diasTransito', compact('modulos','departamentos'));
+        return view('embarque.diasTransito', compact('departamentos'));
     }
     public function getDiasTransito(Request $request)
     {

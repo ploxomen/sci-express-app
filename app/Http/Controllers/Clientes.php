@@ -10,13 +10,11 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cookie;
 
 class Clientes extends Controller
 {
     public function viewAgreModi(Request $request)
     {
-        $modulos = User::getModulos(Auth::id());
         $dep = (new Ubigeo)->getDepartamentosClientes();
         $tipo_documentos = Documentos::where('estado','1')->get();
         $agregar = true;
@@ -26,12 +24,11 @@ class Clientes extends Controller
             $agregar = false;
             $info_cli = ['nro_doc' => $request->nro_doc];
         }
-        return view('cliente.cliagregar',compact('id_new_prov','info_cli','agregar','dep','tipo_documentos','modulos'));
+        return view('cliente.cliagregar',compact('id_new_prov','info_cli','agregar','dep','tipo_documentos'));
     }
     public function agregarSolicitudCliente()
     {
         $tipo_documentos = Documentos::where('estado', '1')->get();
-        $modulos = User::getModulos(Auth::id());
         $hoy = date('Y-m-d');
         $trayectos = TrayectoEnvio::where(['estado' => 1])->get();
         $clientes = User::obtenerClientesTrabajadores(Auth::id());
@@ -43,25 +40,18 @@ class Clientes extends Controller
         } else {
             $ultimo_id = $ultimo_id->id + 1;
         }
-        return view('solicitud.solicitudcliente', compact('usuarioNom','dep', 'ultimo_id', 'clientes', 'tipo_documentos', 'modulos', 'hoy', 'trayectos'));
+        return view('solicitud.solicitudcliente', compact('usuarioNom','dep', 'ultimo_id', 'clientes', 'tipo_documentos', 'hoy', 'trayectos'));
     }
     public function viewConsultaTrabajador()
     {
-        $modulos = User::getModulos(Auth::id());
         $clientes = User::obtenerClientesTrabajadores(Auth::id());
-        return view("cliente.trabajadores.consultaGuia",compact("modulos", "clientes"));
-    }
-    public function viewConsultaTrabajadorDetalle()
-    {
-        # code...
+        return view("cliente.trabajadores.consultaGuia",compact( "clientes"));
     }
     public function viewConsultaGeneral(){
-        $modulos = User::getModulos(Auth::id());
-        return view('comprobante.consultaguia',compact('modulos'));        
+        return view('comprobante.consultaguia');        
     }
     public function viewConsultaDetallada(){
-        $modulos = User::getModulos(Auth::id());
-        return view('comprobante.consultaguiaremitente',compact('modulos'));
+        return view('comprobante.consultaguiaremitente');
     }
     public function eliminarProveedor(Request $request)
     {
@@ -108,8 +98,7 @@ class Clientes extends Controller
     }
     public function misClientes()
     {
-        $modulos = User::getModulos(Auth::id());
-        return view('cliente.misclientes',compact('modulos'));
+        return view('cliente.misclientes');
     }
     public function obtenerClientes(Request $request)
     {
@@ -136,8 +125,7 @@ class Clientes extends Controller
     public function viewArchivos(Request $request)
     {
         $clientes = ModelsClientes::getClientesFiles();
-        $modulos = User::getModulos(Auth::id());
-        return view('cliente.clidocumento',compact('modulos', 'clientes'));
+        return view('cliente.clidocumento',compact( 'clientes'));
     }
     public function cambiarEstadoArchi(Request $request)
     {

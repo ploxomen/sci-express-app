@@ -22,12 +22,11 @@ class Entrega extends Controller
 {
    public function viewEntrega()
    {
-      $modulos = User::getModulos(Auth::id());
       $clusters = ModeloCluster::obtenerTodosClusters();
       $nro_pendients = User::obtenerDatosHome(null,22);
       $fechaFiltros = InformacionAdicional::obtenerDiasFiltros();
       $clientes = Clientes::obtenerCliConProvee();
-      return view('pedidos.entregas',compact('modulos','clusters', 'nro_pendients', 'fechaFiltros', 'clientes'));
+      return view('pedidos.entregas',compact('clusters', 'nro_pendients', 'fechaFiltros', 'clientes'));
    }
    public function reporteEntregas($tipo, $fechaInicio, $fechaFin, $cliente,$cluster)
    {
@@ -96,16 +95,14 @@ class Entrega extends Controller
    }
    public function entregaGuias(Request $request)
    {
-      $modulos = User::getModulos(Auth::id());
       $guias = ModeloEmbarque::entregaGuias(Auth::id());
-      return view('pedidos.entregarguias', compact('modulos','guias'));
+      return view('pedidos.entregarguias', compact('guias'));
    }
    public function devolverGuias()
    {
-      $modulos = User::getModulos(Auth::id());
       $transportes = EmpresaTransporte::obtenerTransportes();
       $hoy = date('Y-m-d');
-      return view('pedidos.devolverguias', compact('modulos', 'transportes','hoy'));
+      return view('pedidos.devolverguias', compact( 'transportes','hoy'));
    }
    public function obtenerImg($filename)
    {

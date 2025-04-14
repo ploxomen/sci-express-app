@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Clientes;
 use App\Http\Controllers\Cluster;
+use App\Http\Controllers\DestinatariosController;
 use App\Http\Controllers\DiasTransito;
 use App\Http\Controllers\Embarque;
 use App\Http\Controllers\Entrega;
@@ -16,9 +17,18 @@ use App\Http\Controllers\Ubigeo;
 use App\Http\Controllers\Usuario;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth')->prefix('intranet')->group(function (){
+Route::middleware(['auth','share'])->prefix('intranet')->group(function (){
     Route::prefix('home')->group(function () {
         Route::post('manager', [Usuario::class, 'filtrosManager']);
+    });
+    Route::prefix('destinatario')->name('destinatario')->group(function () {
+        Route::get('mostrar', [DestinatariosController::class, 'index'])->name('Mostrar');
+        Route::post('obtener', [DestinatariosController::class, 'list']);
+        Route::put('actualizar/{destinatario}', [DestinatariosController::class, 'update']);
+        Route::post('agregar', [DestinatariosController::class, 'store']);
+
+        Route::delete('eliminar/{destinatario}', [DestinatariosController::class, 'drop']);
+        Route::get('agregar-modificar/{destinatario?}', [DestinatariosController::class, 'show']);
     });
     Route::prefix('cliente')->group(function(){
         Route::get('solicitud/agregar', [Clientes::class, 'agregarSolicitudCliente'])->name('solicitudCliente');
