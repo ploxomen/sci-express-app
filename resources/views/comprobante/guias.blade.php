@@ -8,6 +8,39 @@
         .title-label {
             font-size: 20px;
         }
+
+        .sort-buttons {
+            display: flex;
+            flex-direction: column;
+            width: 40px;
+            align-items: center;
+        }
+
+        .sort-button {
+            width: 20px;
+            height: 14px;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .sort-icon {
+            border-style: solid;
+            display: inline-block;
+        }
+
+        .sort-up {
+            border-width: 0 7px 10px 7px;
+            border-color: transparent transparent var(--info) transparent;
+            border-radius: 3px;
+        }
+
+        .sort-down {
+            border-width: 10px 7px 0 7px;
+            border-color: var(--secondary) transparent transparent transparent;
+            border-radius: 3px;
+        }
     </style>
     <section class="p-3">
         <form id="frm_guia" class="mb-4 row">
@@ -299,16 +332,17 @@
                     <table class="table table-sm table-bordered" style="min-width: 1350px;">
                         <thead>
                             <tr>
-                                <th style="width: 200px;">Grupo Envio</th>
-                                <th style="width: 100px;">Tipo Envio</th>
+                                <th style="width: 100px;">Grupo Envio</th>
+                                <th style="width: 150px;">Tipo Envio</th>
                                 <th style="min-width: 250px;">Descripción</th>
-                                <th style="min-width: 200px;">Envase o <br> Embalaje</th>
-                                <th style="width: 100px;">Cantidad</th>
-                                <th style="width: 100px;">Kg</th>
-                                <th style="width: 100px;">Lar / cm</th>
-                                <th style="width: 100px;">Anc / cm</th>
-                                <th style="width: 100px;">Alt / cm</th>
-                                <th style="width: 100px;">Peso Vol / cm<sup>3</sup></th>
+                                <th style="width: 150px;">Envase o <br> Embalaje</th>
+                                <th style="width: 50px;">Cantidad</th>
+                                <th style="width: 80px;">Kg</th>
+                                <th style="width: 80px;">Lar / cm</th>
+                                <th style="width: 80px;">Anc / cm</th>
+                                <th style="width: 80px;">Alt / cm</th>
+                                <th style="width: 120px;">Peso Vol / cm<sup>3</sup></th>
+                                <th style="width: 20px;" id="navegacion-header" hidden></th>
                             </tr>
                         </thead>
                         <tbody id="tabla-detalle">
@@ -392,12 +426,11 @@
                                     <input type="number" value="0.00" id="total-kg"
                                         class="form-control form-control-sm" min="0" step="0.01">
                                 </td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
+                                <td colspan="3"></td>
                                 <td>
                                     <input type="number" value="0.00" id="total-vol"
                                         class="form-control form-control-sm" min="0" step="0.01">
+                                    
                                 </td>
                             </tr>
                         </tfoot>

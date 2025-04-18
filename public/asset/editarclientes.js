@@ -2,6 +2,7 @@ function loadPage(){
     let general = new General();
     let datosCli = new FormData();
     let listProv = document.getElementById('list-proveedores');
+    const listDetalle = document.querySelector("#list-detalle-envio");
     datosCli.append('nro_doc',document.getElementById('id_nro_doc_cli').value);
     general.funcfetch('obtener-editar',datosCli).then(data => {
         if(data.info){
@@ -54,6 +55,7 @@ function loadPage(){
                 listProv.append(liSegundo);
                 general.selectUbigeoCli(liSegundo);
             });
+            
             $('#list-proveedores .cb-ubigeo').select2({
                 theme : 'bootstrap',
                 width: '100%',
@@ -65,6 +67,38 @@ function loadPage(){
                 tags: true
             });
             listProv.children[0].remove();
+        }
+        if(data.detalleEnvios.length){
+            listDetalle.children[0].hidden = false;
+            $("#list-detalle-envio .simple-select2").select2('destroy');
+            data.detalleEnvios.forEach(envio => {
+                const elementoListaDetalle = listDetalle.children[0].cloneNode(true);
+                elementoListaDetalle.hidden = false;
+                for (const element of elementoListaDetalle.querySelectorAll("select, input")) {
+                    element.disabled = false;
+                    switch (element.name) {
+                        case "envase_embalaje[]":
+                            element.value = envio.envase_embalaje;
+                        break;
+                        case "detalle_largo[]":
+                            element.value = envio.largo;
+                        break;
+                        case "detalle_ancho[]":
+                            element.value = envio.ancho;
+                        break;
+                        case "detalle_altura[]":
+                            element.value = envio.altura;
+                        break;
+                    }
+                }
+                listDetalle.append(elementoListaDetalle);
+            });
+            $('#list-detalle-envio .simple-select2').select2({
+                theme: 'bootstrap',
+                width: '100%',
+                placeholder: 'Seleccione una opción'
+            });
+            listDetalle.children[0].hidden = true;
         }
         for (const key in data.ubigeos) {
             if (Object.hasOwnProperty.call(data.ubigeos, key)) {

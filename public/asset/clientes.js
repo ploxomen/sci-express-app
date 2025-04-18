@@ -136,5 +136,34 @@ function loadPage(){
         const idCb = $(this).data('selected-two');
         $('#' + idCb).val($(this).val()).trigger("change");
     });
+    const btnAgregarDetalle = document.querySelector("#btn-add-detalle-envio");
+    const listDetalle = document.querySelector("#list-detalle-envio");
+    listDetalle.onclick = (e) => {
+        if(e.target.classList.contains("btn-delete-detalle")){
+            alertify.confirm("Mensaje","¿Deseas eliminar este detalle de envío?",() => {
+                e.target.closest('li').remove();
+            }, () => {})
+        }
+    }
+    btnAgregarDetalle.onclick = () => {
+        listDetalle.children[0].hidden = false;
+        $("#list-detalle-envio .simple-select2").select2('destroy');
+        const elementoListaDetalle = listDetalle.children[0].cloneNode(true);
+        limpiarListaDetalle(elementoListaDetalle,false);
+        listDetalle.append(elementoListaDetalle);
+        $('#list-detalle-envio .simple-select2').select2({
+            theme: 'bootstrap',
+            width: '100%',
+            placeholder: 'Seleccione una opción'
+        });
+        listDetalle.children[0].hidden = true;
+    }
+    function limpiarListaDetalle(elemento,valor){
+        elemento.hidden = valor;
+        for (const element of elemento.querySelectorAll("select, input")) {
+            element.disabled = valor;
+            element.value = "";
+        }
+    }
 }
 window.addEventListener('DOMContentLoaded',loadPage);

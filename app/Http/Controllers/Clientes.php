@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ClienteDetalleEnvio;
 use App\Models\Clientes as ModelsClientes;
+use App\Models\InformacionAdicional;
 use App\Models\ModeloSolicitud;
 use App\Models\Tipos\Documentos;
 use App\Models\TrayectoEnvio;
@@ -24,7 +26,8 @@ class Clientes extends Controller
             $agregar = false;
             $info_cli = ['nro_doc' => $request->nro_doc];
         }
-        return view('cliente.cliagregar',compact('id_new_prov','info_cli','agregar','dep','tipo_documentos'));
+        $embaseEmbalaje = InformacionAdicional::getEnvaseEmbalaje();
+        return view('cliente.cliagregar',compact('id_new_prov','info_cli','agregar','dep','tipo_documentos','embaseEmbalaje'));
     }
     public function agregarSolicitudCliente()
     {
@@ -82,14 +85,16 @@ class Clientes extends Controller
                 $result = ModelsClientes::where(['id' => $request->nro_doc])->first();
                 $info_ubigeo = null;
                 $proveedores = [];
+                $detalleEnvios = [];
                 if(!is_null($result)){
                     $info_ubigeo['prov_sa'] = (new Ubigeo)->getProvinciasCliente($result->dpto_sa);
                     $info_ubigeo['dist_sa'] = (new Ubigeo)->getDistritosCliente($result->prov_sa);
                     $info_ubigeo['prov_so'] = (new Ubigeo)->getProvinciasCliente($result->dpto_so);
                     $info_ubigeo['dist_so'] = (new Ubigeo)->getDistritosCliente($result->prov_so);
+                    $detalleEnvios = ClienteDetalleEnvio::select('envase_embalaje','largo','ancho','altura')->where('cliente_id',$result->id)->get();
                     $proveedores = ModelsClientes::obtenerProveedores($result->id);
                 }
-                $message = is_null($result) ? ['info' => 'No se encontró el cliente'] : ['cliente' => $result,'ubigeos' => $info_ubigeo,'proveedores' => $proveedores];
+                $message = is_null($result) ? ['info' => 'No se encontró el cliente'] : ['cliente' => $result,'ubigeos' => $info_ubigeo,'proveedores' => $proveedores, 'detalleEnvios' => $detalleEnvios];
                 return response()->json($message);
             }
         } catch (Exception $ex) {
@@ -148,7 +153,7 @@ class Clientes extends Controller
     public function agregarCli(Request $request)
     {
         try {
-            $datos = $request->all();
+            $datos = $request->except(['envase_embalaje','detalle_largo','detalle_ancho','detalle_altura']);
             $msg = '';
             $agregar = true;
             $proveedorAdd = null;
@@ -178,6 +183,19 @@ class Clientes extends Controller
                 $datos['user_create'] = Auth::id();
                 $id_cli = ModelsClientes::addCliente($datos);
                 $msg = 'Cliente agregado correctamente';
+            }
+            ClienteDetalleEnvio::where('cliente_id',$id_cli)->delete();
+            if($request->has('envase_embalaje')){
+                $totalDetalle = count($request->envase_embalaje);
+                for ($i=0; $i < $totalDetalle; $i++) { 
+                    ClienteDetalleEnvio::create([
+                        'cliente_id' => $id_cli,
+                        'envase_embalaje' => $request->envase_embalaje[$i],
+                        'largo' => $request->detalle_largo[$i],
+                        'ancho' => $request->detalle_ancho[$i],
+                        'altura' => $request->detalle_altura[$i]
+                    ]);
+                }
             }
             ModelsClientes::addOrUpdateProveedores(Auth::id(), $proveedorAdd, $proveedorEdid,$id_cli);
             return response()->json(['message' => $msg, 'action' => $agregar]);

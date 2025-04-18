@@ -2,6 +2,7 @@ function pageLoaded(){
     let general = new General();
     let newCliCli = false;
     let tipoCbRemi = null;
+    const tableDetalleGuia = document.getElementById('tabla-detalle');
     const $cbCliente = document.getElementById('id_remi_nomb');
     $('#id_comp_clie').select2({
         theme : 'bootstrap',
@@ -48,24 +49,78 @@ function pageLoaded(){
     });
     document.getElementById('add-delete-detalle').addEventListener('click',function (e) {  
         e.preventDefault();
-        if (document.getElementById('tabla-detalle').children.length === 1 && $('#id_estado').val() === '1'){
+        if (tableDetalleGuia.children.length === 1 && $('#id_estado').val() === '1'){
             alertify.error('la guía activa debe de tener al menos un detalle');
             return
         }
-        const nroChildren = document.getElementById('tabla-detalle').children.length;
-        if ($('#id_estado').val() === '3' && document.getElementById('tabla-detalle').children.length === 1) {
+        const nroChildren = tableDetalleGuia.children.length;
+        if ($('#id_estado').val() === '3' && tableDetalleGuia.children.length === 1) {
             $("#tabla-detalle .simple-select2").val("").trigger("change");
             $("#tabla-detalle .data-texto").val("");
             $("#tabla-detalle .data-anulada-int").val("0").trigger("change");
             $("#tabla-detalle .data-anulada-decimal").val("0").trigger("change");
             return
         }
-        document.getElementById('tabla-detalle').children[nroChildren - 1].remove();
+        indicesNavegaciones.pop();
+        tableDetalleGuia.children[nroChildren - 1].remove();
         alertify.success('ultimo detalle eliminado');
     })
+    let navDetalleEnvios = [];
+    const navegacionEnvases = document.getElementById("navegacion-header");
+    let indicesNavegaciones = [];
     $($cbCliente).on('select2:select',async function(e){
+        indicesNavegaciones = [];
         tipoCbRemi = await general.getDataRemitenteGuia(this, '#id_remi_prov', '#id_remi_dist', '#id_remi_depa', '#id_remi_tipo_docu','#id-invitado-remitente');
+        navDetalleEnvios = window.detallesEnvios;
+        navegacionEnvases.hidden = !navDetalleEnvios.length;
+        for (const tr of tableDetalleGuia.children) {
+            indicesNavegaciones.push(0);
+            if(tr.querySelector(".detalle-envio")){
+                tr.querySelector(".detalle-envio").remove();
+            }
+            if(navDetalleEnvios.length){
+                navegarValores(tr,navDetalleEnvios[0]);
+            }
+            if(navDetalleEnvios.length > 1){
+                const td = document.createElement("td");
+                td.className = "detalle-envio"
+                td.innerHTML = `
+                <div class="sort-buttons">
+                    <button class="sort-button" type="button">
+                        <span class="sort-icon sort-up text-secondary"></span>
+                    </button>
+                    <button class="sort-button" type="button">
+                        <span class="sort-icon sort-down text-secondary"></span>
+                    </button>
+                </div>
+                `
+                tr.append(td);
+            }
+        }
     });
+    function navegarValores(tr,valores){
+        tr.querySelector('[data-name="largo"]').value = valores.largo;
+        tr.querySelector('[data-name="ancho"]').value = valores.ancho;
+        tr.querySelector('[data-name="altura"]').value = valores.altura;
+        $(tr.querySelector('[data-name="embase_embalaje"]')).val(valores.envase_embalaje).trigger("change");
+        const evento = new Event('change',{bubbles : true});
+        tr.querySelector('[data-name="largo"]').dispatchEvent(evento);
+    }
+    tableDetalleGuia.onclick = (e) => {
+        if(e.target.classList.contains('sort-icon')){
+            const indice = Array.from(tableDetalleGuia.children).indexOf(e.target.closest("tr"));
+            if(indicesNavegaciones[indice] >= 0 && indicesNavegaciones[indice] < navDetalleEnvios.length){
+                const valor = e.target.classList.contains('sort-up') ? indicesNavegaciones[indice] + 1 : indicesNavegaciones[indice] - 1;
+                indicesNavegaciones[indice] =  valor < 0 ? 0 : (valor >= navDetalleEnvios.length ? navDetalleEnvios.length - 1 : valor) 
+            }
+            e.target.closest('.sort-buttons').querySelector(".sort-down").style.borderTopColor = indicesNavegaciones[indice] <= 0 ? "var(--secondary)" : "var(--info)"
+            e.target.closest('.sort-buttons').querySelector(".sort-up").style.borderBottomColor = indicesNavegaciones[indice] >= (navDetalleEnvios.length - 1) ? "var(--secondary)" : "var(--info)"
+            if(navDetalleEnvios[indicesNavegaciones[indice]]){
+                navegarValores(tableDetalleGuia.children[indice],navDetalleEnvios[indicesNavegaciones[indice]]);
+            }
+        }
+    }
+
     $('#id-invitado-remitente').on('select2:select', async function (e){
         general.getCCInvitados('#id-invitado-remitente', $cbCliente);
     });
@@ -73,7 +128,6 @@ function pageLoaded(){
     frmGuia.addEventListener('submit',async function(event){
         event.preventDefault();
         let datos = new FormData(this);
-        let tablaDetalle = document.getElementById('tabla-detalle');
         const idCliente = tipoCbRemi == 'proveedor' ? $cbCliente.selectedOptions[0].getAttribute('data-id-cliente') : $($cbCliente).val();
         if (datos.has('valor_complejo_distante')){
             datos.append('ciudad_alejada', document.getElementById('id-tipo-complejo-distante').dataset.tipo);
@@ -81,7 +135,7 @@ function pageLoaded(){
         datos.append('id_cliente_facturacion', idCliente);
         datos.append('tipo_guia',tipoCbRemi);
         let detalles = new Array();
-        for (const e of tablaDetalle.children) {
+        for (const e of tableDetalleGuia.children) {
             let objeto = new Object();
             let deta = e.querySelectorAll('input, select, textarea');
             for (const ele2 of deta) {
@@ -159,6 +213,10 @@ function pageLoaded(){
     });
     document.getElementById('add-new-detalle').addEventListener('click',function(e){
         general.agregarNuevoDetalleGuia('id_estado', '.simple-select2');
+        indicesNavegaciones.push(0);
+        if(navDetalleEnvios[0]){
+            navegarValores(tableDetalleGuia.children[tableDetalleGuia.children.length - 1],navDetalleEnvios[0]);
+        }
     });
     $('#id_dest_nomb').on('select2:select',async function(e){
         newCliCli = await general.getDataDestGuia(this, '#id_remi_depa', '#id_dest_tipo_docu', '#id_dest_depa', '#id_dest_prov', '#id_dest_dist', '#id_ciudad_destino_final', '#id_dias_tran', '#id_via_envi','#box-complejo-distante',0);

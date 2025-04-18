@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\Reportes;
+use App\Models\ClienteDetalleEnvio;
 use App\Models\Clientes;
 use App\Models\InformacionAdicional;
 use App\Models\ModeloCluster;
@@ -433,8 +434,9 @@ class Gias extends Controller
                 $provincias = $datos->listProv;
                 $distritos = $datos->listDist;
             }
+            $detalleEnvios = ClienteDetalleEnvio::select('envase_embalaje','largo','ancho','altura')->where('cliente_id',$idCliente)->get();
             $ínvitados = Clientes::obtenerInvitados($idCliente);
-            return response()->json(['datos' => $datos, 'prov' => $provincias, 'dist' => $distritos,'invitados' => $ínvitados]);
+            return response()->json(['datos' => $datos,'detalleEnvio' =>  $detalleEnvios,'prov' => $provincias, 'dist' => $distritos,'invitados' => $ínvitados]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
