@@ -2,6 +2,10 @@ function pageLoaded(){
     let general = new General();
     let newCliCli = false;
     let tipoCbRemi = null;
+    let comprobantesAgregados = {
+        tipos : [],
+        series : []
+    }
     const tableDetalleGuia = document.getElementById('tabla-detalle');
     const $cbCliente = document.getElementById('id_remi_nomb');
     $('#id_comp_clie').select2({
@@ -132,6 +136,8 @@ function pageLoaded(){
         if (datos.has('valor_complejo_distante')){
             datos.append('ciudad_alejada', document.getElementById('id-tipo-complejo-distante').dataset.tipo);
         }
+        datos.append('nro_comp_cli', [...new Set(comprobantesAgregados.series)].join(';'));
+        datos.append('comp_clie', [...new Set(comprobantesAgregados.tipos)].join(';'));
         datos.append('id_cliente_facturacion', idCliente);
         datos.append('tipo_guia',tipoCbRemi);
         let detalles = new Array();
@@ -221,6 +227,68 @@ function pageLoaded(){
     $('#id_dest_nomb').on('select2:select',async function(e){
         newCliCli = await general.getDataDestGuia(this, '#id_remi_depa', '#id_dest_tipo_docu', '#id_dest_depa', '#id_dest_prov', '#id_dest_dist', '#id_ciudad_destino_final', '#id_dias_tran', '#id_via_envi','#box-complejo-distante',0);
     });
+    const btnAgregarComprobante = document.querySelector("#btn-agregar-comprobantes");
+    const contenidoComprobantes = document.querySelector("#lista-comprobantes");
+    const guardarComprobantes = document.querySelector("#guardar-comprobantes");
+    const valoresComprobantes = (tipoComprobante) => {
+        switch (tipoComprobante) {
+            case 'FACTURA ELECTRÓNICA':
+                return 'F'
+            break;
+            case 'GUIA DE REMISIÓN (R) ELECTRÓNICA':
+                return 'G'
+            break;
+            case 'BOLETA ELECTRÓNICA':
+                return 'B'
+            break;
+            case 'ORDEN DE COMPRA':
+                return 'OC'
+            break;
+            case 'OTRO':
+                return 'OT'
+            break;
+            case 'GUIA DE INTERNAMIENT':
+                return 'GI'
+            break;
+            default:
+                return ''
+            break;
+        }
+    }
+    guardarComprobantes.onclick = e => {
+        $('#id_nro_comp_cli').empty();
+        comprobantesAgregados.tipos = [];
+        comprobantesAgregados.series = [];
+        for (const element of contenidoComprobantes.children) {
+            comprobantesAgregados.tipos.push(element.querySelector('[data-type="comprobante"]').value);
+            if(element.querySelector('[data-type="comprobante"]').value === 'NINGUNO'){
+                continue;
+            }
+            comprobantesAgregados.series.push(
+                `${valoresComprobantes(element.querySelector('[data-type="comprobante"]').value)}/${element.querySelector('[data-type="serie"]').value}-${element.querySelector('[data-type="numero"]').value}` 
+            );
+        }
+        comprobantesAgregados.series.forEach(function(valor) {
+            $('#id_nro_comp_cli').append(new Option(valor, valor,true,true));
+        });
+        $('#id_comp_clie').val(comprobantesAgregados.tipos).trigger('change');
+        $('#agregar-comprobantes').modal('hide');
+    }
+    contenidoComprobantes.onclick = function(e) {
+        if(e.target.classList.contains('btn-danger')){
+            if(contenidoComprobantes.children.length === 1){
+                return alertify.alert("Mensaje","Como mínimo debe haber un comprobante")
+            }
+            e.target.closest('li').remove()
+        }
+    }
+    btnAgregarComprobante.onclick = e => {
+        const liCopia = contenidoComprobantes.children[0].cloneNode(true);
+        for (const element of liCopia.querySelectorAll("select, input")) {
+            element.value = "";
+        }
+        contenidoComprobantes.append(liCopia);
+    }
 }
 function calcVolumen(event){
     if(parseFloat(event.target.value) < 0 || isNaN(event.target.value)){

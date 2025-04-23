@@ -74,12 +74,6 @@ span,th,td,select,b, select option, input, textarea{
     border-radius: 5px;
     background: rgb(255, 97, 97);
 }
-.btn-primary{
-    background: var(--bg-p-blue) !important;
-}
-.btn-danger{
-    background: var(--bg-p-red) !important;
-}
 form fieldset legend{
     color: var(--color-letra-title) !important;
 }
@@ -147,9 +141,13 @@ table thead tr th{
     margin-left: 50px !important;
     width: calc(100% - 50px);
 }
+.gap-1{
+    gap: 4px;
+}
 .navegacion ul li a .icono{
-    font-size: 18px;
-    width: 35px;
+    font-size: 16px;
+    text-align: center;
+    width: 20px;
 }
 .navegacion .menu{
     min-width: 300px;
@@ -229,6 +227,12 @@ table thead tr th{
 .menu-desplegable > a > *{
     pointer-events: none;
     user-select: none;
+}
+ul{
+    list-style: none;
+}
+.menu-desplegable ul{
+    background-color: #173b75
 }
 .panel{
     width: calc(100% - 300px);

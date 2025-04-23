@@ -45,7 +45,7 @@
             </div>
             <ul class="menu accordion" id="accodion-nav">
                 <li class="hover-menu {{ $url_actual == route('home') ? 'activeli' : '' }}">
-                    <a href="{{ route('home') }}" class="menu-prin" title="Inicio">
+                    <a href="{{ route('home') }}" class="menu-prin d-flex gap-1" title="Inicio">
                         <i class="fas fa-home icono"></i>
                         <span class="title">Inicio</span>
                     </a>
@@ -63,7 +63,7 @@
                             }
                         @endphp
                         <li class="menu-desplegable">
-                            <a href="#collapse{{ $modulo->grupo }}" class="active-panel {{ $active_sub ? 'active-menu' : '' }}" title="{{ $modulo->grupo }}"
+                            <a href="#collapse{{ $modulo->grupo }}" class="active-panel d-flex gap-1 {{ $active_sub ? 'active-menu' : '' }}" title="{{ $modulo->grupo }}"
                                 data-toggle="collapse" data-target="#collapse{{ $modulo->grupo }}">
                                 <i class="icono {{ $modulo->icono }}"></i>
                                 <span class="title">{{ $modulo->grupo }}</span>
@@ -73,7 +73,7 @@
                                 @foreach ($modulo->submodulos as $submodulo)
                                     <li
                                         class="hover-menu {{ $url_actual == route($submodulo->nomRuta) ? 'activeli' : '' }}">
-                                        <a href="{{ route($submodulo->nomRuta) }}" title="{{ $submodulo->nombre }}">
+                                        <a href="{{ route($submodulo->nomRuta) }}" class="d-flex gap-1" title="{{ $submodulo->nombre }}">
                                             <i class="icono {{ $submodulo->icono }}"></i>
                                             <span class="title">{{ $submodulo->nombre }}</span>
                                         </a>
@@ -92,7 +92,7 @@
                     @endif
                 @endforeach
                 <li class="hover-menu">
-                    <a href="{{ route('closeSesion') }}" class="menu-prin" title="Cerrar sesión">
+                    <a href="{{ route('closeSesion') }}" class="menu-prin d-flex gap-1" title="Cerrar sesión">
                         <i class="icono fas fa-door-closed"></i>
                         <span class="title">Cerrar sesión</span>
                     </a>

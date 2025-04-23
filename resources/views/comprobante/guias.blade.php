@@ -1,6 +1,6 @@
 @extends('general.index')
 @section('head')
-    <script src="{{ asset('asset/guias.js') }}"></script>
+    <script src="{{ asset('asset/guias.js?v2') }}"></script>
     <title>Guias</title>
 @endsection
 @section('body')
@@ -44,7 +44,7 @@
     </style>
     <section class="p-3">
         <form id="frm_guia" class="mb-4 row">
-            <div class="my-3 col-12">
+            <div class="mt-3 mb-1 col-12">
                 <div class="baner-modulo form-group">
                     <img src="{{ asset('asset/img/intranet/bill.png') }}" alt="Imagen de guia">
                 </div>
@@ -60,6 +60,10 @@
                         <label for="select-os" class="text-primary title-label">Ordenes de Servicio</label>
                     </div>
                 </div>
+            </div>
+            <div class="mb-1">
+                <button type="button" class="btn btn-sm btn-info"
+                    style="font-size: 0.7em;" data-toggle="modal" data-target="#agregar-comprobantes"><i class="fas fa-plus"></i> Comprobantes</button>
             </div>
             <div class="col-12 p-0 px-lg-2 mb-4">
                 <div class="bg-white p-3 form-row">
@@ -90,7 +94,8 @@
                     <div class="form-group col-12 col-md-6 col-lg-3">
                         <label for="id_comp_clie">Comprobantes <small
                                 class="text-danger data-anulada-oculta">*</small></label>
-                        <select name="comp_clie[]" id="id_comp_clie" required class="form-control data-anulada" multiple>
+                        <select name="comp_clie[]" id="id_comp_clie" disabled required class="form-control data-anulada"
+                            multiple>
                             <option value="BOLETA ELECTRÓNICA">BOLETA ELECTRÓNICA</option>
                             <option value="FACTURA ELECTRÓNICA">FACTURA ELECTRÓNICA</option>
                             <option value="GUIA DE REMISIÓN (R) ELECTRÓNICA">GUIA DE REMISIÓN (R) ELECTRÓNICA</option>
@@ -98,14 +103,14 @@
                             <option value="GUIA DE INTERNAMIENTO">GUIA DE INTERNAMIENTO</option>
                             <option value="ORDEN DE COMPRA">ORDEN DE COMPRA</option>
                             <option value="OTRO" class="delete-option">OTRO</option>
-                            <option value="NINGUNO" class="delete-option">NINGUNO</option>
+                            <option value="NINGUNO" class="delete-option" selected>NINGUNO</option>
                         </select>
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-3">
                         <label for="id_nro_comp_cli">N° comprobante <small
                                 class="text-danger data-anulada-oculta">*</small></label>
-                        <select name="nro_comp_cli[]" id="id_nro_comp_cli" required class="form-control data-anulada"
-                            multiple></select>
+                        <select name="nro_comp_cli[]" id="id_nro_comp_cli" disabled required
+                            class="form-control data-anulada" multiple></select>
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-3">
                         <label for="id_cant_comp">Cantidad Comprobante <small
@@ -430,7 +435,7 @@
                                 <td>
                                     <input type="number" value="0.00" id="total-vol"
                                         class="form-control form-control-sm" min="0" step="0.01">
-                                    
+
                                 </td>
                             </tr>
                         </tfoot>
@@ -442,4 +447,5 @@
             </div>
         </form>
     </section>
+    @include('modal.agregarComprobantesGuia')
 @endsection
