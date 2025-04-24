@@ -72,6 +72,18 @@ function loadPage(){
             return
         }
         const bodyModal = document.getElementById('tabla-guias-modal');
+        bodyModal.onclick = async (e) => {
+            if(e.target.classList.contains('btn-danger')){
+                let datos = new FormData();
+                datos.append('tipo','eliminar-guias-guardadas');
+                datos.append('guia',e.target.dataset.guia);
+                const response = await general.funcfetch('/intranet/cluster/embarcar/retornar',datos);
+                if(response.success){
+                    e.target.closest('tr').remove();
+                    return alertify.success('guia eliminada correctamente')
+                }
+            }
+        }
         if(!response.guias.length){
             bodyModal.innerHTML = `<tr><td colspan="5">No se encontró guias guardadas</td></tr>`;
         }else{
@@ -83,6 +95,7 @@ function loadPage(){
                     <td>${g.nom_cli_remitente}</td>
                     <td>${g.dest_nro_docu}</td>
                     <td>${g.nom_cli_destinatario}</td>
+                    <td><button type='button' data-guia="${g.id}" class='btn btn-sm btn-danger'><i class="fas fa-trash"></i></button></td>
                 </tr>`;
             });
             bodyModal.innerHTML = template;
@@ -141,7 +154,39 @@ function loadPage(){
             tabalGuias.draw();
         },()=>{});
     });
-
+    const btnAgregarImg = document.querySelector("#btn-new-img");
+    const fileImg = document.querySelector("#input-img-new");
+    const contenidoImg = document.querySelector("#list-img");
+    let newImages = [];
+    btnAgregarImg.onclick = (e) => fileImg.click();
+    function ImageDelivery(nomFile,nomIdFile,idImg = null){
+        const contenedor = document.createElement('div');
+        contenedor.classList.add('img-delivery');
+        contenedor.innerHTML = `<button type="button" class="eliminar-img" title="Eliminar esta imagen" data-id="${idImg}" data-name="${nomFile}"><i class="far fa-trash-alt"></i></button>
+            <img src="${nomIdFile}"
+            title="${nomFile}"
+            alt="Imagen de entrega de la guía">
+        </button>`;
+        return contenedor;
+    }
+    contenidoImg.onclick = (e) => {
+        if(e.target.classList.contains('eliminar-img')){
+            newImages = newImages.filter(img => img.name !== e.target.dataset.name);
+            e.target.closest('.img-delivery').remove();
+            console.log(newImages)
+        }
+    }
+    fileImg.onchange = function (event) {
+        const files = Array.from(event.target.files);
+        files.forEach((file) => {
+            newImages.push(file);
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                contenidoImg.append(ImageDelivery(file.name,e.target.result));
+            };
+            reader.readAsDataURL(file);
+        });
+    };
     frmCargos.addEventListener('submit',async function(e){
         e.preventDefault();
         let datos = new FormData(this);
@@ -167,6 +212,9 @@ function loadPage(){
             alertify.alert('Alerta','El total de bulto debe de ser mayor que 0');
             return
         }
+        newImages.forEach(file => {
+            datos.append('new_images[]', file);
+        });
         datos.append('tipo','retornar_guias');
         datos.append('guias_guardadas',JSON.stringify(guiasGuardadas));
         datos.append('total_bultos',general.totalBultos(this,'.calc-total'));

@@ -8,6 +8,7 @@ use App\Models\Clientes;
 use App\Models\InformacionAdicional;
 use App\Models\ModeloCluster;
 use App\Models\ModeloGuias;
+use App\Models\RetornoCargo;
 use App\Models\Tipos\Documentos;
 use App\Models\TrayectoEnvio;
 use App\Models\User;
@@ -27,7 +28,7 @@ class Gias extends Controller
     {
         $modulos = User::getModulos(Auth::id());
         $via_envios = InformacionAdicional::viaEnvio();
-        $tipo_documentos = Documentos::where('estado','1')->get();
+        $tipo_documentos = Documentos::where('estado', '1')->get();
         $departamentos = (new Ubigeo)->getDepartamentosClientes();
         $trayecto = TrayectoEnvio::where(['estado' => 1])->get();
         $clientes = Clientes::obtenerCliConProvee();
@@ -36,53 +37,53 @@ class Gias extends Controller
         $nro_os = $nroGuiasSCI['nroOS'];
         $nro_guia_result = $nroGuiasSCI['nroGuia'];
         $hoy = date('Y-m-d');
-        $antes = date('Y-m-d',strtotime($hoy . '-2 days'));
+        $antes = date('Y-m-d', strtotime($hoy . '-2 days'));
         $embaseEmbalaje = InformacionAdicional::getEnvaseEmbalaje();
         $grupoEnvio = InformacionAdicional::getGrupoEnvio();
         $tipoEnvios = InformacionAdicional::getTipoEnvio();
-        return view('comprobante.guias',compact('nro_guia_result','cli_cli','clientes','departamentos','hoy','trayecto','via_envios', 'nro_os','tipo_documentos','modulos','antes','embaseEmbalaje','grupoEnvio','tipoEnvios'));
+        return view('comprobante.guias', compact('nro_guia_result', 'cli_cli', 'clientes', 'departamentos', 'hoy', 'trayecto', 'via_envios', 'nro_os', 'tipo_documentos', 'modulos', 'antes', 'embaseEmbalaje', 'grupoEnvio', 'tipoEnvios'));
     }
     public function generarNroGuiaSCI()
     {
-        $nro_guia = ModeloGuias::select('prefijo','nro_guia')->orderBy('nro_guia', 'desc')->first();
+        $nro_guia = ModeloGuias::select('prefijo', 'nro_guia')->orderBy('nro_guia', 'desc')->first();
         $nro_os = ModeloGuias::select('nro_guia')->where(['prefijo' => null])->orderBy('nro_guia', 'desc')->first();
         $nro_guia_result = '001-0000001';
-        if(!empty($nro_guia)){
-            if($nro_guia->nro_guia == 9999999){
-                $nro_guia_result = str_pad((intval($nro_guia->prefijo) + 1),3,'0',STR_PAD_LEFT) . '-' . '0000001';
+        if (!empty($nro_guia)) {
+            if ($nro_guia->nro_guia == 9999999) {
+                $nro_guia_result = str_pad((intval($nro_guia->prefijo) + 1), 3, '0', STR_PAD_LEFT) . '-' . '0000001';
             }
-            if($nro_guia->nro_guia < 9999999){
+            if ($nro_guia->nro_guia < 9999999) {
                 $nro_guia_result = str_pad((intval($nro_guia->prefijo)), 3, '0', STR_PAD_LEFT) . '-' . str_pad((intval($nro_guia->nro_guia) + 1), 7, '0', STR_PAD_LEFT);
             }
         }
         if (!empty($nro_os)) {
             $nro_os->nro_guia++;
-            $nro_os = str_pad($nro_os->nro_guia,7,"0",STR_PAD_LEFT);
-        }else{
+            $nro_os = str_pad($nro_os->nro_guia, 7, "0", STR_PAD_LEFT);
+        } else {
             $nro_os = "0000001";
         }
         return ['nroOS' => $nro_os, 'nroGuia' => $nro_guia_result];
     }
     public function modificacionPreGuias(Request $request)
     {
-        if(!$request->ajax()){
+        if (!$request->ajax()) {
             return response()->json(['error' => 'No autorizado']);
         }
         switch ($request->accion) {
             case 'obtener-remitente':
                 return response()->json(['data' => Clientes::getRemitente($request->ruc)]);
-            break;
+                break;
             case 'generar-guias':
                 $datos = $request->all();
-                return response()->json(['success' => ModeloGuias::agregarPreGuias($datos,'agregar')]);
-            break;
+                return response()->json(['success' => ModeloGuias::agregarPreGuias($datos, 'agregar')]);
+                break;
             case 'previo-guias':
                 $datos = $request->all();
-                return response()->json(['listaError' => ModeloGuias::agregarPreGuias($datos,'mostrar')]);
-            break;
+                return response()->json(['listaError' => ModeloGuias::agregarPreGuias($datos, 'mostrar')]);
+                break;
         }
     }
-    public function viewComplearGuias():View
+    public function viewComplearGuias(): View
     {
         $modulos = User::getModulos(Auth::id());
         $trayecto = TrayectoEnvio::where(['estado' => 1])->get();
@@ -91,25 +92,25 @@ class Gias extends Controller
         $via_envios = InformacionAdicional::viaEnvio();
         $departamentos = (new Ubigeo)->getDepartamentosClientes();
         $tipo_documentos = Documentos::where('estado', '1')->get();
-        return view('comprobante.completarGuias',compact("modulos","trayecto","clientes","cli_cli","via_envios","departamentos","tipo_documentos"));
+        return view('comprobante.completarGuias', compact("modulos", "trayecto", "clientes", "cli_cli", "via_envios", "departamentos", "tipo_documentos"));
     }
     public function modificacionCompletarPreGuias(Request $request)
     {
-        if(!$request->ajax()){
+        if (!$request->ajax()) {
             return response()->json(['error' => 'No autorizado']);
         }
         switch ($request->accion) {
             case 'consultar-guias':
                 $guias = ModeloGuias::guiasPorCompletar();
                 return datatables()->of($guias)->toJson();
-            break;
+                break;
             case 'detalle-guia':
                 return response()->json(ModeloGuias::guiasPorCompletarDetalle($request->guia));
-            break;
+                break;
             case 'previo-guias':
                 $datos = $request->all();
-                return response()->json(['listaError' => ModeloGuias::agregarPreGuias($datos,'mostrar')]);
-            break;
+                return response()->json(['listaError' => ModeloGuias::agregarPreGuias($datos, 'mostrar')]);
+                break;
         }
     }
     public function viewPreGuias()
@@ -122,19 +123,19 @@ class Gias extends Controller
         $via_envios = InformacionAdicional::viaEnvio();
         $departamentos = (new Ubigeo)->getDepartamentosClientes();
         $provincias = (new Ubigeo)->getProvinciasCliente(3926);
-        return view('comprobante.preguia',compact('provincias','departamentos','via_envios','trayecto','modulos','nro_os','nro_guia_result'));
+        return view('comprobante.preguia', compact('provincias', 'departamentos', 'via_envios', 'trayecto', 'modulos', 'nro_os', 'nro_guia_result'));
     }
     public function deleteImgGuia(Request $request)
     {
         $guia = ModeloGuias::find($request->id_guia);
-        if(empty($guia)){
+        if (empty($guia)) {
             return response()->json(['error' => 'No se encontró la guía']);
         }
-        $deleteGuia = ModeloGuias::deleteImgEntregaGuia($request->id_guia,$request->id_img);
-        if(!Storage::disk('guias-img')->exists($deleteGuia['nomFile']->nom_id_file)){
+        $deleteGuia = ModeloGuias::deleteImgEntregaGuia($request->id_guia, $request->id_img);
+        if (!Storage::disk('guias-img')->exists($deleteGuia['nomFile']->nom_id_file)) {
             return ['error' => 'Imagen no encontrada para ser eliminada'];
         }
-        if($deleteGuia['delete'] === 1 && Storage::disk('guias-img')->exists($deleteGuia['nomFile']->nom_id_file)){
+        if ($deleteGuia['delete'] === 1 && Storage::disk('guias-img')->exists($deleteGuia['nomFile']->nom_id_file)) {
             Storage::disk('guias-img')->delete($deleteGuia['nomFile']->nom_id_file);
             return response()->json(['success' => 'Imagen eliminada correctamente']);
         }
@@ -143,7 +144,7 @@ class Gias extends Controller
     public function obtenerDiasTransito(Request $request)
     {
         try {
-            return response()->json(['dias' => InformacionAdicional::obtenerDiasTransito($request->departamento_origen,$request->departamento_destino,$request->provincia_destino,$request->ciudad_final)]);
+            return response()->json(['dias' => InformacionAdicional::obtenerDiasTransito($request->departamento_origen, $request->departamento_destino, $request->provincia_destino, $request->ciudad_final)]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
@@ -155,7 +156,7 @@ class Gias extends Controller
         $vehiculos = Vehiculos::obtenerVehiculos();
         $dealers = User::obtenerUsuarioRol(7);
         $conductores = User::obtenerUsuarioRol(6);
-        return view('retornos.retornosguiasencargado',compact('conductores','dealers','vehiculos','modulos','clusters'));
+        return view('retornos.retornosguiasencargado', compact('conductores', 'dealers', 'vehiculos', 'modulos', 'clusters'));
     }
     public function uploadImgDetalleGuia(Request $request)
     {
@@ -165,7 +166,7 @@ class Gias extends Controller
             if (empty($guia)) {
                 return response()->json(['error' => 'No se encontró la guía']);
             }
-            if($guia->situ < 8 || $guia->estado === 3){
+            if ($guia->situ < 8 || $guia->estado === 3) {
                 return response()->json(['error' => 'La guía/OS no esta apta para agregar imagenes']);
             }
             $id_file = time();
@@ -181,7 +182,7 @@ class Gias extends Controller
                 ];
             }
             $imgAdd = ModeloGuias::addNewImgGuiaEntrega($filesDb);
-            return response()->json(['success' => count($imgAdd) > 1 ? 'Imagen cargada correctamente' : 'Imágenes subidas correctamente','list' => $imgAdd]);
+            return response()->json(['success' => count($imgAdd) > 1 ? 'Imagen cargada correctamente' : 'Imágenes subidas correctamente', 'list' => $imgAdd]);
         } catch (Exception $ex) {
             Storage::disk('guias-img')->delete($filesDb);
             return response()->json(['error' => $ex->getMessage()]);
@@ -189,38 +190,43 @@ class Gias extends Controller
     }
     public function guiasRetornadas(Request $request)
     {
-        if($request->ajax()){
+        if ($request->ajax()) {
             try {
                 $id_usuario = $request->has('cluster') ? $request->cluster : Auth::id();
                 switch ($request->tipo) {
                     case 'mostrar-guias':
-                        return datatables()->of(ModeloGuias::mostrarRetornoGuias($request->tipo,$id_usuario))->toJson();
-                    break;
+                        return datatables()->of(ModeloGuias::mostrarRetornoGuias($request->tipo, $id_usuario))->toJson();
+                        break;
+                    case 'mostrar-retorno':
+                        $retornoCargo = RetornoCargo::with('imagenes:id,nombre,url')->select(['fch_emba', 'id_empr_tran', 'tipo_comprobantes', 'nro_guias', 'importe_embarque', 'fecha_llegada', 'hr_llegada', 'nro_cajas', 'nro_jabas','total_bultos', 'nro_cajones', 'nro_sobres', 'nro_paquetes', 'num_otros', 'detalle_otro', 'id'])->find($request->id);
+                        $guias = $retornoCargo->detalleGuias()->pluck('id_guia')->toArray();
+                        $retornoCargo->guias = ModeloGuias::guias()->select('guias.id','prefijo','tipo_guia','nro_guia','remi_nro_docu','dest_nro_docu','nomb_prov','nom_cli','clientes_de_clientes.nombres AS destinatario')->whereIn('guias.id',$guias)->get();
+                        return $retornoCargo;
+                        break;
                     case 'mostrar-guias-programar':
                         $resultados = [];
-                        $resultados['data'] = ModeloGuias::mostrarGuiasRetornadasParaProgramar($request->fechaLegada,$request->cluster);
-                        if($request->has('completo')){
+                        $resultados['data'] = ModeloGuias::mostrarGuiasRetornadasParaProgramar($request->fechaLegada, $request->cluster);
+                        if ($request->has('completo')) {
                             $resultados['total'] = ModeloGuias::cantidadGuiasRetornadas();
                         }
                         return response()->json($resultados);
-                    break;
+                        break;
                     case 'mostrar-guias-bultos':
                         return response()->json(['bultos' => ModeloGuias::bultosRetornados($request->retornada)]);
-                    break;
+                        break;
                     case 'programar-retornos':
                         $fechaRecojo = $request->dia_recojo;
                         $detalles = $request->retornos;
                         $vehiculo = $request->vehiculo;
                         $dealer = $request->dealer;
                         $driver = $request->conductor;
-                        return response()->json(ModeloGuias::programarRecojosRetornos($fechaRecojo,Auth::id(),$detalles,$vehiculo,$driver,$dealer));
-                    break;
+                        return response()->json(ModeloGuias::programarRecojosRetornos($fechaRecojo, Auth::id(), $detalles, $vehiculo, $driver, $dealer));
+                        break;
                     case 'cambio-estado':
                         ModeloGuias::cambiarEstadoRetornoGuia($request->cluster, $request->guia, $request->estado);
                         return response()->json(['success' => 'se cambio el status de la guia de manera correcta']);
-                    break;
+                        break;
                 }
-
             } catch (Exception $ex) {
                 return response()->json(['error' => $ex->getMessage()]);
             }
@@ -228,7 +234,7 @@ class Gias extends Controller
     }
     public function eliminarDetalleGuia(Request $request)
     {
-        return response()->json(ModeloGuias::elimiarDetalleGuia($request->guia,$request->detalle,$request->situacion_guia));
+        return response()->json(ModeloGuias::elimiarDetalleGuia($request->guia, $request->detalle, $request->situacion_guia));
     }
     public function obtenerDetalleTabla()
     {
@@ -248,7 +254,7 @@ class Gias extends Controller
     }
     public function obtenerAsignacionGlobal()
     {
-        $guiasPorAsignar = ModeloGuias::selectRaw("DATE_FORMAT(fech_emis,'%d/%m/%Y') AS fecha_emision,id,prefijo,nro_guia")->where(['id_asignado' => null,'activo' => 1, 'situ' => 1, 'estado' => 1])->groupBy("id")->get();
+        $guiasPorAsignar = ModeloGuias::selectRaw("DATE_FORMAT(fech_emis,'%d/%m/%Y') AS fecha_emision,id,prefijo,nro_guia")->where(['id_asignado' => null, 'activo' => 1, 'situ' => 1, 'estado' => 1])->groupBy("id")->get();
         return response()->json(['guias' => $guiasPorAsignar]);
     }
     public function misGuias()
@@ -264,12 +270,12 @@ class Gias extends Controller
         $departamentos = (new Ubigeo)->getDepartamentosClientes();
         $tipo_documentos = Documentos::where('estado', '1')->get();
         $usuarios = User::obtenerUsuarioRol(3);
-        return view('comprobante.misguias',compact('usuarios','trayecto','departamentos','via_envios','clientes','tipo_documentos','cli_cli','modulos', 'estado_guias', 'nro_por_asignar', 'fechaFiltros'));
+        return view('comprobante.misguias', compact('usuarios', 'trayecto', 'departamentos', 'via_envios', 'clientes', 'tipo_documentos', 'cli_cli', 'modulos', 'estado_guias', 'nro_por_asignar', 'fechaFiltros'));
     }
     public function asignarMuchasGuiasUsuario(Request $request)
     {
         $usuario = $request->id_usuario;
-        $guias = json_decode($request->guias,true);
+        $guias = json_decode($request->guias, true);
         foreach ($guias as $guia) {
             ModeloGuias::where(['id' => $guia["id"], 'id_asignado' => null, 'activo' => 1, 'situ' => 1, 'estado' => 1])->update(['id_asignado' => $usuario]);
         }
@@ -298,7 +304,7 @@ class Gias extends Controller
                 unset($datos['detalle_guia_update']);
                 $detallesUpdate = json_decode($request->detalle_guia_update, true);
             }
-            $response = ModeloGuias::updateGuia($idGuia,$datos, $detallesNew, $detallesUpdate, $add_cli_bool,false);
+            $response = ModeloGuias::updateGuia($idGuia, $datos, $detallesNew, $detallesUpdate, $add_cli_bool, false);
             return response()->json($response);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
@@ -325,21 +331,21 @@ class Gias extends Controller
     public function asignarUsuario(Request $request)
     {
         try {
-            $total = ModeloGuias::asignarPersona($request->id_user,$request->id_guia);
+            $total = ModeloGuias::asignarPersona($request->id_user, $request->id_guia);
             $resta = isset($total[0]->total) ? $total[0]->total : 0;
-            return response()->json(['success' => 'Guia asignada correctamente','procesar' => $resta]);
+            return response()->json(['success' => 'Guia asignada correctamente', 'procesar' => $resta]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
     }
     public function obtenerMisGuias(Request $request)
     {
-        if($request->ajax()){
-            $guias = ModeloGuias::mostrarTodasGuias($request->estado,$request->tipo,$request->fechaInicio,$request->fechaFin);
+        if ($request->ajax()) {
+            $guias = ModeloGuias::mostrarTodasGuias($request->estado, $request->tipo, $request->fechaInicio, $request->fechaFin);
             return datatables()->of($guias)->toJson();
         }
     }
-    public function reporteGuias($tipo,$fechaInicio,$fechaFin,$estado)
+    public function reporteGuias($tipo, $fechaInicio, $fechaFin, $estado)
     {
         ini_set('memory_limit', '1024M');
         $estado = $estado == "0" ? 0 : intval($estado);
@@ -358,7 +364,7 @@ class Gias extends Controller
     public function cambiarCluster(Request $request)
     {
         if ($request->ajax()) {
-            ModeloGuias::where(['id' => $request->id_guia,'activo' => 1])->update(['id_cluster' => $request->id_cluster]);
+            ModeloGuias::where(['id' => $request->id_guia, 'activo' => 1])->update(['id_cluster' => $request->id_cluster]);
             return response()->json(['success' => 'Se cambió correctamente el cluster']);
         }
     }
@@ -391,7 +397,7 @@ class Gias extends Controller
                 unset($datos['detalle_guia_update']);
                 $detallesUpdate = json_decode($request->detalle_guia_update, true);
             }
-            $response = ModeloGuias::updateGuia($idGuia,$datos, $detallesNew, $detallesUpdate, $add_cli_bool,true);
+            $response = ModeloGuias::updateGuia($idGuia, $datos, $detallesNew, $detallesUpdate, $add_cli_bool, true);
             return response()->json($response);
         }
     }
@@ -402,11 +408,11 @@ class Gias extends Controller
             $add_cli = $request->has('add_cli_cli') ? $request->add_cli_cli : null;
             $add_cli_bool = $request->has('add_cli_bool') ? $request->add_cli_bool : null;
             $detalles = [];
-            if(isset($datos['detalle_guia'])){
+            if (isset($datos['detalle_guia'])) {
                 unset($datos['detalle_guia']);
                 $detalles = json_decode($request->detalle_guia, true);
             }
-            $response = ModeloGuias::agregar($datos,$detalles, $add_cli, $add_cli_bool,Auth::id());
+            $response = ModeloGuias::agregar($datos, $detalles, $add_cli, $add_cli_bool, Auth::id());
             return response()->json($response);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
@@ -419,46 +425,46 @@ class Gias extends Controller
             $distritos = [];
             $ínvitados = [];
             $idCliente = $request->has('idcliente') ? $request->idcliente : $request->id;
-            if($request->tipo == 'cliente'){
+            if ($request->tipo == 'cliente') {
                 $datos = Clientes::getDetalleSoliCli($request->id);
                 $provincias = Ubigeo::getProvinciasCliente($datos->dpto_so);
                 $distritos = Ubigeo::getDistritosCliente($datos->prov_so);
-            }else{
+            } else {
                 $datos = Clientes::obtenerProveedor($request->id);
                 $provincias = $datos->listProv;
                 $distritos = $datos->listDist;
             }
-            $detalleEnvios = ClienteDetalleEnvio::select('envase_embalaje','largo','ancho','altura')->where('cliente_id',$idCliente)->get();
+            $detalleEnvios = ClienteDetalleEnvio::select('envase_embalaje', 'largo', 'ancho', 'altura')->where('cliente_id', $idCliente)->get();
             $ínvitados = Clientes::obtenerInvitados($idCliente);
-            return response()->json(['datos' => $datos,'detalleEnvio' =>  $detalleEnvios,'prov' => $provincias, 'dist' => $distritos,'invitados' => $ínvitados]);
+            return response()->json(['datos' => $datos, 'detalleEnvio' =>  $detalleEnvios, 'prov' => $provincias, 'dist' => $distritos, 'invitados' => $ínvitados]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
     }
     public function consultaGuia(Request $request)
     {
-        if($request->ajax()){
+        if ($request->ajax()) {
             return response()->json(['result' => ModeloGuias::consultaGuiaCliente($request->all())]);
         }
     }
     public function consultaGuiaRemitentes(Request $request)
     {
-        if($request->ajax()){
+        if ($request->ajax()) {
             switch ($request->tipo) {
                 case 'remitentes':
-                    $datos = ModeloGuias::obtenerGuiasConsulta($request->remitente,$request->fecha);
+                    $datos = ModeloGuias::obtenerGuiasConsulta($request->remitente, $request->fecha);
                     return datatables()->of($datos)->toJson();
-                break;
+                    break;
                 case 'remitentes-cliente':
-                    $datos = ModeloGuias::obtenerGuiasConsultaTrabajador($request->cliente,Auth::id(), $request->fechaIncio,$request->fechaFin);
+                    $datos = ModeloGuias::obtenerGuiasConsultaTrabajador($request->cliente, Auth::id(), $request->fechaIncio, $request->fechaFin);
                     return datatables()->of($datos)->toJson();
-                break;
+                    break;
             }
         }
     }
     public function obtenerComplejoDistante(Request $request)
     {
-        if($request->ajax()){
+        if ($request->ajax()) {
             $distrito = $request->distrito;
             $ciudadFinal = $request->has('ciudad') ? $request->ciudad : null;
             $complejoDistante = Clientes::obtenerComplejoDistante($request->tipo, $distrito, $ciudadFinal);
@@ -474,20 +480,20 @@ class Gias extends Controller
             $ciudades = [];
             $dias = null;
             $complejoDistante = null;
-            if(!empty($datos)){
+            if (!empty($datos)) {
                 $provincias = Ubigeo::getProvinciasCliente($datos->departamento);
                 $distritos = Ubigeo::getDistritosCliente($datos->provincia);
                 $ciudades = Ubigeo::getCiudadesClientes($datos->distrito);
                 $infoDepDest = (new Ubigeo)->getNameDepartamento($datos->departamento);
                 $infoProvDest = (new Ubigeo)->getNameProvincia($datos->provincia);
                 $infoCiudDest = (new Ubigeo)->getNameDistrito($datos->distrito);
-                if(!empty($datos->id_ciudad_final)){
+                if (!empty($datos->id_ciudad_final)) {
                     $infoCiudDest = Clientes::obtenerNombreCliDest($datos->id_ciudad_final);
                 }
                 $complejoDistante = Clientes::obtenerComplejoDistante(!empty($datos->id_ciudad_final) ? 'ciudad' : 'distrito', $datos->distrito, $datos->id_ciudad_final);
                 $dias = InformacionAdicional::obtenerDiasTransito($request->departamentoOrigen, $infoDepDest, $infoProvDest, $infoCiudDest);
             }
-            return response()->json(['datos' => $datos, 'prov' => $provincias,'dias' => $dias ,'dist' => $distritos, 'ciudades' => $ciudades,'complejo' => $complejoDistante]);
+            return response()->json(['datos' => $datos, 'prov' => $provincias, 'dias' => $dias, 'dist' => $distritos, 'ciudades' => $ciudades, 'complejo' => $complejoDistante]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }

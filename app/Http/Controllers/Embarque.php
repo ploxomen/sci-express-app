@@ -8,12 +8,14 @@ use App\Models\InformacionAdicional;
 use App\Models\ModeloEmbarque;
 use App\Models\ModeloGuias;
 use App\Models\ModeloManifiesto;
+use App\Models\RetornoCargoDetalle;
 use App\Models\User;
 use App\Models\Vehiculos;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
 class Embarque extends Controller
@@ -188,7 +190,7 @@ class Embarque extends Controller
     {
         try {
             $guias = [];
-            $datos = $request->all();
+            $datos = $request->except(['new_images']);
             if($request->has('guias')){
                 $guias = json_decode($request->guias, true);
                 unset($datos['guias']);
@@ -197,6 +199,13 @@ class Embarque extends Controller
             switch ($request->tipo) {
                 case 'guardar_guias':
                     $result = ModeloEmbarque::guardarDevolucion($guias,Auth::id());
+                break;
+                case 'eliminar-guias-guardadas':
+                    $result = ['success' => RetornoCargoDetalle::where('id_guia',$request->guia)->delete()];    
+                break;
+                case 'eliminar-guias-retornadas':
+                    RetornoCargoDetalle::where('id_guia',$request->guia)->delete();
+                    $result = ['success' => ModeloGuias::find($request->guia)->update(['situ' => 8])];    
                 break;
                 case 'consultas_guias':
                     $result = ModeloEmbarque::obtenerEmbarquesGuardados(Auth::id());
@@ -213,9 +222,19 @@ class Embarque extends Controller
                         unset($datos['guias_nuevas']);
                         $guias_nuevas = json_decode($request->guias_nuevas,true);
                     }
-                    $result = ModeloEmbarque::actualizarDevolucionCargo($datos, $guias_nuevas,$guias_guardadas, Auth::id());
+                    $imgs = $request->file('new_images');
+                    $imgGuardar = [];
+                    foreach ($imgs as $img) {
+                        $extension = $img->getClientOriginalExtension();
+                        $nombreUnico = Str::uuid() . '.' . $extension;
+                        $img->storeAs('app/retornos-img',$nombreUnico);
+                        $imgGuardar[] = [
+                            'nombre' => $img->getClientOriginalName(),
+                            'url' => $nombreUnico,
+                        ];
+                    }    
+                    $result = ModeloEmbarque::actualizarDevolucionCargo($datos, $guias_nuevas,$guias_guardadas, Auth::id(),$imgGuardar);
                 break;
-                
             }
             return response()->json($result);
         } catch (Exception $ex) {

@@ -251,6 +251,8 @@ Route::middleware(['auth','share'])->prefix('intranet')->group(function (){
         Route::get('agregar', [Solicitud::class, 'viewSolicitud'])->name('solicitud');
     });
     Route::get('storage/img/entrega/{filename}', [Entrega::class, 'obtenerImg'])->name('obtenerImgEntregas');
+    Route::get('storage/img/retorno/{filename}', [Entrega::class, 'retornoImg'])->name('obtenerImgRetorno');
+
     Route::prefix('cliente/consulta/guia')->group(function () {
         Route::get('pendiente-general', [Clientes::class, 'viewConsultaTrabajador'])->name('consultaGuiaClienteTrabajaro');
         Route::get('pendiente-detallado', [Clientes::class, 'viewConsultaTrabajadorDetalle'])->name('consultaGuiaClienteTrabajadorDetallado');

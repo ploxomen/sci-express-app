@@ -321,7 +321,7 @@
                 <h5 class="text-info">IMAGENES DE LA ENTREGA</h5>
             </div>
             <div class="col-12">
-                <div class="d-flex justify-content-center flex-wrap" style="gap:10px;" id="list-img"></div>
+                <div class="d-flex justify-content-center flex-wrap flex-row-reverse gap-1" id="list-img"></div>
             </div>
             <div class="form-group col-12 img-entregas"></div>
             <div class="col-12">

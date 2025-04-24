@@ -6,6 +6,7 @@ use App\Http\Controllers\Ubigeo;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ModeloEmbarque extends Model
 {
@@ -483,7 +484,7 @@ class ModeloEmbarque extends Model
     {
         return ['guias' => DB::select('CALL sp_obtener_embarques_guardados(?)', [$idusuario])];
     }
-    public static function actualizarDevolucionCargo($nuevo_retorno,$guias_nuevas,$guias_guardadas,$usuario)
+    public static function actualizarDevolucionCargo($nuevo_retorno,$guias_nuevas,$guias_guardadas,$usuario, $imgs = [])
     {
         DB::beginTransaction();
         try {
@@ -505,14 +506,18 @@ class ModeloEmbarque extends Model
                     DB::table('detalle_retorno_cargo')->where(['id_guia' => $gguardado['id_guia']])->update(['id_retorno_cargo' => $id_retorno,'id_usuario' => $usuario]);
                 }
             }
+            foreach ($imgs as $img){
+                $img['retorno_cargo_id'] = $id_retorno;
+                RetornoCargoImg::create($img);
+            }
             for ($i=0; $i < count($guias) ; $i++) {
                 DB::select('CALL sp_retorno_cargo(?,?,?)', [$guias[$i]['id_guia'], $usuario, 'actualizar-guia']);
             }
             DB::commit();
             return ['success' => 'Información agregada correctamente'];
         } catch (Exception $ex) {
-            return ['error' => $ex->getMessage()];
             DB::rollBack();
+            return ['error' => $ex->getMessage()];
         }
     }
     public static function reportesEmbarque($fechaInicio,$fechaFin)

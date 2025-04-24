@@ -231,6 +231,53 @@ table thead tr th{
 ul{
     list-style: none;
 }
+.img-delivery{
+    position: relative;
+    width: 200px;
+    max-height: 200px;
+}
+.img-delivery button i{
+    color: #ffffff;
+}
+.img-delivery img{
+    width: 100%;
+    display: block;
+    object-fit: contain;
+    height: 100%
+}
+.new-img{
+    border: 2px dashed rgb(103, 103, 255);
+    padding: 20px 10px;
+    text-align: center;
+    outline: none;
+    background: #ffffff;
+    max-height: 80px;
+    transition: all .3s ease-in-out;
+}
+.new-img i{
+    color: rgb(103, 103, 255);
+    font-size: 30px;
+    transition: color .3s ease-in-out;
+}
+.new-img:hover{
+    background: rgb(103, 103, 255);
+    border-color: #ffffff;
+}
+.new-img:hover i{
+    color: #ffffff;
+}
+.img-delivery button{
+    position: absolute;
+    right: 0;
+    border: none;
+    padding: 5px;
+    border-radius: 50%;
+    width: 30px;
+    background: var(--danger);
+    height: 30px;
+    display: block;
+    outline: none;
+}
 .menu-desplegable ul{
     background-color: #173b75
 }

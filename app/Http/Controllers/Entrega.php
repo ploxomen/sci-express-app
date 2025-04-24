@@ -115,6 +115,16 @@ class Entrega extends Controller
          return $response;
       }
    }
+   public function retornoImg($filename) {
+      $path = storage_path('app/retornos-img/' . $filename);
+      if(File::exists($path)){
+         $file = File::get($path);
+         $type = File::mimeType($path);
+         $response = response()->make($file);
+         $response->header("Content-Type",$type);
+         return $response;
+      }
+   }
    public function agregarPedidosEntregados(Request $request)
    {
       try {

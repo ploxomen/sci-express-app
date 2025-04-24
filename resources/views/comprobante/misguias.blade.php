@@ -16,53 +16,6 @@
     .form-editar-guia label{
         font-size: 12px !important;
     }
-    .new-img{
-        border: 2px dashed rgb(103, 103, 255);
-        padding: 20px 10px;
-        text-align: center;
-        outline: none;
-        background: #ffffff;
-        max-height: 80px;
-        transition: all .3s ease-in-out;
-    }
-    .new-img i{
-        color: rgb(103, 103, 255);
-        font-size: 30px;
-        transition: color .3s ease-in-out;
-    }
-    .new-img:hover{
-        background: rgb(103, 103, 255);
-        border-color: #ffffff;
-    }
-    .new-img:hover i{
-        color: #ffffff;
-    }
-    .img-delivery{
-        position: relative;
-        width: 200px;
-        max-height: 200px;
-    }
-    .img-delivery img{
-        width: 100%;
-        display: block;
-        object-fit: contain;
-        height: 100%
-    }
-    .img-delivery button{
-        position: absolute;
-        right: 0;
-        border: none;
-        padding: 5px;
-        border-radius: 50%;
-        width: 30px;
-        background: #7885ee;
-        height: 30px;
-        display: block;
-        outline: none;
-    }
-    .img-delivery button i{
-        color: #ffffff;
-    }
 </style>
 @section('body')
 <section class="p-2 bg-white">

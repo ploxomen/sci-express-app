@@ -12,7 +12,12 @@ class ModeloGuias extends Model
 {
     protected $table = 'guias';
     public $timestamps = false;
-
+    protected $fillable = ['situ'];
+    public function scopeGuias($query){
+        return $query->leftJoin('clientes','clientes.id','=','id_remitente')
+        ->leftJoin('clientes_de_clientes','clientes_de_clientes.id','=','id_destinatario')
+        ->leftJoin('proveedor_clientes','proveedor_clientes.id','=','id_remitente');
+    }
     public static function agregar($guia,$detalles,$cli,$cli_bool,$user)
     {
         DB::beginTransaction();
