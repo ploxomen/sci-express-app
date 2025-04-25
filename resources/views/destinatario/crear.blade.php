@@ -13,7 +13,7 @@
         @endif
         <div class="mb-4 col-12">
             <div class="baner-modulo">
-                <img src="{{asset('asset/img/intranet/addcliente.png')}}" alt="Imagen de clientes">
+                <img src="{{asset('asset/img/intranet/destination.png')}}" alt="Imagen de clientes">
             </div>
             <h3 class="text-primary text-center">{{$agregar ? 'Agregar nuevo destinatario' : 'Modificar destinatario'}}</h3>
         </div>
@@ -92,7 +92,6 @@
                 <button type="submit" class="btn btn-primary">Agregar</button>
                 <button type="reset" class="btn btn-secondary">Limpiar</button>
             @endif
-            
         </div>
     </form>
 </section>

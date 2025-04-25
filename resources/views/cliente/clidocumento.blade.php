@@ -10,7 +10,7 @@
             <div class="baner-modulo">
                 <img src="{{asset('asset/img/intranet/doccliente.png')}}" alt="Imagen de clientes">
             </div>
-            <h3 class="text-primary text-center">Documentos de clientes</h3>
+            <h1 class="text-primary titulo-h1 text-center">Documentos de clientes</h1>
         </div>
         <div class="form-group col-12 mb-5">
             <div class="m-auto w-100" style="max-width: 500px;">
@@ -84,7 +84,7 @@
 
     <div class="form-group">
         <div class="form-group">
-            <h4 class="text-primary">Datos del Cliente</h4>
+            <h2 class="text-primary titulo-h2">Datos del Cliente</h2>
         </div>
         <div class="row">
             <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
@@ -123,7 +123,7 @@
             </div>
         </div>
         <div class="form-group">
-            <h4 class="text-primary">Representante legal</h4>
+            <h2 class="text-primary titulo-h2">Representante legal</h2>
         </div>
         <div class="row">
             <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
@@ -151,80 +151,14 @@
                 <span id="id_email_rl" data-type="text"></span>
             </div>
         </div>
-        {{-- <div class="table-responsive">
-            <table class="table table-bordered table-striped table-sm">
-                <thead>
-                    <tr>
-                        <th>Aprob_File</th>
-                        <th>Aprob_Credito</th>
-                        <th>Alta_Cliente</th>
-                        <th>Estado_Cliente</th>
-                        <th>Doc_Ident</th>
-                        <th>Nro_Doc_Ident</th>
-                        <th>Nomb_Cliente</th>
-                        <th>Nomb_Rep_Legal</th>
-                        <th>Doc_Ident_RL</th>
-                        <th>Nro_Doc_Ident_RL</th>
-                        <th>Tlf_Anx_RL</th>
-                        <th>Cel_RL</th>
-                        <th>Email_RL</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input change-doc" name="aprob_file" id="id_aprob_file" data-type="checkbox" data-doc="estado_cliente_file">
-                                <label class="custom-control-label" for="id_aprob_file"></label>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input change-doc" name="aprob_cred" id="id_aprob_cred" data-type="checkbox" data-doc="estado_cliente_file">
-                                <label class="custom-control-label" for="id_aprob_cred"></label>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input change-doc" name="alta_clien" id="id_alta_clien" data-type="checkbox" data-doc="estado_cliente_file">
-                                <label class="custom-control-label" for="id_alta_clien"></label>
-                            </div>
-                        </td>
-                        <td>
-                            <b id="id_estado_cliente_file" data-type="text"></b>
-                        </td>
-                        <td>
-                            <span id="id_doc_ident" data-type="text"></span>
-                        </td>
-                        <td>
-                            <span id="id_nro_doc" data-type="text"></span>
-                        </td>
-                        <td>
-                            <span id="id_nom_cli" data-type="text"></span>
-                        </td>
-                        <td>
-                            <span id="id_nom_rl" data-type="text"></span>
-                        </td>
-                        <td>
-                            <span id="id_doc_ident_rl" data-type="text"></span>
-                        </td>
-                        <td>
-                            <span id="id_nro_doc_rl" data-type="text"></span>
-                        </td>
-                        <td>
-                            <span id="id_tlf_anex_rl" data-type="text"></span>
-                        </td>
-                        <td>
-                            <span id="id_cel_rl" data-type="text"></span>
-                        </td>
-                        <td>
-                            <span id="id_email_rl" data-type="text"></span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div> --}}
-       
+        <div class="form-group d-flex gap-1 align-items-center">
+            <h2 class="text-primary titulo-h2">Documentos obligatorios</h2>
+            <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#modal-agregar-documento">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+        <div class="d-flex flex-wrap gap-2 align-items-center" id="contenido-opciones-desarpobar"></div>
     </div>
 </section>
+@include('modal.agregarDocumentoObligatorio')
 @endsection

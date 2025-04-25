@@ -15,6 +15,7 @@ use App\Http\Controllers\Recojo;
 use App\Http\Controllers\Solicitud;
 use App\Http\Controllers\Ubigeo;
 use App\Http\Controllers\Usuario;
+use App\Http\Controllers\VerificacionGuiaController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth','share'])->prefix('intranet')->group(function (){
@@ -26,7 +27,7 @@ Route::middleware(['auth','share'])->prefix('intranet')->group(function (){
         Route::post('obtener', [DestinatariosController::class, 'list']);
         Route::put('actualizar/{destinatario}', [DestinatariosController::class, 'update']);
         Route::post('agregar', [DestinatariosController::class, 'store']);
-
+        Route::get('crear', [DestinatariosController::class, 'crear'])->name('Crear');
         Route::delete('eliminar/{destinatario}', [DestinatariosController::class, 'drop']);
         Route::get('agregar-modificar/{destinatario?}', [DestinatariosController::class, 'show']);
     });
@@ -42,6 +43,7 @@ Route::middleware(['auth','share'])->prefix('intranet')->group(function (){
         Route::post('obtener-editar', [Clientes::class, 'obtenerCliEdit']);
         Route::post('get-archivos', [Clientes::class, 'obtenerArchivosCli']);
         Route::post('change-files', [Clientes::class, 'cambiarEstadoArchi']);
+        Route::post('documentos-verificacion', [Clientes::class, 'documentosObligatorios']);
     });
     Route::prefix('ubigeo')->group(function(){
         Route::post('departamentos',[Ubigeo::class,'getDepartamentos']);
@@ -106,6 +108,14 @@ Route::middleware(['auth','share'])->prefix('intranet')->group(function (){
         Route::post('nuevo', [Embarque::class, 'agregarEmpresa']);
         Route::post('actualizar', [Embarque::class, 'actualizarEmpresa']);
         Route::post('eliminar', [Embarque::class, 'eliminarEmpresa']);
+
+    });
+    Route::prefix('verificacion')->name('verificacion')->group(function(){
+        Route::get('mostrar', [VerificacionGuiaController::class, 'indexVerificacion'])->name('Crear');
+        Route::post('guias', [VerificacionGuiaController::class, 'obtenerGuias']);
+        Route::post('guias/opciones-denegar', [VerificacionGuiaController::class, 'opcionesDenegar']);
+        Route::post('guias/denegar', [VerificacionGuiaController::class, 'desaprobarGuia']);
+        Route::post('guias/aprobar', [VerificacionGuiaController::class, 'aprobarGuia']);
 
     });
     Route::prefix('pedidos')->group(function(){

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\ClienteDetalleEnvio;
 use App\Models\Clientes as ModelsClientes;
+use App\Models\DocumentosObligatorios;
+use App\Models\DocumentosObligatoriosExcluidos;
 use App\Models\InformacionAdicional;
 use App\Models\ModeloSolicitud;
 use App\Models\Tipos\Documentos;
@@ -72,6 +74,9 @@ class Clientes extends Controller
         try {
             if($request->ajax()){
                 $result = ModelsClientes::getFileCliente($request->nro_doc);
+                $cliente = ModelsClientes::firstWhere('nro_doc',$request->nro_doc);
+                $result->alternativasDesaprobacion = DocumentosObligatorios::all(['id','opcion']);
+                $result->alternativasDesaprobacionInactiva = DocumentosObligatoriosExcluidos::select('doc_oblig_id')->where('cliente_id',$cliente->id)->pluck('doc_oblig_id');
                 return response()->json(['files' => $result]);
             }
         } catch (Exception $ex) {
@@ -131,6 +136,37 @@ class Clientes extends Controller
     {
         $clientes = ModelsClientes::getClientesFiles();
         return view('cliente.clidocumento',compact( 'clientes'));
+    }
+    public function documentosObligatorios(Request $request) {
+        $result = [];
+        switch ($request->tipo) {
+            case 'agregar-opcion':
+                DocumentosObligatorios::create([
+                    'opcion' => $request->opcion
+                ]);
+                $result = ['success' => 'Alternativa creada correctamente'];
+            break;
+            case 'eliminar-opcion':
+                DocumentosObligatorios::find($request->id)->delete();
+                $result = ['success' => 'Alternativa creada correctamente'];
+            break;
+            case 'desmarcar-opcion-cliente':
+                $cliente = ModelsClientes::firstWhere('nro_doc',$request->nro_doc);
+                if($request->seleccionar === "false"){
+                    DocumentosObligatoriosExcluidos::create([
+                        'doc_oblig_id' => $request->id,
+                        'cliente_id' => $cliente->id
+                    ]);
+                }else{
+                    DocumentosObligatoriosExcluidos::where([
+                        'doc_oblig_id' => $request->id,
+                        'cliente_id' => $cliente->id
+                    ])->delete();
+                }
+                $result = ['success' => 'Alternativa quitada correctamente para el cliente'];
+            break;
+        }
+        return response()->json($result);
     }
     public function cambiarEstadoArchi(Request $request)
     {

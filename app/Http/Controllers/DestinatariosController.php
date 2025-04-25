@@ -36,7 +36,6 @@ class DestinatariosController extends Controller
         $datos = $request->except('_token');
         $validator = Validator::make($datos, $this->rules);
         $validator->setAttributeNames($this->attributes);
-        
         $validator->validate();
         $destinatario = new Destinatarios();
         $destinatario->fill($datos);
@@ -64,6 +63,16 @@ class DestinatariosController extends Controller
         $destinatario->fill($request->all());
         $destinatario->save();
         return response()->json(['success' => 'destinatario actualizado correctamente']);
+    }
+    public function crear() {
+        $ubigeo = new Ubigeo();
+        $tipo_documentos = Documentos::where('estado','1')->get();
+        $agregar = true;
+        $provincias = [];
+        $distritos = [];
+        $caserios = [];
+        $departamentos = $ubigeo->getDepartamentosClientes();
+        return view("destinatario.crear",compact('departamentos','tipo_documentos','agregar','provincias','distritos','caserios'));
     }
     public function drop(Destinatarios $destinatario)
     {

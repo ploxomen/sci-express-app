@@ -71,13 +71,8 @@ function loadPage() {
         },
         columns: columnsTable,
     });
-    const btnAgregarImg = document.querySelector("#btn-new-img");
-    const fileImg = document.querySelector("#input-img-new");
     const contenidoImg = document.querySelector("#list-img");
-    let newImages = [];
-    let deleteImages = [];
-    btnAgregarImg.onclick = (e) => fileImg.click();
-    function ImageDelivery(nomFile,nomIdFile,idImg = null){
+    function ImageDelivery(nomFile,nomIdFile,idImg){
         const contenedor = document.createElement('div');
         contenedor.classList.add('img-delivery');
         contenedor.innerHTML = `<button type="button" class="eliminar-img" title="Eliminar esta imagen" data-id="${idImg}" data-name="${nomFile}"><i class="far fa-trash-alt"></i></button>
@@ -87,17 +82,7 @@ function loadPage() {
         </button>`;
         return contenedor;
     }
-    fileImg.onchange = function (event) {
-        const files = Array.from(event.target.files);
-        files.forEach((file) => {
-            newImages.push(file);
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                contenidoImg.append(ImageDelivery(file.name,e.target.result));
-            };
-            reader.readAsDataURL(file);
-        });
-    };
+    
     const bodyModal = document.getElementById('tabla-guias-modal');
     bodyModal.onclick = async (e) => {
         if(e.target.classList.contains('btn-danger')){
@@ -149,13 +134,14 @@ function loadPage() {
                 if(response.error){
                     return alertify.alert("Alerta","Error al obtener los resultados");
                 }
+                window.retorno = e.target.dataset.embarque;
                 for (const key in response) {
                     if (Object.prototype.hasOwnProperty.call(response, key)) {
                         const value = response[key];
                         const dom = document.querySelector(`#guardar-detalles-nuevo [name="${key}"]`)
                         if(key === "imagenes"){
                             value.forEach(img => {
-                                contenidoImg.append(ImageDelivery(img.nombre,img.url,img.id));
+                                contenidoImg.append(ImageDelivery(img.nombre,`/intranet/storage/img/retorno/${img.url}`,img.id));
                             });
                             continue;
                         }
@@ -188,6 +174,7 @@ function loadPage() {
                         dom.value = value;
                     }
                 }
+                document.querySelector("#btn-guardar-guias-embarcar").textContent = "Actualizar";
                 $('.simple-select2, .cb-mult-nuevo').trigger("change");
                 $('#guardar-detalles-nuevo').modal('show');
             }

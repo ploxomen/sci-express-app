@@ -57,6 +57,32 @@ function loadPage(){
             }
         })
     }
+    const contenidoOpciondesDesaprobacion = document.querySelector("#contenido-opciones-desarpobar");
+    contenidoOpciondesDesaprobacion.onclick = async (e) => {
+        if(e.target.classList.contains('btn-danger')){
+            alertify.confirm("Alerta","¿Deseas eliminar esta altenativa? Recueda que se eliminará para todos los clientes", async () => {
+                let datos = new FormData();
+                datos.append('tipo','eliminar-opcion');
+                datos.append('id',e.target.dataset.id);
+                const response = await general.funcfetch('documentos-verificacion',datos)
+                if(response.success){
+                    getConfigFiles($('#id_documento').val());
+                    return alertify.success(response.success);
+                }
+            },() => {})
+        }else if(e.target.classList.contains('custom-control-input')){
+            let datos = new FormData();
+            datos.append('tipo','desmarcar-opcion-cliente');
+            datos.append('id',e.target.dataset.id);
+            datos.append('seleccionar',e.target.checked);
+            datos.append('nro_doc',$('#id_documento').val());
+            const response = await general.funcfetch('documentos-verificacion',datos)
+            if(response.success){
+                getConfigFiles($('#id_documento').val());
+                return alertify.success(response.success);
+            }
+        }
+    }
     async function getConfigFiles(nro_doc) {  
         let datos = new FormData();
         estado.classList.remove('text-danger','text-success');
@@ -72,6 +98,21 @@ function loadPage(){
                     if (Object.hasOwnProperty.call(response.files, key)) {
                         const value = response.files[key];
                         const input = document.getElementById('id_' + key);
+                        if(key === "alternativasDesaprobacion"){
+                            let template = ``
+                            value.forEach(opcion => {
+                                template += `
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" ${response.files.alternativasDesaprobacionInactiva.indexOf(opcion.id) >= 0 ? '' : 'checked'} class="custom-control-input" id="opcion-desaprobacion-${opcion.id}" data-id="${opcion.id}">
+                                    <label class="custom-control-label" for="opcion-desaprobacion-${opcion.id}">${opcion.opcion}</label>
+                                    <button class='btn btn-danger btn-sm' data-id="${opcion.id}">
+                                    <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                `
+                            });
+                            contenidoOpciondesDesaprobacion.innerHTML = !template ? `<span class="text-danger">Sin opciones</span>` : template;
+                        }
                         if(!input){
                             continue;
                         }
@@ -97,6 +138,21 @@ function loadPage(){
             console.error(error);
         }
     }
-    
+    document.querySelector("#btn-guardar-opcion").onclick = e => document.querySelector("#send-form-opcion").click();
+    const formDocumentoObligatorio = document.querySelector("#form-opcion-documentos");
+    formDocumentoObligatorio.onsubmit = async e => {
+        e.preventDefault();
+        const datos = new FormData(e.target);
+        datos.append('tipo','agregar-opcion');
+        const response = await general.funcfetch('documentos-verificacion',datos)
+        if(response.success){
+            getConfigFiles($('#id_documento').val());
+            $('#modal-agregar-documento').modal('hide');
+            return alertify.success(response.success);
+        }
+    }
+    $('#modal-agregar-documento').on('hidden.bs.modal', function (event) {
+        formDocumentoObligatorio.reset();
+    })
 }
 window.addEventListener('DOMContentLoaded',loadPage);

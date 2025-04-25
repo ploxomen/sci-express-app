@@ -198,7 +198,7 @@ class Gias extends Controller
                         return datatables()->of(ModeloGuias::mostrarRetornoGuias($request->tipo, $id_usuario))->toJson();
                         break;
                     case 'mostrar-retorno':
-                        $retornoCargo = RetornoCargo::with('imagenes:id,nombre,url')->select(['fch_emba', 'id_empr_tran', 'tipo_comprobantes', 'nro_guias', 'importe_embarque', 'fecha_llegada', 'hr_llegada', 'nro_cajas', 'nro_jabas','total_bultos', 'nro_cajones', 'nro_sobres', 'nro_paquetes', 'num_otros', 'detalle_otro', 'id'])->find($request->id);
+                        $retornoCargo = RetornoCargo::with('imagenes')->select(['fch_emba', 'id_empr_tran', 'tipo_comprobantes', 'nro_guias', 'importe_embarque', 'fecha_llegada', 'hr_llegada', 'nro_cajas', 'nro_jabas','total_bultos', 'nro_cajones', 'nro_sobres', 'nro_paquetes', 'num_otros', 'detalle_otro', 'id'])->find($request->id);
                         $guias = $retornoCargo->detalleGuias()->pluck('id_guia')->toArray();
                         $retornoCargo->guias = ModeloGuias::guias()->select('guias.id','prefijo','tipo_guia','nro_guia','remi_nro_docu','dest_nro_docu','nomb_prov','nom_cli','clientes_de_clientes.nombres AS destinatario')->whereIn('guias.id',$guias)->get();
                         return $retornoCargo;

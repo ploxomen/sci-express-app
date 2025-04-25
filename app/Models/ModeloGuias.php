@@ -639,13 +639,13 @@ class ModeloGuias extends Model
             $actualizar = $query->update(['rc.estado' =>4,'pr.estado' => 3,'pr.fechaHrTermino' => $fechaHr]);
             $guiasTemp = DB::table("detalle_retorno_cargo AS drc")->select("g.*","drc.id_guia")->join("guias AS g","drc.id_guia","=","g.id")
             ->whereIn("drc.id_retorno_cargo",$arrayRetornos);
-            $idsGuias = [];
-            foreach ($guiasTemp->get() as $guia) {
-                $idsGuias[] = $guia->id;
-            }
+            // $idsGuias = [];
+            // foreach ($guiasTemp->get() as $guia) {
+            //     $idsGuias[] = $guia->id;
+            // }
             $guiasTemp->update(["g.situ" => 11]);
-            $guias = DB::table("guias")->where(['activo' => 1,'estado' => 1, 'situ' => 11])->whereIn('id',$idsGuias)->get();
-            ModelFacturacion::calcularGuias($guias);
+            // $guias = DB::table("guias")->where(['activo' => 1,'estado' => 1, 'situ' => 11])->whereIn('id',$idsGuias)->get();
+            // ModelFacturacion::calcularGuias($guias);
             DB::commit();
             return ['success' => $actualizar];
         } catch (\Throwable $th) {

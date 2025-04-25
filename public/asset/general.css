@@ -144,6 +144,12 @@ table thead tr th{
 .gap-1{
     gap: 4px;
 }
+.gap-2{
+    gap: 8px;
+}
+.gap-3{
+    gap: 12px;
+}
 .navegacion ul li a .icono{
     font-size: 16px;
     text-align: center;
@@ -258,6 +264,12 @@ ul{
     color: rgb(103, 103, 255);
     font-size: 30px;
     transition: color .3s ease-in-out;
+}
+.titulo-h1{
+    font-size: 2rem;
+}
+.titulo-h2{
+    font-size: 1.3rem;
 }
 .new-img:hover{
     background: rgb(103, 103, 255);

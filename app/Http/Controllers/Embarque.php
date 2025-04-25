@@ -8,13 +8,16 @@ use App\Models\InformacionAdicional;
 use App\Models\ModeloEmbarque;
 use App\Models\ModeloGuias;
 use App\Models\ModeloManifiesto;
+use App\Models\RetornoCargo;
 use App\Models\RetornoCargoDetalle;
+use App\Models\RetornoCargoImg;
 use App\Models\User;
 use App\Models\Vehiculos;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -210,6 +213,30 @@ class Embarque extends Controller
                 case 'consultas_guias':
                     $result = ModeloEmbarque::obtenerEmbarquesGuardados(Auth::id());
                 break;
+                case 'editar-retorno':
+                    $imgs = !$request->hasFile('new_images') ? [] : $request->file('new_images');
+                    foreach ($imgs as $img) {
+                        $extension = $img->getClientOriginalExtension();
+                        $nombreUnico = Str::uuid() . '.' . $extension;
+                        $img->storeAs('retornos-img',$nombreUnico);
+                        RetornoCargoImg::create([
+                            'retorno_cargo_id' => $request->id_retorno,
+                            'nombre' => $img->getClientOriginalName(),
+                            'url' => $nombreUnico,
+                        ]);
+                    }
+                    $imgsDelete = explode(";",$request->input('deleteImages',""));
+                    $imgsModel = RetornoCargoImg::whereIn('id',$imgsDelete)->get();
+                    foreach ($imgsModel as $imgDelete) {
+                        $filePath = "retornos-img/{$imgDelete->url}";
+                        if (Storage::disk('local')->exists($filePath)) {
+                            Storage::disk('local')->delete($filePath);
+                        }
+                        $imgDelete->delete();
+                    }
+                    RetornoCargo::find($request->id_retorno)->update($request->except('tipo','id_retorno'));
+                    $result = ['success' => 'Retorno modificado correctamente'];
+                break;
                 case 'retornar_guias':
                     $guias_nuevas = [];
                     $guias_guardadas = [];
@@ -222,17 +249,17 @@ class Embarque extends Controller
                         unset($datos['guias_nuevas']);
                         $guias_nuevas = json_decode($request->guias_nuevas,true);
                     }
-                    $imgs = $request->file('new_images');
+                    $imgs = !$request->hasFile('new_images') ? [] : $request->file('new_images');
                     $imgGuardar = [];
                     foreach ($imgs as $img) {
                         $extension = $img->getClientOriginalExtension();
                         $nombreUnico = Str::uuid() . '.' . $extension;
-                        $img->storeAs('app/retornos-img',$nombreUnico);
+                        $img->storeAs('retornos-img',$nombreUnico);
                         $imgGuardar[] = [
                             'nombre' => $img->getClientOriginalName(),
                             'url' => $nombreUnico,
                         ];
-                    }    
+                    }
                     $result = ModeloEmbarque::actualizarDevolucionCargo($datos, $guias_nuevas,$guias_guardadas, Auth::id(),$imgGuardar);
                 break;
             }
