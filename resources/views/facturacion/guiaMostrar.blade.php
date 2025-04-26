@@ -25,7 +25,7 @@
         <div class="form-group col-12 col-md-6 col-lg-2">
             <label for="id_estado_estado">Estado</label>
             <select name="estado" id="id_estado_estado" class="form-control filtros simple-select2" required>
-                <option value="11" selected>CARGO EN CD</option>
+                <option value="15" selected>VERIFICADO</option>
                 <option value="12">FACTURADO</option>
             </select>
         </div>
