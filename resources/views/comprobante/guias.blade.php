@@ -1,6 +1,6 @@
 @extends('general.index')
 @section('head')
-    <script src="{{ asset('asset/guias.js?v2.1') }}"></script>
+    <script src="{{ asset('asset/guias.js?v2.2') }}"></script>
     <title>Guias</title>
 @endsection
 @section('body')
@@ -96,13 +96,9 @@
                                 class="text-danger data-anulada-oculta">*</small></label>
                         <select name="comp_clie[]" id="id_comp_clie" disabled required class="form-control data-anulada"
                             multiple>
-                            <option value="BOLETA ELECTRÓNICA">BOLETA ELECTRÓNICA</option>
-                            <option value="FACTURA ELECTRÓNICA">FACTURA ELECTRÓNICA</option>
-                            <option value="GUIA DE REMISIÓN (R) ELECTRÓNICA">GUIA DE REMISIÓN (R) ELECTRÓNICA</option>
-                            <option value="GUIA DE REMISIÓN (T) ELECTRONICA">GUIA DE REMISIÓN (T) ELECTRÓNICA</option>
-                            <option value="GUIA DE INTERNAMIENTO">GUIA DE INTERNAMIENTO</option>
-                            <option value="ORDEN DE COMPRA">ORDEN DE COMPRA</option>
-                            <option value="OTRO" class="delete-option">OTRO</option>
+                            @foreach ($comprobantes as $comprobante)
+                                <option value="{{ $comprobante["comprobante"] }}">{{ $comprobante["comprobante"] }}</option>
+                            @endforeach
                             <option value="NINGUNO" class="delete-option" selected>NINGUNO</option>
                         </select>
                     </div>

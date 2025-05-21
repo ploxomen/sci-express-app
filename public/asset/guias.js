@@ -419,6 +419,7 @@ function pageLoaded() {
             $("#id_nro_comp_cli").append(new Option(valor, valor, true, true));
         });
         $("#id_comp_clie").val(comprobantesAgregados.tipos).trigger("change");
+        $('#id_cant_comp').val( comprobantesAgregados.series.length);
         $("#agregar-comprobantes").modal("hide");
     };
     contenidoComprobantes.onclick = function (e) {
