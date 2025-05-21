@@ -6,6 +6,7 @@ function pageLoaded() {
         tipos: [],
         series: [],
     };
+    let comprobantesGenerales = [];
     const tableDetalleGuia = document.getElementById("tabla-detalle");
     const $cbCliente = document.getElementById("id_remi_nomb");
     $("#id_comp_clie")
@@ -217,6 +218,7 @@ function pageLoaded() {
         );
         datos.append("id_cliente_facturacion", idCliente);
         datos.append("tipo_guia", tipoCbRemi);
+        datos.append("comprobantes_general",JSON.stringify(comprobantesGenerales));
         let detalles = new Array();
         for (const e of tableDetalleGuia.children) {
             let objeto = new Object();
@@ -390,6 +392,7 @@ function pageLoaded() {
         $("#id_nro_comp_cli").empty();
         comprobantesAgregados.tipos = [];
         comprobantesAgregados.series = [];
+        comprobantesGenerales = [];
         for (const element of contenidoComprobantes.children) {
             comprobantesAgregados.tipos.push(
                 element.querySelector('[data-type="comprobante"]').value
@@ -400,6 +403,10 @@ function pageLoaded() {
             ) {
                 continue;
             }
+            comprobantesGenerales.push({
+                "tipo" : element.querySelector('[data-type="comprobante"]').value,
+                "serie" : element.querySelector('[data-type="serie"]').value
+            })
             comprobantesAgregados.series.push(
                 `${valoresComprobantes(
                     element.querySelector('[data-type="comprobante"]').value
@@ -428,8 +435,11 @@ function pageLoaded() {
     btnAgregarComprobante.onclick = (e) => {
         $("#lista-comprobantes select").select2("destroy");
         const liCopia = contenidoComprobantes.children[0].cloneNode(true);
-        for (const element of liCopia.querySelectorAll("input")) {
+        for (const element of liCopia.querySelectorAll("input, select")) {
             element.value = "";
+            if(element.dataset.type === "serie"){
+                element.innerHTML = "";
+            }
         }
         contenidoComprobantes.append(liCopia);
         for (const element of contenidoComprobantes.querySelectorAll(
@@ -438,11 +448,33 @@ function pageLoaded() {
             $(element).select2({
                 theme: "bootstrap",
                 width: "100%",
-                placeholder: element.classList.contains("simple-select2") ? "Seleccione una opción" : "Seleccione o agregue una opción",
+                placeholder: element.classList.contains("simple-select2")
+                    ? "Seleccione una opción"
+                    : "Seleccione o agregue una opción",
                 tags: !element.classList.contains("simple-select2"),
             });
+            if (element.dataset.type === "comprobante") {
+                $(element).on("select2:select", generarSeries);
+            }
         }
     };
+    function generarSeries(e) {
+        console.log(e)
+        let selectedOption = e.target.selectedOptions[0];
+        let series = selectedOption.getAttribute("data-series");
+        e.target.closest("li").querySelector("[data-type='serie']").innerHTML =
+            "";
+        if (series) {
+            series = series.split(";");
+            series.forEach((serie) => {
+                e.target
+                    .closest("li")
+                    .querySelector("[data-type='serie']")
+                    .append(new Option(serie, serie));
+            });
+        }
+    }
+    $("#agregar-comprobantes [data-type='comprobante']").on("select2:select", generarSeries);
 }
 function calcVolumen(event) {
     if (parseFloat(event.target.value) < 0 || isNaN(event.target.value)) {

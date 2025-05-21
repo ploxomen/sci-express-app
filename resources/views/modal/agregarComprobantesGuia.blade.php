@@ -20,24 +20,17 @@
                             <div class="col-12 col-md-6">
                                 <label for="comprobante-tipo-0">Tipo comprobante</label>
                                 <select class="simple-select2" data-type="comprobante">
-                                    <option value="FACTURA ELECTRÓNICA" selected>FACTURA ELECTRÓNICA</option>
-                                    <option value="BOLETA ELECTRÓNICA">BOLETA ELECTRÓNICA</option>
-                                    <option value="GUIA DE REMISIÓN (R) ELECTRÓNICA">GUIA DE REMISIÓN (R) ELECTRÓNICA
-                                    </option>
-                                    <option value="GUIA DE REMISIÓN (T) ELECTRONICA">GUIA DE REMISIÓN (T) ELECTRÓNICA
-                                    </option>
-                                    <option value="GUIA DE INTERNAMIENTO">GUIA DE INTERNAMIENTO</option>
-                                    <option value="ORDEN DE COMPRA">ORDEN DE COMPRA</option>
-                                    <option value="OTRO" class="delete-option">OTRO</option>
+                                    @foreach ($comprobantes as $comprobante)
+                                        <option value="{{ $comprobante["comprobante"] }}" {{ $comprobante["comprobante"] === "FACTURA ELECTRÓNICA" ?? 'selected'}} data-series="{{ implode(";",$comprobante["series"]) }}">{{ $comprobante["comprobante"] }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-md-2">
                                 <label for="comprobante-serie-0">Serie</label>
                                 <select class="cb-select2-tags" data-type="serie">
-                                    <option value="F001" selected>F001</option>
-                                    <option value="F008">F008</option>
-                                    <option value="F009">F009</option>
-                                    <option value="F009">F009</option>
+                                    @foreach ($comprobantes[0]["series"] as $serie)
+                                        <option value="{{ $serie }}">{{$serie}}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-md-3">

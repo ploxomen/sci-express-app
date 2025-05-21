@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\Reportes;
 use App\Models\ClienteDetalleEnvio;
 use App\Models\Clientes;
+use App\Models\ComprobantesGuias;
 use App\Models\InformacionAdicional;
 use App\Models\ModeloCluster;
 use App\Models\ModeloGuias;
@@ -18,6 +19,7 @@ use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
@@ -41,7 +43,8 @@ class Gias extends Controller
         $embaseEmbalaje = InformacionAdicional::getEnvaseEmbalaje();
         $grupoEnvio = InformacionAdicional::getGrupoEnvio();
         $tipoEnvios = InformacionAdicional::getTipoEnvio();
-        return view('comprobante.guias', compact('nro_guia_result', 'cli_cli', 'clientes', 'departamentos', 'hoy', 'trayecto', 'via_envios', 'nro_os', 'tipo_documentos', 'modulos', 'antes', 'embaseEmbalaje', 'grupoEnvio', 'tipoEnvios'));
+        $comprobantes = ComprobantesGuias::listaComprobantes();
+        return view('comprobante.guias', compact('nro_guia_result', 'cli_cli', 'clientes', 'departamentos', 'hoy', 'trayecto', 'via_envios', 'nro_os', 'tipo_documentos', 'modulos', 'antes', 'embaseEmbalaje', 'grupoEnvio', 'tipoEnvios','comprobantes'));
     }
     public function generarNroGuiaSCI()
     {
@@ -404,7 +407,20 @@ class Gias extends Controller
     public function addGuia(Request $request)
     {
         try {
-            $datos = $request->all();
+            if($request->has('comprobantes_general')){
+                $comprobantes = json_decode($request->comprobantes_general);
+                foreach ($comprobantes as $comprobante) {
+                    $existeComprobante = ComprobantesGuias::where('comprobante',$comprobante->tipo)->where('serie','LIKE','%'. $comprobante->serie.'%')->exists();
+                    if($existeComprobante){
+                        continue;
+                    }
+                    $comprobanteDB = ComprobantesGuias::where('comprobante',$comprobante->tipo)->first();
+                    ComprobantesGuias::where('comprobante',$comprobante->tipo)->update([
+                        'serie' => $comprobanteDB->serie . ";" . $comprobante->serie
+                    ]);
+                }
+            }
+            $datos = $request->except('comprobantes_general');
             $add_cli = $request->has('add_cli_cli') ? $request->add_cli_cli : null;
             $add_cli_bool = $request->has('add_cli_bool') ? $request->add_cli_bool : null;
             $detalles = [];
