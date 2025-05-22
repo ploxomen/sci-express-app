@@ -41,8 +41,9 @@ function loadPage(){
     }
     document.body.addEventListener('click',function(e){
         subMenuSmall.classList.add('d-none');
-        if($navegacion.classList.contains('menu-small')&& window.innerWidth <= 600){
-            $navegacion.classList.remove('menu-small')
+        console.log(e.target)
+        if($navegacion.classList.contains('menu-small') && window.innerWidth <= 600 && e.target.closest('#navegacion') !== $navegacion){
+            $navegacion.classList.remove('menu-small');
         }
     });
     let active_menu = localStorage.getItem('active_small_menu');

@@ -12,7 +12,7 @@
         rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{ asset('iconos/fontawesome/css/all.css') }}">
-    <link rel="stylesheet" href="{{ asset('asset/general.css') }}">
+    <link rel="stylesheet" href="{{ asset('asset/general.css?v.1.3') }}">
     <link rel="stylesheet" href="{{ asset('library/bootstrap/bootstrap.min.css') }}">
     <script src="{{ asset('library/jquery/external/jquery/jquery.js') }}"></script>
     <script src="{{ asset('library/bootstrap/popper.min.js') }}"></script>
@@ -26,7 +26,7 @@
     <link rel="stylesheet" href="{{ asset('library/pagination/pagination.css') }}">
     <script src="{{ asset('library/pagination/pagination.js') }}"></script>
     <script src="{{ asset('asset/general.js') }}"></script>
-    <script src="{{ asset('asset/home.js') }}"></script>
+    <script src="{{ asset('asset/home.js?v.1.2') }}"></script>
     <link rel="icon" href="{{ asset('asset/img/icono.png') }}">
     <meta name="theme-color" content="#2e405e">
     @yield('head')

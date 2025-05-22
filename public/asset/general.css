@@ -182,12 +182,12 @@ table thead tr th{
     width: 100%;
     visibility: visible;
 }
-.menu-small .menu-desplegable a:hover{
+/* .menu-small .menu-desplegable a:hover{
     background: var(--color-secundario);
 }
 .menu-small .menu-desplegable a:hover{
     color: var(--color-principal);
-}
+} */
 .content-mi-info{
     position: fixed;
     background: white;
@@ -326,19 +326,17 @@ ul{
     .menu-small .menu-desplegable:hover{
         background: initial !important;
     }
-    .menu-small .menu-desplegable:hover a{
-        color: var(--color-secundario) !important;
-    }
     .activeli{
         background: var(--color-secundario) !important;
     }
-    .menu-small .menu .menu-desplegable .sub-menu .hover-menu:hover a,
-    .menu-small .menu .sub-menu .activeli a {
-        color: var(--color-principal) !important;
+    .menu-small .title,
+    .menu-small .fa-angle-down  {
+        display: block !important;
     }
-    .menu-small .menu .sub-menu a {
-        color: var(--color-secundario) !important;
-    }
+}
+.menu-small .fa-angle-down,
+.menu-small .title {
+    display: none;
 }
 .sub-menu {
     margin-left: 15px;
