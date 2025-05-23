@@ -96,6 +96,7 @@ Route::middleware(['auth','share'])->prefix('intranet')->group(function (){
         Route::post('eliminar', [Cluster::class, 'eliminarCluster']);
         Route::post('obtener-provincia', [Manifiesto::class, 'obtenerClusterProv']);
         Route::post('modificar-pedidos', [Entrega::class, 'agregarPedidosEntregados']);
+        Route::get('embarcar/guias-rechazadas/{guia}', [Embarque::class, 'guiaRechazada']);
         Route::post('embarcar/por-retornar', [Embarque::class, 'obtenerDevolucionGuias']);
         Route::post('embarcar/retornar', [Embarque::class, 'retornarGuias']);
         Route::get('entregar-pedidos', [Entrega::class, 'entregaGuias'])->name('clusterEntregaPedidos');

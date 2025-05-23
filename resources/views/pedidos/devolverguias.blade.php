@@ -39,8 +39,9 @@
                             title="Embarcar guías guardadas y/o seleccionadas">Embarcar</button>
                     </div>
                     <h4 class="text-primary">Guías a retornar</h4>
-                    <div class="form-group d-flex">
-                        <div class="cuadro table-danger mr-1"></div><span>Incidencia en la entrega</span>
+                    <div class="form-group d-flex gap-1">
+                        <div class="cuadro table-warning"></div><span>Incidencia en la entrega</span>
+                        <div class="cuadro table-danger"></div><span>Guias rechazadas</span>
                     </div>
                     <table class="table table-sm table-bordered" id="tabla-retorno-guia">
                         <thead>
@@ -99,4 +100,5 @@
     @include('modal.detalleguia')
     @include('modal.devolverguiasmodal')
     @include('modal.detallembarque')
+    @include('modal.detallerechazo')
 @endsection

@@ -21,7 +21,14 @@ function loadPage() {
                 </div>`;
                 },
             },
-            { data: "nro_guia" },
+            {
+                data: "nro_guia",
+                render: function (data, type, row) {
+                    return row.retorno_rechazo === 1
+                        ? `<span>${data}</span><button class="btn btn-sm btn-danger" style="font-size:8px;" data-guia="${row.id}"><i class="fas fa-info"></i></button>`
+                        : data;
+                },
+            },
             { data: "remi_nro_docu" },
             { data: "nom_cli_remitente" },
             { data: "dest_nro_docu" },
@@ -31,10 +38,49 @@ function loadPage() {
             { data: "dest_prov" },
         ],
         createdRow: function (row, data) {
-            let bgTable = data.situ == 14 ? "table-danger" : "";
+            let bgTable = "";
+            if (data.retorno_rechazo === 1) {
+                bgTable = "table-danger";
+            }
+            if (data.situ == 14) {
+                bgTable = "table-warning";
+            }
             $(row).addClass(bgTable);
         },
     });
+    document.querySelector("#tabla-retorno-guia").onclick = async (event) => {
+        if(event.target.classList.contains('btn-danger')){
+            try {
+                const response = await fetch("guias-rechazadas/" + event.target.dataset.guia).then(response => response.json());
+                if(!response.data) {
+                    return alertify.alert("Mensaje","No se encontraron rechazos para mostrar");
+                }
+                renderMotivosRechazos(response.data);
+                $("#embarque-rechazos").modal("show")
+            } catch (error) {
+                alertify.error("error al mostrar los rechazos");
+                console.error(error)
+            }
+        }
+    }
+    function renderMotivosRechazos(rechazos){
+        let template = "";
+        rechazos.forEach(rechazo => {
+            template += `<div class="card" style="font-size:0.75rem;">
+                <div class="card-body p-2">
+                <h5 style="font-size:1rem;" class="text-primary"> Rechazado por ${rechazo.responsable}</h5>
+                <h6 style="font-size:0.75rem;" class="card-subtitle mb-2 text-muted">${rechazo.fecha_hora}</h6>
+                <strong>Motivos:</strong>
+                <ul class="card-text">
+                    <li>
+                    ${rechazo.detalles.join("</li><li>")}
+                    </li>
+                </ul>`
+            template += rechazo.otros_detalles ? `<p>${rechazo.otros_detalles}</p>` : '';
+            template += '</div></div>'
+        });
+        return document.getElementById("motivos-rechazo").innerHTML = template;
+    }
     cbSelectAll.addEventListener("change", function () {
         const activo = this.checked;
         for (const tr of tblGuia.children) {
@@ -221,13 +267,13 @@ function loadPage() {
         document.querySelector("#btn-guardar-guias-embarcar").textContent =
             "Embarcar";
         frmCargos.reset();
-        $('#id_nro_guias').empty();
-        $('.simple-select2, .cb-mult-nuevo').trigger("change");
+        $("#id_nro_guias").empty();
+        $(".simple-select2, .cb-mult-nuevo").trigger("change");
         if (window.retorno) {
             delete window.retorno;
         }
-        Array.from(contenidoImg.children).forEach((li,key) => {
-            if(key > 1){
+        Array.from(contenidoImg.children).forEach((li, key) => {
+            if (key > 1) {
                 li.remove();
             }
         });

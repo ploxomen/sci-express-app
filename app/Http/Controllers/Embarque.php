@@ -8,12 +8,14 @@ use App\Models\InformacionAdicional;
 use App\Models\ModeloEmbarque;
 use App\Models\ModeloGuias;
 use App\Models\ModeloManifiesto;
+use App\Models\RechazoGuiaRetornada;
 use App\Models\RetornoCargo;
 use App\Models\RetornoCargoDetalle;
 use App\Models\RetornoCargoImg;
 use App\Models\User;
 use App\Models\Vehiculos;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -127,6 +129,19 @@ class Embarque extends Controller
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
+    }
+    public function guiaRechazada(ModeloGuias $guia)  {
+        $rechazos = RechazoGuiaRetornada::where('guia_id',$guia->id)->get()->map(function($row){
+            $usuarioResponsable = User::find($row->usuario_id,['name','last_name']);
+            return [
+                'detalles' => explode(';',$row->opciones_denegado),
+                'otros_detalles' => $row->detalles,
+                'responsable' => "{$usuarioResponsable->name} {$usuarioResponsable->last_name}",
+                'fecha_hora' => Carbon::parse($row->created_at)->format('d/m/Y H:i')
+            ];
+        });
+        return response()->json(['data' => $rechazos,'mensaje' => 'rechazos obtenidos correctamente']);
+        
     }
     public function obtenerDevolucionGuias(Request $request)
     {

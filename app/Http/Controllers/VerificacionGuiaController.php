@@ -34,11 +34,12 @@ class VerificacionGuiaController extends Controller
     }
     public function desaprobarGuia(Request $request) {
         ModeloGuias::find($request->guia)->update(['situ' => 8]);
+        $documentos = DocumentosObligatorios::whereIn('id',$request->opciones)->select('opcion')->get()->pluck('opcion')->toArray();
         RechazoGuiaRetornada::create([
             'detalles' => $request->detalle,
             'guia_id' => $request->guia,
             'usuario_id' => Auth::id(),
-            'opciones_denegado' => $request->has('opciones') ? implode(";",$request->opciones) : ""
+            'opciones_denegado' => $request->has('opciones') ? implode(";",$documentos) : ""
         ]);
         return response()->json(['success' => 'Guía rechazada correctamante']);
 
