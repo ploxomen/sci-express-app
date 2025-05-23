@@ -7,8 +7,8 @@
     <script src="{{ asset('library/datatable/datatable-bootstrap4.min.js') }}"></script>
     <script src="{{ asset('library/datatable/datatable-responsive.min.js') }}"></script>
     <script src="{{ asset('library/datatable/responsive-bootstrap.min.js') }}"></script>
-    <script src="{{ asset('asset/devolverguias.js') }}"></script>
-    <script src="{{ asset('asset/retornoguias.js') }}"></script>
+    <script src="{{ asset('asset/devolverguias.js?v.1.2') }}"></script>
+    <script src="{{ asset('asset/retornoguias.js?v.1.2') }}"></script>
     <title>Retorno de Cluster</title>
 @endsection
 @section('body')
