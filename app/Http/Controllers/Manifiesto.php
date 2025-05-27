@@ -38,7 +38,8 @@ class Manifiesto extends Controller
         $hoy = date('Y-m-d');
         $antes = date('Y-m-d',strtotime($hoy . '-2 days'));
         $departamentoProv = $this->arrayDepartamentosProvincias();
-        return view('manifiesto.maninuevo', compact('antes','departamentoProv','trayectos','hoy','tipo_documentos', 'modulos'));
+        $via_envios = InformacionAdicional::viaEnvio();
+        return view('manifiesto.maninuevo', compact('antes','departamentoProv','trayectos','hoy','via_envios','tipo_documentos', 'modulos'));
     }
     public function obtenerTodosManifiestos(Request $request)
     {

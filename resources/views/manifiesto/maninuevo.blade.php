@@ -85,8 +85,9 @@
                 <label for="id_via_traslado">Vía de traslado</label>
                 <select name="via_traslado" id="id_via_traslado" class="form-control aplicar-filtro simple-select2">
                     <option value="todos" selected>TODOS</option>
-                    <option value="terrestre">TERRESTRE</option>
-                    <option value="aereo">AEREO</option>
+                    @foreach ($via_envios as $via)
+                        <option value="{{ $via->id }}">{{ $via->envio }}</option>
+                    @endforeach
                 </select>
             </div>
             {{-- <div class="col-12 col-md-4 col-xl-2 form-group">

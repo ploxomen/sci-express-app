@@ -116,10 +116,10 @@
         <div class="form-group col-12 col-md-6 col-lg-3">
             <label for="id_prov_dest">Ciudades base</label>
             <select name="prov_dest" id="id_prov_dest" class="form-control simple-select2">
-                <option value="todos">TODOS</option>
+                {{-- <option value="todos">TODOS</option>
                     @foreach ($ciudadesBase as $key => $ciudad)
                         <option data-position="{{$key}}" value="{{$ciudad->value}}" data-tipo="{{$ciudad->tipo_base}}">{{$ciudad->nombre}}</option>
-                    @endforeach
+                    @endforeach --}}
             </select>
         </div>
         <div class="form-group col-12">
