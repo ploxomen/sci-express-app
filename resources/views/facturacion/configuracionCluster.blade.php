@@ -1,6 +1,6 @@
 @extends('general.index')
 @section('head')
-    <script src="{{asset('asset/facturacionCluster.js')}}"></script>
+    <script src="{{asset('asset/facturacionCluster.js?v.1')}}"></script>
     <title>Configuracion Cluster</title>
 @endsection
 @section('body')

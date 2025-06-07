@@ -1,6 +1,6 @@
 @extends('general.index')
 @section('head')
-    <script src="{{asset('asset/facturacionCliente.js')}}"></script>
+    <script src="{{asset('asset/facturacionCliente.js?v.1')}}"></script>
     <title>Configuracion Cliente</title>
 @endsection
 @section('body')

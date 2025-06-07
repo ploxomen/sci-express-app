@@ -78,7 +78,7 @@ function loadPage(){
     const boxInfoCostos = document.querySelector("#boxInfoCostos");
     const boxInfoTable = document.querySelector("#boxNumGuias");
     function changeValue(valor){
-        if (valor == "11") {
+        if (valor == "15") {
             if (tablaFacturacion) {
                 tablaFacturacion.destroy();
                 tablaFacturacion = null;

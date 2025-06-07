@@ -65,7 +65,7 @@ class ModelFacturacion extends Model
         ->leftJoin("embarque_ciudad_llegada AS ec","ec.id","=","em.id_embarque_ciudad")
         ->leftJoin("ciudades AS ci","ci.id","=","ec.id_ciudad")
         ->leftJoin("ciudades AS ci2","ci2.id","=","g.ciudad_destino_final")
-        ->whereIn("g.id_cluster",$idsCluster)->where(['g.activo' => 1,'g.estado' => 1,'g.via_tras' => $traslado])->where('g.situ','>=',11)->where('g.situ','!=',14)->where("g.estado_fact_cluster",$estado == "11" ? 0 : 1)->whereBetween('g.fech_emis',[$fechaInicio,$fechaFin])->groupBy("g.id")->orderBy("g.prefijo")->orderBy("g.nro_guia")->get();
+        ->whereIn("g.id_cluster",$idsCluster)->where(['g.activo' => 1,'g.estado' => 1,'g.via_tras' => $traslado])->where('g.situ','>=',11)->where('g.situ','!=',14)->where("g.estado_fact_cluster",$estado == "15" ? 0 : 1)->whereBetween('g.fech_emis',[$fechaInicio,$fechaFin])->groupBy("g.id")->orderBy("g.prefijo")->orderBy("g.nro_guia")->get();
         foreach ($guias as $guia) {
             $guia->baseCluster = $guia->tipoBaseCluster == "distrito" ? (new Ubigeo)->getNameDistrito($guia->baseCluster) : $guia->baseCluster;
             $guia->nomCiudadFinal = $guia->tipoFinal == "distrito" ? (new Ubigeo)->getNameDistrito($guia->nomCiudadFinal) : $guia->nomCiudadFinal;
@@ -215,7 +215,7 @@ class ModelFacturacion extends Model
         try {
             $guiasAdd = [];
             foreach ($guias as $guia) {
-                $g = DB::table("guias")->where(['id' => $guia['idGuia'],'id_cliente_facturacion' => $cliente,'activo' => 1, 'situ' => 11, 'estado' => 1]);
+                $g = DB::table("guias")->where(['id' => $guia['idGuia'],'id_cliente_facturacion' => $cliente,'activo' => 1, 'situ' => 15, 'estado' => 1]);
                 $gg = $g->first();
                 if(!empty($gg)){
                     $guiasAdd[] = ['id_cliente' => $gg->id];
