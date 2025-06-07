@@ -271,7 +271,7 @@ class ModelFacturacion extends Model
     }
     public static function cantidadGuiasAFacturar($idCliente,$viaTraslado)
     {
-        return DB::table("guias")->where(["situ" => 11,"activo" => 1, "estado" => 1,"id_cliente_facturacion" => $idCliente, "via_tras" => $viaTraslado]);
+        return DB::table("guias")->where(["situ" => 15,"activo" => 1, "estado" => 1,"id_cliente_facturacion" => $idCliente, "via_tras" => $viaTraslado]);
     }
     public static function mostrarFacturacionClientes($idCliente){
         $ciudadesBase = self::mostrarCiudades();
