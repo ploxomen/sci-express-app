@@ -59,6 +59,7 @@ class Recojo extends Controller
     {
         $modulos = User::getModulos(Auth::id());
         $programaciones = ModeloGuias::retornosCargosProgramados(Auth::id());
+        //dd($programaciones);
         return view('retornos.recojerProgramacion',compact('modulos','programaciones'));
     }
     public function accionesRetornoEntrega(Request $request)

@@ -667,7 +667,7 @@ class ModeloGuias extends Model
     public static function detalleRetornoCargo($idDetalleRetorno)
     {
         return DB::table('programacion_detaller_recojo_retornos AS prd')
-        ->select("rc.id","rc.estado","rc.importe_embarque","rc.tipo_comprobantes","rc.total_bultos","rc.importe_embarque","rc.nro_cajas","rc.nro_jabas","rc.nro_cajones","rc.nro_sobres","rc.nro_paquetes","rc.num_otros","rc.detalle_otro","et.empresa")
+        ->select("rc.id","rc.estado","rc.importe_embarque","rc.tipo_comprobantes","rc.nro_guias","rc.total_bultos","rc.importe_embarque","rc.nro_cajas","rc.nro_jabas","rc.nro_cajones","rc.nro_sobres","rc.nro_paquetes","rc.num_otros","rc.detalle_otro","et.empresa")
         ->selectRaw("LPAD(rc.id,5,'0') AS nroRetorno,fn_obtener_nombres_clusters(rc.id_cluster) AS nombreCluster,CONCAT(DATE_FORMAT(rc.fecha_llegada,'%d/%m/%Y'),' ',TIME_FORMAT(rc.hr_llegada,'%h:%i %p')) AS fechaHrLlegada,IF(rc.estado = 3,DATE_FORMAT(prd.fechaHoraRecojido,'%d/%m/%Y %h:%i %p'),null) AS fechaHrRecogido")
         ->join("retorno_cargo AS rc","prd.idRetornoCargo","=","rc.id")
         ->join("empresa_transporte AS et","et.id","=","rc.id_empr_tran")

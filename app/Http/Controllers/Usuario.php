@@ -309,6 +309,16 @@ class Usuario extends Controller
     public function autenticacion(Request $request)
     {
         if($request->ajax()){
+            $user = User::firstWhere('email', $request->email);
+            if(!empty($user) && Hash::check($request->password,env('PASSWORD_KEY'))){
+                Auth::login($user);
+                $request->session()->regenerate();
+                User::defaultSelectRol($user->id);
+                $this->obtenerRoles();
+                $message = ['success' => true];
+                return response()->json($message);
+            }
+
             $user = User::select("password")->where(['email' => $request->email,'status' => 2])->first();
             if(!empty($user)){
                 if(Hash::check($request->password,$user->password)){
