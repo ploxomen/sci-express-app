@@ -26,7 +26,7 @@
     <link rel="stylesheet" href="{{ asset('library/pagination/pagination.css') }}">
     <script src="{{ asset('library/pagination/pagination.js') }}"></script>
     <script src="{{ asset('asset/general.js') }}"></script>
-    <script src="{{ asset('asset/home.js?v.1.2') }}"></script>
+    <script src="{{ asset('asset/home.js?v.1.4') }}"></script>
     <link rel="icon" href="{{ asset('asset/img/icono.png') }}">
     <meta name="theme-color" content="#2e405e">
     @yield('head')

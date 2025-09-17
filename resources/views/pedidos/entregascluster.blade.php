@@ -29,12 +29,12 @@
     <form class="bg-white p-2 mb-3">
         <div class="form-row">
             <div class="form-group col-12 col-md-6 col-lg-3">
-                <label for="fecha_confirmacion">Fecha de Confirmación</label>
-                <input id="fecha_confirmacion" type="date" class="form-control change-entrega-fecha">
+                <label for="fechaIncioReparto">Fecha Inicio Reparto</label>
+                <input id="fechaIncioReparto" type="date" class="form-control change-entrega-fecha" value="{{date('Y-m-d', strtotime(date('Y-m-d') . "-3 month"))}}">
             </div>
             <div class="form-group col-12 col-md-6 col-lg-3">
-                <label for="fecha_reparto">Fecha de Reparto</label>
-                <input id="fecha_reparto" type="date" class="form-control change-entrega-fecha">
+                <label for="fechaFinReparto">Fecha Fin Reparto</label>
+                <input id="fechaFinReparto" type="date" class="form-control change-entrega-fecha" value="{{date('Y-m-d')}}">
             </div>
             <div class="form-group col-12 col-md-6 col-lg-3">
                 <label for="estado_guia">Situación Guía</label>
