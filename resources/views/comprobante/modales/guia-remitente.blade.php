@@ -35,7 +35,7 @@
                         </select>
                     </div>
                     <div class="col-12">
-                        <span class="!text-sm text-blue-500 !font-semibold">Datos del emisor</span>
+                        <span class="!text-sm text-blue-500 !font-semibold">Datos del remitente</span>
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-3">
                         <label for="txt-emi-tipo-doc">Tipo Documento</label>
