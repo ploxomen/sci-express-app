@@ -329,49 +329,87 @@ function pageLoaded() {
     const $btnSeleccionRemitente = document.getElementById(
         "btn-seleccion-remitente"
     );
+    const $btnSeleccionTransportista = document.getElementById(
+        "btn-seleccion-transportista"
+    );
+    $btnSeleccionTransportista.onclick = (event) => {
+        datosFormularioLlenar("trans");
+        llenarDetaalesGuias(
+            "items-guia-transportista",
+            "bulto-total-transportista"
+        );
+        toogleModalesGuias("#guia-transportista", "#seleccion-comprobantes");
+    };
     $btnSeleccionRemitente.onclick = (event) => {
         datosFormularioLlenar("");
-        llenarDetaalesGuias('items-guia-remitente','bulto-total-remitente');
-        toogleModalesGuias('#guia-remitente','#seleccion-comprobantes');
+        llenarDetaalesGuias("items-guia-remitente", "bulto-total-remitente");
+        toogleModalesGuias("#guia-remitente", "#seleccion-comprobantes");
     };
     const datosFormularioLlenar = (id) => {
         const data = {
-            "txt-fecha-emision" : document.getElementById("id_fech_emis").value,
-            "txt-fecha-traslado" : document.getElementById("id_fech_tras").value,
-            "txt-emi-razon-social" : document.getElementById("id_remi_nomb").selectedOptions[0].text,
-            "txt-emi-tipo-doc" : document.getElementById("id_remi_tipo_docu").value,
-            "txt-emi-num-doc" : document.getElementById("id_remi_nro_docu").value,
-            "txt-partida" : document.getElementById("id_remi_dire").value + " - " + document.getElementById("id_remi_depa").selectedOptions[0].text + " " + document.getElementById("id_remi_prov").selectedOptions[0].text + " " + document.getElementById("id_remi_dist").selectedOptions[0].text,
-            "txt-dest-razon-social" : document.getElementById("id_dest_nomb").selectedOptions[0].text,
-            "txt-dest-tipo-doc" : document.getElementById("id_dest_tipo_docu").value,
-            "txt-dest-num-doc" : document.getElementById("id_dest_nro_docu").value,
-            "txt-llegada" : document.getElementById("id_dest_dire").value + " - " + document.getElementById("id_dest_depa").selectedOptions[0].text + " " + document.getElementById("id_dest_prov").selectedOptions[0].text + " " + document.getElementById("id_dest_dist").selectedOptions[0].text,
-        }
+            "txt-fecha-emision": document.getElementById("id_fech_emis").value,
+            "txt-fecha-traslado": document.getElementById("id_fech_tras").value,
+            "txt-emi-razon-social":
+                document.getElementById("id_remi_nomb").selectedOptions[0].text,
+            "txt-emi-tipo-doc":
+                document.getElementById("id_remi_tipo_docu").value,
+            "txt-emi-num-doc":
+                document.getElementById("id_remi_nro_docu").value,
+            "txt-partida":
+                document.getElementById("id_remi_dire").value +
+                " - " +
+                document.getElementById("id_remi_depa").selectedOptions[0]
+                    .text +
+                " " +
+                document.getElementById("id_remi_prov").selectedOptions[0]
+                    .text +
+                " " +
+                document.getElementById("id_remi_dist").selectedOptions[0].text,
+            "txt-dest-razon-social":
+                document.getElementById("id_dest_nomb").selectedOptions[0].text,
+            "txt-dest-tipo-doc":
+                document.getElementById("id_dest_tipo_docu").value,
+            "txt-dest-num-doc":
+                document.getElementById("id_dest_nro_docu").value,
+            "txt-llegada":
+                document.getElementById("id_dest_dire").value +
+                " - " +
+                document.getElementById("id_dest_depa").selectedOptions[0]
+                    .text +
+                " " +
+                document.getElementById("id_dest_prov").selectedOptions[0]
+                    .text +
+                " " +
+                document.getElementById("id_dest_dist").selectedOptions[0].text,
+        };
         for (const key in data) {
             if (!Object.hasOwn(data, key)) continue;
-            document.getElementById(key + id).value = data[key];
+            document.getElementById(key + "-" + id).value = data[key];
         }
-    }
+    };
     const totalBultoKG = () => {
         const detalles = obtenerDatosDetalle();
-        return detalles.reduce((acumulador,elementoActual) => acumulador + parseFloat(elementoActual.kg),0);
-    }
-    const llenarDetaalesGuias = (tbody,totalBultos) => {
+        return detalles.reduce(
+            (acumulador, elementoActual) =>
+                acumulador + parseFloat(elementoActual.kg),
+            0
+        );
+    };
+    const llenarDetaalesGuias = (tbody, totalBultos) => {
         const detalles = obtenerDatosDetalle();
-        let template = '';
-        detalles.forEach((detalle,index) => {
+        let template = "";
+        detalles.forEach((detalle, index) => {
             template += `<tr>
                 <td>${index + 1}</td>
                 <td>${detalle.descripcion}</td>
                 <td>${detalle.cantidad}</td>
                 <td>UNIDAD</td>
-            </tr>`
-        })
+            </tr>`;
+        });
         document.getElementById(tbody).innerHTML = template;
         document.getElementById(totalBultos).textContent = totalBultoKG();
-
-    }
-    const toogleModalesGuias = (modalMostrar,modalOcultar) => {
+    };
+    const toogleModalesGuias = (modalMostrar, modalOcultar) => {
         $(modalOcultar).modal("hide");
         setTimeout(() => {
             $(modalMostrar).modal("show");

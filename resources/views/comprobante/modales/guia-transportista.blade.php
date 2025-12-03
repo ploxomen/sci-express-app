@@ -1,4 +1,4 @@
-<div class="modal fade" id="guia-remitente" data-backdrop="static" data-keyboard="false" tabindex="-1"
+<div class="modal fade" id="guia-transportista" data-backdrop="static" data-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -9,7 +9,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="guia-remitente-form" class="form-row">
+                <form id="guia-transportista-form" class="form-row">
                     <div class="form-group col-12 col-md-6 col-lg-4">
                         <label for="txt-fecha-emision-trans">Fecha emisión</label>
                         <input name="fecha_emision" id="txt-fecha-emision-trans" type="date"
@@ -82,20 +82,46 @@
                     <div class="col-12">
                         <span class="!text-sm text-blue-500 !font-semibold">Vehículo principal</span>
                     </div>
-                    <div class="form-group mod-trans-priva col-12 col-md-6">
-                        <label for="cb-vehiculo-transporte-trans">Placas</label>
-                        <select name="placa" class="form-control form-control-sm" id="cb-vehiculo-transporte-trans"
-                            disabled required>
+                    <div class="form-group col-12 col-md-6">
+                        <label for="cb-placa-prin">Placas</label>
+                        <select name="placa_principal" class="form-control form-control-sm" id="cb-placa-prin"
+                            required>
                             <option value="" hidden>Seleccione un vehículo</option>
                             @foreach ($vehiculos as $vehiculo)
                                 <option value="{{ $vehiculo->placa }}">{{ $vehiculo->placa }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group mod-trans-priva col-12 col-md-6 col-lg-4" hidden>
-                        <label for="cb-conductor-transporte">Conductor</label>
-                        <select name="conductor" disabled required class="form-control form-control-sm cb-relacionado"
-                            data-input="#licencia-conductor" data-value="licencia" id="cb-conductor-transporte">
+                    <div class="form-group col-12 col-md-6 col-lg-4">
+                        <label for="txt-tuse-principal">TUSE</label>
+                        <input type="text" required id="txt-tuse-principal"
+                            class="form-control form-control-sm" name="tuse_principal">
+                    </div>
+                    <div class="col-12">
+                        <span class="!text-sm text-blue-500 !font-semibold">Vehículo secundario</span>
+                    </div>
+                    <div class="form-group col-12 col-md-6">
+                        <label for="cb-placa-secun">Placas</label>
+                        <select name="placas_secun" class="form-control form-control-sm" id="cb-placa-secun"
+                            >
+                            <option value="" hidden>Seleccione un vehículo</option>
+                            @foreach ($vehiculos as $vehiculo)
+                                <option value="{{ $vehiculo->placa }}">{{ $vehiculo->placa }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group col-12 col-md-6 col-lg-4">
+                        <label for="txt-tuse-secun">TUSE</label>
+                        <input type="text" required id="txt-tuse-secun"
+                            class="form-control form-control-sm" name="tuse_secun">
+                    </div>
+                    <div class="col-12">
+                        <span class="!text-sm text-blue-500 !font-semibold">Conductor principal</span>
+                    </div>
+                    <div class="form-group col-12 col-md-6">
+                        <label for="cb-conductor-principal">Nombres completos</label>
+                        <select name="conductor_principal" required class="form-control form-control-sm"
+                            data-input="#licencia-conductor" data-value="licencia" id="cb-conductor-principal">
                             <option value="" hidden>Seleccione un conductor</option>
                             @foreach ($conductores as $conductor)
                                 <option value="{{ $conductor->id }}"
@@ -104,10 +130,40 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group mod-trans-priva col-12 col-md-6 col-lg-4" hidden>
-                        <label for="licencia-conductor">Licencia</label>
-                        <input type="text" disabled required id="licencia-conductor"
-                            class="form-control form-control-sm" name="licencia_conductor">
+                    <div class="form-group col-12 col-md-6 col-lg-4">
+                        <label for="numero-doc-cond-prin" id="tipo-documento-conductor-prin"></label>
+                        <input type="text" disabled required id="numero-doc-cond-prin"
+                            class="form-control form-control-sm" name="num_doc_cond_prin">
+                    </div>
+                    <div class="form-group mod-trans-priva col-12 col-md-6 col-lg-4">
+                        <label for="licencia-cond-prin">Licencia</label>
+                        <input type="text" disabled required id="licencia-cond-prin" class="form-control form-control-sm"
+                            name="licencia_conductor_principal">
+                    </div>
+                    <div class="col-12">
+                        <span class="!text-sm text-blue-500 !font-semibold">Conductor secundario</span>
+                    </div>
+                    <div class="form-group col-12 col-md-6">
+                        <label for="cb-conductor-secundario">Nombres completos</label>
+                        <select name="conductor_secundario" required class="form-control form-control-sm"
+                            data-input="#licencia-conductor" data-value="licencia" id="cb-conductor-secundario">
+                            <option value="" hidden>Seleccione un conductor</option>
+                            @foreach ($conductores as $conductor)
+                                <option value="{{ $conductor->id }}"
+                                    data-licencia="{{ $conductor->driver_license }}">{{ $conductor->name }}
+                                    {{ $conductor->last_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group col-12 col-md-6 col-lg-4">
+                        <label for="numero-doc-cond-secun" id="tipo-documento-conductor-secun"></label>
+                        <input type="text" disabled required id="numero-doc-cond-secun"
+                            class="form-control form-control-sm" name="num_doc_cond_secun">
+                    </div>
+                    <div class="form-group mod-trans-priva col-12 col-md-6 col-lg-4">
+                        <label for="licencia-cond-secun">Licencia</label>
+                        <input type="text" disabled required id="licencia-cond-secun" class="form-control form-control-sm"
+                            name="licencia_conductor_secundario">
                     </div>
                     <div class="col-12 mod-trans-public">
                         <span class="!text-sm !font-semibold text-blue-500">Items</span>
@@ -123,18 +179,18 @@
                                         <th>UNI</th>
                                     </tr>
                                 </thead>
-                                <tbody id="items-guia-remitente"></tbody>
+                                <tbody id="items-guia-transportista"></tbody>
                             </table>
                         </div>
                     </div>
                     <div class="col-12 text-right">
                         <span class="text-blue-500">Bultos totales (KG)</span>
-                        <span class="text-black !text-base" id="bulto-total-remitente"></span>
+                        <span class="text-black !text-base" id="bulto-total-transportista"></span>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary" form="guia-remitente-form">Generar</button>
+                <button type="submit" class="btn btn-primary" form="guia-transportista-form">Generar</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
             </div>
         </div>
