@@ -190,13 +190,30 @@ function pageLoaded() {
         }
     };
 
+    const $formGuiaRemitente = document.getElementById("guia-remitente-form");
+    $formGuiaRemitente.addEventListener("submit", function (e) {
+        e.preventDefault();
+    });
     $("#id-invitado-remitente").on("select2:select", async function (e) {
         general.getCCInvitados("#id-invitado-remitente", $cbCliente);
     });
     let frmGuia = document.getElementById("frm_guia");
-    frmGuia.addEventListener("submit", async function (event) {
-        event.preventDefault();
-        let datos = new FormData(this);
+    const obtenerDatosDetalle = () => {
+        let detalles = new Array();
+        for (const e of tableDetalleGuia.children) {
+            let objeto = new Object();
+            let deta = e.querySelectorAll("input, select, textarea");
+            for (const ele2 of deta) {
+                objeto[ele2.dataset.name] = ele2.value;
+            }
+            if (!general.isObjEmpty(objeto)) {
+                detalles.push(objeto);
+            }
+        }
+        return detalles;
+    };
+    const generarGuia = (form) => {
+        let datos = new FormData(form);
         const idCliente =
             tipoCbRemi == "proveedor"
                 ? $cbCliente.selectedOptions[0].getAttribute("data-id-cliente")
@@ -218,18 +235,11 @@ function pageLoaded() {
         );
         datos.append("id_cliente_facturacion", idCliente);
         datos.append("tipo_guia", tipoCbRemi);
-        datos.append("comprobantes_general",JSON.stringify(comprobantesGenerales));
-        let detalles = new Array();
-        for (const e of tableDetalleGuia.children) {
-            let objeto = new Object();
-            let deta = e.querySelectorAll("input, select, textarea");
-            for (const ele2 of deta) {
-                objeto[ele2.dataset.name] = ele2.value;
-            }
-            if (!general.isObjEmpty(objeto)) {
-                detalles.push(objeto);
-            }
-        }
+        datos.append(
+            "comprobantes_general",
+            JSON.stringify(comprobantesGenerales)
+        );
+        const detalles = obtenerDatosDetalle();
         if (
             !detalles.length &&
             document.getElementById("id_estado").value != "3"
@@ -282,6 +292,98 @@ function pageLoaded() {
                 addGuia(datos);
             }
         });
+    };
+    const colocarDatosInputCB = function (event) {
+        const opcionSelccionada = this.selectedOptions[0];
+        document.querySelector(event.target.dataset.input).value =
+            opcionSelccionada.dataset[event.target.dataset.value];
+    };
+    const habilitarDeshHabilitarInputs = (clase, valor) => {
+        for (const element of document.querySelectorAll(`.${clase}`)) {
+            const inputs = element.querySelector("input, select");
+            element.hidden = valor;
+            if (!inputs) {
+                continue;
+            }
+            inputs.value = "";
+            inputs.disabled = valor;
+        }
+    };
+    const modTrasladoDOM = function (event) {
+        const classOculto =
+            event.target.id === "mod-trans-public"
+                ? "mod-trans-priva"
+                : "mod-trans-public";
+
+        habilitarDeshHabilitarInputs(classOculto, !event.checked);
+        habilitarDeshHabilitarInputs(event.target.id, false);
+    };
+    for (const cbRelacion of document.querySelectorAll(".cb-relacionado")) {
+        cbRelacion.addEventListener("change", colocarDatosInputCB);
+    }
+    for (const cbRadioTipoMod of document.querySelectorAll(
+        ".cambio-mod-traslado"
+    )) {
+        cbRadioTipoMod.addEventListener("change", modTrasladoDOM);
+    }
+    const $btnSeleccionRemitente = document.getElementById(
+        "btn-seleccion-remitente"
+    );
+    $btnSeleccionRemitente.onclick = (event) => {
+        datosFormularioLlenar("");
+        llenarDetaalesGuias('items-guia-remitente','bulto-total-remitente');
+        toogleModalesGuias('#guia-remitente','#seleccion-comprobantes');
+    };
+    const datosFormularioLlenar = (id) => {
+        const data = {
+            "txt-fecha-emision" : document.getElementById("id_fech_emis").value,
+            "txt-fecha-traslado" : document.getElementById("id_fech_tras").value,
+            "txt-emi-razon-social" : document.getElementById("id_remi_nomb").selectedOptions[0].text,
+            "txt-emi-tipo-doc" : document.getElementById("id_remi_tipo_docu").value,
+            "txt-emi-num-doc" : document.getElementById("id_remi_nro_docu").value,
+            "txt-partida" : document.getElementById("id_remi_dire").value + " - " + document.getElementById("id_remi_depa").selectedOptions[0].text + " " + document.getElementById("id_remi_prov").selectedOptions[0].text + " " + document.getElementById("id_remi_dist").selectedOptions[0].text,
+            "txt-dest-razon-social" : document.getElementById("id_dest_nomb").selectedOptions[0].text,
+            "txt-dest-tipo-doc" : document.getElementById("id_dest_tipo_docu").value,
+            "txt-dest-num-doc" : document.getElementById("id_dest_nro_docu").value,
+            "txt-llegada" : document.getElementById("id_dest_dire").value + " - " + document.getElementById("id_dest_depa").selectedOptions[0].text + " " + document.getElementById("id_dest_prov").selectedOptions[0].text + " " + document.getElementById("id_dest_dist").selectedOptions[0].text,
+        }
+        for (const key in data) {
+            if (!Object.hasOwn(data, key)) continue;
+            document.getElementById(key + id).value = data[key];
+        }
+    }
+    const totalBultoKG = () => {
+        const detalles = obtenerDatosDetalle();
+        return detalles.reduce((acumulador,elementoActual) => acumulador + parseFloat(elementoActual.kg),0);
+    }
+    const llenarDetaalesGuias = (tbody,totalBultos) => {
+        const detalles = obtenerDatosDetalle();
+        let template = '';
+        detalles.forEach((detalle,index) => {
+            template += `<tr>
+                <td>${index + 1}</td>
+                <td>${detalle.descripcion}</td>
+                <td>${detalle.cantidad}</td>
+                <td>UNIDAD</td>
+            </tr>`
+        })
+        document.getElementById(tbody).innerHTML = template;
+        document.getElementById(totalBultos).textContent = totalBultoKG();
+
+    }
+    const toogleModalesGuias = (modalMostrar,modalOcultar) => {
+        $(modalOcultar).modal("hide");
+        setTimeout(() => {
+            $(modalMostrar).modal("show");
+        }, 500);
+    };
+    frmGuia.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const botonPresionado = event.submitter;
+        if (botonPresionado.value == "generar") {
+            return generarGuia();
+        }
+        $("#seleccion-comprobantes").modal("show");
     });
     $(".calculo-dia").on("select2:select", function () {
         general.calculoDiasTrancitoCb(
@@ -404,9 +506,9 @@ function pageLoaded() {
                 continue;
             }
             comprobantesGenerales.push({
-                "tipo" : element.querySelector('[data-type="comprobante"]').value,
-                "serie" : element.querySelector('[data-type="serie"]').value
-            })
+                tipo: element.querySelector('[data-type="comprobante"]').value,
+                serie: element.querySelector('[data-type="serie"]').value,
+            });
             comprobantesAgregados.series.push(
                 `${valoresComprobantes(
                     element.querySelector('[data-type="comprobante"]').value
@@ -419,7 +521,7 @@ function pageLoaded() {
             $("#id_nro_comp_cli").append(new Option(valor, valor, true, true));
         });
         $("#id_comp_clie").val(comprobantesAgregados.tipos).trigger("change");
-        $('#id_cant_comp').val( comprobantesAgregados.series.length);
+        $("#id_cant_comp").val(comprobantesAgregados.series.length);
         $("#agregar-comprobantes").modal("hide");
     };
     contenidoComprobantes.onclick = function (e) {
@@ -438,7 +540,7 @@ function pageLoaded() {
         const liCopia = contenidoComprobantes.children[0].cloneNode(true);
         for (const element of liCopia.querySelectorAll("input, select")) {
             element.value = "";
-            if(element.dataset.type === "serie"){
+            if (element.dataset.type === "serie") {
                 element.innerHTML = "";
             }
         }
@@ -460,7 +562,7 @@ function pageLoaded() {
         }
     };
     function generarSeries(e) {
-        console.log(e)
+        console.log(e);
         let selectedOption = e.target.selectedOptions[0];
         let series = selectedOption.getAttribute("data-series");
         e.target.closest("li").querySelector("[data-type='serie']").innerHTML =
@@ -475,7 +577,10 @@ function pageLoaded() {
             });
         }
     }
-    $("#agregar-comprobantes [data-type='comprobante']").on("select2:select", generarSeries);
+    $("#agregar-comprobantes [data-type='comprobante']").on(
+        "select2:select",
+        generarSeries
+    );
 }
 function calcVolumen(event) {
     if (parseFloat(event.target.value) < 0 || isNaN(event.target.value)) {

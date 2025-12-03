@@ -62,8 +62,8 @@
                 </div>
             </div>
             <div class="mb-1">
-                <button type="button" class="btn btn-sm btn-info"
-                    style="font-size: 0.7em;" data-toggle="modal" data-target="#agregar-comprobantes"><i class="fas fa-plus"></i> Comprobantes</button>
+                <button type="button" class="btn btn-sm btn-info" style="font-size: 0.7em;" data-toggle="modal"
+                    data-target="#agregar-comprobantes"><i class="fas fa-plus"></i> Comprobantes</button>
             </div>
             <div class="col-12 p-0 px-lg-2 mb-4">
                 <div class="bg-white p-3 form-row">
@@ -97,7 +97,7 @@
                         <select name="comp_clie[]" id="id_comp_clie" disabled required class="form-control data-anulada"
                             multiple>
                             @foreach ($comprobantes as $comprobante)
-                                <option value="{{ $comprobante["comprobante"] }}">{{ $comprobante["comprobante"] }}</option>
+                                <option value="{{ $comprobante['comprobante'] }}">{{ $comprobante['comprobante'] }}</option>
                             @endforeach
                             <option value="NINGUNO" class="delete-option" selected>NINGUNO</option>
                         </select>
@@ -125,8 +125,8 @@
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-3">
                         <label for="id_fech_tras">Fecha Traslado <small class="text-danger">*</small></label>
-                        <input type="date" class="form-control" min="{{ $antes }}" value="{{ $hoy }}"
-                            required name="fech_tras" id="id_fech_tras">
+                        <input type="date" class="form-control" min="{{ $antes }}"
+                            value="{{ $hoy }}" required name="fech_tras" id="id_fech_tras">
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-3">
                         <label for="id_tray_env">Trayecto Envio <small class="text-danger">*</small></label>
@@ -439,9 +439,13 @@
                 </div>
             </div>
             <div class="col-12 form-group p-0 px-lg-2">
-                <button type="submit" class="btn btn-success">Generar</button>
+                <button type="submit" class="btn btn-primary" value="generar">Generar</button>
+                <button type="submit" class="btn btn-secondary" value="generar-sunat">Generar (SUNAT)</button>
             </div>
         </form>
     </section>
     @include('modal.agregarComprobantesGuia')
+    @include('comprobante.modales.seleccion-guias')
+    @include('comprobante.modales.guia-remitente')
+    @include('comprobante.modales.guia-transportista')
 @endsection

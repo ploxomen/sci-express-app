@@ -10,12 +10,7 @@ class User extends Authenticatable
 {
     protected $table = 'usuarios';
     public $timestamps = false;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var string[]
-     */
+    public const ROL_DRIVER = 6;
     protected $fillable = [
         'ty_document',
         'n_document',
@@ -132,6 +127,13 @@ class User extends Authenticatable
     public static function obtenerUsuarioRol($id_rol)
     {
         return DB::select('CALL sp_obtener_usuarios_rol(?)', [$id_rol]);
+    }
+    public static function obtenerTiposUsuarios($rol)
+    {
+        return User::select('n_document','type_document','name','last_name','driver_license','usuarios.id')
+        ->join('usuario_rol AS ur','ur.id_usuario', '=', 'usuarios.id')
+        ->where('ur.id_rol',$rol)
+        ->get();
     }
     public static function obtenerRolActivo($id_user)
     {

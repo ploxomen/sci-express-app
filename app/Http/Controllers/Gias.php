@@ -6,6 +6,7 @@ use App\Exports\Reportes;
 use App\Models\ClienteDetalleEnvio;
 use App\Models\Clientes;
 use App\Models\ComprobantesGuias;
+use App\Models\EmpresaTransporte;
 use App\Models\InformacionAdicional;
 use App\Models\ModeloCluster;
 use App\Models\ModeloGuias;
@@ -44,7 +45,10 @@ class Gias extends Controller
         $grupoEnvio = InformacionAdicional::getGrupoEnvio();
         $tipoEnvios = InformacionAdicional::getTipoEnvio();
         $comprobantes = ComprobantesGuias::listaComprobantes();
-        return view('comprobante.guias', compact('nro_guia_result', 'cli_cli', 'clientes', 'departamentos', 'hoy', 'trayecto', 'via_envios', 'nro_os', 'tipo_documentos', 'modulos', 'antes', 'embaseEmbalaje', 'grupoEnvio', 'tipoEnvios','comprobantes'));
+        $empresasTransporte = EmpresaTransporte::obtenerTransportes();
+        $vehiculos = Vehiculos::obtenerVehiculos();
+        $conductores = User::obtenerTiposUsuarios(User::ROL_DRIVER);
+        return view('comprobante.guias', compact('nro_guia_result', 'cli_cli', 'clientes', 'departamentos', 'hoy', 'trayecto', 'via_envios', 'nro_os', 'tipo_documentos', 'modulos', 'antes', 'embaseEmbalaje', 'grupoEnvio', 'tipoEnvios','comprobantes','conductores','vehiculos','empresasTransporte'));
     }
     public function generarNroGuiaSCI()
     {

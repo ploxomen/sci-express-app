@@ -27,6 +27,7 @@
     <script src="{{ asset('library/pagination/pagination.js') }}"></script>
     <script src="{{ asset('asset/general.js') }}"></script>
     <script src="{{ asset('asset/home.js?v.1.4') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="icon" href="{{ asset('asset/img/icono.png') }}">
     <meta name="theme-color" content="#2e405e">
     @yield('head')
@@ -34,6 +35,11 @@
 </head>
 
 <body>
+    <style>
+        .collapse {
+            visibility: visible !important;
+        }
+    </style>
     @php
         $url_actual = Request::url();
     @endphp
@@ -63,17 +69,21 @@
                             }
                         @endphp
                         <li class="menu-desplegable">
-                            <a href="#collapse{{ $modulo->grupo }}" class="active-panel d-flex gap-1 {{ $active_sub ? 'active-menu' : '' }}" title="{{ $modulo->grupo }}"
-                                data-toggle="collapse" data-target="#collapse{{ $modulo->grupo }}">
+                            <a href="#collapse{{ $modulo->grupo }}"
+                                class="active-panel d-flex gap-1 {{ $active_sub ? 'active-menu' : '' }}"
+                                title="{{ $modulo->grupo }}" data-toggle="collapse"
+                                data-target="#collapse{{ $modulo->grupo }}">
                                 <i class="icono {{ $modulo->icono }}"></i>
                                 <span class="title">{{ $modulo->grupo }}</span>
                                 <i class="fas fa-angle-down"></i>
                             </a>
-                            <ul id="collapse{{ $modulo->grupo }}" class="collapse {{ $active_sub ? 'show' : '' }}" data-parent="#accodion-nav">
+                            <ul id="collapse{{ $modulo->grupo }}" class="collapse {{ $active_sub ? 'show' : '' }}"
+                                data-parent="#accodion-nav">
                                 @foreach ($modulo->submodulos as $submodulo)
                                     <li
                                         class="hover-menu {{ $url_actual == route($submodulo->nomRuta) ? 'activeli' : '' }}">
-                                        <a href="{{ route($submodulo->nomRuta) }}" class="d-flex gap-1" title="{{ $submodulo->nombre }}">
+                                        <a href="{{ route($submodulo->nomRuta) }}" class="d-flex gap-1"
+                                            title="{{ $submodulo->nombre }}">
                                             <i class="icono {{ $submodulo->icono }}"></i>
                                             <span class="title">{{ $submodulo->nombre }}</span>
                                         </a>
