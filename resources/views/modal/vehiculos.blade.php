@@ -26,6 +26,10 @@
                     <label for="id_modelo">Modelo</label>
                     <input type="text" required class="form-control" id="id_modelo" name="modelo"></textarea>
                 </div>
+                <div class="form-group col-12 col-lg-6">
+                    <label for="id_TUSE">TUSE</label>
+                    <input type="text" required class="form-control" id="id_TUSE" name="TUSE">
+                </div>
                 <div class="form-group col-12">
                     <button type="submit" hidden id="btn-send-frm"></button>
                 </div>

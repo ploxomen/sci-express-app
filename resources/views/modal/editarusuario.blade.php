@@ -21,15 +21,11 @@
                     <label for="n_document">N° de documento:</label>
                     <input type="text" name="n_document" id="modal_n_document" class="form-control">
                 </div>
-                <div class="form-group col-12 col-md-3 col-lg-4">
-                    <label for="modal_id_area">Área: <small class="text-danger">*</small></label>
-                    <select name="id_area" class="form-control" id="modal_id_area" required>
-                        <option></option>
-                        @foreach ($areas as $area)
-                            <option value="{{$area->id}}">{{$area->area}}</option>
-                        @endforeach
-                    </select>
+                <div class="form-group col-12 col-md-6 col-lg-4">
+                    <label for="modal_driver_license">Licencia conducir:</label>
+                    <input type="text" name="driver_license" id="modal_driver_license" class="form-control">
                 </div>
+                
                 <div class="form-group col-12 col-md-6">
                     <label for="name">Nombres: <small class="text-danger">*</small></label>
                     <input type="text" name="name" id="modal_name" class="form-control" required>
@@ -46,7 +42,16 @@
                     <label for="phone">Celular:</label> 
                     <input type="tel" maxlength="9" minlength="9" class="form-control" name="phone" id="modal_phone">
                 </div>
-                <div class="form-group col-12 col-md-6">
+                <div class="form-group col-12 col-md-3 col-lg-4">
+                    <label for="modal_id_area">Área: <small class="text-danger">*</small></label>
+                    <select name="id_area" class="form-control" id="modal_id_area" required>
+                        <option></option>
+                        @foreach ($areas as $area)
+                            <option value="{{$area->id}}">{{$area->area}}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="modal_sexo">Sexo:</label> 
                     <select name="sexo" id="modal_sexo" class="form-control">
                         <option value="" hidden>Selecione una opción</option>
@@ -54,7 +59,7 @@
                         <option value="M">Mujer</option>
                     </select>
                 </div>
-                <div class="form-group col-12 col-md-6">
+                <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="modal_nacimiento">Fecha Nacimiento:</label> 
                     <input type="date" class="form-control" name="nacimiento" id="modal_nacimiento">
                 </div>

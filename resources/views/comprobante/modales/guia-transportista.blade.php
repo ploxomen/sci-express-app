@@ -165,10 +165,14 @@
                         <input type="text" disabled required id="licencia-cond-secun" class="form-control form-control-sm"
                             name="licencia_conductor_secundario">
                     </div>
-                    <div class="col-12 mod-trans-public">
+                    <div class="form-group col-12 text-right">
+                        <label for="txt-observaciones">Observaciones</label>
+                        <textarea name="observaciones" class="form-control form-control-sm" id="txt-observaciones" rows="5"></textarea>
+                    </div>
+                    <div class="form-group col-12 mod-trans-public">
                         <span class="!text-sm !font-semibold text-blue-500">Items</span>
                     </div>
-                    <div class="form-group col-12 mt-4">
+                    <div class="form-group col-12">
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered">
                                 <thead>

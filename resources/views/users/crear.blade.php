@@ -21,7 +21,7 @@
                     </div>
                 </div>
                 <div class="form-row">
-                <div class="form-group col-12 col-md-6">
+                <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="type_document">Tipo de documento:</label>
                     <select name="type_document" id="type_document" class="form-control simple-select2 cb-tipo-doc" data-input="n_document">
                         <option></option>
@@ -30,9 +30,13 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="form-group col-12 col-md-6">
+                <div class="form-group col-12 col-md-6 col-lg-4">
                     <label for="n_document">N° de documento:</label>
                     <input type="text" name="n_document" id="n_document" class="form-control">
+                </div>
+                 <div class="form-group col-12 col-md-6 col-lg-4">
+                    <label for="license-driver">Licencia conducir:</label>
+                    <input type="text" name="driver_license" id="license-driver" class="form-control">
                 </div>
                 <div class="form-group col-12 col-md-6">
                     <label for="name">Nombres: <small class="text-danger">*</small></label>

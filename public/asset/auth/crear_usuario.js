@@ -36,6 +36,9 @@ function loadPage(){
             return $('#modal-usuario-cliente').modal('show');
         }
         let datos = new FormData(this);
+        if($('#roles').val().some(role => role === '6') && !datos.get('driver_license')){
+            return alertify.error('debe de completar el campo de licencia de conducir')
+        }
         alertify.confirm('Mensaje', '¿Estás seguro de crear al usuario ' + datos.get('name') + ' ' + datos.get('last_name') + '?', () => { agregarNuevoUsuario(datos) },()=>{});
     });
     document.getElementById('id_trabajador_cliente').onchange = function(event){

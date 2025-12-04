@@ -25,6 +25,7 @@ class User extends Authenticatable
         'status',
         'create_at',
         'update_at',
+        'driver_license',
         'small_menu'
     ];
 
@@ -141,7 +142,7 @@ class User extends Authenticatable
     }
     public static function obtenerDatosEditar($id_user)
     {
-        $usuario = DB::table('usuarios AS u')->select('id', 'type_document', 'n_document', 'name', 'last_name', 'email', 'phone', 'sexo', 'nacimiento', 'direction', 'id_area')->where(['id' => $id_user])->first();
+        $usuario = DB::table('usuarios AS u')->select('id', 'type_document', 'n_document', 'name', 'last_name', 'email', 'phone', 'driver_license', 'sexo', 'nacimiento', 'direction', 'id_area')->where(['id' => $id_user])->first();
         $rolClienteInvitado = DB::table('usuario_rol')->where(['id_usuario' => $id_user, 'id_rol' => 10])->count();
         $response = [];
         if(!empty($usuario)){
