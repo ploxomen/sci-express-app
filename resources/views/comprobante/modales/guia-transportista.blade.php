@@ -23,7 +23,7 @@
                     <div class="form-group col-12 col-md-6 col-lg-4">
                         <label for="cb-comprobantes-transportista">Comprobantes</label>
                         <select name="comprobantes[]" id="cb-comprobantes-transportista" disabled required
-                            class="form-control data-anulada" multiple></select>
+                            class="form-control comprobantes-guias" multiple></select>
                     </div>
                     <div class="col-12">
                         <span class="!text-sm text-blue-500 !font-semibold">Datos del remitente</span>
@@ -165,7 +165,7 @@
                         <input type="text" disabled required id="licencia-cond-secun" class="form-control form-control-sm"
                             name="licencia_conductor_secundario">
                     </div>
-                    <div class="form-group col-12 text-right">
+                    <div class="form-group col-12">
                         <label for="txt-observaciones">Observaciones</label>
                         <textarea name="observaciones" class="form-control form-control-sm" id="txt-observaciones" rows="5"></textarea>
                     </div>

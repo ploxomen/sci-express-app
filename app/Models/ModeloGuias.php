@@ -123,7 +123,7 @@ class ModeloGuias extends Model
             DB::table('guias')->where(['id' => $id_guia])->update(['tot_cant' => $tot_cant, 'tot_kg' => $tot_kg, 'tot_vol' => $tot_vol]);
             DB::table('procesos_guia')->insert(['id_guia' => $id_guia,'situacion' => 1,'id_user' => $user]);
             DB::commit();
-            return ['success' => $msj];
+            return ['success' => $msj,'id_guia' => $id_guia];
         } catch (Exception $ex) {
             DB::rollBack();
             return ['error' => $ex->getMessage()];

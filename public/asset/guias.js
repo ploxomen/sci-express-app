@@ -26,6 +26,11 @@ function pageLoaded() {
         width: "100%",
         tags: true,
     });
+    $(".comprobantes-guias").select2({
+        theme: "bootstrap",
+        width: "100%",
+        tags: true,
+    });
     const dataGuias = [
         {
             action: "guia",
@@ -212,7 +217,7 @@ function pageLoaded() {
         }
         return detalles;
     };
-    const generarGuia = (form) => {
+    const dataFormPrincipal = (form) => {
         let datos = new FormData(form);
         const idCliente =
             tipoCbRemi == "proveedor"
@@ -239,16 +244,46 @@ function pageLoaded() {
             "comprobantes_general",
             JSON.stringify(comprobantesGenerales)
         );
+
+        return datos;
+    };
+    const $formTransportista = document.getElementById(
+        "guia-transportista-form"
+    );
+    const generarComprobanteFetch = (url, data) => {
+        fetch("/facturacion/" + url, {
+            method: "POST",
+            data,
+            headers: {
+                "X-CSRF-TOKEN": document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute("content"),
+                "X-Requested-With": "XMLHttpRequest",
+            },
+        }).then(response => response.json())
+        .then(data => {
+
+        }).catch(error => {
+            console.error(error)
+        });
+    };
+    $formTransportista.onsubmit = async (event) => {
+        event.preventDefault();
+        await generarGuia(frmGuia);
+        let data = new FormData()
+    };
+    const generarGuia = (form,reload) => {
+        let datos = dataFormPrincipal(form);
         const detalles = obtenerDatosDetalle();
+        if (detalles.length) {
+            datos.append("detalle_guia", JSON.stringify(detalles));
+        }
         if (
             !detalles.length &&
             document.getElementById("id_estado").value != "3"
         ) {
             alertify.alert("Mensaje", "Por favor agregue detalles a la guía");
             return;
-        }
-        if (detalles.length) {
-            datos.append("detalle_guia", JSON.stringify(detalles));
         }
         const textOs = $("#select-os").prop("checked")
             ? "Orden de Servicio"
@@ -281,15 +316,15 @@ function pageLoaded() {
                     nuevoCliente.set("onok", function () {
                         datos.append("add_cli_bool", true);
                         datos.append("add_cli_cli", idCliente);
-                        addGuia(datos);
+                        addGuia(datos,reload);
                     });
                     nuevoCliente.set("oncalcel", function () {
                         datos.append("add_cli_bool", false);
-                        addGuia(datos);
+                        addGuia(datos,reload);
                     });
                 }, 200);
             } else {
-                addGuia(datos);
+                addGuia(datos,reload);
             }
         });
     };
@@ -333,6 +368,7 @@ function pageLoaded() {
         "btn-seleccion-transportista"
     );
     $btnSeleccionTransportista.onclick = (event) => {
+        colocarComprobantes("#cb-comprobantes-transportista");
         datosFormularioLlenar("trans");
         llenarDetaalesGuias(
             "items-guia-transportista",
@@ -384,7 +420,10 @@ function pageLoaded() {
         };
         for (const key in data) {
             if (!Object.hasOwn(data, key)) continue;
-            document.getElementById(key + "-" + id).value = data[key];
+            const element = !id
+                ? document.getElementById(key)
+                : document.getElementById(key + "-" + id);
+            element.value = data[key];
         }
     };
     const totalBultoKG = () => {
@@ -394,6 +433,15 @@ function pageLoaded() {
                 acumulador + parseFloat(elementoActual.kg),
             0
         );
+    };
+    const colocarComprobantes = function (idCbComprobante) {
+        const comprobantes = $("#id_nro_comp_cli").val();
+        comprobantes.forEach((comprobante) => {
+            $(idCbComprobante).append(
+                new Option(comprobante, comprobante, true, true)
+            );
+        });
+        $(idCbComprobante).val(comprobantes).trigger("change");
     };
     const llenarDetaalesGuias = (tbody, totalBultos) => {
         const detalles = obtenerDatosDetalle();
@@ -419,7 +467,7 @@ function pageLoaded() {
         event.preventDefault();
         const botonPresionado = event.submitter;
         if (botonPresionado.value == "generar") {
-            return generarGuia();
+            return generarGuia(frmGuia,true);
         }
         $("#seleccion-comprobantes").modal("show");
     });
@@ -444,7 +492,7 @@ function pageLoaded() {
             tipo == "ciudad" ? $(this).val() : null
         );
     });
-    async function addGuia(datos) {
+    async function addGuia(datos,reload) {
         try {
             let response = await general.funcfetch("guias/agregar-guia", datos);
             if (response.error) {
@@ -456,6 +504,7 @@ function pageLoaded() {
                 return;
             }
             newCliCli = false;
+            if(!reload) return response.id;
             alertify.alert("Mensaje", response.success, () => {
                 window.location.reload();
             });
