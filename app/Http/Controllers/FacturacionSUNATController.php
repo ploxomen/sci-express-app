@@ -4,19 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Models\ModeloGuias;
 use App\Models\User;
+use App\Services\UbigeoService;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 
 class FacturacionSUNATController extends Controller
 {
     public $urlGenerarComprobante = 'https://demo.mifact.net.pe/api/GuiaRemision.svc/SendGuia';
+    public $token = 'gN8zNRBV+/FVxTLwdaZx0w==';
     public function guiaRemisionRemitente(Request $request) {}
-    public function guiaRemisionTransportista(Request $request)
+    public function guiaRemisionTransportista(Request $request, UbigeoService $ubigeoService, Ubigeo $ubigeo)
     {
         $guia = ModeloGuias::find(7251);
         $remitente = $guia->tipo_guia == 'proveedor' ? $guia->remitenteProveedor : $guia->remitenteCliente;
         $destinatario = $guia->destinatario;
         $conductorPrincipal = User::find($request->conductor_principal);
+        $departamentoRemitente = $ubigeo->getNameDepartamento($guia->remi_depa);
+        $provinciaRemitente = $ubigeo->getNameProvincia($guia->remi_prov);
+        $distritoRemitente = $ubigeo->getNameDistrito($guia->remi_dist);
+        $ubigeoRemitente = $ubigeoService->obtenerNumeroUbigeo($departamentoRemitente,$provinciaRemitente,$distritoRemitente);
+        $departamentoDestinatario = $ubigeo->getNameDepartamento($guia->dest_depa);
+        $provinciaDestinatario = $ubigeo->getNameProvincia($guia->dest_prov);
+        $distritoDestinatario = $ubigeo->getNameDistrito($guia->dest_dist);
+        $ubigeoDestinatario = $ubigeoService->obtenerNumeroUbigeo($departamentoDestinatario,$provinciaDestinatario,$distritoDestinatario);
         $data = [
             'observaciones' => $request->observaciones,
             'tipo_docu_remi' => '6',
@@ -29,9 +39,9 @@ class FacturacionSUNATController extends Controller
             'cond_prin_tipo_doc' => $conductorPrincipal->tipoDocumento->sunat_cod,
             'cond_prin_num_doc' => $conductorPrincipal->n_document,
             'cond_prin_licencia' => $conductorPrincipal->driver_license,
-            'ubigeo_remi' => $guia->remi_dist,
-            'ubigeo_dest' => $guia->dest_dist,
-            'tot_kg' => $guia->tot_kg
+            'ubigeo_remi' => $ubigeoRemitente,
+            'ubigeo_dest' => $ubigeoDestinatario,
+            'tot_kg' => $guia->tot_kg,
         ];
         if ($request->filled('conductor_secundario')) {
             $conductorSecundario = User::find($request->conductor_secundario);
@@ -55,36 +65,48 @@ class FacturacionSUNATController extends Controller
         $data = $response->getBody()->getContents();
         dd(json_decode($data));
     }
-
-    public function construccionJSONGuiaRemisionTransportista($data,$detalles)
+    public function JSONGuiaRemision($data,$detalles)
     {
-        $dataPrincipal = [
-            'TOKEN' => 'gN8zNRBV+/FVxTLwdaZx0w==',
+       return [
+            "TOKEN" => $this->token,
             "INDICADOR_PAGADOR_FLETE_REMITENTE" => "1",
             "INDICADOR_TRASLADO_TOTAL_BIENES" => "1",
-            "NRO_REGISTRO_MTC" => "05625625", // CONSULTAR ELLO ALAIN SI ES TRANSPORTISTA NO DEBE SER VACIO,
             "INDICADOR_TRASLADO_SUB_CONTRATADO" => "0",
             "INDICADOR_PAGADOR_FLETE_SUB_CONTRATADOR" => "0",
             "INDICADOR_PAGADOR_FLETE_TERCERO" => "0",
             "RETORNA_XML_ENVIO" => false,
             "RETORNA_XML_CDR" => false,
-            "NUM_SERIE_GUR" => "V001",
             "OBSERVACIONES" => $data->observaciones,
             "COD_TIP_NIF_EMIS" => '6',
-            "NUM_CORRE_GUR" => '',
-            "NUM_NIF_EMIS" => '20100100100',
-            "NOM_COMER_EMIS" => "DEMO",
-            "TXT_DMCL_FISC_EMIS" => "AV DEMO",
-            "NOM_RZN_SOC_EMIS" => 'DEMO SAC',
+            "NUM_NIF_EMIS" => env('SIMPLE_RUC'),
+            "NOM_COMER_EMIS" => env('SIMPLE_NOMBRE_COMERCIAL'),
+            "TXT_DMCL_FISC_EMIS" => env('SIMPLE_FISC_EMIS'),
+            "NOM_RZN_SOC_EMIS" => env('SIMPLE_RAZON_SOCIAL'),
             "COD_UBI_EMIS" => "",
+            "UBI_PARTIDA" => $data->ubigeo_remi,
+            "UBI_LLEGADA" => $data->ubigeo_dest,
+            "COD_PRCD_CARGA" => "",
+            "IND_TRANSBORDO" => false,
+            "TXT_VERS_UBL" => "2.1",
+            "TXT_VERS_ESTRUCT_UBL"=> "2.0",
+            "UND_MEDIDA" => "KGM",
+            "PESO_BRUTO" => $data->tot_kg,
+            "items" => $this->detalleRemision($detalles)
+        ];
+    }
+    public function construccionJSONGuiaRemisionTransportista($data,$detalles)
+    {
+        $dataPrincipal = $this->JSONGuiaRemision($data,$detalles);
+        $dataPrincipal = array_merge($dataPrincipal,[
+            "NRO_REGISTRO_MTC" => env('SIMPLE_NRO_REGISTRO_MTC'), // CONSULTAR ELLO ALAIN SI ES TRANSPORTISTA NO DEBE SER VACIO,
+            "NUM_SERIE_GUR" => "V001",
+            "NUM_CORRE_GUR" => '',
             "COD_TIP_GUR" => "31", // TRANSPORTISTA 31 / REMITENTE 09
             "COD_PRCD_CARGA" => "",
             "FEC_EMIS_GUR" => $data->fecha_emision,
             "FEC_TRASLADO" => $data->fecha_traslado,
             "DIR_PARTIDA" => $data->punto_partida,
-            "UBI_PARTIDA" => "150101",
             "DIR_LLEGADA" => $data->punto_llegada,
-            "UBI_LLEGADA" => "150131",
             "COD_TIP_NIF_DEST" => $data->tipo_docu_dest,
             "NOM_RZN_SOC_DEST" => $data->nombre_dest,
             "NUM_NIF_DEST" => $data->num_doc_dest,
@@ -97,18 +119,12 @@ class FacturacionSUNATController extends Controller
             "NOM_RZN_SOC_CONDUCT" => $data->cond_prin_nom,
             "PLACA" => $data->placa_principal, // placa vehiculo principal
             "CONSTANCIA_VEHICULAR_TUC" => $data->tuse_principal, // dato opcional del vehiculo principal, hasta que sunat lo permita (se recomienda siempre enviar)
-            "IND_TRANSBORDO" => false,
-            "TXT_VERS_UBL" => "2.1",
-            "TXT_VERS_ESTRUCT_UBL"=> "2.0",
-            "UND_MEDIDA" => "KGM",
-            "PESO_BRUTO" => $data->tot_kg,
             "ENTIDAD_EMISORA_AUT_TRANSPORTISTA" => "",
             "NRO_AUTORIZACION_ESPECIAL_EMISORA" => "",
             "COD_TIP_NIF_TRANSP" => "",
             "NUM_NIF_TRANSP" => "",
             "NOM_RZN_SOC_TRANSP" => "",
-            "items" => $this->detalleRemision($detalles)
-        ];
+        ]);
         if(!empty($data->placas_secun)){
             $dataPrincipal['vehiculos_secundarios'] = [
                 'PLACA' => $data->placas_secun,
