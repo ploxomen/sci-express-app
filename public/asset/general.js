@@ -7,6 +7,16 @@ class General {
         "X-CSRF-TOKEN": this.token,
         "X-Requested-With": "XMLHttpRequest",
     };
+    alertifyConfirmPromise(title, message) {
+        return new Promise((resolve) => {
+            alertify.confirm(
+                title,
+                message,
+                () => resolve(true),
+                () => resolve(false)
+            );
+        });
+    }
     async funcfetch(url, dato, method = "POST") {
         let response = await fetch(url, {
             headers: this.jsonToken,
@@ -290,6 +300,7 @@ class General {
             }
         });
     }
+    $loader = '#banner-cargando'
     async obtenerFlestes() {
         let response = await this.funcfetch("obtener-fletes");
         if (response.error) {
@@ -756,7 +767,7 @@ class General {
         const cloneTr = tr.cloneNode(true);
         let $estadoGuiaVal =
             document.getElementById($estadoGuia) || $estadoGuia;
-        if(cloneTr.querySelector(".detalle-envio")){
+        if (cloneTr.querySelector(".detalle-envio")) {
             cloneTr.querySelector(".sort-up").removeAttribute("style");
             cloneTr.querySelector(".sort-down").removeAttribute("style");
         }
@@ -900,7 +911,7 @@ class General {
                 });
             }
             window.detallesEnvios = response.detalleEnvio;
-            
+
             $(idInvitado).trigger("change");
             if (response.prov.length > 0) {
                 this.transforData(

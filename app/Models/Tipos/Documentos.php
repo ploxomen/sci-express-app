@@ -9,6 +9,6 @@ class Documentos extends Model
 {
     protected $table = 'tipo_documento';
     public $timestamps = false;
-    protected $fillable = ['tipo','estado'];
+    protected $fillable = ['tipo','estado','sunat_cod'];
     
 }

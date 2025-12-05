@@ -65,7 +65,7 @@ Route::middleware(['auth', 'share'])->prefix('intranet')->group(function () {
         Route::post('agregar-guia-manual', [Manifiesto::class, 'agregarGuiaManual']);
         Route::get('reporte/{tipo}/{fechaInicio}/{fechaFin}', [Manifiesto::class, 'reportesManifiesto']);
     });
-    Route::prefix('facturacion')->group(function () {
+    Route::prefix('facturacion-sunat')->group(function () {
         Route::post('guia-remision-remitente', [FacturacionSUNATController::class, 'guiaRemisionRemitente']);
         Route::post('guia-remision-transportista', [FacturacionSUNATController::class, 'guiaRemisionTransportista']);
 

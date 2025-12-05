@@ -84,11 +84,11 @@
                     </div>
                     <div class="form-group col-12 col-md-6">
                         <label for="cb-placa-prin">Placas</label>
-                        <select name="placa_principal" class="form-control form-control-sm" id="cb-placa-prin"
+                        <select name="placa_principal" class="form-control form-control-sm cb-relacionado" data-input="#txt-tuse-principal" data-value="tuse" id="cb-placa-prin"
                             required>
                             <option value="" hidden>Seleccione un vehículo</option>
                             @foreach ($vehiculos as $vehiculo)
-                                <option value="{{ $vehiculo->placa }}">{{ $vehiculo->placa }}</option>
+                                <option value="{{ $vehiculo->placa }}" data-tuse="{{ $vehiculo->TUSE }}">{{ $vehiculo->placa }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -102,17 +102,17 @@
                     </div>
                     <div class="form-group col-12 col-md-6">
                         <label for="cb-placa-secun">Placas</label>
-                        <select name="placas_secun" class="form-control form-control-sm" id="cb-placa-secun"
+                        <select name="placas_secun" class="form-control form-control-sm cb-relacionado" data-input="#txt-tuse-secun" data-value="tuse" id="cb-placa-secun"
                             >
                             <option value="" hidden>Seleccione un vehículo</option>
                             @foreach ($vehiculos as $vehiculo)
-                                <option value="{{ $vehiculo->placa }}">{{ $vehiculo->placa }}</option>
+                                <option value="{{ $vehiculo->placa }}" data-tuse="{{ $vehiculo->TUSE }}">{{ $vehiculo->placa }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-4">
                         <label for="txt-tuse-secun">TUSE</label>
-                        <input type="text" required id="txt-tuse-secun"
+                        <input type="text" id="txt-tuse-secun"
                             class="form-control form-control-sm" name="tuse_secun">
                     </div>
                     <div class="col-12">
@@ -120,18 +120,18 @@
                     </div>
                     <div class="form-group col-12 col-md-6">
                         <label for="cb-conductor-principal">Nombres completos</label>
-                        <select name="conductor_principal" required class="form-control form-control-sm"
-                            data-input="#licencia-conductor" data-value="licencia" id="cb-conductor-principal">
+                        <select name="conductor_principal" required class="form-control form-control-sm cb-relacionado"
+                            data-input="#licencia-cond-prin,#numero-doc-cond-prin" data-value="licencia,documento" id="cb-conductor-principal">
                             <option value="" hidden>Seleccione un conductor</option>
                             @foreach ($conductores as $conductor)
                                 <option value="{{ $conductor->id }}"
-                                    data-licencia="{{ $conductor->driver_license }}">{{ $conductor->name }}
+                                    data-licencia="{{ $conductor->driver_license }}" data-documento="{{ $conductor->n_document }}">{{ $conductor->name }}
                                     {{ $conductor->last_name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-4">
-                        <label for="numero-doc-cond-prin" id="tipo-documento-conductor-prin"></label>
+                        <label for="numero-doc-cond-prin" id="tipo-documento-conductor-prin">N° documento</label>
                         <input type="text" disabled required id="numero-doc-cond-prin"
                             class="form-control form-control-sm" name="num_doc_cond_prin">
                     </div>
@@ -145,24 +145,24 @@
                     </div>
                     <div class="form-group col-12 col-md-6">
                         <label for="cb-conductor-secundario">Nombres completos</label>
-                        <select name="conductor_secundario" required class="form-control form-control-sm"
-                            data-input="#licencia-conductor" data-value="licencia" id="cb-conductor-secundario">
+                        <select name="conductor_secundario" class="form-control form-control-sm cb-relacionado"
+                            data-input="#licencia-cond-secun,#numero-doc-cond-secun" data-value="licencia,documento" id="cb-conductor-secundario">
                             <option value="" hidden>Seleccione un conductor</option>
                             @foreach ($conductores as $conductor)
                                 <option value="{{ $conductor->id }}"
-                                    data-licencia="{{ $conductor->driver_license }}">{{ $conductor->name }}
+                                    data-licencia="{{ $conductor->driver_license }}" data-documento="{{ $conductor->n_document }}">{{ $conductor->name }}
                                     {{ $conductor->last_name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-4">
-                        <label for="numero-doc-cond-secun" id="tipo-documento-conductor-secun"></label>
-                        <input type="text" disabled required id="numero-doc-cond-secun"
+                        <label for="numero-doc-cond-secun" id="tipo-documento-conductor-secun">N° documento</label>
+                        <input type="text" disabled id="numero-doc-cond-secun"
                             class="form-control form-control-sm" name="num_doc_cond_secun">
                     </div>
                     <div class="form-group mod-trans-priva col-12 col-md-6 col-lg-4">
                         <label for="licencia-cond-secun">Licencia</label>
-                        <input type="text" disabled required id="licencia-cond-secun" class="form-control form-control-sm"
+                        <input type="text" disabled id="licencia-cond-secun" class="form-control form-control-sm"
                             name="licencia_conductor_secundario">
                     </div>
                     <div class="form-group col-12">

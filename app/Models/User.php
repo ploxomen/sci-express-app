@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Tipos\Documentos;
 use Exception;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\DB;
@@ -38,6 +39,10 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+    public function tipoDocumento()
+    {
+        return $this->belongsTo(Documentos::class,'type_document');
+    }
     public static function addUser($usuario)
     {
         DB::beginTransaction();

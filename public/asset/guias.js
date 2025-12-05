@@ -1,5 +1,6 @@
 function pageLoaded() {
     let general = new General();
+    $(general.$loader).hide();
     let newCliCli = false;
     let tipoCbRemi = null;
     let comprobantesAgregados = {
@@ -217,12 +218,9 @@ function pageLoaded() {
         }
         return detalles;
     };
-    const dataFormPrincipal = (form) => {
+    const dataFormPrincipal = (form, idCliente) => {
         let datos = new FormData(form);
-        const idCliente =
-            tipoCbRemi == "proveedor"
-                ? $cbCliente.selectedOptions[0].getAttribute("data-id-cliente")
-                : $($cbCliente).val();
+
         if (datos.has("valor_complejo_distante")) {
             datos.append(
                 "ciudad_alejada",
@@ -251,29 +249,45 @@ function pageLoaded() {
         "guia-transportista-form"
     );
     const generarComprobanteFetch = (url, data) => {
-        fetch("/facturacion/" + url, {
+        $(general.$loader).show();
+        fetch("/intranet/facturacion-sunat/" + url, {
             method: "POST",
-            data,
+            body: data,
             headers: {
                 "X-CSRF-TOKEN": document
                     .querySelector('meta[name="csrf-token"]')
                     .getAttribute("content"),
                 "X-Requested-With": "XMLHttpRequest",
             },
-        }).then(response => response.json())
-        .then(data => {
-
-        }).catch(error => {
-            console.error(error)
-        });
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.error) {
+                    throw new Error(data.message);
+                }
+                // window.open(data.pdf, "_target");
+                // alertify.alert("Mensaje", data.message, () =>
+                //     window.location.reload()
+                // );
+            })
+            .catch((error) => {
+                console.error(error);
+            })
+            .finally(() => $(general.$loader).hide());
     };
     $formTransportista.onsubmit = async (event) => {
         event.preventDefault();
-        await generarGuia(frmGuia);
-        let data = new FormData()
+        let idGuia = await generarGuia(frmGuia, false);
+        let data = new FormData($formTransportista);
+        data.append("guia", idGuia);
+        generarComprobanteFetch("guia-remision-transportista", data);
     };
-    const generarGuia = (form,reload) => {
-        let datos = dataFormPrincipal(form);
+    const generarGuia = async (form, reload) => {
+        const idCliente =
+            tipoCbRemi == "proveedor"
+                ? $cbCliente.selectedOptions[0].getAttribute("data-id-cliente")
+                : $($cbCliente).val();
+        let datos = dataFormPrincipal(form, idCliente);
         const detalles = obtenerDatosDetalle();
         if (detalles.length) {
             datos.append("detalle_guia", JSON.stringify(detalles));
@@ -288,50 +302,36 @@ function pageLoaded() {
         const textOs = $("#select-os").prop("checked")
             ? "Orden de Servicio"
             : "Guía";
-        const confirmDatos = alertify.confirm(
+        const continuar = await general.alertifyConfirmPromise(
             "Alerta",
             "Al continuar se generará una nueva " +
                 textOs +
-                ", asegúrese de que estén correctamente llenadas.<br>¿Deseas continuar de todas maneras?",
-            null,
-            null
+                ".<br>¿Deseas continuar?"
         );
-        confirmDatos.set("onok", function () {
-            if (newCliCli) {
-                setTimeout(function () {
-                    const nuevoCliente = alertify.confirm(
-                        "Mensaje",
-                        "Se a detectado un nuevo cliente del cliente. <br> ¿Deseas guardarlo para la proxima vez?",
-                        null,
-                        null
-                    );
-                    nuevoCliente.set({
-                        invokeOnCloseOff: true,
-                        closable: false,
-                        labels: {
-                            ok: "Si",
-                            cancel: "No",
-                        },
-                    });
-                    nuevoCliente.set("onok", function () {
-                        datos.append("add_cli_bool", true);
-                        datos.append("add_cli_cli", idCliente);
-                        addGuia(datos,reload);
-                    });
-                    nuevoCliente.set("oncalcel", function () {
-                        datos.append("add_cli_bool", false);
-                        addGuia(datos,reload);
-                    });
-                }, 200);
-            } else {
-                addGuia(datos,reload);
+        if (!continuar) return null;
+        if (newCliCli) {
+            const guardarCliente = await general.alertifyConfirmPromise(
+                "Mensaje",
+                "Se ha detectado un nuevo cliente.<br>¿Deseas guardarlo?"
+            );
+            datos.append("add_cli_bool", guardarCliente);
+            if (guardarCliente) {
+                datos.append("add_cli_cli", idCliente);
             }
-        });
+        }
+        $(general.$loader).show();
+        const guia = await addGuia(datos, reload);
+        $(general.$loader).hide();
+        return guia;
     };
     const colocarDatosInputCB = function (event) {
         const opcionSelccionada = this.selectedOptions[0];
-        document.querySelector(event.target.dataset.input).value =
-            opcionSelccionada.dataset[event.target.dataset.value];
+        const $selectores = event.target.dataset.input.split(',');
+        const values = event.target.dataset.value.split(',');
+        $selectores.forEach((selector,key) => {
+            document.querySelector(selector).value = opcionSelccionada.dataset[values[key]]
+        })
+        
     };
     const habilitarDeshHabilitarInputs = (clase, valor) => {
         for (const element of document.querySelectorAll(`.${clase}`)) {
@@ -435,7 +435,7 @@ function pageLoaded() {
         );
     };
     const colocarComprobantes = function (idCbComprobante) {
-        const comprobantes = $("#id_nro_comp_cli").val();
+        const comprobantes = $("#id_nro_comp_cli").val() || [];
         comprobantes.forEach((comprobante) => {
             $(idCbComprobante).append(
                 new Option(comprobante, comprobante, true, true)
@@ -467,7 +467,7 @@ function pageLoaded() {
         event.preventDefault();
         const botonPresionado = event.submitter;
         if (botonPresionado.value == "generar") {
-            return generarGuia(frmGuia,true);
+            return generarGuia(frmGuia, true);
         }
         $("#seleccion-comprobantes").modal("show");
     });
@@ -492,7 +492,7 @@ function pageLoaded() {
             tipo == "ciudad" ? $(this).val() : null
         );
     });
-    async function addGuia(datos,reload) {
+    async function addGuia(datos, reload) {
         try {
             let response = await general.funcfetch("guias/agregar-guia", datos);
             if (response.error) {
@@ -504,7 +504,7 @@ function pageLoaded() {
                 return;
             }
             newCliCli = false;
-            if(!reload) return response.id;
+            if (!reload) return response.id_guia;
             alertify.alert("Mensaje", response.success, () => {
                 window.location.reload();
             });

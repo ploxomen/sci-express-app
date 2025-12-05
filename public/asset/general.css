@@ -18,6 +18,19 @@
 .form-group{
     margin-bottom: .4rem !important;
 }
+.before-page, .before-page-comentario, .before-page-add-firma, .before-page-save-config{
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /*z-index: 2;*/
+    z-index: 5000;
+    background: rgba(249, 249, 249, 0.705);
+}
 label{
     color: var(--color-letra-title);
     font-size: 12px !important;

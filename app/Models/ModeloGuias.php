@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Http\Controllers\Ubigeo;
+use App\Models\Tipos\Documentos;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,30 @@ class ModeloGuias extends Model
         return $query->leftJoin('clientes','clientes.id','=','id_remitente')
         ->leftJoin('clientes_de_clientes','clientes_de_clientes.id','=','id_destinatario')
         ->leftJoin('proveedor_clientes','proveedor_clientes.id','=','id_remitente');
+    }
+    public function tipoDocumentoRemitente()
+    {
+        return $this->belongsTo(Documentos::class,'remi_tipo_docu');
+    }
+    public function tipoDocumentoDestinatario()
+    {
+        return $this->belongsTo(Documentos::class,'dest_tipo_docu');
+    }
+    public function detalles()
+    {
+        return $this->hasMany(GuiaDetalle::class,'id_guia');
+    }
+    public function remitenteProveedor()
+    {
+        return $this->belongsTo(ClienteProveedor::class,'id_remitente');
+    }
+    public function remitenteCliente()
+    {
+        return $this->belongsTo(Clientes::class,'id_remitente');
+    }
+    public function destinatario()
+    {
+        return $this->belongsTo(Destinatarios::class,'id_destinatario');
     }
     public static function agregar($guia,$detalles,$cli,$cli_bool,$user)
     {
