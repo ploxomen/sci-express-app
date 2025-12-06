@@ -34,31 +34,14 @@
                             <option value="13">OTROS</option>
                         </select>
                     </div>
-                    <div class="col-12">
-                        <span class="!text-sm text-blue-500 !font-semibold">Datos del remitente</span>
-                    </div>
-                    <div class="form-group col-12 col-md-6 col-lg-3">
-                        <label for="txt-emi-tipo-doc">Tipo Documento</label>
-                        <select name="emi_tipo_doc" class="form-control form-control-sm" id="txt-emi-tipo-doc" disabled
-                            required>
-                            @foreach ($tipo_documentos as $tipo_docu)
-                                <option value="{{ $tipo_docu->id }}">{{ $tipo_docu->tipo }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group col-12 col-md-6 col-lg-3">
-                        <label for="txt-emi-num-doc">N° Documento</label>
-                        <input type="text" name="emi_num_doc" class="form-control form-control-sm"
-                            id="txt-emi-num-doc" disabled required>
-                    </div>
-                    <div class="form-group col-12 col-md-6">
-                        <label for="txt-emi-razon-social">Razón social</label>
-                        <input type="text" name="emi_razon_social" class="form-control form-control-sm"
-                            id="txt-emi-razon-social" disabled required>
-                    </div>
                     <div class="form-group col-12">
                         <label for="txt-partida">Punto partida</label>
                         <input type="text" name="punto_partida" class="form-control form-control-sm" id="txt-partida"
+                            required>
+                    </div>
+                    <div class="form-group col-12">
+                        <label for="txt-llegada">Punto llegada</label>
+                        <input type="text" name="punto_llegada" class="form-control form-control-sm" id="txt-llegada"
                             required>
                     </div>
                     <div class="col-12">
@@ -82,11 +65,6 @@
                         <label for="txt-dest-razon-social">Razón social</label>
                         <input type="text" name="dest_razon_social" class="form-control form-control-sm"
                             id="txt-dest-razon-social" disabled required>
-                    </div>
-                    <div class="form-group col-12">
-                        <label for="txt-llegada">Punto llegada</label>
-                        <input type="text" name="punto_llegada" class="form-control form-control-sm" id="txt-llegada"
-                            required>
                     </div>
                     <div class="col-12">
                         <span class="!text-sm text-blue-500 !font-semibold">Datos traslado</span>
@@ -116,11 +94,11 @@
                     </div>
                     <div class="form-group mod-trans-public col-12 col-md-6">
                         <label for="cb-empre-nombre">Razon social</label>
-                        <select name="empre_razon_social" class="form-control form-control-sm cb-relacionado" required
+                        <select name="empresa_transporte" class="form-control form-control-sm cb-relacionado" required
                             id="cb-empre-nombre" data-input="#ruc-empresa-trans" data-value="ruc">
                             <option value="" hidden>Seleccione una empresa de transporte</option>
                             @foreach ($empresasTransporte as $empresa)
-                                <option value="{{ $empresa->empresa }}" data-ruc="{{ $empresa->nro_ruc }}">
+                                <option value="{{ $empresa->id }}" data-ruc="{{ $empresa->nro_ruc }}">
                                     {{ $empresa->empresa }}</option>
                             @endforeach
                         </select>

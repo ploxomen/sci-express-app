@@ -197,8 +197,12 @@ function pageLoaded() {
     };
 
     const $formGuiaRemitente = document.getElementById("guia-remitente-form");
-    $formGuiaRemitente.addEventListener("submit", function (e) {
+    $formGuiaRemitente.addEventListener("submit", async function (e) {
         e.preventDefault();
+        let idGuia = await generarGuia(frmGuia, false);
+        let data = new FormData($formGuiaRemitente);
+        data.append("guia", idGuia);
+        generarComprobanteFetch("guia-remision-remitente", data);
     });
     $("#id-invitado-remitente").on("select2:select", async function (e) {
         general.getCCInvitados("#id-invitado-remitente", $cbCliente);
@@ -423,6 +427,9 @@ function pageLoaded() {
             const element = !id
                 ? document.getElementById(key)
                 : document.getElementById(key + "-" + id);
+            if(!element){
+                continue;
+            }
             element.value = data[key];
         }
     };
