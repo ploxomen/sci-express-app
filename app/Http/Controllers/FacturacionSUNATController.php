@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ComprobantesSimpleFact;
 use App\Models\EmpresaTransporte;
 use App\Models\ModeloGuias;
 use App\Models\User;
@@ -45,18 +46,19 @@ class FacturacionSUNATController extends Controller
             $data['cond_secu_num_doc'] = $conductorSecundario->n_document;
             $data['cond_secu_licencia'] = $conductorSecundario->driver_license;
         }
+        $tipoDocumentoSunat = 'GUIA REMISION TRANSPORTISTA';
         $detalles = $guia->detalles;
         $dataJSON = (object)array_merge($data, $request->all());
-        $parametros = $this->construccionJSONGuiaRemisionTransportista($dataJSON, $detalles);
+        $parametros = $this->construccionJSONGuiaRemisionTransportista($dataJSON, $detalles,$tipoDocumentoSunat);
         $response = $this->enviarAPI($parametros);
-        $this->responseAPI($response,$guia, $response->serie_cpe, $response->correlativo_cpe);
+        $this->responseAPI($response, $guia, $response->serie_cpe, $response->correlativo_cpe,$tipoDocumentoSunat);
         return $response;
     }
     public function guiaRemisionRemitente(Request $request)
     {
         $guia = ModeloGuias::find($request->guia);
         $destinatario = $guia->destinatario;
-       $ubigeoRemitente = $this->obtenerUBIGEOSunatNombres($guia->remi_depa, $guia->remi_prov, $guia->remi_dist);
+        $ubigeoRemitente = $this->obtenerUBIGEOSunatNombres($guia->remi_depa, $guia->remi_prov, $guia->remi_dist);
         $ubigeoDestinatario = $this->obtenerUBIGEOSunatNombres($guia->dest_depa, $guia->dest_prov, $guia->dest_dist);
         $data = [
             'observaciones' => $request->observaciones,
@@ -81,14 +83,15 @@ class FacturacionSUNATController extends Controller
             $data['cond_prin_licencia'] = $conductorPrincipal->driver_license;
             $data['placa_princial'] = $conductorPrincipal->placa;
         }
+        $tipoDocumentoSunat = 'GUIA REMISION REMITENTE';
         $detalles = $guia->detalles;
         $dataJSON = (object)array_merge($data, $request->all());
-        $parametros = $this->construccionJSONGuiaRemisionRemitente($dataJSON, $detalles);
+        $parametros = $this->construccionJSONGuiaRemisionRemitente($dataJSON, $detalles,$tipoDocumentoSunat);
         $response = $this->enviarAPI($parametros);
-        $this->responseAPI($response,$guia, $response->serie_cpe, $response->correlativo_cpe);
+        $this->responseAPI($response, $guia, $response->serie_cpe, $response->correlativo_cpe,$tipoDocumentoSunat);
         return $response;
     }
-    public function obtenerUBIGEOSunatNombres($ubiDepartamento,$ubiProvincia,$ubiDistrito)
+    public function obtenerUBIGEOSunatNombres($ubiDepartamento, $ubiProvincia, $ubiDistrito)
     {
         $ubigeoService = new UbigeoService();
         $ubigeo = new Ubigeo();
@@ -97,13 +100,13 @@ class FacturacionSUNATController extends Controller
         $distritoRemitente = $ubigeo->getNameDistrito($ubiDistrito);
         return $ubigeoService->obtenerNumeroUbigeo($departamentoRemitente, $provinciaRemitente, $distritoRemitente);
     }
-    public function guardarArchivosServidor($base64,$nombre,$ruta = 'documentos')
+    public function guardarArchivosServidor($base64, $nombre, $ruta = 'documentos')
     {
         $pdfContent = base64_decode($base64);
         $filename = $ruta . "/" . $nombre;
-        return Storage::disk('public')->put($filename,$pdfContent);
+        return Storage::disk('public')->put($filename, $pdfContent);
     }
-    public function responseAPI($response, ModeloGuias $guia, $numeroSerie, $correlativo)
+    public function responseAPI($response, ModeloGuias $guia, $numeroSerie, $correlativo,$tipo)
     {
         if (!empty($response->errors)) {
             $guia->procesos()->delete();
@@ -111,8 +114,9 @@ class FacturacionSUNATController extends Controller
             $guia->delete();
             return false;
         }
+        ComprobantesSimpleFact::firstWhere('tipo',$tipo)->increment('correlativo');
         $numeroComprobante = $numeroSerie . "-" . $correlativo;
-        $this->guardarArchivosServidor($response->pdf_bytes,$numeroComprobante.".pdf");
+        $this->guardarArchivosServidor($response->pdf_bytes, $numeroComprobante . ".pdf");
         return $guia->update(['comprobante_sunat' => $numeroComprobante]);
     }
     public function enviarAPI($parametros)
@@ -129,11 +133,14 @@ class FacturacionSUNATController extends Controller
         return json_decode($data);
     }
 
-    public function JSONGuiaRemision($data, $detalles)
+    public function JSONGuiaRemision($tipo,$data, $detalles)
     {
+        $comprobanteSimple = ComprobantesSimpleFact::porTipo($tipo)->first();
         return [
             "TOKEN" => $this->token,
             "RETORNA_XML_ENVIO" => false,
+            "NUM_SERIE_GUR" => $comprobanteSimple->serie,
+            "NUM_CORRE_GUR" => $comprobanteSimple->correlativo + 1,
             "RETORNA_XML_CDR" => false,
             "FEC_EMIS_GUR" => $data->fecha_emision,
             "FEC_TRASLADO" => $data->fecha_traslado,
@@ -160,18 +167,16 @@ class FacturacionSUNATController extends Controller
             "items" => $this->detalleRemision($detalles)
         ];
     }
-    public function construccionJSONGuiaRemisionTransportista($data, $detalles)
+    public function construccionJSONGuiaRemisionTransportista($data, $detalles,$tipo)
     {
-        $dataPrincipal = $this->JSONGuiaRemision($data, $detalles);
+        $dataPrincipal = $this->JSONGuiaRemision($tipo,$data, $detalles);
         $dataPrincipal = array_merge($dataPrincipal, [
             "NRO_REGISTRO_MTC" => env('SIMPLE_NRO_REGISTRO_MTC'), // CONSULTAR ELLO ALAIN SI ES TRANSPORTISTA NO DEBE SER VACIO,
-            "NUM_SERIE_GUR" => "V001",
             "INDICADOR_PAGADOR_FLETE_REMITENTE" => "1",
             "INDICADOR_TRASLADO_TOTAL_BIENES" => "1",
             "INDICADOR_TRASLADO_SUB_CONTRATADO" => "0",
             "INDICADOR_PAGADOR_FLETE_SUB_CONTRATADOR" => "0",
             "INDICADOR_PAGADOR_FLETE_TERCERO" => "0",
-            "NUM_CORRE_GUR" => '',
             "COD_TIP_GUR" => "31", // TRANSPORTISTA 31 / REMITENTE 09
             "COD_TIP_NIF_REMIT" => $data->tipo_docu_remi,
             "NOM_RZN_SOC_REMITENTE" => $data->tipo_docu_remi,
@@ -199,12 +204,10 @@ class FacturacionSUNATController extends Controller
         }
         return $dataPrincipal;
     }
-    public function construccionJSONGuiaRemisionRemitente($data, $detalles)
+    public function construccionJSONGuiaRemisionRemitente($data, $detalles, $tipo)
     {
-        $dataPrincipal = $this->JSONGuiaRemision($data, $detalles);
+        $dataPrincipal = $this->JSONGuiaRemision($tipo,$data, $detalles);
         $dataPrincipal = array_merge($dataPrincipal, [
-            "NUM_SERIE_GUR" => "V001",
-            "NUM_CORRE_GUR" => '10003',
             "INDICADOR_M1_L" => isset($data->categoria_m1) ? "1" : "0",
             "COD_TIP_GUR" => "09", // TRANSPORTISTA 31 / REMITENTE 09
             "MOT_TRASLADO" => $data->motivo_traslado,
