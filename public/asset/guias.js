@@ -200,6 +200,9 @@ function pageLoaded() {
     $formGuiaRemitente.addEventListener("submit", async function (e) {
         e.preventDefault();
         let idGuia = await generarGuia(frmGuia, false);
+        if(!idGuia){
+            return false;
+        }
         let data = new FormData($formGuiaRemitente);
         data.append("guia", idGuia);
         generarComprobanteFetch("guia-remision-remitente", data);
@@ -266,22 +269,27 @@ function pageLoaded() {
         })
             .then((response) => response.json())
             .then((data) => {
-                if (data.error) {
-                    throw new Error(data.message);
+                if (data.errors) {
+                    throw new Error(data.errors);
                 }
-                // window.open(data.pdf, "_target");
-                // alertify.alert("Mensaje", data.message, () =>
-                //     window.location.reload()
-                // );
+                window.open(`/storage/documentos/${data.serie_cpe}-${data.correlativo_cpe}.pdf`, "_target");
+                alertify.alert("Mensaje", "Comprobante generado correctamente", () =>
+                    window.location.reload()
+                );
             })
             .catch((error) => {
+                console.log(error.message);
                 console.error(error);
+                alertify.alert("Error",error.message);
             })
             .finally(() => $(general.$loader).hide());
     };
     $formTransportista.onsubmit = async (event) => {
         event.preventDefault();
         let idGuia = await generarGuia(frmGuia, false);
+        if(!idGuia){
+            return false;
+        }
         let data = new FormData($formTransportista);
         data.append("guia", idGuia);
         generarComprobanteFetch("guia-remision-transportista", data);
@@ -396,15 +404,7 @@ function pageLoaded() {
             "txt-emi-num-doc":
                 document.getElementById("id_remi_nro_docu").value,
             "txt-partida":
-                document.getElementById("id_remi_dire").value +
-                " - " +
-                document.getElementById("id_remi_depa").selectedOptions[0]
-                    .text +
-                " " +
-                document.getElementById("id_remi_prov").selectedOptions[0]
-                    .text +
-                " " +
-                document.getElementById("id_remi_dist").selectedOptions[0].text,
+                document.getElementById("id_remi_dire").value,
             "txt-dest-razon-social":
                 document.getElementById("id_dest_nomb").selectedOptions[0].text,
             "txt-dest-tipo-doc":
@@ -412,15 +412,7 @@ function pageLoaded() {
             "txt-dest-num-doc":
                 document.getElementById("id_dest_nro_docu").value,
             "txt-llegada":
-                document.getElementById("id_dest_dire").value +
-                " - " +
-                document.getElementById("id_dest_depa").selectedOptions[0]
-                    .text +
-                " " +
-                document.getElementById("id_dest_prov").selectedOptions[0]
-                    .text +
-                " " +
-                document.getElementById("id_dest_dist").selectedOptions[0].text,
+                document.getElementById("id_dest_dire").value
         };
         for (const key in data) {
             if (!Object.hasOwn(data, key)) continue;
@@ -511,13 +503,14 @@ function pageLoaded() {
                 return;
             }
             newCliCli = false;
-            if (!reload) return response.id_guia;
+            if (!reload) return response?.id_guia;
             alertify.alert("Mensaje", response.success, () => {
                 window.location.reload();
             });
         } catch (error) {
+            console.log(error);
             console.error(error);
-            alertify.alert("Error", error.message);
+            alertify.alert("Error", error);
         }
     }
     document

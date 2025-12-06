@@ -8,25 +8,20 @@ use App\Models\User;
 use App\Services\UbigeoService;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class FacturacionSUNATController extends Controller
 {
     public $urlGenerarComprobante = 'https://demo.mifact.net.pe/api/GuiaRemision.svc/SendGuia';
     public $token = 'gN8zNRBV+/FVxTLwdaZx0w==';
-    public function guiaRemisionTransportista(Request $request, UbigeoService $ubigeoService, Ubigeo $ubigeo)
+    public function guiaRemisionTransportista(Request $request)
     {
-        $guia = ModeloGuias::find(7251);
+        $guia = ModeloGuias::find($request->guia);
         $remitente = $guia->tipo_guia == 'proveedor' ? $guia->remitenteProveedor : $guia->remitenteCliente;
         $destinatario = $guia->destinatario;
         $conductorPrincipal = User::find($request->conductor_principal);
-        $departamentoRemitente = $ubigeo->getNameDepartamento($guia->remi_depa);
-        $provinciaRemitente = $ubigeo->getNameProvincia($guia->remi_prov);
-        $distritoRemitente = $ubigeo->getNameDistrito($guia->remi_dist);
-        $ubigeoRemitente = $ubigeoService->obtenerNumeroUbigeo($departamentoRemitente, $provinciaRemitente, $distritoRemitente);
-        $departamentoDestinatario = $ubigeo->getNameDepartamento($guia->dest_depa);
-        $provinciaDestinatario = $ubigeo->getNameProvincia($guia->dest_prov);
-        $distritoDestinatario = $ubigeo->getNameDistrito($guia->dest_dist);
-        $ubigeoDestinatario = $ubigeoService->obtenerNumeroUbigeo($departamentoDestinatario, $provinciaDestinatario, $distritoDestinatario);
+        $ubigeoRemitente = $this->obtenerUBIGEOSunatNombres($guia->remi_depa, $guia->remi_prov, $guia->remi_dist);
+        $ubigeoDestinatario = $this->obtenerUBIGEOSunatNombres($guia->dest_depa, $guia->dest_prov, $guia->dest_dist);
         $data = [
             'observaciones' => $request->observaciones,
             'tipo_docu_remi' => '6',
@@ -53,20 +48,16 @@ class FacturacionSUNATController extends Controller
         $detalles = $guia->detalles;
         $dataJSON = (object)array_merge($data, $request->all());
         $parametros = $this->construccionJSONGuiaRemisionTransportista($dataJSON, $detalles);
-        return $this->enviarAPI($parametros);
+        $response = $this->enviarAPI($parametros);
+        $this->responseAPI($response,$guia, $response->serie_cpe, $response->correlativo_cpe);
+        return $response;
     }
-    public function guiaRemisionRemitente(Request $request, UbigeoService $ubigeoService, Ubigeo $ubigeo)
+    public function guiaRemisionRemitente(Request $request)
     {
-        $guia = ModeloGuias::find(7251);
+        $guia = ModeloGuias::find($request->guia);
         $destinatario = $guia->destinatario;
-        $departamentoRemitente = $ubigeo->getNameDepartamento($guia->remi_depa);
-        $provinciaRemitente = $ubigeo->getNameProvincia($guia->remi_prov);
-        $distritoRemitente = $ubigeo->getNameDistrito($guia->remi_dist);
-        $ubigeoRemitente = $ubigeoService->obtenerNumeroUbigeo($departamentoRemitente, $provinciaRemitente, $distritoRemitente);
-        $departamentoDestinatario = $ubigeo->getNameDepartamento($guia->dest_depa);
-        $provinciaDestinatario = $ubigeo->getNameProvincia($guia->dest_prov);
-        $distritoDestinatario = $ubigeo->getNameDistrito($guia->dest_dist);
-        $ubigeoDestinatario = $ubigeoService->obtenerNumeroUbigeo($departamentoDestinatario, $provinciaDestinatario, $distritoDestinatario);
+       $ubigeoRemitente = $this->obtenerUBIGEOSunatNombres($guia->remi_depa, $guia->remi_prov, $guia->remi_dist);
+        $ubigeoDestinatario = $this->obtenerUBIGEOSunatNombres($guia->dest_depa, $guia->dest_prov, $guia->dest_dist);
         $data = [
             'observaciones' => $request->observaciones,
             'tipo_docu_dest' => $guia->tipoDocumentoDestinatario->sunat_cod,
@@ -77,11 +68,11 @@ class FacturacionSUNATController extends Controller
             'tot_kg' => $guia->tot_kg,
         ];
         //TRANSPORTE PUBLICO
-        if($request->transporte == "01"){
+        if ($request->transporte == "01") {
             $empresaTransporte = EmpresaTransporte::find($request->empresa_transporte);
             $data['razon_social_transporte'] = $empresaTransporte->empresa;
             $data['ruc_transporte'] =  $empresaTransporte->nro_ruc;
-        }else{
+        } else {
             //TRANSPORTE PRIVADO
             $conductorPrincipal = User::find($request->conductor_principal);
             $data['cond_prin_nom'] = $conductorPrincipal->name . ' ' . $conductorPrincipal->last_name;
@@ -93,7 +84,36 @@ class FacturacionSUNATController extends Controller
         $detalles = $guia->detalles;
         $dataJSON = (object)array_merge($data, $request->all());
         $parametros = $this->construccionJSONGuiaRemisionRemitente($dataJSON, $detalles);
-        return $this->enviarAPI($parametros);
+        $response = $this->enviarAPI($parametros);
+        $this->responseAPI($response,$guia, $response->serie_cpe, $response->correlativo_cpe);
+        return $response;
+    }
+    public function obtenerUBIGEOSunatNombres($ubiDepartamento,$ubiProvincia,$ubiDistrito)
+    {
+        $ubigeoService = new UbigeoService();
+        $ubigeo = new Ubigeo();
+        $departamentoRemitente = $ubigeo->getNameDepartamento($ubiDepartamento);
+        $provinciaRemitente = $ubigeo->getNameProvincia($ubiProvincia);
+        $distritoRemitente = $ubigeo->getNameDistrito($ubiDistrito);
+        return $ubigeoService->obtenerNumeroUbigeo($departamentoRemitente, $provinciaRemitente, $distritoRemitente);
+    }
+    public function guardarArchivosServidor($base64,$nombre,$ruta = 'documentos')
+    {
+        $pdfContent = base64_decode($base64);
+        $filename = $ruta . "/" . $nombre;
+        return Storage::disk('public')->put($filename,$pdfContent);
+    }
+    public function responseAPI($response, ModeloGuias $guia, $numeroSerie, $correlativo)
+    {
+        if (!empty($response->errors)) {
+            $guia->procesos()->delete();
+            $guia->detalles()->delete();
+            $guia->delete();
+            return false;
+        }
+        $numeroComprobante = $numeroSerie . "-" . $correlativo;
+        $this->guardarArchivosServidor($response->pdf_bytes,$numeroComprobante.".pdf");
+        return $guia->update(['comprobante_sunat' => $numeroComprobante]);
     }
     public function enviarAPI($parametros)
     {
@@ -108,6 +128,7 @@ class FacturacionSUNATController extends Controller
         $data = $response->getBody()->getContents();
         return json_decode($data);
     }
+
     public function JSONGuiaRemision($data, $detalles)
     {
         return [
@@ -183,17 +204,17 @@ class FacturacionSUNATController extends Controller
         $dataPrincipal = $this->JSONGuiaRemision($data, $detalles);
         $dataPrincipal = array_merge($dataPrincipal, [
             "NUM_SERIE_GUR" => "V001",
-            "NUM_CORRE_GUR" => '10000',
+            "NUM_CORRE_GUR" => '10003',
             "INDICADOR_M1_L" => isset($data->categoria_m1) ? "1" : "0",
             "COD_TIP_GUR" => "09", // TRANSPORTISTA 31 / REMITENTE 09
             "MOT_TRASLADO" => $data->motivo_traslado,
             "MOD_TRASLADO" => $data->transporte,
         ]);
-        if($data->transporte == "01"){
+        if ($data->transporte == "01") {
             $dataPrincipal['NUM_NIF_TRANSP'] = $data->ruc_transporte;
             $dataPrincipal['COD_TIP_NIF_TRANSP'] = "6";
             $dataPrincipal['NOM_RZN_SOC_TRANSP'] = $data->razon_social_transporte;
-        }else{
+        } else {
             $dataPrincipal['COD_TIP_NIF_CONDUCT'] = $data->cond_prin_tipo_doc;
             $dataPrincipal['NUM_NIF_CONDUCT'] = $data->cond_prin_num_doc;
             $dataPrincipal['NOM_RZN_SOC_CONDUCT'] = $data->cond_prin_nom;

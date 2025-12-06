@@ -13,7 +13,7 @@ class ModeloGuias extends Model
 {
     protected $table = 'guias';
     public $timestamps = false;
-    protected $fillable = ['situ'];
+    protected $fillable = ['situ','comprobante_sunat'];
     public function scopeGuias($query){
         return $query->leftJoin('clientes','clientes.id','=','id_remitente')
         ->leftJoin('clientes_de_clientes','clientes_de_clientes.id','=','id_destinatario')
@@ -30,6 +30,10 @@ class ModeloGuias extends Model
     public function detalles()
     {
         return $this->hasMany(GuiaDetalle::class,'id_guia');
+    }
+    public function procesos()
+    {
+        return $this->hasMany(ProcesosGuia::class,'id_guia');
     }
     public function remitenteProveedor()
     {
