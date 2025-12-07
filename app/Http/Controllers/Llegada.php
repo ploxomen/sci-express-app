@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EmbarqueCiudadBaseImg;
 use App\Models\InformacionAdicional;
 use App\Models\ModeloCluster;
 use App\Models\ModeloEmbarque;
@@ -13,6 +14,10 @@ use Illuminate\Support\Facades\Auth;
 
 class Llegada extends Controller
 {
+    public function verImagenesLegada($llegada)
+    {
+        return response()->json(['imagenes' => EmbarqueCiudadBaseImg::select('ruta','nombre_original')->where('id_ciudad_llegada',$llegada)->get()]);
+    }
     public function viewLlegada()
     {
         $modulos = User::getModulos(Auth::id());

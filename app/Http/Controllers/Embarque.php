@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\Reportes;
+use App\Models\EmbarqueCiudadBaseImg;
 use App\Models\EmpresaTransporte;
 use App\Models\InformacionAdicional;
 use App\Models\ModeloEmbarque;
@@ -33,8 +34,8 @@ class Embarque extends Controller
         $conductores = User::obtenerUsuarioRol(6);
         $vehiculos = Vehiculos::obtenerVehiculos();
         $transportes = EmpresaTransporte::obtenerTransportes();
-        $diasAtras = date('Y-m-d',strtotime(date('Y-m-d') . "- 2 days"));
-        return view('pedidos.listaembarque',compact('diasAtras','dealers', 'conductores', 'ciudadesBase', 'vehiculos', 'transportes','hoy'));
+        $diasAtras = date('Y-m-d', strtotime(date('Y-m-d') . "- 2 days"));
+        return view('pedidos.listaembarque', compact('diasAtras', 'dealers', 'conductores', 'ciudadesBase', 'vehiculos', 'transportes', 'hoy'));
     }
     public function viewEmbarquesTodo()
     {
@@ -43,7 +44,7 @@ class Embarque extends Controller
         $conductores = User::obtenerUsuarioRol(6);
         $vehiculos = Vehiculos::obtenerVehiculos();
         $transportes = EmpresaTransporte::obtenerTransportes();
-        return view('embarque.misEmbarques',compact( 'transportes','fechaFiltros', 'dealers', 'conductores', 'vehiculos'));
+        return view('embarque.misEmbarques', compact('transportes', 'fechaFiltros', 'dealers', 'conductores', 'vehiculos'));
     }
     public function agregarManifiestoEmbarque(Request $request)
     {
@@ -54,7 +55,7 @@ class Embarque extends Controller
             return response()->json(['error' => $ex->getMessage()]);
         }
     }
-    public function reportesEmbarque($tipo,$fechaInicio,$fechaFin)
+    public function reportesEmbarque($tipo, $fechaInicio, $fechaFin)
     {
         ini_set('memory_limit', '1024M');
         switch ($tipo) {
@@ -72,7 +73,7 @@ class Embarque extends Controller
     public function eliminarManifiestoEmbarque(Request $request)
     {
         try {
-            $manifiestos = ModeloEmbarque::eliminarManifiestoEmbarque($request->embarque,$request->manifiesto);
+            $manifiestos = ModeloEmbarque::eliminarManifiestoEmbarque($request->embarque, $request->manifiesto);
             return response()->json($manifiestos);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
@@ -80,8 +81,8 @@ class Embarque extends Controller
     }
     public function editarFletes(Request $request)
     {
-       $fletes = json_decode($request->fletes,true);
-       $editarFlete = ModeloEmbarque::editarFlete($request->embarque,$fletes,$request->tota_bult,$request->flet_esti);
+        $fletes = json_decode($request->fletes, true);
+        $editarFlete = ModeloEmbarque::editarFlete($request->embarque, $fletes, $request->tota_bult, $request->flet_esti);
         return response()->json($editarFlete);
     }
     public function editarEmbarque(Request $request)
@@ -90,15 +91,15 @@ class Embarque extends Controller
         $empresasTransporte = $request->id_empr_tran;
         unset($actualizadDatos['embarque']);
         unset($actualizadDatos['id_empr_tran']);
-        $result = ModeloEmbarque::editarEmbarque($actualizadDatos,$empresasTransporte,$request->embarque,Auth::id());
+        $result = ModeloEmbarque::editarEmbarque($actualizadDatos, $empresasTransporte, $request->embarque, Auth::id());
         return response()->json($result);
     }
     public function mostrarEditarEmbarque(Request $request)
     {
         try {
-            $guias = ModeloEmbarque::misEmbarquesFiltros(null,null,'todos','todos','todos','todos',$request->embarque);
+            $guias = ModeloEmbarque::misEmbarquesFiltros(null, null, 'todos', 'todos', 'todos', 'todos', $request->embarque);
             $manifiestos = ModeloManifiesto::manifiestoAgregarManual();
-            return response()->json(['success' => $guias,'manifiesto' => $manifiestos]);
+            return response()->json(['success' => $guias, 'manifiesto' => $manifiestos]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
@@ -130,23 +131,23 @@ class Embarque extends Controller
             return response()->json(['error' => $ex->getMessage()]);
         }
     }
-    public function guiaRechazada(ModeloGuias $guia)  {
-        $rechazos = RechazoGuiaRetornada::where('guia_id',$guia->id)->get()->map(function($row){
-            $usuarioResponsable = User::find($row->usuario_id,['name','last_name']);
+    public function guiaRechazada(ModeloGuias $guia)
+    {
+        $rechazos = RechazoGuiaRetornada::where('guia_id', $guia->id)->get()->map(function ($row) {
+            $usuarioResponsable = User::find($row->usuario_id, ['name', 'last_name']);
             return [
-                'detalles' => explode(';',$row->opciones_denegado),
+                'detalles' => explode(';', $row->opciones_denegado),
                 'otros_detalles' => $row->detalles,
                 'responsable' => "{$usuarioResponsable->name} {$usuarioResponsable->last_name}",
                 'fecha_hora' => Carbon::parse($row->created_at)->format('d/m/Y H:i')
             ];
         });
-        return response()->json(['data' => $rechazos,'mensaje' => 'rechazos obtenidos correctamente']);
-        
+        return response()->json(['data' => $rechazos, 'mensaje' => 'rechazos obtenidos correctamente']);
     }
     public function obtenerDevolucionGuias(Request $request)
     {
         try {
-            $guias = ModeloEmbarque::devolucionCargo(0, 'ver-cargos-pendientes',Auth::id());
+            $guias = ModeloEmbarque::devolucionCargo(0, 'ver-cargos-pendientes', Auth::id());
             return datatables()->of($guias)->toJson();
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
@@ -159,9 +160,9 @@ class Embarque extends Controller
     public function obtenerEmpresas(Request $request)
     {
         try {
-            if($request->has('empresa_id')){
+            if ($request->has('empresa_id')) {
                 return response()->json(['empresas' => InformacionAdicional::obtenerEmpresaTrasnporte($request->empresa_id)]);
-            }else{
+            } else {
                 return datatables()->of(InformacionAdicional::obtenerEmpresasTrasnportes())->toJson();
             }
         } catch (Exception $ex) {
@@ -172,7 +173,7 @@ class Embarque extends Controller
     {
         try {
             $datos = $request->all();
-            if(isset($datos['nro_contacto']) && !empty($datos['nro_contacto'])){
+            if (isset($datos['nro_contacto']) && !empty($datos['nro_contacto'])) {
                 $datos['nro_contacto'] = implode(';', $datos['nro_contacto']);
             }
             if (isset($datos['correos']) && !empty($datos['correos'])) {
@@ -189,7 +190,7 @@ class Embarque extends Controller
         try {
             $id = $request->id_empresa;
             $datos = $request->all();
-            if(isset($datos['id_empresa'])){
+            if (isset($datos['id_empresa'])) {
                 unset($datos['id_empresa']);
             }
             if (isset($datos['nro_contacto']) && !empty($datos['nro_contacto'])) {
@@ -198,7 +199,7 @@ class Embarque extends Controller
             if (isset($datos['correos']) && !empty($datos['correos'])) {
                 $datos['correos'] = implode(';', $datos['correos']);
             }
-            InformacionAdicional::actualizarEmpresaTransporte($datos,$id);
+            InformacionAdicional::actualizarEmpresaTransporte($datos, $id);
             return response()->json(['success' => true]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
@@ -209,39 +210,39 @@ class Embarque extends Controller
         try {
             $guias = [];
             $datos = $request->except(['new_images']);
-            if($request->has('guias')){
+            if ($request->has('guias')) {
                 $guias = json_decode($request->guias, true);
                 unset($datos['guias']);
             }
             $result = [];
             switch ($request->tipo) {
                 case 'guardar_guias':
-                    $result = ModeloEmbarque::guardarDevolucion($guias,Auth::id());
-                break;
+                    $result = ModeloEmbarque::guardarDevolucion($guias, Auth::id());
+                    break;
                 case 'eliminar-guias-guardadas':
-                    $result = ['success' => RetornoCargoDetalle::where('id_guia',$request->guia)->delete()];    
-                break;
+                    $result = ['success' => RetornoCargoDetalle::where('id_guia', $request->guia)->delete()];
+                    break;
                 case 'eliminar-guias-retornadas':
-                    RetornoCargoDetalle::where('id_guia',$request->guia)->delete();
-                    $result = ['success' => ModeloGuias::find($request->guia)->update(['situ' => 8])];    
-                break;
+                    RetornoCargoDetalle::where('id_guia', $request->guia)->delete();
+                    $result = ['success' => ModeloGuias::find($request->guia)->update(['situ' => 8])];
+                    break;
                 case 'consultas_guias':
                     $result = ModeloEmbarque::obtenerEmbarquesGuardados(Auth::id());
-                break;
+                    break;
                 case 'editar-retorno':
                     $imgs = !$request->hasFile('new_images') ? [] : $request->file('new_images');
                     foreach ($imgs as $img) {
                         $extension = $img->getClientOriginalExtension();
                         $nombreUnico = Str::uuid() . '.' . $extension;
-                        $img->storeAs('retornos-img',$nombreUnico);
+                        $img->storeAs('retornos-img', $nombreUnico);
                         RetornoCargoImg::create([
                             'retorno_cargo_id' => $request->id_retorno,
                             'nombre' => $img->getClientOriginalName(),
                             'url' => $nombreUnico,
                         ]);
                     }
-                    $imgsDelete = explode(";",$request->input('deleteImages',""));
-                    $imgsModel = RetornoCargoImg::whereIn('id',$imgsDelete)->get();
+                    $imgsDelete = explode(";", $request->input('deleteImages', ""));
+                    $imgsModel = RetornoCargoImg::whereIn('id', $imgsDelete)->get();
                     foreach ($imgsModel as $imgDelete) {
                         $filePath = "retornos-img/{$imgDelete->url}";
                         if (Storage::disk('local')->exists($filePath)) {
@@ -249,34 +250,34 @@ class Embarque extends Controller
                         }
                         $imgDelete->delete();
                     }
-                    RetornoCargo::find($request->id_retorno)->update($request->except('tipo','id_retorno'));
+                    RetornoCargo::find($request->id_retorno)->update($request->except('tipo', 'id_retorno'));
                     $result = ['success' => 'Retorno modificado correctamente'];
-                break;
+                    break;
                 case 'retornar_guias':
                     $guias_nuevas = [];
                     $guias_guardadas = [];
                     unset($datos['tipo']);
-                    if($request->has('guias_guardadas')){
+                    if ($request->has('guias_guardadas')) {
                         unset($datos['guias_guardadas']);
                         $guias_guardadas = json_decode($request->guias_guardadas, true);
                     }
                     if ($request->has('guias_nuevas')) {
                         unset($datos['guias_nuevas']);
-                        $guias_nuevas = json_decode($request->guias_nuevas,true);
+                        $guias_nuevas = json_decode($request->guias_nuevas, true);
                     }
                     $imgs = !$request->hasFile('new_images') ? [] : $request->file('new_images');
                     $imgGuardar = [];
                     foreach ($imgs as $img) {
                         $extension = $img->getClientOriginalExtension();
                         $nombreUnico = Str::uuid() . '.' . $extension;
-                        $img->storeAs('retornos-img',$nombreUnico);
+                        $img->storeAs('retornos-img', $nombreUnico);
                         $imgGuardar[] = [
                             'nombre' => $img->getClientOriginalName(),
                             'url' => $nombreUnico,
                         ];
                     }
-                    $result = ModeloEmbarque::actualizarDevolucionCargo($datos, $guias_nuevas,$guias_guardadas, Auth::id(),$imgGuardar);
-                break;
+                    $result = ModeloEmbarque::actualizarDevolucionCargo($datos, $guias_nuevas, $guias_guardadas, Auth::id(), $imgGuardar);
+                    break;
             }
             return response()->json($result);
         } catch (Exception $ex) {
@@ -295,7 +296,7 @@ class Embarque extends Controller
     public function obtenerManiPend(Request $request)
     {
         try {
-            $manifiestos = ModeloManifiesto::obtenerEmbarcar($request->ciudad_base, $request->tipo == 'undefined' ? null : $request->tipo,Auth::id());
+            $manifiestos = ModeloManifiesto::obtenerEmbarcar($request->ciudad_base, $request->tipo == 'undefined' ? null : $request->tipo, Auth::id());
             return response()->json($manifiestos);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
@@ -303,14 +304,14 @@ class Embarque extends Controller
     }
     public function transporteEmbarque(Request $request)
     {
-        $embarques = ModeloEmbarque::embarcarTrabajador(0,Auth::id(),'embarque');
+        $embarques = ModeloEmbarque::embarcarTrabajador(0, Auth::id(), 'embarque');
         $hoy = strtotime(date('Y-m-d'));
-        return view('pedidos.embarquemanifiesto',compact('hoy','embarques'));
+        return view('pedidos.embarquemanifiesto', compact('hoy', 'embarques'));
     }
     public function actualizarEmbarque(Request $request)
     {
         try {
-            $resultado = ModeloEmbarque::actualizarEmbarque($request->id_embarque,Auth::id(),$request->has('ciudades') ? $request->ciudades : null);
+            $resultado = ModeloEmbarque::actualizarEmbarque($request->id_embarque, Auth::id(), $request->has('ciudades') ? $request->ciudades : null);
             return response()->json($resultado);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
@@ -329,7 +330,7 @@ class Embarque extends Controller
     {
         $datos = $request->all();
         $idEmbarque = $request->embarque;
-        $actualizar = ModeloEmbarque::actualizarInforme($datos,$idEmbarque,Auth::id());
+        $actualizar = ModeloEmbarque::actualizarInforme($datos, $idEmbarque, Auth::id());
         return response()->json($actualizar);
     }
     public function verEditarInformeEmbarque(Request $request)
@@ -340,7 +341,7 @@ class Embarque extends Controller
     public function obtenerInfoEmbDeta(Request $request)
     {
         try {
-            $embarque = ModeloEmbarque::embarcarTrabajador($request->id_embarque,Auth::id(),'informe');
+            $embarque = ModeloEmbarque::embarcarTrabajador($request->id_embarque, Auth::id(), 'informe');
             return response()->json(['embarque' => isset($embarque[0]) ? $embarque[0] : null]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
@@ -358,7 +359,7 @@ class Embarque extends Controller
     {
         try {
             $manifiestos = implode(',', json_decode($request->lista_manifiestos, true));
-            return response()->json(['ciudades' => ModeloEmbarque::obtenerCiudadesBaseFlete($manifiestos,Auth::id())]);
+            return response()->json(['ciudades' => ModeloEmbarque::obtenerCiudadesBaseFlete($manifiestos, Auth::id())]);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
@@ -367,7 +368,7 @@ class Embarque extends Controller
     {
         try {
             $datos = $request->all();
-            $embarque = ModeloManifiesto::embarcarManifiesto($datos,Auth::id());
+            $embarque = ModeloManifiesto::embarcarManifiesto($datos, Auth::id());
             return response()->json($embarque);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
@@ -377,7 +378,31 @@ class Embarque extends Controller
     {
         try {
             $datos = $request->all();
-            return response()->json(ModeloEmbarque::agregarInformeEmbarque($datos, Auth::id()));
+            $realizacionInforme = ModeloEmbarque::agregarInformeEmbarque($datos, Auth::id());
+            if (isset($realizacionInforme['success'])) {
+                $files = $request->file('imagenes') ?? [];
+                foreach ($files as $key => $fileIndex) {
+                    $ciudadBase = $datos['ciudades_base'][$key];
+                    foreach ($fileIndex as $file) {
+                        $original = $file->getClientOriginalName();
+                        // extensión
+                        $ext = $file->getClientOriginalExtension();
+                        // un nombre único personalizado
+                        $nombreUnico = uniqid() . '_' . time() . '.' . $ext;
+                        // guardar con nombre único
+                        $ruta = $file->storeAs('imagenes', $nombreUnico, 'public');
+                        // guardar en DB
+                        EmbarqueCiudadBaseImg::create([
+                            'id_ciudad_llegada' => $ciudadBase,
+                            'nombre_original' => $original,
+                            'tipo_archivo'       => $ext,
+                            'nombre_unico'    => $nombreUnico,
+                            'ruta'            => $ruta
+                        ]);
+                    }
+                }
+            }
+            return response()->json($realizacionInforme);
         } catch (Exception $ex) {
             return response()->json(['error' => $ex->getMessage()]);
         }
@@ -390,7 +415,7 @@ class Embarque extends Controller
     {
         try {
             if ($request->has('vehiculo_id')) {
-                return response()->json(['vehiculo' => Vehiculos::where(['activo' => 1,'id' => $request->vehiculo_id])->first()]);
+                return response()->json(['vehiculo' => Vehiculos::where(['activo' => 1, 'id' => $request->vehiculo_id])->first()]);
             } else {
                 $vehiculos = Vehiculos::obtenerVehiculos();
                 return datatables()->of($vehiculos)->toJson();

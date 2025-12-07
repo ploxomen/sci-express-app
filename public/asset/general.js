@@ -514,12 +514,12 @@ class General {
         let template = "";
         let cbComprobante = null,
             cbNroComprobantes = "";
-        response.embarque.manfiestos.forEach((e) => {
-            for (const key in nroBultos) {
-                if (Object.hasOwnProperty.call(nroBultos, key)) {
-                    nroBultos[key] += isNaN(parseInt(e[key]))
+        response.embarque.manfiestos.forEach((e,key) => {
+            for (const keyObject in nroBultos) {
+                if (Object.hasOwnProperty.call(nroBultos, keyObject)) {
+                    nroBultos[keyObject] += isNaN(parseInt(e[keyObject]))
                         ? 0
-                        : parseInt(e[key]);
+                        : parseInt(e[keyObject]);
                 }
             }
             cbNroComprobantes = "";
@@ -528,9 +528,8 @@ class General {
             cbGuiasEmbarque.className = "form-control form-control-sm";
             cbGuiasEmbarque.id = `id_guia_embarque_${e.id}`;
             cbGuiasEmbarque.required = true;
-            cbGuiasEmbarque.append(
-                new Option("Seleccione un comprobante", "")
-            );
+            cbGuiasEmbarque.name = "guias_embarque[]";
+            cbGuiasEmbarque.append(new Option("Seleccione un comprobante", ""));
             const nroGuiaEmbarque =
                 e.prefijo_guia_embarque == null && e.nro_guia_embarque == null
                     ? ""
@@ -554,7 +553,7 @@ class General {
                     }
                     cbGuiasEmbarque.append(
                         new Option(
-                            `${prefijo}-${correlativo}`,
+                            `${prefijo}-${correlativo} | ${guiasPendientes.comprobante_sunat}`,
                             `${prefijo}-${correlativo}`,
                             nroGuiaEmbarque === `${prefijo}-${correlativo}`
                         )
@@ -578,6 +577,7 @@ class General {
             empresasTransporte.classList.add("form-control", "form-control-sm");
             empresasTransporte.id = "empresa_trasporte_" + e.id;
             empresasTransporte.required = true;
+            empresasTransporte.name = "empresa_transporte[]"
             if (response.embarque.lista_empresas_transporte) {
                 empresasTransporte.classList.add("simple-select2");
                 let templateEmpre = "";
@@ -596,7 +596,7 @@ class General {
             const requerido =
                 tipoAreos.indexOf(e.tipo_trayecto) >= 0 ? "" : "required";
 
-            let txtGuiaEmbarque = `<label for="id_guia_embarque_${e.id}">N° guías de embarque <small class="text-danger">*</small></label>${cbGuiasEmbarque.outerHTML}`;
+            let txtGuiaEmbarque = requerido !== "" ? `<div class="form-group col-12 col-lg-4"><label for="id_guia_embarque_${e.id}">N° guías de embarque <small class="text-danger">*</small></label>${cbGuiasEmbarque.outerHTML}</div>` : "";
             template += `
                         <li class='informe-ciudades' data-ciudad="${
                             e.id
@@ -612,7 +612,7 @@ class General {
                                         e.tipo_trayecto
                                     }</span>
                                 </div>
-                                <div class="form-group col-12 col-lg-4">${txtGuiaEmbarque}</div>
+                                ${txtGuiaEmbarque}
                                 <div class="form-group col-12 col-md-6 col-lg-5">
                                     <label for="id_comprobantes_${
                                         e.id
@@ -621,7 +621,7 @@ class General {
             }</label>
                                     <select id="id_comprobantes_${
                                         e.id
-                                    }" class="form-control simple-select2 form-control-sm" multiple ${requerido}>
+                                    }" class="form-control simple-select2 form-control-sm" name="comprobantes[${key}][]" multiple ${requerido}>
                                         <option value="GUIA TRANSPORTISTA" ${
                                             cbComprobante &&
                                             cbComprobante.indexOf(
@@ -663,7 +663,7 @@ class General {
             }</label>
                                     <select id="id_nro_comprobantes_${
                                         e.id
-                                    }" ${requerido} multiple class="form-control cb-select2-tags form-control-sm">${cbNroComprobantes}</select>
+                                    }" ${requerido} multiple class="form-control cb-select2-tags form-control-sm" name="nro_comprobante[${key}][]">${cbNroComprobantes}</select>
                                 </div>
                                 <div class="form-group col-12 col-md-6 col-lg-2">
                                     <label for="id_importe_factura_${
@@ -671,7 +671,7 @@ class General {
                                     }">Importe Factura ${
                 requerido != "" ? '<small class="text-danger">*</small>' : ""
             }</label>
-                                    <input type="number" value="${
+                                    <input type="number" name="importe_factura[]" value="${
                                         e.importe_factura
                                     }" ${requerido} step="0.01" id="id_importe_factura_${
                 e.id
@@ -687,7 +687,7 @@ class General {
                                     <label for="id_embarque_fch_emba_${
                                         e.id
                                     }">Fecha embarque <small class="text-danger">*</small></label>
-                                    <input type="date" id="id_embarque_fch_emba_${
+                                    <input type="date"  name="fecha_embarque[]" id="id_embarque_fch_emba_${
                                         e.id
                                     }" value="${
                 response.embarque.fch_emba
@@ -699,7 +699,7 @@ class General {
                                     }">Fecha llegada ${
                 requerido != "" ? '<small class="text-danger">*</small>' : ""
             }</label>
-                                    <input type="date" id="id_fecha_llegada_${
+                                    <input type="date"  name="fecha_llegada[]" id="id_fecha_llegada_${
                                         e.id
                                     }" value="${
                 e.fecha_llegada
@@ -711,16 +711,20 @@ class General {
                                     }">Hr llegada ${
                 requerido != "" ? '<small class="text-danger">*</small>' : ""
             }</label>
-                                    <input type="time" id="id_hr_llegada_${
+                                    <input name="hr_llegada[]" type="time" id="id_hr_llegada_${
                                         e.id
                                     }" value="${
                 e.hr_llegada
             }" class="form-control form-control-sm" ${requerido}>
                                 </div>
                                 `;
+            
             template += `
-                <label>Fotos</label>
-            `
+            <div class="col-12 form-group">
+                <label for="input_file_${e.id}">Elegir archivos</label>
+                <input type="file" class="form-control form-control-sm" name="imagenes[${key}][]" multiple id="input_file_${e.id}">
+            </div>
+            `;
             if (e.guiasEmbarque) {
                 template += `
                                                 <div class="form-group col-12">

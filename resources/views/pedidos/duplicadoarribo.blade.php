@@ -1,5 +1,7 @@
 @extends('general.index')
 @section('head')
+    <link rel="stylesheet" href="/library/viewer/viewer.min.css">
+    <script src="/library/viewer/viewer.min.js"></script>
     <script src="{{asset('asset/llegada.js')}}"></script>
     <title>Embarques por arribar</title>
 @endsection
@@ -93,6 +95,7 @@
         </div>
     </div>
 </section>
+<div id="mi-galeria" class="d-none"></div>
 @include('modal.detalleguia')
 @include('modal.detallembarque')
 @endsection

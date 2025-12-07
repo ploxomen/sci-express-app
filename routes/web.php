@@ -169,6 +169,8 @@ Route::middleware(['auth', 'share'])->prefix('intranet')->group(function () {
             Route::get('/', [Llegada::class, 'viewLlegada'])->name('pedidoLlegada');
             Route::get('manual', [Llegada::class, 'viewLlegadaManual'])->name('embarquePorArribarManual');
             Route::post('embarques/arribar', [Llegada::class, 'obtenerEmbarqueArribar']);
+            Route::get('imagenes/{llegada}', [Llegada::class, 'verImagenesLegada']);
+
             Route::post('arribar-guias', [Llegada::class, 'actualizarGuiasLlegada']);
             Route::post('mis-guias', [Llegada::class, 'clusterMisGuias']);
             Route::post('cambiar-estado-guias', [Llegada::class, 'changeEstadoGuias']);

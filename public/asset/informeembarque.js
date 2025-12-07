@@ -51,23 +51,12 @@ function loadPage(){
         if(!embarque){
             return
         }
-        let ciudadesBase = new Array();
-        for (const ciudad of document.querySelectorAll('#informes-embarques .informe-ciudades')) {
-            const idCiudad = ciudad.dataset.ciudad;
-            ciudadesBase.push({
-                ciudadBase : ciudad.dataset.ciudad,
-                trayecto: ciudad.dataset.trayecto,
-                comprobantes: $(ciudad).find('#id_comprobantes_' + idCiudad).val(),
-                nroComprobantes: $(ciudad).find('#id_nro_comprobantes_' + idCiudad).val(),
-                importeFactura: $(ciudad).find('#id_importe_factura_' + idCiudad).val(),
-                fechaLlegada: $(ciudad).find('#id_fecha_llegada_' + idCiudad).val(),
-                hrLlegada: $(ciudad).find('#id_hr_llegada_' + idCiudad).val(),
-                guiasEmbarque: ciudad.dataset.trayecto == 'AEREO' ? null : $(ciudad).find('#id_guia_embarque_' + idCiudad).val()
-            });
-        }
         let datos = new FormData(this);
+        for (const ciudad of document.querySelectorAll('#informes-embarques .informe-ciudades')) {
+            datos.append("ciudades_base[]", ciudad.dataset.ciudad);
+            datos.append("trayecto[]", ciudad.dataset.trayecto);
+        }
         datos.append('id_embarque',embarque);
-        datos.append('ciudades_base',JSON.stringify(ciudadesBase));
         try {
             let response = await general.funcfetch('agregar-informe', datos);
             console.log(response);

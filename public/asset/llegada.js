@@ -160,7 +160,11 @@ function loadPage() {
         datos.resultados.forEach((r) => {
             if (r.guias.length) {
                 template += `<tr>
-                <td rowspan="${r.guias.length}">${r.nro_mani}</td>
+                <td rowspan="${r.guias.length}">
+                    <a href="javascript:void(0)" data-llegada="${r.id_ciudad_llegada}" class="ver-imagenes">
+                        ${r.nro_mani}
+                    </a>
+                </td>
                 <td rowspan="${r.guias.length}">${r.format_fecha_mani}</td>
                 <td rowspan="${r.guias.length}">${r.prov_orig}</td>
                 <td rowspan="${r.guias.length}">${r.prov_dest}</td>
@@ -186,10 +190,38 @@ function loadPage() {
         tablaMani.innerHTML = template;
         valorMani.value = total;
     }
+    let viewer = null;
+
     tablaMani.addEventListener("click", function (event) {
         nro_guia = null;
         nro_mani = null;
         nroguiainfo = null;
+        if (event.target.classList.contains("ver-imagenes")) {
+            fetch("imagenes/" + event.target.dataset.llegada) // tu ruta que devuelve un JSON con imágenes
+                .then((res) => res.json())
+                .then((data) => {
+                    if(!data.imagenes.length){
+                        return alertify.alert("Mensaje","No se adjuntaron imagenes");
+                    }
+                    const cont = document.getElementById("mi-galeria");
+
+                    cont.innerHTML = ""; // limpiar
+
+                    // insertar imágenes invisibles
+                    data.imagenes.forEach((img) => {
+                        cont.innerHTML += `<img src="${window.location.origin}/storage/${img.ruta}">`;
+                    });
+
+                    if (!viewer) {
+                        viewer = new Viewer(cont);
+                    } else {
+                        viewer.update(); // si ya existía, recarga las nuevas imágenes
+                    }
+
+                    viewer.show();
+                })
+                .catch((err) => console.error(err));
+        }
         if (event.target.classList.contains("ver-detalle-guias")) {
             nro_mani = event.target.dataset.manifiesto;
             nro_guia = event.target.dataset.guia;
