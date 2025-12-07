@@ -14,6 +14,8 @@ class ModeloGuias extends Model
     protected $table = 'guias';
     public $timestamps = false;
     protected $fillable = ['situ','comprobante_sunat'];
+    public const ESTADO_INACTIVO = 3;
+    public const ESTADO_ACTIVO = 1;
     public function scopeGuias($query){
         return $query->leftJoin('clientes','clientes.id','=','id_remitente')
         ->leftJoin('clientes_de_clientes','clientes_de_clientes.id','=','id_destinatario')
@@ -26,6 +28,18 @@ class ModeloGuias extends Model
     public function tipoDocumentoDestinatario()
     {
         return $this->belongsTo(Documentos::class,'dest_tipo_docu');
+    }
+    public function scopeSinRelacionEmbarque($query)
+    {
+        return $query->leftJoin('embarque_ciudad_llegada AS ecl',function($join){
+            $join->on('ecl.prefijo_guia_embarque','=','guias.prefijo')
+            ->on('ecl.nro_guia_embarque','=','guias.nro_guia');
+        })->whereNull('ecl.prefijo_guia_embarque')
+        ->whereNull('ecl.nro_guia_embarque');
+    }
+    public function scopeGuiasInactivasSUNAT($query)
+    {
+        return $query->where('guias.estado',self::ESTADO_INACTIVO)->whereNotNull('comprobante_sunat');
     }
     public function detalles()
     {

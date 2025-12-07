@@ -300,7 +300,7 @@ class General {
             }
         });
     }
-    $loader = '#banner-cargando'
+    $loader = "#banner-cargando";
     async obtenerFlestes() {
         let response = await this.funcfetch("obtener-fletes");
         if (response.error) {
@@ -524,6 +524,48 @@ class General {
             }
             cbNroComprobantes = "";
             cbComprobante = e.comprobantes ? e.comprobantes.split(";") : null;
+            const cbGuiasEmbarque = document.createElement("select");
+            cbGuiasEmbarque.className = "form-control form-control-sm";
+            cbGuiasEmbarque.id = `id_guia_embarque_${e.id}`;
+            cbGuiasEmbarque.required = true;
+            cbGuiasEmbarque.append(
+                new Option("Seleccione un comprobante", "")
+            );
+            const nroGuiaEmbarque =
+                e.prefijo_guia_embarque == null && e.nro_guia_embarque == null
+                    ? ""
+                    : e.prefijo_guia_embarque.toString().padStart(3, "0") +
+                      "-" +
+                      e.nro_guia_embarque.toString().padStart(7, "0");
+            let existeOpcionGuiasEmbarque = false;
+            response.embarque.guias_inactivas_pendientes.forEach(
+                (guiasPendientes) => {
+                    const prefijo = guiasPendientes.prefijo
+                        .toString()
+                        .padStart(3, "0");
+                    const correlativo = guiasPendientes.nro_guia
+                        .toString()
+                        .padStart(7, "0");
+                    if (
+                        !existeOpcionGuiasEmbarque &&
+                        nroGuiaEmbarque === `${prefijo}-${correlativo}`
+                    ) {
+                        existeOpcionGuiasEmbarque = true;
+                    }
+                    cbGuiasEmbarque.append(
+                        new Option(
+                            `${prefijo}-${correlativo}`,
+                            `${prefijo}-${correlativo}`,
+                            nroGuiaEmbarque === `${prefijo}-${correlativo}`
+                        )
+                    );
+                }
+            );
+            if (nroGuiaEmbarque && !existeOpcionGuiasEmbarque) {
+                cbGuiasEmbarque.append(
+                    new Option(nroGuiaEmbarque, nroGuiaEmbarque, true)
+                );
+            }
             if (e.nro_comprobantes) {
                 e.nro_comprobantes = e.nro_comprobantes.split(";");
                 e.nro_comprobantes.forEach((nro) => {
@@ -553,20 +595,8 @@ class General {
             const tipoAreos = ["AEREO", "AEREA"];
             const requerido =
                 tipoAreos.indexOf(e.tipo_trayecto) >= 0 ? "" : "required";
-            const nroGuiaEmbarque =
-                e.prefijo_guia_embarque == null && e.nro_guia_embarque == null
-                    ? ""
-                    : e.prefijo_guia_embarque.toString().padStart(3, "0") +
-                      "-" +
-                      e.nro_guia_embarque.toString().padStart(7, "0");
-            let txtGuiaEmbarque = "";
-            if (e.guiasEmbarque) {
-                txtGuiaEmbarque = `
-                <div class="form-group col-12 col-lg-4">
-                    <input type="text" required pattern="[0-9]{3}[-][0-9]{7}" id="id_guia_embarque_${e.id}" value="${nroGuiaEmbarque}" maxlength="11" class="form-control form-control-sm informe-embarque" placeholder="N° guía embarque">
-                </div>
-                `;
-            }
+
+            let txtGuiaEmbarque = `<label for="id_guia_embarque_${e.id}">N° guías de embarque <small class="text-danger">*</small></label>${cbGuiasEmbarque.outerHTML}`;
             template += `
                         <li class='informe-ciudades' data-ciudad="${
                             e.id
@@ -582,7 +612,7 @@ class General {
                                         e.tipo_trayecto
                                     }</span>
                                 </div>
-                                ${txtGuiaEmbarque}
+                                <div class="form-group col-12 col-lg-4">${txtGuiaEmbarque}</div>
                                 <div class="form-group col-12 col-md-6 col-lg-5">
                                     <label for="id_comprobantes_${
                                         e.id
@@ -688,6 +718,9 @@ class General {
             }" class="form-control form-control-sm" ${requerido}>
                                 </div>
                                 `;
+            template += `
+                <label>Fotos</label>
+            `
             if (e.guiasEmbarque) {
                 template += `
                                                 <div class="form-group col-12">
@@ -695,6 +728,7 @@ class General {
                                                 </div>
                                                 <div class="form-group col-12">
                                                         `;
+
                 e.guiasEmbarque.forEach((g) => {
                     const nroGuia =
                         g.prefijo !== null

@@ -22,6 +22,7 @@ class ModeloEmbarque extends Model
                 $em->transportes = DB::table('transporte_embarque AS te')->select('et.id', 'et.empresa', 'et.aereo')
                 ->join('empresa_transporte AS et', 'te.id_empr_tran', '=', 'et.id')->where(['te.id_list_emba' => $em->id, 'et.activo' => 1])->get();
             }
+            $em->guias_inactivas_pendientes = ModeloGuias::select('guias.id','guias.prefijo','guias.nro_guia','comprobante_sunat')->sinRelacionEmbarque()->guiasInactivasSUNAT()->get();
             $em->manfiestos = DB::select('CALL sp_embarque_embarcar_manifiesto(?)',[$em->id]);
             foreach ($em->manfiestos as $prov) {
                 if($condicion == 'informe' && $prov->tipo_trayecto == 'TERRESTRE'){
