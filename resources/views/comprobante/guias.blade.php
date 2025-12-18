@@ -1,6 +1,6 @@
 @extends('general.index')
 @section('head')
-    <script src="{{ asset('asset/guias.js?v2.2') }}"></script>
+    <script src="{{ asset('asset/guias.js?v2.4') }}"></script>
     <title>Guias</title>
 @endsection
 @section('body')

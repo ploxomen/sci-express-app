@@ -139,12 +139,12 @@
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-4">
                         <label for="numero-doc-cond-prin" id="tipo-documento-conductor-prin">N° documento</label>
-                        <input type="text" disabled required id="numero-doc-cond-prin"
+                        <input type="text" required id="numero-doc-cond-prin"
                             class="form-control form-control-sm" name="num_doc_cond_prin">
                     </div>
                     <div class="form-group mod-trans-priva col-12 col-md-6 col-lg-4">
                         <label for="licencia-cond-prin">Licencia</label>
-                        <input type="text" disabled required id="licencia-cond-prin" class="form-control form-control-sm"
+                        <input type="text" required id="licencia-cond-prin" class="form-control form-control-sm"
                             name="licencia_conductor_principal">
                     </div>
                     <div class="col-12">
@@ -164,12 +164,12 @@
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-4">
                         <label for="numero-doc-cond-secun" id="tipo-documento-conductor-secun">N° documento</label>
-                        <input type="text" disabled id="numero-doc-cond-secun"
+                        <input type="text" id="numero-doc-cond-secun"
                             class="form-control form-control-sm" name="num_doc_cond_secun">
                     </div>
                     <div class="form-group mod-trans-priva col-12 col-md-6 col-lg-4">
                         <label for="licencia-cond-secun">Licencia</label>
-                        <input type="text" disabled id="licencia-cond-secun" class="form-control form-control-sm"
+                        <input type="text" id="licencia-cond-secun" class="form-control form-control-sm"
                             name="licencia_conductor_secundario">
                     </div>
                     <div class="form-group col-12">

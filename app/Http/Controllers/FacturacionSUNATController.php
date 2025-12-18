@@ -26,6 +26,7 @@ class FacturacionSUNATController extends Controller
         $data = [
             'observaciones' => $request->observaciones,
             'tipo_docu_remi' => '6',
+            'comprobantes' => $guia->nro_comp_cli,
             'num_doc_remi' => $guia->remi_nro_docu,
             'nombre_remi' => $remitente->nomb_prov ?? $remitente->nom_cli,
             'tipo_docu_dest' => $guia->tipoDocumentoDestinatario->sunat_cod,
@@ -53,6 +54,15 @@ class FacturacionSUNATController extends Controller
         $response = $this->enviarAPI($parametros);
         $this->responseAPI($response, $guia, $response->serie_cpe, $response->correlativo_cpe,$serieDocumentoSunat);
         return $response;
+    }
+    public function documentosReferencia($textoReferencia)
+    {
+        $comprobantes = explode(';',$textoReferencia);
+        $documentosReferencia = [];
+        foreach ($comprobantes as $comprobante) {
+            $documentosReferencia[] = ComprobantesSimpleFact::comprobanteSUNAT($comprobante);
+        }
+        return $documentosReferencia;
     }
     public function guiaRemisionRemitente(Request $request)
     {
@@ -164,7 +174,8 @@ class FacturacionSUNATController extends Controller
             "TXT_VERS_ESTRUCT_UBL" => "2.0",
             "UND_MEDIDA" => "KGM",
             "PESO_BRUTO" => $data->tot_kg,
-            "items" => $this->detalleRemision($detalles)
+            "items" => $this->detalleRemision($detalles),
+            "docs_referenciado" => isset($data->comprobantes) ? $this->documentosReferencia($data->comprobantes) : [],
         ];
     }
     public function construccionJSONGuiaRemisionTransportista($data, $detalles,$tipo)
