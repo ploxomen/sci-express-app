@@ -11,5 +11,9 @@ class ComprobantesSimpleFact extends Model
     {
         return $query->where('tipo',$tipo);
     }
+    protected function scopePorSerie($query, $serie)
+    {
+        return $query->where('serie',$serie);
+    }
 
 }
