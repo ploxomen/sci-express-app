@@ -10,17 +10,24 @@
             </div>
             <div class="modal-body">
                 <form id="guia-transportista-form" class="form-row">
-                    <div class="form-group col-12 col-md-6 col-lg-4">
+                    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
+                        <label for="txt-serie">Serie</label>
+                        <select name="serie" class="form-control form-control-sm" id="txt-serie" required>
+                            <option value="VT01" selected>VT01 - Terrestre</option>
+                            <option value="VA01">VA01 - Aereo</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
                         <label for="txt-fecha-emision-trans">Fecha emisión</label>
                         <input name="fecha_emision" id="txt-fecha-emision-trans" type="date"
                             class="form-control fom-control-sm" required value="{{ date('Y-m-d') }}">
                     </div>
-                    <div class="form-group col-12 col-md-6 col-lg-4">
+                    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
                         <label for="txt-fecha-traslado-trans">Fecha traslado</label>
                         <input name="fecha_traslado" id="txt-fecha-traslado-trans" required type="date"
                             class="form-control fom-control-sm" value="{{ date('Y-m-d') }}">
                     </div>
-                    <div class="form-group col-12 col-md-6 col-lg-4">
+                    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
                         <label for="cb-comprobantes-transportista">Comprobantes</label>
                         <select name="comprobantes[]" id="cb-comprobantes-transportista" disabled required
                             class="form-control comprobantes-guias" multiple></select>

@@ -10,17 +10,24 @@
             </div>
             <div class="modal-body">
                 <form id="guia-remitente-form" class="form-row">
-                    <div class="form-group col-12 col-md-6 col-lg-4">
+                    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
+                        <label for="txt-serie">Serie</label>
+                        <select name="serie" class="form-control form-control-sm" id="txt-serie" required>
+                            <option value="TT01" selected>TT01 - Terrestre</option>
+                            <option value="TA01">TA01 - Aereo</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
                         <label for="txt-fecha-emision">Fecha emisión</label>
                         <input name="fecha_emision" id="txt-fecha-emision" type="date"
                             class="form-control fom-control-sm" required value="{{ date('Y-m-d') }}">
                     </div>
-                    <div class="form-group col-12 col-md-6 col-lg-4">
+                    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
                         <label for="txt-fecha-traslado">Fecha traslado</label>
                         <input name="fecha_traslado" id="txt-fecha-traslado" required type="date"
                             class="form-control fom-control-sm" value="{{ date('Y-m-d') }}">
                     </div>
-                    <div class="form-group col-12 col-md-6 col-lg-4">
+                    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
                         <label for="txt-motivo">Motivo</label>
                         <select name="motivo_traslado" class="form-control form-control-sm" id="txt-motivo" required>
                             <option value="01">VENTA</option>
