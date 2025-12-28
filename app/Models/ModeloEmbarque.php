@@ -113,6 +113,7 @@ class ModeloEmbarque extends Model
     public function scopeVerEmbarqueInforme($query, $idEmbarque)
     {
         $embarque = DB::table('embarque AS e')->select('e.total_bultos_paquete', 'e.fch_emba')->where('id', $idEmbarque)->first();
+        $embarque->guias_inactivas_pendientes = ModeloGuias::select('guias.id', 'guias.prefijo', 'guias.nro_guia', 'comprobante_sunat')->sinRelacionEmbarque()->guiasInactivasSUNAT()->get();
         $embarque->lista_empresas_transporte = DB::table('transporte_embarque AS te')->select('et.id', 'et.empresa')->join('empresa_transporte AS et', 'te.id_empr_tran', '=', 'et.id')->where('id_list_emba', $idEmbarque)->get();
         $embarque->manfiestos = DB::table('embarque_ciudad_llegada AS ecl')
             ->select('ecl.*', 'c.nombre_ciudad', 'et.empresa AS empresa_trasporte')->selectRaw('SUM(ef.cajas) AS embarque_nro_cajas,SUM(ef.cajones) AS embarque_nro_cajones, SUM(ef.jabas) AS embarque_nro_jabas, SUM(ef.paquetes) AS embarque_nro_paquetes, SUM(ef.sobres) AS embarque_nro_sobres, SUM(ef.otros) AS embarque_num_otros')
