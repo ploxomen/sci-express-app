@@ -9,7 +9,7 @@
     <script src="{{ asset('library/datatable/responsive-bootstrap.min.js') }}"></script>
     <link rel="stylesheet" href="/library/viewer/viewer.min.css">
     <script src="/library/viewer/viewer.min.js"></script>
-    <script src="{{ asset('asset/llegada.js') }}"></script>
+    <script src="{{ asset('asset/llegada.js?v2') }}"></script>
     <script src="{{ asset('asset/llegadacluster.js') }}"></script>
     <title>Embarques por arribar</title>
 @endsection

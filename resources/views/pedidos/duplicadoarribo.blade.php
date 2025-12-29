@@ -2,7 +2,7 @@
 @section('head')
     <link rel="stylesheet" href="/library/viewer/viewer.min.css">
     <script src="/library/viewer/viewer.min.js"></script>
-    <script src="{{asset('asset/llegada.js')}}"></script>
+    <script src="{{asset('asset/llegada.js?v2')}}"></script>
     <title>Embarques por arribar</title>
 @endsection
 @section('body')
