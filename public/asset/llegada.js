@@ -156,7 +156,6 @@ function loadPage() {
             valorMani.value = "0";
             return;
         }
-        alertify.success("manifiestos cargados correctamente");
         let total = 0;
         let template = ``;
         datos.resultados.forEach((r) => {
@@ -190,6 +189,7 @@ function loadPage() {
             }
         });
         tablaMani.innerHTML = template;
+        alertify.success("manifiestos cargados correctamente");
         tablaMani.scrollIntoView({ behavior: "smooth" });
         valorMani.value = total;
     }
