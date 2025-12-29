@@ -44,17 +44,17 @@ class ModeloEmbarque extends Model
     {
         DB::beginTransaction();
         try {
-            foreach ($datos['ciudades_base'] as $key => $ciudad) {
+            foreach ($datos as $ciudad) {
                 $fecha_reparto = null;
-                $fechaLlegada = $datos['fecha_llegada'][$key];
-                $horaLegada = $datos['hr_llegada'][$key];
-                $idEmpresaTransporte = $datos['empresa_transporte'][$key];
-                $idEmbarqueCiudad = $datos['ciudades_base'][$key];
-                $importeFactura = $datos['importe_factura'][$key];
-                $guiaEmbarque = isset($datos['guias_embarque'][$key]) ? $datos['guias_embarque'][$key] : null;
-                $comprobantes = $datos['comprobantes'][$key];
-                $nroComprobantes = $datos['nro_comprobante'][$key];
-                $trayecto = $datos['trayecto'][$key];
+                $fechaLlegada = $ciudad['fechaLlegada'];
+                $horaLegada = $ciudad['hrLlegada'];
+                $idEmpresaTransporte = $ciudad['empresaTransporte'];
+                $idEmbarqueCiudad = $ciudad['ciudadBase'];
+                $importeFactura = $ciudad['importeFactura'];
+                $guiaEmbarque = isset($ciudad['guiasEmbarque']) ? $ciudad['guiasEmbarque'] : null;
+                $comprobantes = $ciudad['comprobantes'];
+                $nroComprobantes = $ciudad['nroComprobantes'];
+                $trayecto = $ciudad['trayecto'];
                 if (!empty($horaLegada) && !empty($fechaLlegada)) {
                     $fecha_reparto = $fechaLlegada;
                     $limite_hora = date('N', strtotime($fechaLlegada)) == 6 ? strtotime('12:00') : strtotime("17:00");
@@ -73,6 +73,8 @@ class ModeloEmbarque extends Model
                     'ecl.nro_comprobantes' => null,
                     'ecl.id_empr_tran_emba' => empty($idEmpresaTransporte) ? null : $idEmpresaTransporte,
                     'ecl.importe_factura' => empty($importeFactura) ? null : $importeFactura,
+                    'ecl.nro_guia_embarque' => null,
+                    'ecl.prefijo_guia_embarque' => null
                 ];
                 if (!empty($guiaEmbarque) && $trayecto == 'TERRESTRE') {
                     if (strlen(trim($guiaEmbarque)) > 11 && strpos($guiaEmbarque, '-') != 3) {

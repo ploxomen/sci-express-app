@@ -330,7 +330,7 @@ class Embarque extends Controller
     {
         $datos = $request->all();
         $idEmbarque = $request->embarque;
-        $actualizar = ModeloEmbarque::actualizarInforme($datos, $idEmbarque, Auth::id());
+        $actualizar = ModeloEmbarque::actualizarInforme(json_decode($datos['ciudades_base'],true), $idEmbarque, Auth::id());
         return response()->json($actualizar);
     }
     public function verEditarInformeEmbarque(Request $request)

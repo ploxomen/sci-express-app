@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="{{asset('library/alertify/alertify.min.css')}}">
     <script src="{{asset('library/alertify/alertify.min.js')}}"></script>
     <meta name="csrf-token" content="{{csrf_token()}}">
-    <script src="{{asset('asset/general.js')}}"></script>
+    <script src="{{asset('asset/general.js?v2')}}"></script>
     <script src="{{asset('asset/auth/users.js')}}"></script>
     <title>Iniciar sesión</title>
 </head>

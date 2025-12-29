@@ -527,7 +527,6 @@ class General {
             const cbGuiasEmbarque = document.createElement("select");
             cbGuiasEmbarque.className = "form-control form-control-sm";
             cbGuiasEmbarque.id = `id_guia_embarque_${e.id}`;
-            cbGuiasEmbarque.required = true;
             cbGuiasEmbarque.name = "guias_embarque[]";
             cbGuiasEmbarque.append(new Option("Seleccione un comprobante", ""));
             const nroGuiaEmbarque =
