@@ -7,7 +7,7 @@
     <script src="{{asset('library/datatable/datatable-bootstrap4.min.js')}}"></script>
     <script src="{{asset('library/datatable/datatable-responsive.min.js')}}"></script>
     <script src="{{asset('library/datatable/responsive-bootstrap.min.js')}}"></script>
-    <script src="{{asset('asset/auth/misusuarios.js')}}"></script>
+    <script src="{{asset('asset/auth/misusuarios.js?v2')}}"></script>
     <title>Mis usuarios</title>
 @endsection
 @section('body')
