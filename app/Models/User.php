@@ -99,7 +99,7 @@ class User extends Authenticatable
     {
         return DB::table('usuarios AS u')->select('u.id','u.n_document', 'u.name', 'u.last_name', 'u.email', 'u.phone', 'u.status','a.area')
         ->leftJoin('area AS a','u.id_area','=','a.id')
-        ->where('u.status', '!=', 0)->where("u.id","!=",1)->get();
+        ->where("u.id","!=",1)->get();
     }
     public static function getModulos($id_user)
     {

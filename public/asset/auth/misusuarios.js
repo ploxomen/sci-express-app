@@ -31,6 +31,9 @@ function loadPage(){
             {data: 'status', render: function(data,type,full){
                 let estado = '';
                 switch (data) {
+                    case 0:
+                        estado = `<span class="text-danger">Anulado</span>`;
+                    break;
                     case 1:
                         estado = `<span class="text-success">Activo</span>`;
                     break;
@@ -62,7 +65,7 @@ function loadPage(){
     tbodyUsuarios.addEventListener('click',async function(e){
         if(e.target.classList.contains('btn-delete')){
             const usuario = e.target.dataset.usuario;
-            alertify.confirm('Alerta','¿Deseas eliminar este usuario?<br>Si acepta ya no podrá restaurarlo',async function(){
+            alertify.confirm('Alerta','¿Deseas anular este usuario?<br>Para restaurarlo deberá de resturar su contraseña',async function(){
                 let datos = new FormData();
                 datos.append('id_usuario',usuario);
                 datos.append('accion','eliminar');
