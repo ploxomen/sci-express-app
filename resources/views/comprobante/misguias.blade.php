@@ -9,7 +9,7 @@
     <script src="{{asset('library/datatable/responsive-bootstrap.min.js')}}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nanogallery2/3.0.5/css/nanogallery2.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nanogallery2/3.0.5/jquery.nanogallery2.min.js"></script>
-    <script src="{{asset('asset/misguias.js?v2')}}"></script>
+    <script src="{{asset('asset/misguias.js?v2.2')}}"></script>
     <title>Mis guías</title>
 @endsection
 <style>
@@ -72,6 +72,7 @@
         <thead>
             <tr>
                 <th>N° Guia</th>
+                <th>N° Comprobante SUNAT</th>
                 <th>Fecha Emis</th>
                 <th>Fecha Tras</th>
                 <th>Comprobantes</th>

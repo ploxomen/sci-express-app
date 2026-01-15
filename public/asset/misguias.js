@@ -764,6 +764,9 @@ function loadPage() {
                             data: "nro_guia",
                         },
                         {
+                            data: "comprobante_sunat",
+                        },
+                        {
                             data: "fecha_emision",
                         },
                         {
@@ -878,7 +881,19 @@ function loadPage() {
                             name: "id",
                             render: function (data, type, full) {
                                 let temButtons = `<div class="d-flex justify-content-center flex-wrap" style="gap:5px;"><button data-toggle="tooltip" title="Visualizar solicitud" data-guia="${data}" class="btn btn-sm btn-secondary view-guia"><i class="far fa-eye"></i></button><button data-guia="${data}" class="btn btn-sm btn-primary editar-guia"><i class="fas fa-pen"></i></button>`;
-                                
+                                temButtons += `
+                                <div class="btn-group">
+                                    <button type="button" title="Mostrar más opciones" class="btn btn-sm btn-ligth dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="#">Action</a>
+                                        <a class="dropdown-item" href="#">Another action</a>
+                                        <a class="dropdown-item" href="#">Something else here</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#">Separated link</a>
+                                    </div>
+                                </div>`;
                                 if (full.guia_tipo != "ANULADA") {
                                     temButtons += `<button data-toggle="tooltip" title="Anular guia" data-guia="${data}" class="btn btn-sm btn-danger delete-guia"><i class="fas fa-trash-alt"></i></button>`;
                                 }
@@ -1102,6 +1117,9 @@ function loadPage() {
                             data: "nro_guia",
                         },
                         {
+                            data: "comprobante_sunat",
+                        },
+                        {
                             data: "fecha_emision",
                         },
                         {
@@ -1222,8 +1240,8 @@ function loadPage() {
                                 if (full.guia_tipo != "ANULADA") {
                                     temButtons += `<button data-toggle="tooltip" title="Anular guia" data-guia="${data}" class="btn btn-sm btn-danger delete-guia"><i class="fas fa-trash-alt"></i></button>`;
                                 }
-                                    temButtons += "</div>";
-                                
+                                temButtons += "</div>";
+
                                 return temButtons;
                             },
                         },
