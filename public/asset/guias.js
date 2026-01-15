@@ -216,8 +216,12 @@ function pageLoaded() {
         for (const e of tableDetalleGuia.children) {
             let objeto = new Object();
             let deta = e.querySelectorAll("input, select, textarea");
+            console.log(deta);
             for (const ele2 of deta) {
                 objeto[ele2.dataset.name] = ele2.value;
+                if( ele2.dataset.name === "tipo_envio"){
+                    objeto["tipo_envio_text"] = ele2.selectedOptions[0].text;
+                }
             }
             if (!general.isObjEmpty(objeto)) {
                 detalles.push(objeto);
@@ -387,6 +391,7 @@ function pageLoaded() {
             "bulto-total-transportista"
         );
         toogleModalesGuias("#guia-transportista", "#seleccion-comprobantes");
+        llenarObservacionesGuiaTransportista();
     };
     $btnSeleccionRemitente.onclick = (event) => {
         datosFormularioLlenar("");
@@ -442,15 +447,25 @@ function pageLoaded() {
         });
         $(idCbComprobante).val(comprobantes).trigger("change");
     };
+    const llenarObservacionesGuiaTransportista = () => {
+        const detalles = obtenerDatosDetalle();
+        let template = "";
+        detalles.forEach((detalle, index) => {
+            template += `${detalle.cantidad} ${detalle.embase_embalaje} - ${detalle.kg} Kg - ${detalle.largo} Lar., ${detalle.ancho} Anc., ${detalle.altura} Alt\n`;
+        });
+        document.querySelector("#guia-transportista-form #txt-observaciones").value = template;
+    }
     const llenarDetaalesGuias = (tbody, totalBultos) => {
         const detalles = obtenerDatosDetalle();
         let template = "";
         detalles.forEach((detalle, index) => {
+            const detalleStr = `${detalle.grupo_envio} - ${detalle.tipo_envio_text}`;
+            const unit = general.findUnitOfMeasureSUNAT(detalle.embase_embalaje);
             template += `<tr>
                 <td>${index + 1}</td>
-                <td>${detalle.descripcion}</td>
+                <td>${detalle.descripcion ? detalleStr + " - " + detalle.descripcion : detalleStr}</td>
                 <td>${detalle.cantidad}</td>
-                <td>UNIDAD</td>
+                <td>${unit ? unit.unit : "UNIDAD"}</td>
             </tr>`;
         });
         document.getElementById(tbody).innerHTML = template;

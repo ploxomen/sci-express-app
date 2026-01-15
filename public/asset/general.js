@@ -7,6 +7,51 @@ class General {
         "X-CSRF-TOKEN": this.token,
         "X-Requested-With": "XMLHttpRequest",
     };
+    unitOfMeasureSUNAT = [
+        {
+            id: "NIU",
+            unit: "UNIDAD",
+        },
+        {
+            id: "BJ",
+            unit: "BALDES",
+        },
+        {
+            id: "4A",
+            unit: "BOBINAS",
+        },
+        {
+            id: "BG",
+            unit: "BOLSAS",
+        },
+        {
+            id: "BX",
+            unit: "CAJAS",
+        },
+        {
+            id: "CY",
+            unit: "CILINDROS",
+        },
+        {
+            id: "BE",
+            unit: "FARDOS",
+        },
+        {
+            id: "CA",
+            unit: "LATAS",
+        },
+        {
+            id: "PK",
+            unit: "PAQUETES",
+        },
+        {
+            id: "DR",
+            unit: "TAMBORES",
+        },
+    ];
+    findUnitOfMeasureSUNAT(strUnit){
+        return this.unitOfMeasureSUNAT.find(u => u.unit === strUnit);
+    }
     alertifyConfirmPromise(title, message) {
         return new Promise((resolve) => {
             alertify.confirm(
@@ -514,7 +559,7 @@ class General {
         let template = "";
         let cbComprobante = null,
             cbNroComprobantes = "";
-        response.embarque.manfiestos.forEach((e,key) => {
+        response.embarque.manfiestos.forEach((e, key) => {
             for (const keyObject in nroBultos) {
                 if (Object.hasOwnProperty.call(nroBultos, keyObject)) {
                     nroBultos[keyObject] += isNaN(parseInt(e[keyObject]))
@@ -576,7 +621,7 @@ class General {
             empresasTransporte.classList.add("form-control", "form-control-sm");
             empresasTransporte.id = "empresa_trasporte_" + e.id;
             empresasTransporte.required = true;
-            empresasTransporte.name = "empresa_transporte[]"
+            empresasTransporte.name = "empresa_transporte[]";
             if (response.embarque.lista_empresas_transporte) {
                 empresasTransporte.classList.add("simple-select2");
                 let templateEmpre = "";
@@ -595,7 +640,10 @@ class General {
             const requerido =
                 tipoAreos.indexOf(e.tipo_trayecto) >= 0 ? "" : "required";
 
-            let txtGuiaEmbarque = requerido !== "" ? `<div class="form-group col-12 col-lg-4"><label for="id_guia_embarque_${e.id}">N° guías de embarque <small class="text-danger">*</small></label>${cbGuiasEmbarque.outerHTML}</div>` : "";
+            let txtGuiaEmbarque =
+                requerido !== ""
+                    ? `<div class="form-group col-12 col-lg-4"><label for="id_guia_embarque_${e.id}">N° guías de embarque <small class="text-danger">*</small></label>${cbGuiasEmbarque.outerHTML}</div>`
+                    : "";
             template += `
                         <li class='informe-ciudades' data-ciudad="${
                             e.id
@@ -717,7 +765,7 @@ class General {
             }" class="form-control form-control-sm" ${requerido}>
                                 </div>
                                 `;
-            
+
             template += `
             <div class="col-12 form-group">
                 <label for="input_file_${e.id}">Elegir archivos</label>

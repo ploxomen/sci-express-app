@@ -97,7 +97,7 @@ class InformacionAdicional extends Model
     }
     public static function getEnvaseEmbalaje()
     {
-        return ['A GRANEL','ATADOS','BALDES','BALDES', 'BARRICAS', 'BIDONES', 'BOBINAS', 'BOLSAS', 'BOTELLONES', 'CAJAS', 'CAJONES', 'CANASTOS', 'CANECAS', 'CARRETES', 'CILINDROS', 'CISTERNAS','EMBASE', 'EMBALAJE', 'CUÑETES', 'FARDOS', 'JAULAS', 'LATAS', 'PAQUETES','PARIHUELA' ,'PLATAFORMA', 'ROLLOS', 'SACOS', 'SOBRES', 'TAMBORES', 'TONELES'];
+        return ['A GRANEL','ATADOS','BALDES', 'BARRICAS', 'BIDONES', 'BOBINAS', 'BOLSAS', 'BOTELLONES', 'CAJAS', 'CAJONES', 'CANASTOS', 'CANECAS', 'CARRETES', 'CILINDROS', 'CISTERNAS','EMBASE', 'EMBALAJE', 'CUÑETES', 'FARDOS', 'JAULAS', 'LATAS', 'PAQUETES','PARIHUELA' ,'PLATAFORMA', 'ROLLOS', 'SACOS', 'SOBRES', 'TAMBORES', 'TONELES', 'UNIDADES'];
     }
     public static function obtenerDiasFiltros()
     {
