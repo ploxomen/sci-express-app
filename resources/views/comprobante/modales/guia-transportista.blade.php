@@ -28,6 +28,14 @@
                             class="form-control fom-control-sm" value="{{ date('Y-m-d') }}">
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
+                        <label for="txt-transportista-impresion">Impresión</label>
+                        <select name="impresion" id="txt-transportista-impresion" required
+                            class="form-control fom-control-sm">
+                            <option value="001">A4</option>
+                            <option value="004" selected>TICKET 80mm</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-12">
                         <label for="cb-comprobantes-transportista">Comprobantes</label>
                         <select name="comprobantes[]" id="cb-comprobantes-transportista" disabled required
                             class="form-control comprobantes-guias" multiple></select>

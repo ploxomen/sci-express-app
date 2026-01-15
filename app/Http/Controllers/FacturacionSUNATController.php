@@ -26,6 +26,7 @@ class FacturacionSUNATController extends Controller
         $data = [
             'observaciones' => $request->observaciones,
             'tipo_docu_remi' => '6',
+            'impresion' => $request->impresion,
             'comprobantes' => $guia->nro_comp_cli,
             'num_doc_remi' => $guia->remi_nro_docu,
             'nombre_remi' => $remitente->nomb_prov ?? $remitente->nom_cli,
@@ -75,6 +76,7 @@ class FacturacionSUNATController extends Controller
             'tipo_docu_dest' => $guia->tipoDocumentoDestinatario->sunat_cod,
             'num_doc_dest' => $guia->dest_nro_docu,
             'nombre_dest' => $destinatario->nombres,
+            'impresion' => $request->impresion,
             'ubigeo_remi' => $ubigeoRemitente,
             'ubigeo_dest' => $ubigeoDestinatario,
             'tot_kg' => $guia->tot_kg,
@@ -148,7 +150,9 @@ class FacturacionSUNATController extends Controller
         $comprobanteSimple = ComprobantesSimpleFact::porSerie($tipo)->first();
         return [
             "TOKEN" => $this->token,
+            "COD_FORM_IMPR" => $data->impresion,
             "RETORNA_XML_ENVIO" => false,
+            "RETORNA_PDF" => true,
             "NUM_SERIE_GUR" => $comprobanteSimple->serie,
             "NUM_CORRE_GUR" => $comprobanteSimple->correlativo + 1,
             "RETORNA_XML_CDR" => false,

@@ -28,6 +28,14 @@
                             class="form-control fom-control-sm" value="{{ date('Y-m-d') }}">
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
+                        <label for="txt-remitente-impresion">Impresión</label>
+                        <select name="impresion" id="txt-remitente-impresion" required
+                            class="form-control fom-control-sm">
+                            <option value="001">A4</option>
+                            <option value="004" selected>TICKET 80mm</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
                         <label for="txt-motivo">Motivo</label>
                         <select name="motivo_traslado" class="form-control form-control-sm" id="txt-motivo" required>
                             <option value="01">VENTA</option>

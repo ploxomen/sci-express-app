@@ -7,11 +7,12 @@ class General {
         "X-CSRF-TOKEN": this.token,
         "X-Requested-With": "XMLHttpRequest",
     };
+    defaultUnitMeasureSUNAT = {
+        id: "NIU",
+        unit: "UNIDAD",
+    };
     unitOfMeasureSUNAT = [
-        {
-            id: "NIU",
-            unit: "UNIDAD",
-        },
+        this.defaultUnitMeasureSUNAT,
         {
             id: "BJ",
             unit: "BALDES",

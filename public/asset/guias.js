@@ -222,6 +222,9 @@ function pageLoaded() {
                 if( ele2.dataset.name === "tipo_envio"){
                     objeto["tipo_envio_text"] = ele2.selectedOptions[0].text;
                 }
+                if( ele2.dataset.name === "embase_embalaje"){
+                    objeto["embase_embalaje_SUNAT"] = general.findUnitOfMeasureSUNAT(ele2.value)?.id || general.defaultUnitMeasureSUNAT.id;
+                }
             }
             if (!general.isObjEmpty(objeto)) {
                 detalles.push(objeto);
@@ -304,7 +307,8 @@ function pageLoaded() {
                 ? $cbCliente.selectedOptions[0].getAttribute("data-id-cliente")
                 : $($cbCliente).val();
         let datos = dataFormPrincipal(form, idCliente);
-        const detalles = obtenerDatosDetalle();
+        let detalles = obtenerDatosDetalle();
+        detalles = detalles.map(({tipo_envio_text, ...resto}) => resto);
         if (detalles.length) {
             datos.append("detalle_guia", JSON.stringify(detalles));
         }
@@ -465,7 +469,7 @@ function pageLoaded() {
                 <td>${index + 1}</td>
                 <td>${detalle.descripcion ? detalleStr + " - " + detalle.descripcion : detalleStr}</td>
                 <td>${detalle.cantidad}</td>
-                <td>${unit ? unit.unit : "UNIDAD"}</td>
+                <td>${unit ? unit.unit : general.defaultUnitMeasureSUNAT.unit}</td>
             </tr>`;
         });
         document.getElementById(tbody).innerHTML = template;
