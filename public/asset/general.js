@@ -50,8 +50,8 @@ class General {
             unit: "TAMBORES",
         },
     ];
-    findUnitOfMeasureSUNAT(strUnit){
-        return this.unitOfMeasureSUNAT.find(u => u.unit === strUnit);
+    findUnitOfMeasureSUNAT(strUnit) {
+        return this.unitOfMeasureSUNAT.find((u) => u.unit === strUnit);
     }
     alertifyConfirmPromise(title, message) {
         return new Promise((resolve) => {
@@ -1230,6 +1230,17 @@ class General {
             response.dias.total_origen_base_hr_aereo,
             response.dias.total_hr_origen_destino
         );
+    }
+    selectAllCheckbox($contenidoCheckbox, seleccionado) {
+        const checkboxes = $contenidoCheckbox.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = seleccionado;
+        })
+    }
+    selectOneCheckbox($contenidoCheckbox,$checkboxAll){
+        const checkboxes = $contenidoCheckbox.querySelectorAll('input[type="checkbox"]');
+        const checkboxesSelect = $contenidoCheckbox.querySelectorAll('input[type="checkbox"]:checked');
+        $checkboxAll.checked = checkboxes.length === checkboxesSelect.length
     }
     clearCliDeCli(
         idDestTipoDocu,

@@ -56,17 +56,6 @@ class InformacionAdicional extends Model
         }
         return $destinos;
     }
-    public static function obtenerCiudadesBase()
-    {
-        $ciudades = DB::table('ciudades_base_cluster AS cb')->select("cb.tipo_base","cb.ubigeo_distrito","c.id","c.nombre_ciudad")
-        ->leftJoin('ciudades AS c','cb.id_ciudad','=','c.id')
-        ->where(['activo' => 1 ,'base' => 1])->get();
-        foreach ($ciudades as $ciudad) {
-            $ciudad->nombre = $ciudad->tipo_base == 'distrito' ? (new Ubigeo)->getNameDistrito($ciudad->ubigeo_distrito) : $ciudad->nombre_ciudad;
-            $ciudad->value = $ciudad->tipo_base == 'distrito' ? $ciudad->ubigeo_distrito : $ciudad->id;
-        }
-        return $ciudades;
-    }
     public static function obtenerCiudadBaseEmbarcar($idUsuario)
     {
         $ciudades = DB::select("CALL sp_embarque_filtros_manifiestos(?)",[$idUsuario]);

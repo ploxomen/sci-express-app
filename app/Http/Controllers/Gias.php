@@ -29,6 +29,7 @@ class Gias extends Controller
     public function viewGuias()
     {
         $modulos = User::getModulos(Auth::id());
+        $ciudades = ModeloCluster::obtenerCiudadesBase(null,true)->sortBy('nombre_ciudad');
         $via_envios = InformacionAdicional::viaEnvio();
         $tipo_documentos = Documentos::where('estado', '1')->get();
         $departamentos = (new Ubigeo)->getDepartamentosClientes();
@@ -47,7 +48,7 @@ class Gias extends Controller
         $empresasTransporte = EmpresaTransporte::obtenerTransportes();
         $vehiculos = Vehiculos::obtenerVehiculos();
         $conductores = User::obtenerTiposUsuarios(User::ROL_DRIVER);
-        return view('comprobante.guias', compact('nro_guia_result', 'cli_cli', 'clientes', 'departamentos', 'hoy', 'trayecto', 'via_envios', 'nro_os', 'tipo_documentos', 'modulos', 'antes', 'embaseEmbalaje', 'grupoEnvio', 'tipoEnvios','comprobantes','conductores','vehiculos','empresasTransporte'));
+        return view('comprobante.guias', compact('nro_guia_result', 'cli_cli', 'clientes', 'departamentos', 'hoy', 'trayecto', 'via_envios', 'nro_os', 'tipo_documentos', 'modulos', 'antes','ciudades', 'embaseEmbalaje', 'grupoEnvio', 'tipoEnvios','comprobantes','conductores','vehiculos','empresasTransporte'));
     }
     public function generarNroGuiaSCI()
     {
@@ -69,6 +70,14 @@ class Gias extends Controller
             $nro_os = "0000001";
         }
         return ['nroOS' => $nro_os, 'nroGuia' => $nro_guia_result];
+    }
+    public function guiasSeleccionadas(Request $request)
+    {
+        $fechaInicio = $request->input('fecha_inicio', null);
+        $fechaFin = $request->input('fecha_fin',null);
+        $ciudadBase = $request->input(key: 'ciudad_base');
+        $guias = ModeloGuias::guiasRangoFechas($fechaInicio,$fechaFin,$ciudadBase);
+        return view('comprobante.components.tabla-seleccion-guias',compact('guias'));
     }
     public function modificacionPreGuias(Request $request)
     {

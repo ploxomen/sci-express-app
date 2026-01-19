@@ -61,9 +61,11 @@
                     </div>
                 </div>
             </div>
-            <div class="mb-1">
+            <div class="mb-1 flex gap-2">
                 <button type="button" class="btn btn-sm btn-info" style="font-size: 0.7em;" data-toggle="modal"
                     data-target="#agregar-comprobantes"><i class="fas fa-plus"></i> Comprobantes</button>
+                <button type="button" class="btn btn-sm btn-primary" style="font-size: 0.7em;" data-toggle="modal"
+                    data-target="#seleccionar-comprobantes"><i class="fas fa-check"></i> Guías activas</button>
             </div>
             <div class="col-12 p-0 px-lg-2 mb-4">
                 <div class="bg-white p-3 form-row">
@@ -448,5 +450,6 @@
     @include('comprobante.modales.seleccion-guias')
     @include('comprobante.modales.guia-remitente')
     @include('comprobante.modales.guia-transportista')
-    <x-loader/>
+    @include('comprobante.modales.seleccion-comprobantes')
+    <x-loader />
 @endsection

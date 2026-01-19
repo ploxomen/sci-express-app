@@ -200,7 +200,7 @@ function pageLoaded() {
     $formGuiaRemitente.addEventListener("submit", async function (e) {
         e.preventDefault();
         let idGuia = await generarGuia(frmGuia, false);
-        if(!idGuia){
+        if (!idGuia) {
             return false;
         }
         let data = new FormData($formGuiaRemitente);
@@ -219,11 +219,13 @@ function pageLoaded() {
             console.log(deta);
             for (const ele2 of deta) {
                 objeto[ele2.dataset.name] = ele2.value;
-                if( ele2.dataset.name === "tipo_envio"){
+                if (ele2.dataset.name === "tipo_envio") {
                     objeto["tipo_envio_text"] = ele2.selectedOptions[0].text;
                 }
-                if( ele2.dataset.name === "embase_embalaje"){
-                    objeto["embase_embalaje_SUNAT"] = general.findUnitOfMeasureSUNAT(ele2.value)?.id || general.defaultUnitMeasureSUNAT.id;
+                if (ele2.dataset.name === "embase_embalaje") {
+                    objeto["embase_embalaje_SUNAT"] =
+                        general.findUnitOfMeasureSUNAT(ele2.value)?.id ||
+                        general.defaultUnitMeasureSUNAT.id;
                 }
             }
             if (!general.isObjEmpty(objeto)) {
@@ -279,22 +281,27 @@ function pageLoaded() {
                 if (data.errors) {
                     throw new Error(data.errors);
                 }
-                window.open(`/storage/documentos/${data.serie_cpe}-${data.correlativo_cpe}.pdf`, "_target");
-                alertify.alert("Mensaje", "Comprobante generado correctamente", () =>
-                    window.location.reload()
+                window.open(
+                    `/storage/documentos/${data.serie_cpe}-${data.correlativo_cpe}.pdf`,
+                    "_target"
+                );
+                alertify.alert(
+                    "Mensaje",
+                    "Comprobante generado correctamente",
+                    () => window.location.reload()
                 );
             })
             .catch((error) => {
                 console.log(error.message);
                 console.error(error);
-                alertify.alert("Error",error.message);
+                alertify.alert("Error", error.message);
             })
             .finally(() => $(general.$loader).hide());
     };
     $formTransportista.onsubmit = async (event) => {
         event.preventDefault();
         let idGuia = await generarGuia(frmGuia, false);
-        if(!idGuia){
+        if (!idGuia) {
             return false;
         }
         let data = new FormData($formTransportista);
@@ -308,7 +315,7 @@ function pageLoaded() {
                 : $($cbCliente).val();
         let datos = dataFormPrincipal(form, idCliente);
         let detalles = obtenerDatosDetalle();
-        detalles = detalles.map(({tipo_envio_text, ...resto}) => resto);
+        detalles = detalles.map(({ tipo_envio_text, ...resto }) => resto);
         if (detalles.length) {
             datos.append("detalle_guia", JSON.stringify(detalles));
         }
@@ -346,12 +353,12 @@ function pageLoaded() {
     };
     const colocarDatosInputCB = function (event) {
         const opcionSelccionada = this.selectedOptions[0];
-        const $selectores = event.target.dataset.input.split(',');
-        const values = event.target.dataset.value.split(',');
-        $selectores.forEach((selector,key) => {
-            document.querySelector(selector).value = opcionSelccionada.dataset[values[key]]
-        })
-        
+        const $selectores = event.target.dataset.input.split(",");
+        const values = event.target.dataset.value.split(",");
+        $selectores.forEach((selector, key) => {
+            document.querySelector(selector).value =
+                opcionSelccionada.dataset[values[key]];
+        });
     };
     const habilitarDeshHabilitarInputs = (clase, valor) => {
         for (const element of document.querySelectorAll(`.${clase}`)) {
@@ -412,23 +419,21 @@ function pageLoaded() {
                 document.getElementById("id_remi_tipo_docu").value,
             "txt-emi-num-doc":
                 document.getElementById("id_remi_nro_docu").value,
-            "txt-partida":
-                document.getElementById("id_remi_dire").value,
+            "txt-partida": document.getElementById("id_remi_dire").value,
             "txt-dest-razon-social":
                 document.getElementById("id_dest_nomb").selectedOptions[0].text,
             "txt-dest-tipo-doc":
                 document.getElementById("id_dest_tipo_docu").value,
             "txt-dest-num-doc":
                 document.getElementById("id_dest_nro_docu").value,
-            "txt-llegada":
-                document.getElementById("id_dest_dire").value
+            "txt-llegada": document.getElementById("id_dest_dire").value,
         };
         for (const key in data) {
             if (!Object.hasOwn(data, key)) continue;
             const element = !id
                 ? document.getElementById(key)
                 : document.getElementById(key + "-" + id);
-            if(!element){
+            if (!element) {
                 continue;
             }
             element.value = data[key];
@@ -457,19 +462,61 @@ function pageLoaded() {
         detalles.forEach((detalle, index) => {
             template += `${detalle.cantidad} ${detalle.embase_embalaje} - ${detalle.kg} Kg - ${detalle.largo} Lar., ${detalle.ancho} Anc., ${detalle.altura} Alt\n`;
         });
-        document.querySelector("#guia-transportista-form #txt-observaciones").value = template;
-    }
+        document.querySelector(
+            "#guia-transportista-form #txt-observaciones"
+        ).value = template;
+    };
+    const $formFiltroGuiasSeleccion = document.getElementById(
+        "form-filtro-seleccion"
+    );
+    const $tableComprobanteSunat =
+        document.getElementById("comprobantes-sunat");
+    const $selectCheckBoxTodoSunat = document.getElementById(
+        "seleccion-todos-comprobantes"
+    );
+    $formFiltroGuiasSeleccion.onsubmit = (event) => {
+        event.preventDefault();
+        comprobantesSeleccion();
+    };
+    $selectCheckBoxTodoSunat.onchange = (event) =>
+        general.selectAllCheckbox($tableComprobanteSunat, event.target.checked);
+    $tableComprobanteSunat.onclick = (event) => {
+        console.log(event.target);
+        if (event.target.type === "checkbox") {
+            general.selectOneCheckbox($tableComprobanteSunat,$selectCheckBoxTodoSunat);
+        }
+    };
+    const comprobantesSeleccion = () => {
+        const formData = new FormData($formFiltroGuiasSeleccion);
+        fetch(
+            `/intranet/comprobante/guias/seleccion?${new URLSearchParams(
+                formData
+            ).toString()}`
+        )
+            .then((response) => response.text())
+            .then((data) => {
+                $tableComprobanteSunat.innerHTML = data;
+            });
+    };
     const llenarDetaalesGuias = (tbody, totalBultos) => {
         const detalles = obtenerDatosDetalle();
         let template = "";
         detalles.forEach((detalle, index) => {
             const detalleStr = `${detalle.grupo_envio} - ${detalle.tipo_envio_text}`;
-            const unit = general.findUnitOfMeasureSUNAT(detalle.embase_embalaje);
+            const unit = general.findUnitOfMeasureSUNAT(
+                detalle.embase_embalaje
+            );
             template += `<tr>
                 <td>${index + 1}</td>
-                <td>${detalle.descripcion ? detalleStr + " - " + detalle.descripcion : detalleStr}</td>
+                <td>${
+                    detalle.descripcion
+                        ? detalleStr + " - " + detalle.descripcion
+                        : detalleStr
+                }</td>
                 <td>${detalle.cantidad}</td>
-                <td>${unit ? unit.unit : general.defaultUnitMeasureSUNAT.unit}</td>
+                <td>${
+                    unit ? unit.unit : general.defaultUnitMeasureSUNAT.unit
+                }</td>
             </tr>`;
         });
         document.getElementById(tbody).innerHTML = template;
