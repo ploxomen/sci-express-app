@@ -206,6 +206,7 @@ Route::middleware(['auth', 'share'])->prefix('intranet')->group(function () {
             Route::get('view-retornadas', [Gias::class, 'viewGuiasRetornadas'])->name('verGuiasRetornadas');
             Route::get('seleccion', [Gias::class, 'guiasSeleccionadas']);
             Route::get('seleccionadas', [Gias::class, 'comprobantesClientes']);
+            Route::get('consulta/{guia}', [Gias::class, 'consultaGuiaSunat']);
             Route::post('preguias-modificacion', [Gias::class, 'modificacionPreGuias']);
             Route::post('preguias-completar', [Gias::class, 'modificacionCompletarPreGuias']);
             Route::post('preguias-completar-editar', [Gias::class, 'editarCompletarPreGuias']);

@@ -53,7 +53,7 @@ class FacturacionSUNATController extends Controller
         $dataJSON = (object)array_merge($data, $request->all());
         $parametros = $this->construccionJSONGuiaRemisionTransportista($dataJSON, $detalles,$serieDocumentoSunat);
         $response = $this->enviarAPI($parametros);
-        $this->responseAPI($response, $guia, $response->serie_cpe, $response->correlativo_cpe,$serieDocumentoSunat);
+        $this->responseAPI($response, $guia, $response->serie_cpe, $response->correlativo_cpe,$serieDocumentoSunat, !$request->has('return_guia'));
         return $response;
     }
     public function documentosReferencia($textoReferencia)
@@ -100,7 +100,7 @@ class FacturacionSUNATController extends Controller
         $dataJSON = (object)array_merge($data, $request->all());
         $parametros = $this->construccionJSONGuiaRemisionRemitente($dataJSON, $detalles,$serieDocumentoSunat);
         $response = $this->enviarAPI($parametros);
-        $this->responseAPI($response, $guia, $response->serie_cpe, $response->correlativo_cpe,$serieDocumentoSunat);
+        $this->responseAPI($response, $guia, $response->serie_cpe, $response->correlativo_cpe,$serieDocumentoSunat, !$request->has('return_guia'));
         return $response;
     }
     public function obtenerUBIGEOSunatNombres($ubiDepartamento, $ubiProvincia, $ubiDistrito)
@@ -118,9 +118,9 @@ class FacturacionSUNATController extends Controller
         $filename = $ruta . "/" . $nombre;
         return Storage::disk('public')->put($filename, $pdfContent);
     }
-    public function responseAPI($response, ModeloGuias $guia, $numeroSerie, $correlativo,$tipo)
+    public function responseAPI($response, ModeloGuias $guia, $numeroSerie, $correlativo,$tipo, $deleteGuia = false)
     {
-        if (!empty($response->errors)) {
+        if (!empty($response->errors) && $deleteGuia) {
             $guia->procesos()->delete();
             $guia->detalles()->delete();
             $guia->delete();

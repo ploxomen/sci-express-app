@@ -206,7 +206,7 @@ function pageLoaded() {
         }
         let data = new FormData($formGuiaRemitente);
         data.append("guia", idGuia);
-        generarComprobanteFetch("guia-remision-remitente", data);
+        general.generarComprobanteFetch("guia-remision-remitente", data);
     });
     $("#id-invitado-remitente").on("select2:select", async function (e) {
         general.getCCInvitados("#id-invitado-remitente", $cbCliente);
@@ -265,40 +265,6 @@ function pageLoaded() {
     const $formTransportista = document.getElementById(
         "guia-transportista-form",
     );
-    const generarComprobanteFetch = (url, data) => {
-        $(general.$loader).show();
-        fetch("/intranet/facturacion-sunat/" + url, {
-            method: "POST",
-            body: data,
-            headers: {
-                "X-CSRF-TOKEN": document
-                    .querySelector('meta[name="csrf-token"]')
-                    .getAttribute("content"),
-                "X-Requested-With": "XMLHttpRequest",
-            },
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.errors) {
-                    throw new Error(data.errors);
-                }
-                window.open(
-                    `/storage/documentos/${data.serie_cpe}-${data.correlativo_cpe}.pdf`,
-                    "_target",
-                );
-                alertify.alert(
-                    "Mensaje",
-                    "Comprobante generado correctamente",
-                    () => window.location.reload(),
-                );
-            })
-            .catch((error) => {
-                console.log(error.message);
-                console.error(error);
-                alertify.alert("Error", error.message);
-            })
-            .finally(() => $(general.$loader).hide());
-    };
     $formTransportista.onsubmit = async (event) => {
         event.preventDefault();
         let idGuia = await generarGuia(frmGuia, false);
@@ -307,7 +273,7 @@ function pageLoaded() {
         }
         let data = new FormData($formTransportista);
         data.append("guia", idGuia);
-        generarComprobanteFetch("guia-remision-transportista", data);
+        general.generarComprobanteFetch("guia-remision-transportista", data);
     };
     const generarGuia = async (form, reload) => {
         const idCliente =
@@ -352,15 +318,7 @@ function pageLoaded() {
         $(general.$loader).hide();
         return guia;
     };
-    const colocarDatosInputCB = function (event) {
-        const opcionSelccionada = this.selectedOptions[0];
-        const $selectores = event.target.dataset.input.split(",");
-        const values = event.target.dataset.value.split(",");
-        $selectores.forEach((selector, key) => {
-            document.querySelector(selector).value =
-                opcionSelccionada.dataset[values[key]];
-        });
-    };
+    
     const habilitarDeshHabilitarInputs = (clase, valor) => {
         for (const element of document.querySelectorAll(`.${clase}`)) {
             const inputs = element.querySelector("input, select");
@@ -382,7 +340,7 @@ function pageLoaded() {
         habilitarDeshHabilitarInputs(event.target.id, false);
     };
     for (const cbRelacion of document.querySelectorAll(".cb-relacionado")) {
-        cbRelacion.addEventListener("change", colocarDatosInputCB);
+        cbRelacion.addEventListener("change", general.colocarDatosInputCB);
     }
     for (const cbRadioTipoMod of document.querySelectorAll(
         ".cambio-mod-traslado",
@@ -419,7 +377,7 @@ function pageLoaded() {
     };
     $btnSeleccionRemitente.onclick = (event) => {
         datosFormularioLlenar("");
-        llenarDetaalesGuias("items-guia-remitente", "txt-bulto-total-remi-kg");
+        llenarDetaalesGuias("items-guia-remitente", "txt-bulto-remi-total-kg");
         toogleModalesGuias("#guia-remitente", "#seleccion-comprobantes");
     };
     const datosFormularioLlenar = (id) => {

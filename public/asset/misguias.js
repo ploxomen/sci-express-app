@@ -15,13 +15,21 @@ function loadPage() {
         .catch((errer) => {
             alertify.alert(
                 "Error",
-                "Ocurrió un problema al obtener los datos de la tabla detalle, por favor intentelo más tarde"
+                "Ocurrió un problema al obtener los datos de la tabla detalle, por favor intentelo más tarde",
             );
         });
     $(".simple-select2-2").select2({
         theme: "bootstrap",
         width: "100%",
         placeholder: "Seleccione una opción",
+    });
+    for (const cbRelacion of document.querySelectorAll(".cb-relacionado")) {
+        cbRelacion.addEventListener("change", general.colocarDatosInputCB);
+    }
+    $(".comprobantes-guias").select2({
+        theme: "bootstrap",
+        width: "100%",
+        tags: true,
     });
     const tblDetalleGuia = document.getElementById("tabla-detalle-guias");
     let tablaGuias = null;
@@ -32,7 +40,7 @@ function loadPage() {
         labelGuia = document.getElementById("label_nro_guia"),
         $boxImgGuia = document.getElementById("list-img"),
         $boxComplejo = document.getElementById(
-            "id-editar-box-complejo-distante"
+            "id-editar-box-complejo-distante",
         );
     tblDetalleGuia.addEventListener("click", async function (e) {
         if (e.target.classList.contains("delete-guia")) {
@@ -45,7 +53,7 @@ function loadPage() {
                     datos.append("id_guia", guia);
                     let response = await general.funcfetch(
                         "anular-guia",
-                        datos
+                        datos,
                     );
                     if (response.error) {
                         alertify.alert("Error", response.error);
@@ -56,7 +64,7 @@ function loadPage() {
                         tablaGuias.draw();
                     }
                 },
-                () => {}
+                () => {},
             );
         }
         if (e.target.classList.contains("view-guia")) {
@@ -70,6 +78,10 @@ function loadPage() {
             }
             general.verDetalleGuia(response.datos);
         }
+        if (e.target.classList.contains("factura-sunat")) {
+            datosGlobales.idGuia = e.target.dataset.guia;
+            $("#seleccion-comprobantes").modal("show");
+        }
         if (e.target.classList.contains("editar-guia")) {
             let datos = new FormData();
             datos.append("guia", e.target.dataset.guia);
@@ -82,7 +94,7 @@ function loadPage() {
             tipoCbRemi = response.datos.tipo_guia;
             estado = response.datos.situ;
             $(
-                "#editar-guias .simple-select2, #editar-guias .cb-select2-tags, #editar-guias .cb-ubigeo"
+                "#editar-guias .simple-select2, #editar-guias .cb-select2-tags, #editar-guias .cb-ubigeo",
             )
                 .val("")
                 .trigger("change");
@@ -91,19 +103,19 @@ function loadPage() {
                 response.datos;
             general.transforData(
                 listProvRemi,
-                document.getElementById("id_editar_remi_prov")
+                document.getElementById("id_editar_remi_prov"),
             );
             general.transforData(
                 listDistRemi,
-                document.getElementById("id_editar_remi_dist")
+                document.getElementById("id_editar_remi_dist"),
             );
             general.transforData(
                 listProvDest,
-                document.getElementById("id_editar_dest_prov")
+                document.getElementById("id_editar_dest_prov"),
             );
             general.transforData(
                 listDistDest,
-                document.getElementById("id_editar_dest_dist")
+                document.getElementById("id_editar_dest_dist"),
             );
             const idInvitado = "#id_editar_id_invitado";
             const ccInvitado = $(idInvitado).attr("data-cuenta");
@@ -111,7 +123,7 @@ function loadPage() {
             $(ccInvitado).prop("disabled", true);
             $(idInvitado).empty();
             $(idInvitado).append(
-                new Option("Ninguno", "ninguno", false, false)
+                new Option("Ninguno", "ninguno", false, false),
             );
             if (response.datos.listInvitados.length > 0) {
                 response.datos.listInvitados.forEach((invitado) => {
@@ -119,7 +131,7 @@ function loadPage() {
                         invitado.name + " " + invitado.last_name,
                         invitado.id,
                         false,
-                        false
+                        false,
                     );
                     $(idInvitado).append(optNew);
                 });
@@ -139,14 +151,14 @@ function loadPage() {
                         cc,
                         cc,
                         cc == response.datos.cc_invitado ? true : false,
-                        false
+                        false,
                     );
                     $(ccInvitado).append(optNew);
                 });
             }
             $(ccInvitado).prop(
                 "required",
-                valorInvitado != "ninguno" ? true : false
+                valorInvitado != "ninguno" ? true : false,
             );
             if (response.datos.ciudadesFinales) {
                 let templateOpt = "<option></option>";
@@ -154,7 +166,7 @@ function loadPage() {
                     templateOpt += `<option value="${c.id}">${c.nombre_ciudad}</option>`;
                 });
                 document.getElementById(
-                    "id_editar_ciudad_destino_final"
+                    "id_editar_ciudad_destino_final",
                 ).innerHTML = templateOpt;
             }
             $("#editar-guias").modal("show");
@@ -171,7 +183,7 @@ function loadPage() {
                     }
                     if (key == "id_remitente") {
                         document.querySelector(
-                            `#id_editar_id_remitente option[value='${valor}'][data-type='${response.datos.tipo_guia}'`
+                            `#id_editar_id_remitente option[value='${valor}'][data-type='${response.datos.tipo_guia}'`,
                         ).selected = true;
                         continue;
                     }
@@ -202,7 +214,7 @@ function loadPage() {
                                 de.ancho,
                                 de.altura,
                                 de.volumen,
-                                detalleTabla
+                                detalleTabla,
                             );
                         });
                         document.getElementById("tabla-detalle").innerHTML =
@@ -223,7 +235,7 @@ function loadPage() {
                                 "0.00",
                                 "0.00",
                                 "0.00",
-                                detalleTabla
+                                detalleTabla,
                             );
                         continue;
                     }
@@ -249,7 +261,7 @@ function loadPage() {
                             txtNGuia.setAttribute("maxlength", 11);
                             txtNGuia.setAttribute(
                                 "pattern",
-                                "[0-9]{3}[-][0-9]{7}"
+                                "[0-9]{3}[-][0-9]{7}",
                             );
                         } else {
                             labelGuia.innerHTML =
@@ -283,7 +295,7 @@ function loadPage() {
             $(".enable-estado-4").prop("disabled", true);
 
             $(
-                "#editar-guias .simple-select2, #editar-guias .cb-select2-tags, #editar-guias .cb-ubigeo"
+                "#editar-guias .simple-select2, #editar-guias .cb-select2-tags, #editar-guias .cb-ubigeo",
             ).trigger("change");
             if (response.datos.estado === 3) {
                 $(".disable_inactiva").prop("disabled", true);
@@ -307,7 +319,11 @@ function loadPage() {
                 if (response.datos.imagenes) {
                     response.datos.imagenes.map((img) => {
                         $boxImgGuia.append(
-                            ImageDelivery(img.nom_file, img.id, img.nom_id_file)
+                            ImageDelivery(
+                                img.nom_file,
+                                img.id,
+                                img.nom_id_file,
+                            ),
                         );
                     });
                 }
@@ -335,7 +351,7 @@ function loadPage() {
         e.preventDefault();
         const response = await general.funcfetch(
             "obtener-asignacion-global",
-            null
+            null,
         );
         if (response.guias) {
             let template = "";
@@ -373,7 +389,7 @@ function loadPage() {
     });
     document.getElementById("seleccion-todo-asignar").onchange = function (e) {
         for (const checkbox of document.querySelectorAll(
-            '#llenar-guias-por-asignar input[type="checkbox"]'
+            '#llenar-guias-por-asignar input[type="checkbox"]',
         )) {
             checkbox.checked = e.target.checked;
         }
@@ -381,7 +397,7 @@ function loadPage() {
     document.getElementById("asignar-masivo-guias").onclick = (e) => {
         let guiaAsignar = [];
         const selectGuias = document.querySelectorAll(
-            `#llenar-guias-por-asignar input[type="checkbox"]:checked`
+            `#llenar-guias-por-asignar input[type="checkbox"]:checked`,
         );
         for (const checkbox of selectGuias) {
             guiaAsignar.push({
@@ -390,7 +406,7 @@ function loadPage() {
         }
         if (!guiaAsignar.length) {
             return alertify.error(
-                "Por favor selecione una o más guias/OS para ser asignados"
+                "Por favor selecione una o más guias/OS para ser asignados",
             );
         }
         alertify.confirm(
@@ -406,7 +422,7 @@ function loadPage() {
                 datos.append("guias", JSON.stringify(guiaAsignar));
                 const response = await general.funcfetch(
                     "asignar-global",
-                    datos
+                    datos,
                 );
                 if (response.success) {
                     alertify.success(response.success);
@@ -414,12 +430,12 @@ function loadPage() {
                         tablaGuias.draw();
                     }
                     document.getElementById(
-                        "total-por-procesar-guias"
+                        "total-por-procesar-guias",
                     ).textContent = response.porAsignar;
                     $("#modal-asignar-masivo").modal("hide");
                 }
             },
-            () => {}
+            () => {},
         );
     };
     $("#id_editar_estado_entregado").on("change", function (e) {
@@ -472,7 +488,7 @@ function loadPage() {
         }
         detalleEntrega.forEach((entrega) => {
             listEntrega.append(
-                AddVisitaEntrega(entrega.visita, entrega.motivo)
+                AddVisitaEntrega(entrega.visita, entrega.motivo),
             );
         });
 
@@ -550,7 +566,7 @@ function loadPage() {
                     datos.append("id_guia", datosGlobales.idGuia);
                     const response = await general.funcfetch(
                         "delete-img-guia",
-                        datos
+                        datos,
                     );
                     if (response.error) {
                         return alertify.alert("Error", response.error);
@@ -558,7 +574,7 @@ function loadPage() {
                     alertify.success(response.success);
                     event.target.parentElement.remove();
                 },
-                () => {}
+                () => {},
             );
         }
         if (
@@ -584,8 +600,8 @@ function loadPage() {
                             ImageDelivery(
                                 img.nom_file,
                                 img.id_img,
-                                img.nom_id_file
-                            )
+                                img.nom_id_file,
+                            ),
                         );
                     });
                     alertify.success(success);
@@ -611,7 +627,7 @@ function loadPage() {
             "update-total-guia",
             "#editar-guias",
             $cbCliente,
-            tablaGuias
+            tablaGuias,
         );
     };
 
@@ -622,7 +638,7 @@ function loadPage() {
             "#id_editar_remi_dist",
             "#id_editar_remi_depa",
             "#id_editar_remi_tipo_docu",
-            "#id_editar_id_invitado"
+            "#id_editar_id_invitado",
         );
     });
     $("#id_editar_id_destinatario").on("select2:select", async function (e) {
@@ -637,7 +653,7 @@ function loadPage() {
             "#id_editar_dias_tran",
             "#id_editar_via_envi",
             "#id-editar-box-complejo-distante",
-            estado
+            estado,
         );
     });
     $(".calculo-dia").on("select2:select", function () {
@@ -646,7 +662,7 @@ function loadPage() {
             "#id_editar_dest_depa",
             "#id_editar_dest_prov",
             "#id_editar_dias_tran",
-            "#id_editar_via_envi"
+            "#id_editar_via_envi",
         );
         const distrito =
             $(this).attr("data-cli-cli") == "distrito"
@@ -658,7 +674,7 @@ function loadPage() {
             distrito,
             tipo,
             "#id-editar-box-complejo-distante",
-            tipo == "ciudad" ? $(this).val() : null
+            tipo == "ciudad" ? $(this).val() : null,
         );
     });
     $(cbOrdenServicio).on("select2:select", function (e) {
@@ -669,14 +685,14 @@ function loadPage() {
             datosNroGuia.max,
             datosNroGuia.condicion,
             datosNroGuia.textLabel,
-            datosNroGuia.valid
+            datosNroGuia.valid,
         );
     });
     $("#id_editar_comp_clie").on("select2:select", function (e) {
         general.validarSeleccionComprobantes(
             $(this).val(),
             "#id_editar_comp_clie",
-            "#id_editar_nro_comp_cli"
+            "#id_editar_nro_comp_cli",
         );
     });
     $("#id_editar_nro_comp_cli").on("change.select2", function (e) {
@@ -689,7 +705,7 @@ function loadPage() {
                 event,
                 $detalleGuiaTabla,
                 $("#id_editar_estado").val(),
-                datosGlobales.idGuia
+                datosGlobales.idGuia,
             );
         }
     };
@@ -697,27 +713,27 @@ function loadPage() {
         event.preventDefault();
         general.agregarNuevoDetalleGuia(
             "id_editar_estado",
-            ".select-new-detalle"
+            ".select-new-detalle",
         );
     };
     $("#id_editar_dest_dist").on("select2:select", function (e) {
         general.getCiudadesFinales(
             $(this).val(),
-            $(this).attr("data-ciudades")
+            $(this).attr("data-ciudades"),
         );
     });
     $("#id_editar_situacion_envio").on("change", function (event) {
         validarEntregaReparto(
             "#id_editar_incidencia_envio",
             "#id_editar_text_disconforme",
-            $(this).val()
+            $(this).val(),
         );
     });
     $("#id_editar_situacion_durante_envio").on("change", function (event) {
         validarEntregaReparto(
             "#id_editar_incidencia_durante_envio",
             "#id_editar_text_durante_disconforme",
-            $(this).val()
+            $(this).val(),
         );
     });
 
@@ -725,7 +741,7 @@ function loadPage() {
         $($incidencia).prop("disabled", valor === "CONFORME" ? true : false);
         $($textoDisconforme).prop(
             "disabled",
-            valor === "CONFORME" ? true : false
+            valor === "CONFORME" ? true : false,
         );
         if (valor === "CONFORME") {
             $($incidencia).val("").trigger("change");
@@ -881,19 +897,7 @@ function loadPage() {
                             name: "id",
                             render: function (data, type, full) {
                                 let temButtons = `<div class="d-flex justify-content-center flex-wrap" style="gap:5px;"><button data-toggle="tooltip" title="Visualizar solicitud" data-guia="${data}" class="btn btn-sm btn-secondary view-guia"><i class="far fa-eye"></i></button><button data-guia="${data}" class="btn btn-sm btn-primary editar-guia"><i class="fas fa-pen"></i></button>`;
-                                temButtons += `
-                                <div class="btn-group">
-                                    <button type="button" title="Mostrar más opciones" class="btn btn-sm btn-ligth dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="#">Action</a>
-                                        <a class="dropdown-item" href="#">Another action</a>
-                                        <a class="dropdown-item" href="#">Something else here</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="#">Separated link</a>
-                                    </div>
-                                </div>`;
+
                                 if (full.guia_tipo != "ANULADA") {
                                     temButtons += `<button data-toggle="tooltip" title="Anular guia" data-guia="${data}" class="btn btn-sm btn-danger delete-guia"><i class="fas fa-trash-alt"></i></button>`;
                                 }
@@ -922,12 +926,12 @@ function loadPage() {
                                 let datos = new FormData();
                                 datos.append(
                                     "id_guia",
-                                    $(this).attr("data-guia")
+                                    $(this).attr("data-guia"),
                                 );
                                 datos.append("id_cluster", $(this).val());
                                 let response = await general.funcfetch(
                                     "cambiar-cluster",
-                                    datos
+                                    datos,
                                 );
                                 if (response.error) {
                                     alertify.alert("Error", response.error);
@@ -945,32 +949,32 @@ function loadPage() {
                                     let datos = new FormData();
                                     datos.append(
                                         "id_guia",
-                                        event.target.dataset.guia
+                                        event.target.dataset.guia,
                                     );
                                     datos.append("id_user", $(this).val());
                                     let response = await general.funcfetch(
                                         "asignar-personal",
-                                        datos
+                                        datos,
                                     );
                                     if (response.error) {
                                         alertify.alert(
                                             "Mensaje",
-                                            response.error
+                                            response.error,
                                         );
                                         return;
                                     }
                                     document.getElementById(
-                                        "total-por-procesar-guias"
+                                        "total-por-procesar-guias",
                                     ).textContent = response.procesar;
                                     alertify.success(response.success);
-                                }
+                                },
                             );
                         }
                         if (tabla.children[10].style.display == "none") {
                             $(".cb-estado-change").off("change");
                             $(".cb-estado-change").attr(
                                 "data-responsive",
-                                "true"
+                                "true",
                             );
                             $(".cb-estado-change").on(
                                 "change",
@@ -978,22 +982,22 @@ function loadPage() {
                                     let datos = new FormData();
                                     datos.append(
                                         "id_guia",
-                                        $(this).attr("data-guia")
+                                        $(this).attr("data-guia"),
                                     );
                                     datos.append("estado", $(this).val());
                                     let response = await general.funcfetch(
                                         "cambiar-estado",
-                                        datos
+                                        datos,
                                     );
                                     if (response.error) {
                                         alertify.alert("Error", response.error);
                                         return;
                                     }
                                     alertify.success(response.success);
-                                }
+                                },
                             );
                         }
-                    }
+                    },
                 );
                 tablaGuias.on("draw.dt", function () {
                     $(".cb-usuarios")
@@ -1008,14 +1012,14 @@ function loadPage() {
                             datos.append("id_user", $(this).val());
                             let response = await general.funcfetch(
                                 "asignar-personal",
-                                datos
+                                datos,
                             );
                             if (response.error) {
                                 alertify.alert("Mensaje", response.error);
                                 return;
                             }
                             document.getElementById(
-                                "total-por-procesar-guias"
+                                "total-por-procesar-guias",
                             ).textContent = response.procesar;
                             alertify.success(response.success);
                         });
@@ -1031,7 +1035,7 @@ function loadPage() {
                             datos.append("id_cluster", $(this).val());
                             let response = await general.funcfetch(
                                 "cambiar-cluster",
-                                datos
+                                datos,
                             );
                             if (response.error) {
                                 alertify.alert("Error", response.error);
@@ -1051,7 +1055,7 @@ function loadPage() {
                             datos.append("estado", $(this).val());
                             let response = await general.funcfetch(
                                 "cambiar-estado",
-                                datos
+                                datos,
                             );
                             if (response.error) {
                                 alertify.alert("Error", response.error);
@@ -1085,10 +1089,10 @@ function loadPage() {
                             $(".cb-estado-change").off("change");
                             $(".cb-estado-change").attr(
                                 "data-responsive",
-                                "false"
+                                "false",
                             );
                         }
-                    }
+                    },
                 );
             } else {
                 tablaGuias.draw();
@@ -1233,14 +1237,22 @@ function loadPage() {
                             orderable: false,
                             name: "id",
                             render: function (data, type, full) {
-                                let temButtons = `<div class="d-flex justify-content-center flex-wrap" style="gap:5px;"><button data-toggle="tooltip" title="Visualizar solicitud" data-guia="${data}" class="btn btn-sm btn-secondary view-guia"><i class="far fa-eye"></i></button><button data-guia="${data}" class="btn btn-sm btn-primary editar-guia"><i class="fas fa-pen"></i></button>`;
+                                let temButtons = `<div class="d-flex justify-content-center flex-wrap gap-3"><button data-toggle="tooltip" title="Visualizar solicitud" data-guia="${data}" class="btn btn-sm btn-secondary view-guia"><i class="far fa-eye"></i></button>`;
                                 if (full.comprobante_sunat) {
                                     temButtons += `<a href="/storage/documentos/${full.comprobante_sunat}.pdf" target="_blank" data-toggle="tooltip" title="Ver comprobante" class="btn btn-sm btn-info"><i class="fas fa-file-pdf"></i></a>`;
                                 }
+                                temButtons += `
+                                <div class="btn-group">
+                                    <button type="button" title="Mostrar más opciones" class="btn btn-sm btn-ligth dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item editar-guia" data-guia="${data}" href="#"><i class="fas fa-pen text-primary"></i> Editar</a>
+                                    `;
                                 if (full.guia_tipo != "ANULADA") {
-                                    temButtons += `<button data-toggle="tooltip" title="Anular guia" data-guia="${data}" class="btn btn-sm btn-danger delete-guia"><i class="fas fa-trash-alt"></i></button>`;
+                                    temButtons += `<a class="dropdown-item factura-sunat" data-guia="${data}" href="#"><i class="fas fa-file text-info"></i> Generar SUNAT</a><a class="dropdown-item delete-guia" data-guia="${data}" href="#"><i class="fas fa-trash-alt text-danger"></i> Anular</a>`;
                                 }
-                                temButtons += "</div>";
+                                temButtons += "</div></div></div>";
 
                                 return temButtons;
                             },
@@ -1266,12 +1278,12 @@ function loadPage() {
                                 let datos = new FormData();
                                 datos.append(
                                     "id_guia",
-                                    $(this).attr("data-guia")
+                                    $(this).attr("data-guia"),
                                 );
                                 datos.append("id_cluster", $(this).val());
                                 let response = await general.funcfetch(
                                     "cambiar-cluster",
-                                    datos
+                                    datos,
                                 );
                                 if (response.error) {
                                     alertify.alert("Error", response.error);
@@ -1289,32 +1301,32 @@ function loadPage() {
                                     let datos = new FormData();
                                     datos.append(
                                         "id_guia",
-                                        event.target.dataset.guia
+                                        event.target.dataset.guia,
                                     );
                                     datos.append("id_user", $(this).val());
                                     let response = await general.funcfetch(
                                         "asignar-personal",
-                                        datos
+                                        datos,
                                     );
                                     if (response.error) {
                                         alertify.alert(
                                             "Mensaje",
-                                            response.error
+                                            response.error,
                                         );
                                         return;
                                     }
                                     document.getElementById(
-                                        "total-por-procesar-guias"
+                                        "total-por-procesar-guias",
                                     ).textContent = response.procesar;
                                     alertify.success(response.success);
-                                }
+                                },
                             );
                         }
                         if (tabla.children[11].style.display == "none") {
                             $(".cb-estado-change").off("change");
                             $(".cb-estado-change").attr(
                                 "data-responsive",
-                                "true"
+                                "true",
                             );
                             $(".cb-estado-change").on(
                                 "change",
@@ -1322,22 +1334,22 @@ function loadPage() {
                                     let datos = new FormData();
                                     datos.append(
                                         "id_guia",
-                                        $(this).attr("data-guia")
+                                        $(this).attr("data-guia"),
                                     );
                                     datos.append("estado", $(this).val());
                                     let response = await general.funcfetch(
                                         "cambiar-estado",
-                                        datos
+                                        datos,
                                     );
                                     if (response.error) {
                                         alertify.alert("Error", response.error);
                                         return;
                                     }
                                     alertify.success(response.success);
-                                }
+                                },
                             );
                         }
-                    }
+                    },
                 );
                 tablaGuias.on("draw.dt", function () {
                     $(".cb-usuarios")
@@ -1352,14 +1364,14 @@ function loadPage() {
                             datos.append("id_user", $(this).val());
                             let response = await general.funcfetch(
                                 "asignar-personal",
-                                datos
+                                datos,
                             );
                             if (response.error) {
                                 alertify.alert("Mensaje", response.error);
                                 return;
                             }
                             document.getElementById(
-                                "total-por-procesar-guias"
+                                "total-por-procesar-guias",
                             ).textContent = response.procesar;
                             alertify.success(response.success);
                         });
@@ -1375,7 +1387,7 @@ function loadPage() {
                             datos.append("id_cluster", $(this).val());
                             let response = await general.funcfetch(
                                 "cambiar-cluster",
-                                datos
+                                datos,
                             );
                             if (response.error) {
                                 alertify.alert("Error", response.error);
@@ -1395,7 +1407,7 @@ function loadPage() {
                             datos.append("estado", $(this).val());
                             let response = await general.funcfetch(
                                 "cambiar-estado",
-                                datos
+                                datos,
                             );
                             if (response.error) {
                                 alertify.alert("Error", response.error);
@@ -1429,10 +1441,10 @@ function loadPage() {
                             $(".cb-estado-change").off("change");
                             $(".cb-estado-change").attr(
                                 "data-responsive",
-                                "false"
+                                "false",
                             );
                         }
-                    }
+                    },
                 );
             } else {
                 tablaGuias.draw();
@@ -1453,10 +1465,142 @@ function loadPage() {
                     $("#id_fecha_fin").val() +
                     "/" +
                     $("#estado_guias").val(),
-                "_blank"
+                "_blank",
             );
         });
     }
+    //FACTURACION SUNAT
+    const $btnSeleccionRemitente = document.getElementById(
+        "btn-seleccion-remitente",
+    );
+    const $btnSeleccionTransportista = document.getElementById(
+        "btn-seleccion-transportista",
+    );
+    const $formTransportista = document.getElementById(
+        "guia-transportista-form",
+    );
+    const $formGuiaRemitente = document.getElementById("guia-remitente-form");
+
+    $formTransportista.onsubmit = async (event) => {
+        event.preventDefault();
+        let data = new FormData($formTransportista);
+        data.append("guia", datosGlobales.idGuia);
+        data.append("return_guia", false);
+        general.generarComprobanteFetch("guia-remision-transportista", data);
+    };
+    $formGuiaRemitente.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        let data = new FormData($formGuiaRemitente);
+        data.append("guia", idGuia);
+        data.append("return_guia", false);
+        general.generarComprobanteFetch("guia-remision-remitente", data);
+    });
+    $btnSeleccionRemitente.onclick = async (event) => {
+        const data = await consultaSunatForm(datosGlobales.idGuia);
+        datosFormularioLlenar(data, "");
+        llenarDetaalesGuias(
+            data.detalles,
+            data.tot_kg,
+            "items-guia-remitente",
+            "txt-bulto-remi-total-kg",
+        );
+        toogleModalesGuias("#guia-remitente", "#seleccion-comprobantes");
+    };
+    const colocarComprobantes = function (idCbComprobante, comprobantes) {
+        $(idCbComprobante).empty();
+        comprobantes.forEach((comprobante) => {
+            $(idCbComprobante).append(
+                new Option(comprobante, comprobante, true, true),
+            );
+        });
+        $(idCbComprobante).val(comprobantes).trigger("change");
+    };
+    const llenarObservacionesGuiaTransportista = (detalles) => {
+        let template = "";
+        detalles.forEach((detalle, index) => {
+            template += `${detalle.cantidad} ${detalle.embase_embalaje} - ${detalle.kg} Kg - ${detalle.largo} Lar., ${detalle.ancho} Anc., ${detalle.altura} Alt\n`;
+        });
+        document.querySelector(
+            "#guia-transportista-form #txt-observaciones",
+        ).value = template;
+    };
+    $btnSeleccionTransportista.onclick = async (event) => {
+        const data = await consultaSunatForm(datosGlobales.idGuia);
+        const comprobantes = data.nro_comp_cli?.split(";") || [];
+        colocarComprobantes("#cb-comprobantes-transportista", comprobantes);
+        datosFormularioLlenar(data, "trans");
+        llenarDetaalesGuias(
+            data.detalles,
+            data.tot_kg,
+            "items-guia-transportista",
+            "txt-bulto-trans-total-kg",
+        );
+        toogleModalesGuias("#guia-transportista", "#seleccion-comprobantes");
+        llenarObservacionesGuiaTransportista(data.detalles);
+    };
+    const toogleModalesGuias = (modalMostrar, modalOcultar) => {
+        $(modalOcultar).modal("hide");
+        setTimeout(() => {
+            $(modalMostrar).modal("show");
+        }, 500);
+    };
+    const llenarDetaalesGuias = (
+        detalles,
+        totalBulto,
+        $tbody,
+        $totalBultos,
+    ) => {
+        let template = "";
+        detalles.forEach((detalle, index) => {
+            const detalleStr = `${detalle.grupo_envio} - ${detalle.tipo_envio.tipo_envio}`;
+            const unit = general.findUnitOfMeasureSUNAT(
+                detalle.embase_embalaje,
+            );
+            template += `<tr>
+                <td>${index + 1}</td>
+                <td>${
+                    detalle.descripcion
+                        ? detalleStr + " - " + detalle.descripcion
+                        : detalleStr
+                }</td>
+                <td>${detalle.cantidad}</td>
+                <td>${
+                    unit ? unit.unit : general.defaultUnitMeasureSUNAT.unit
+                }</td>
+            </tr>`;
+        });
+        document.getElementById($tbody).innerHTML = template;
+        document.getElementById($totalBultos).value = totalBulto;
+    };
+    const consultaSunatForm = async (guia) => {
+        return fetch(`/intranet/comprobante/guias/consulta/${guia}`)
+            .then((response) => response.json())
+            .catch((error) => error.message);
+    };
+    const datosFormularioLlenar = (dataDB, id) => {
+        const data = {
+            "txt-fecha-emision": dataDB.fech_emis,
+            "txt-fecha-traslado": dataDB.fech_tras,
+            "txt-emi-tipo-doc": dataDB.remi_tipo_docu,
+            "txt-emi-num-doc": dataDB.remi_nro_docu,
+            "txt-partida": dataDB.remi_dire,
+            "txt-dest-razon-social": dataDB.destinatario.nombres,
+            "txt-emi-razon-social": dataDB.remitente_nombre,
+            "txt-dest-tipo-doc": dataDB.dest_tipo_docu,
+            "txt-dest-num-doc": dataDB.dest_nro_docu,
+            "txt-llegada": dataDB.dest_dire,
+        };
+        for (const key in data) {
+            if (!Object.hasOwn(data, key)) continue;
+            const element = !id
+                ? document.getElementById(key)
+                : document.getElementById(key + "-" + id);
+            if (!element) {
+                continue;
+            }
+            element.value = data[key];
+        }
+    };
 }
 
 function calcVolumen(event) {
@@ -1482,7 +1626,7 @@ function calcTotal(event, num, dom) {
     for (let i = 0; i < filaTotal.children.length; i++) {
         const isFloat =
             filaTotal.children[i].children[num].children[0].getAttribute(
-                "step"
+                "step",
             ) == "0.01"
                 ? true
                 : false;

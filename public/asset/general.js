@@ -1237,6 +1237,49 @@ class General {
             checkbox.checked = seleccionado;
         })
     }
+    colocarDatosInputCB(event) {
+        const opcionSelccionada = event.target.selectedOptions[0];
+        const $selectores = event.target.dataset.input.split(",");
+        const values = event.target.dataset.value.split(",");
+        $selectores.forEach((selector, key) => {
+            document.querySelector(selector).value =
+                opcionSelccionada.dataset[values[key]];
+        });
+    }
+    generarComprobanteFetch = (url, data) => {
+        $(this.$loader).show();
+        fetch("/intranet/facturacion-sunat/" + url, {
+            method: "POST",
+            body: data,
+            headers: {
+                "X-CSRF-TOKEN": document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute("content"),
+                "X-Requested-With": "XMLHttpRequest",
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.errors) {
+                    throw new Error(data.errors);
+                }
+                window.open(
+                    `/storage/documentos/${data.serie_cpe}-${data.correlativo_cpe}.pdf`,
+                    "_target",
+                );
+                alertify.alert(
+                    "Mensaje",
+                    "Comprobante generado correctamente",
+                    () => window.location.reload(),
+                );
+            })
+            .catch((error) => {
+                console.log(error.message);
+                console.error(error);
+                alertify.alert("Error", error.message);
+            })
+            .finally(() => $(this.$loader).hide());
+    };
     selectOneCheckbox($contenidoCheckbox,$checkboxAll){
         const checkboxes = $contenidoCheckbox.querySelectorAll('input[type="checkbox"]');
         const checkboxesSelect = $contenidoCheckbox.querySelectorAll('input[type="checkbox"]:checked');

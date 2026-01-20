@@ -98,4 +98,7 @@
 @include('modal.detalleguiatodos')
 @include('modal.editarguia')
 @include('modal.asignarPersonalMasivoGuia')
+@include('comprobante.modales.seleccion-guias')
+@include('comprobante.modales.guia-remitente')
+@include('comprobante.modales.guia-transportista')
 @endsection
