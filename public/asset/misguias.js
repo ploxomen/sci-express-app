@@ -1483,6 +1483,11 @@ function loadPage() {
 
     $formTransportista.onsubmit = async (event) => {
         event.preventDefault();
+        const continuar = await general.alertifyConfirmPromise(
+            "Alerta",
+            "Al continuar se emitirá una guía remisión transportista en SUNAT<br>¿Deseas continuar?",
+        );
+        if (!continuar) return null;
         let data = new FormData($formTransportista);
         data.append("guia", datosGlobales.idGuia);
         data.append("return_guia", false);
@@ -1490,6 +1495,11 @@ function loadPage() {
     };
     $formGuiaRemitente.addEventListener("submit", async function (e) {
         e.preventDefault();
+        const continuar = await general.alertifyConfirmPromise(
+            "Alerta",
+            "Al continuar se emitirá una guía remisión remitente en SUNAT<br>¿Deseas continuar?",
+        );
+        if (!continuar) return null;
         let data = new FormData($formGuiaRemitente);
         data.append("guia", idGuia);
         data.append("return_guia", false);
