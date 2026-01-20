@@ -19,7 +19,7 @@ function pageLoaded() {
             general.validarSeleccionComprobantes(
                 $(this).val(),
                 "#id_comp_clie",
-                "#id_nro_comp_cli"
+                "#id_nro_comp_cli",
             );
         });
     $("#id_nro_comp_cli").select2({
@@ -59,7 +59,7 @@ function pageLoaded() {
                         v.maxlength,
                         v.pattern,
                         v.label,
-                        v.requiredDataClient
+                        v.requiredDataClient,
                     );
                 }
             });
@@ -68,7 +68,7 @@ function pageLoaded() {
     $("#id_dest_dist").on("select2:select", async function (e) {
         general.getCiudadesFinales(
             $(this).val(),
-            $(this).attr("data-ciudades")
+            $(this).attr("data-ciudades"),
         );
     });
     $("#id_nro_comp_cli").on("change.select2", function (e) {
@@ -83,7 +83,7 @@ function pageLoaded() {
                 $("#id_estado").val() === "1"
             ) {
                 alertify.error(
-                    "la guía activa debe de tener al menos un detalle"
+                    "la guía activa debe de tener al menos un detalle",
                 );
                 return;
             }
@@ -117,7 +117,7 @@ function pageLoaded() {
             "#id_remi_dist",
             "#id_remi_depa",
             "#id_remi_tipo_docu",
-            "#id-invitado-remitente"
+            "#id-invitado-remitente",
         );
         navDetalleEnvios = window.detallesEnvios;
         navegacionEnvases.hidden = !navDetalleEnvios.length;
@@ -159,7 +159,7 @@ function pageLoaded() {
     tableDetalleGuia.onclick = (e) => {
         if (e.target.classList.contains("sort-icon")) {
             const indice = Array.from(tableDetalleGuia.children).indexOf(
-                e.target.closest("tr")
+                e.target.closest("tr"),
             );
             if (
                 indicesNavegaciones[indice] >= 0 &&
@@ -172,8 +172,8 @@ function pageLoaded() {
                     valor < 0
                         ? 0
                         : valor >= navDetalleEnvios.length
-                        ? navDetalleEnvios.length - 1
-                        : valor;
+                          ? navDetalleEnvios.length - 1
+                          : valor;
             }
             e.target
                 .closest(".sort-buttons")
@@ -190,7 +190,7 @@ function pageLoaded() {
             if (navDetalleEnvios[indicesNavegaciones[indice]]) {
                 navegarValores(
                     tableDetalleGuia.children[indice],
-                    navDetalleEnvios[indicesNavegaciones[indice]]
+                    navDetalleEnvios[indicesNavegaciones[indice]],
                 );
             }
         }
@@ -241,28 +241,28 @@ function pageLoaded() {
             datos.append(
                 "ciudad_alejada",
                 document.getElementById("id-tipo-complejo-distante").dataset
-                    .tipo
+                    .tipo,
             );
         }
         datos.append(
             "nro_comp_cli",
-            [...new Set(comprobantesAgregados.series)].join(";")
+            [...new Set(comprobantesAgregados.series)].join(";"),
         );
         datos.append(
             "comp_clie",
-            [...new Set(comprobantesAgregados.tipos)].join(";")
+            [...new Set(comprobantesAgregados.tipos)].join(";"),
         );
         datos.append("id_cliente_facturacion", idCliente);
         datos.append("tipo_guia", tipoCbRemi);
         datos.append(
             "comprobantes_general",
-            JSON.stringify(comprobantesGenerales)
+            JSON.stringify(comprobantesGenerales),
         );
 
         return datos;
     };
     const $formTransportista = document.getElementById(
-        "guia-transportista-form"
+        "guia-transportista-form",
     );
     const generarComprobanteFetch = (url, data) => {
         $(general.$loader).show();
@@ -283,12 +283,12 @@ function pageLoaded() {
                 }
                 window.open(
                     `/storage/documentos/${data.serie_cpe}-${data.correlativo_cpe}.pdf`,
-                    "_target"
+                    "_target",
                 );
                 alertify.alert(
                     "Mensaje",
                     "Comprobante generado correctamente",
-                    () => window.location.reload()
+                    () => window.location.reload(),
                 );
             })
             .catch((error) => {
@@ -333,13 +333,13 @@ function pageLoaded() {
             "Alerta",
             "Al continuar se generará una nueva " +
                 textOs +
-                ".<br>¿Deseas continuar?"
+                ".<br>¿Deseas continuar?",
         );
         if (!continuar) return null;
         if (newCliCli) {
             const guardarCliente = await general.alertifyConfirmPromise(
                 "Mensaje",
-                "Se ha detectado un nuevo cliente.<br>¿Deseas guardarlo?"
+                "Se ha detectado un nuevo cliente.<br>¿Deseas guardarlo?",
             );
             datos.append("add_cli_bool", guardarCliente);
             if (guardarCliente) {
@@ -384,22 +384,22 @@ function pageLoaded() {
         cbRelacion.addEventListener("change", colocarDatosInputCB);
     }
     for (const cbRadioTipoMod of document.querySelectorAll(
-        ".cambio-mod-traslado"
+        ".cambio-mod-traslado",
     )) {
         cbRadioTipoMod.addEventListener("change", modTrasladoDOM);
     }
     const $btnSeleccionRemitente = document.getElementById(
-        "btn-seleccion-remitente"
+        "btn-seleccion-remitente",
     );
     const $btnSeleccionTransportista = document.getElementById(
-        "btn-seleccion-transportista"
+        "btn-seleccion-transportista",
     );
     $btnSeleccionTransportista.onclick = (event) => {
         colocarComprobantes("#cb-comprobantes-transportista");
         datosFormularioLlenar("trans");
         llenarDetaalesGuias(
             "items-guia-transportista",
-            "bulto-total-transportista"
+            "bulto-total-transportista",
         );
         toogleModalesGuias("#guia-transportista", "#seleccion-comprobantes");
         llenarObservacionesGuiaTransportista();
@@ -444,14 +444,14 @@ function pageLoaded() {
         return detalles.reduce(
             (acumulador, elementoActual) =>
                 acumulador + parseFloat(elementoActual.kg),
-            0
+            0,
         );
     };
     const colocarComprobantes = function (idCbComprobante) {
         const comprobantes = $("#id_nro_comp_cli").val() || [];
         comprobantes.forEach((comprobante) => {
             $(idCbComprobante).append(
-                new Option(comprobante, comprobante, true, true)
+                new Option(comprobante, comprobante, true, true),
             );
         });
         $(idCbComprobante).val(comprobantes).trigger("change");
@@ -463,17 +463,56 @@ function pageLoaded() {
             template += `${detalle.cantidad} ${detalle.embase_embalaje} - ${detalle.kg} Kg - ${detalle.largo} Lar., ${detalle.ancho} Anc., ${detalle.altura} Alt\n`;
         });
         document.querySelector(
-            "#guia-transportista-form #txt-observaciones"
+            "#guia-transportista-form #txt-observaciones",
         ).value = template;
     };
     const $formFiltroGuiasSeleccion = document.getElementById(
-        "form-filtro-seleccion"
+        "form-filtro-seleccion",
     );
     const $tableComprobanteSunat =
         document.getElementById("comprobantes-sunat");
     const $selectCheckBoxTodoSunat = document.getElementById(
-        "seleccion-todos-comprobantes"
+        "seleccion-todos-comprobantes",
     );
+    const $btnSeleccionarGuias = document.getElementById(
+        "seleccion-guias-procesar",
+    );
+    $btnSeleccionarGuias.onclick = (event) => {
+        const checkboxesSelect = $tableComprobanteSunat.querySelectorAll(
+            'input[type="checkbox"]:checked',
+        );
+        comprobantesAgregados.tipos = [];
+        comprobantesAgregados.series = [];
+        comprobantesGenerales = [];
+        if (!checkboxesSelect.length) {
+            alertify.success('comprobantes desmarcados correctamente')
+            return llenarComprobantes();
+        }
+        const formData = new FormData();
+        checkboxesSelect.forEach(checkbox => {
+            formData.append('guias[]',checkbox.value);
+        })
+        fetch(`/intranet/comprobante/guias/seleccionadas?${new URLSearchParams(formData).toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            comprobantesAgregados.tipos = data.tipos;
+            comprobantesAgregados.series = data.series;
+            llenarComprobantes();
+            alertify.success('comprobantes seleccionados correctamente')
+            $('#seleccionar-comprobantes').modal('hide');
+        }).catch(error => {
+            alertify.error('error al seleccionar los comprobantes')
+            console.error(error);
+        });
+    };
+    const llenarComprobantes = () => {
+        $('#id_nro_comp_cli').val([]).trigger('change');
+        comprobantesAgregados.series.forEach(function (valor) {
+            $("#id_nro_comp_cli").append(new Option(valor, valor, true, true));
+        });
+        $("#id_comp_clie").val(comprobantesAgregados.tipos).trigger("change");
+        $("#id_cant_comp").val(comprobantesAgregados.series.length);
+    };
     $formFiltroGuiasSeleccion.onsubmit = (event) => {
         event.preventDefault();
         comprobantesSeleccion();
@@ -481,17 +520,19 @@ function pageLoaded() {
     $selectCheckBoxTodoSunat.onchange = (event) =>
         general.selectAllCheckbox($tableComprobanteSunat, event.target.checked);
     $tableComprobanteSunat.onclick = (event) => {
-        console.log(event.target);
         if (event.target.type === "checkbox") {
-            general.selectOneCheckbox($tableComprobanteSunat,$selectCheckBoxTodoSunat);
+            general.selectOneCheckbox(
+                $tableComprobanteSunat,
+                $selectCheckBoxTodoSunat,
+            );
         }
     };
     const comprobantesSeleccion = () => {
         const formData = new FormData($formFiltroGuiasSeleccion);
         fetch(
             `/intranet/comprobante/guias/seleccion?${new URLSearchParams(
-                formData
-            ).toString()}`
+                formData,
+            ).toString()}`,
         )
             .then((response) => response.text())
             .then((data) => {
@@ -504,7 +545,7 @@ function pageLoaded() {
         detalles.forEach((detalle, index) => {
             const detalleStr = `${detalle.grupo_envio} - ${detalle.tipo_envio_text}`;
             const unit = general.findUnitOfMeasureSUNAT(
-                detalle.embase_embalaje
+                detalle.embase_embalaje,
             );
             template += `<tr>
                 <td>${index + 1}</td>
@@ -542,7 +583,7 @@ function pageLoaded() {
             "#id_dest_depa",
             "#id_dest_prov",
             "#id_dias_tran",
-            "#id_via_envi"
+            "#id_via_envi",
         );
         const distrito =
             $(this).attr("data-cli-cli") == "distrito"
@@ -554,7 +595,7 @@ function pageLoaded() {
             distrito,
             tipo,
             "#box-complejo-distante",
-            tipo == "ciudad" ? $(this).val() : null
+            tipo == "ciudad" ? $(this).val() : null,
         );
     });
     async function addGuia(datos, reload) {
@@ -594,7 +635,7 @@ function pageLoaded() {
                     tableDetalleGuia.children[
                         tableDetalleGuia.children.length - 1
                     ],
-                    navDetalleEnvios[0]
+                    navDetalleEnvios[0],
                 );
             }
         });
@@ -610,11 +651,11 @@ function pageLoaded() {
             "#id_dias_tran",
             "#id_via_envi",
             "#box-complejo-distante",
-            0
+            0,
         );
     });
     const btnAgregarComprobante = document.querySelector(
-        "#btn-agregar-comprobantes"
+        "#btn-agregar-comprobantes",
     );
     const contenidoComprobantes = document.querySelector("#lista-comprobantes");
     const guardarComprobantes = document.querySelector("#guardar-comprobantes");
@@ -650,7 +691,7 @@ function pageLoaded() {
         comprobantesGenerales = [];
         for (const element of contenidoComprobantes.children) {
             comprobantesAgregados.tipos.push(
-                element.querySelector('[data-type="comprobante"]').value
+                element.querySelector('[data-type="comprobante"]').value,
             );
             if (
                 element.querySelector('[data-type="comprobante"]').value ===
@@ -664,17 +705,13 @@ function pageLoaded() {
             });
             comprobantesAgregados.series.push(
                 `${valoresComprobantes(
-                    element.querySelector('[data-type="comprobante"]').value
+                    element.querySelector('[data-type="comprobante"]').value,
                 )}/${element.querySelector('[data-type="serie"]').value}-${
                     element.querySelector('[data-type="numero"]').value
-                }`
+                }`,
             );
         }
-        comprobantesAgregados.series.forEach(function (valor) {
-            $("#id_nro_comp_cli").append(new Option(valor, valor, true, true));
-        });
-        $("#id_comp_clie").val(comprobantesAgregados.tipos).trigger("change");
-        $("#id_cant_comp").val(comprobantesAgregados.series.length);
+        llenarComprobantes();
         $("#agregar-comprobantes").modal("hide");
     };
     contenidoComprobantes.onclick = function (e) {
@@ -682,7 +719,7 @@ function pageLoaded() {
             if (contenidoComprobantes.children.length === 1) {
                 return alertify.alert(
                     "Mensaje",
-                    "Como mínimo debe haber un comprobante"
+                    "Como mínimo debe haber un comprobante",
                 );
             }
             e.target.closest("li").remove();
@@ -699,7 +736,7 @@ function pageLoaded() {
         }
         contenidoComprobantes.append(liCopia);
         for (const element of contenidoComprobantes.querySelectorAll(
-            "select"
+            "select",
         )) {
             $(element).select2({
                 theme: "bootstrap",
@@ -732,7 +769,7 @@ function pageLoaded() {
     }
     $("#agregar-comprobantes [data-type='comprobante']").on(
         "select2:select",
-        generarSeries
+        generarSeries,
     );
 }
 function calcVolumen(event) {
@@ -758,7 +795,7 @@ function calcTotal(event, num, dom) {
     for (let i = 0; i < filaTotal.children.length; i++) {
         isFloat =
             filaTotal.children[i].children[num].children[0].getAttribute(
-                "step"
+                "step",
             ) == "0.01"
                 ? true
                 : false;

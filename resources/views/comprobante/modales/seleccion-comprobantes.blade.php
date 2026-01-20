@@ -43,9 +43,9 @@
                                         <label class="custom-control-label" for="seleccion-todos-comprobantes"></label>
                                     </div>
                                 </th>
-                                <th>N° de Guía</th>
+                                <th>N° de Guía (SCI)</th>
                                 <th>Fecha Emisión</th>
-                                <th>N° comprobante</th>
+                                <th>N° comprobante (SUNAT)</th>
                             </tr>
                         </thead>
                         <tbody id="comprobantes-sunat">
@@ -55,7 +55,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary" form="guia-transportista-form">Seleccionar</button>
+                <button type="submit" class="btn btn-primary" id="seleccion-guias-procesar">Seleccionar</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
             </div>
         </div>

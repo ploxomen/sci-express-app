@@ -29,7 +29,7 @@ class Gias extends Controller
     public function viewGuias()
     {
         $modulos = User::getModulos(Auth::id());
-        $ciudades = ModeloCluster::obtenerCiudadesBase(null,true)->sortBy('nombre_ciudad');
+        $ciudades = ModeloCluster::obtenerCiudadesBase(null, true)->sortBy('nombre_ciudad');
         $via_envios = InformacionAdicional::viaEnvio();
         $tipo_documentos = Documentos::where('estado', '1')->get();
         $departamentos = (new Ubigeo)->getDepartamentosClientes();
@@ -48,7 +48,7 @@ class Gias extends Controller
         $empresasTransporte = EmpresaTransporte::obtenerTransportes();
         $vehiculos = Vehiculos::obtenerVehiculos();
         $conductores = User::obtenerTiposUsuarios(User::ROL_DRIVER);
-        return view('comprobante.guias', compact('nro_guia_result', 'cli_cli', 'clientes', 'departamentos', 'hoy', 'trayecto', 'via_envios', 'nro_os', 'tipo_documentos', 'modulos', 'antes','ciudades', 'embaseEmbalaje', 'grupoEnvio', 'tipoEnvios','comprobantes','conductores','vehiculos','empresasTransporte'));
+        return view('comprobante.guias', compact('nro_guia_result', 'cli_cli', 'clientes', 'departamentos', 'hoy', 'trayecto', 'via_envios', 'nro_os', 'tipo_documentos', 'modulos', 'antes', 'ciudades', 'embaseEmbalaje', 'grupoEnvio', 'tipoEnvios', 'comprobantes', 'conductores', 'vehiculos', 'empresasTransporte'));
     }
     public function generarNroGuiaSCI()
     {
@@ -71,13 +71,30 @@ class Gias extends Controller
         }
         return ['nroOS' => $nro_os, 'nroGuia' => $nro_guia_result];
     }
+    public function comprobantesClientes(Request $request)
+    {
+        $guias = $request->input('guias', []);
+        $guiasDB = ModeloGuias::query()->whereIn('id', $guias)->get();
+        $tipos = $guiasDB->flatMap(
+            fn($item) =>
+            explode(';', $item->comp_clie)
+        )->filter()->unique()->values();
+        $series = $guiasDB->flatMap(
+            fn($item) =>
+            explode(';', $item->nro_comp_cli)
+        )->filter()->unique()->values();
+        return response()->json([
+            'tipos' => $tipos,
+            'series' => $series
+        ]);
+    }
     public function guiasSeleccionadas(Request $request)
     {
         $fechaInicio = $request->input('fecha_inicio', null);
-        $fechaFin = $request->input('fecha_fin',null);
+        $fechaFin = $request->input('fecha_fin', null);
         $ciudadBase = $request->input(key: 'ciudad_base');
-        $guias = ModeloGuias::guiasRangoFechas($fechaInicio,$fechaFin,$ciudadBase);
-        return view('comprobante.components.tabla-seleccion-guias',compact('guias'));
+        $guias = ModeloGuias::guiasRangoFechas($fechaInicio, $fechaFin, $ciudadBase);
+        return view('comprobante.components.tabla-seleccion-guias', compact('guias'));
     }
     public function modificacionPreGuias(Request $request)
     {
@@ -213,9 +230,9 @@ class Gias extends Controller
                         return datatables()->of(ModeloGuias::mostrarRetornoGuias($request->tipo, $id_usuario))->toJson();
                         break;
                     case 'mostrar-retorno':
-                        $retornoCargo = RetornoCargo::with('imagenes')->select(['fch_emba', 'id_empr_tran', 'tipo_comprobantes', 'nro_guias', 'importe_embarque', 'fecha_llegada', 'hr_llegada', 'nro_cajas', 'nro_jabas','total_bultos', 'nro_cajones', 'nro_sobres', 'nro_paquetes', 'num_otros', 'detalle_otro', 'id'])->find($request->id);
+                        $retornoCargo = RetornoCargo::with('imagenes')->select(['fch_emba', 'id_empr_tran', 'tipo_comprobantes', 'nro_guias', 'importe_embarque', 'fecha_llegada', 'hr_llegada', 'nro_cajas', 'nro_jabas', 'total_bultos', 'nro_cajones', 'nro_sobres', 'nro_paquetes', 'num_otros', 'detalle_otro', 'id'])->find($request->id);
                         $guias = $retornoCargo->detalleGuias()->pluck('id_guia')->toArray();
-                        $retornoCargo->guias = ModeloGuias::guias()->select('guias.id','prefijo','tipo_guia','nro_guia','remi_nro_docu','dest_nro_docu','nomb_prov','nom_cli','clientes_de_clientes.nombres AS destinatario')->whereIn('guias.id',$guias)->get();
+                        $retornoCargo->guias = ModeloGuias::guias()->select('guias.id', 'prefijo', 'tipo_guia', 'nro_guia', 'remi_nro_docu', 'dest_nro_docu', 'nomb_prov', 'nom_cli', 'clientes_de_clientes.nombres AS destinatario')->whereIn('guias.id', $guias)->get();
                         return $retornoCargo;
                         break;
                     case 'mostrar-guias-programar':
@@ -419,15 +436,15 @@ class Gias extends Controller
     public function addGuia(Request $request)
     {
         try {
-            if($request->has('comprobantes_general')){
+            if ($request->has('comprobantes_general')) {
                 $comprobantes = json_decode($request->comprobantes_general);
                 foreach ($comprobantes as $comprobante) {
-                    $existeComprobante = ComprobantesGuias::where('comprobante',$comprobante->tipo)->where('serie','LIKE','%'. $comprobante->serie.'%')->exists();
-                    if($existeComprobante){
+                    $existeComprobante = ComprobantesGuias::where('comprobante', $comprobante->tipo)->where('serie', 'LIKE', '%' . $comprobante->serie . '%')->exists();
+                    if ($existeComprobante) {
                         continue;
                     }
-                    $comprobanteDB = ComprobantesGuias::where('comprobante',$comprobante->tipo)->first();
-                    ComprobantesGuias::where('comprobante',$comprobante->tipo)->update([
+                    $comprobanteDB = ComprobantesGuias::where('comprobante', $comprobante->tipo)->first();
+                    ComprobantesGuias::where('comprobante', $comprobante->tipo)->update([
                         'serie' => $comprobanteDB->serie . ";" . $comprobante->serie
                     ]);
                 }
