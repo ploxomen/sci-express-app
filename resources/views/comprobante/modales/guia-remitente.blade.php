@@ -170,9 +170,9 @@
                             </table>
                         </div>
                     </div>
-                    <div class="col-12 text-right">
-                        <span class="text-blue-500">Bultos totales (KG)</span>
-                        <span class="text-black !text-base" id="bulto-total-remitente"></span>
+                    <div class="col-12 flex justify-content-end gap-2 align-items-center">
+                        <label for="txt-bulto-remi-total-kg">Bultos totales (KG)</label>
+                        <input type="text" class="form-control form-control-sm max-w-20" name="bulto_total_kg" id="txt-bulto-remi-total-kg">
                     </div>
                 </form>
             </div>

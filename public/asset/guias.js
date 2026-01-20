@@ -7,6 +7,7 @@ function pageLoaded() {
         tipos: [],
         series: [],
     };
+    let kilosTotalesInactiva = 0;
     let comprobantesGenerales = [];
     const tableDetalleGuia = document.getElementById("tabla-detalle");
     const $cbCliente = document.getElementById("id_remi_nomb");
@@ -394,19 +395,31 @@ function pageLoaded() {
     const $btnSeleccionTransportista = document.getElementById(
         "btn-seleccion-transportista",
     );
+    $('#guia-transportista').on('hidden.bs.modal', function (event) {
+        limpiarFormularioGuiasSunat($formTransportista,document.getElementById('cb-comprobantes-transportista'))
+    });
+    $('#guia-remitente').on('hidden.bs.modal', function (event) {
+        limpiarFormularioGuiasSunat($formGuiaRemitente, null)
+    });
+    const limpiarFormularioGuiasSunat = ($formulario,$comprobantes) => {
+        $formulario.reset();
+        if($comprobantes instanceof HTMLElement){
+            $($comprobantes).empty();
+        }
+    }
     $btnSeleccionTransportista.onclick = (event) => {
         colocarComprobantes("#cb-comprobantes-transportista");
         datosFormularioLlenar("trans");
         llenarDetaalesGuias(
             "items-guia-transportista",
-            "bulto-total-transportista",
+            "txt-bulto-trans-total-kg",
         );
         toogleModalesGuias("#guia-transportista", "#seleccion-comprobantes");
         llenarObservacionesGuiaTransportista();
     };
     $btnSeleccionRemitente.onclick = (event) => {
         datosFormularioLlenar("");
-        llenarDetaalesGuias("items-guia-remitente", "bulto-total-remitente");
+        llenarDetaalesGuias("items-guia-remitente", "txt-bulto-total-remi-kg");
         toogleModalesGuias("#guia-remitente", "#seleccion-comprobantes");
     };
     const datosFormularioLlenar = (id) => {
@@ -440,6 +453,7 @@ function pageLoaded() {
         }
     };
     const totalBultoKG = () => {
+        if ($("#id_estado").val() === "3") return kilosTotalesInactiva;
         const detalles = obtenerDatosDetalle();
         return detalles.reduce(
             (acumulador, elementoActual) =>
@@ -448,6 +462,7 @@ function pageLoaded() {
         );
     };
     const colocarComprobantes = function (idCbComprobante) {
+        $(idCbComprobante).empty();
         const comprobantes = $("#id_nro_comp_cli").val() || [];
         comprobantes.forEach((comprobante) => {
             $(idCbComprobante).append(
@@ -484,6 +499,7 @@ function pageLoaded() {
         comprobantesAgregados.tipos = [];
         comprobantesAgregados.series = [];
         comprobantesGenerales = [];
+        kilosTotalesInactiva = 0;
         if (!checkboxesSelect.length) {
             alertify.success('comprobantes desmarcados correctamente')
             return llenarComprobantes();
@@ -497,6 +513,7 @@ function pageLoaded() {
         .then(data => {
             comprobantesAgregados.tipos = data.tipos;
             comprobantesAgregados.series = data.series;
+            kilosTotalesInactiva = data.kilos;
             llenarComprobantes();
             alertify.success('comprobantes seleccionados correctamente')
             $('#seleccionar-comprobantes').modal('hide');
@@ -561,7 +578,7 @@ function pageLoaded() {
             </tr>`;
         });
         document.getElementById(tbody).innerHTML = template;
-        document.getElementById(totalBultos).textContent = totalBultoKG();
+        document.getElementById(totalBultos).value = totalBultoKG();
     };
     const toogleModalesGuias = (modalMostrar, modalOcultar) => {
         $(modalOcultar).modal("hide");

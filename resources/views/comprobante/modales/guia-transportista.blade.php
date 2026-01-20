@@ -45,8 +45,8 @@
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-3">
                         <label for="txt-emi-tipo-doc-trans">Tipo Documento</label>
-                        <select name="emi_tipo_doc" class="form-control form-control-sm" id="txt-emi-tipo-doc-trans" disabled
-                            required>
+                        <select name="emi_tipo_doc" class="form-control form-control-sm" id="txt-emi-tipo-doc-trans"
+                            disabled required>
                             @foreach ($tipo_documentos as $tipo_docu)
                                 <option value="{{ $tipo_docu->id }}">{{ $tipo_docu->tipo }}</option>
                             @endforeach
@@ -64,8 +64,8 @@
                     </div>
                     <div class="form-group col-12">
                         <label for="txt-partida-trans">Punto partida</label>
-                        <input type="text" name="punto_partida" class="form-control form-control-sm" id="txt-partida-trans"
-                            required>
+                        <input type="text" name="punto_partida" class="form-control form-control-sm"
+                            id="txt-partida-trans" required>
                     </div>
                     <div class="col-12">
                         <span class="!text-sm text-blue-500 !font-semibold">Datos del destinatario</span>
@@ -91,64 +91,69 @@
                     </div>
                     <div class="form-group col-12">
                         <label for="txt-llegada-trans">Punto llegada</label>
-                        <input type="text" name="punto_llegada" class="form-control form-control-sm" id="txt-llegada-trans"
-                            required>
+                        <input type="text" name="punto_llegada" class="form-control form-control-sm"
+                            id="txt-llegada-trans" required>
                     </div>
                     <div class="col-12">
                         <span class="!text-sm text-blue-500 !font-semibold">Vehículo principal</span>
                     </div>
                     <div class="form-group col-12 col-md-6">
                         <label for="cb-placa-prin">Placas</label>
-                        <select name="placa_principal" class="form-control form-control-sm cb-relacionado" data-input="#txt-tuse-principal" data-value="tuse" id="cb-placa-prin"
-                            required>
+                        <select name="placa_principal" class="form-control form-control-sm cb-relacionado"
+                            data-input="#txt-tuse-principal" data-value="tuse" id="cb-placa-prin" required>
                             <option value="" hidden>Seleccione un vehículo</option>
                             @foreach ($vehiculos as $vehiculo)
-                                <option value="{{ $vehiculo->placa }}" data-tuse="{{ $vehiculo->TUSE }}">{{ $vehiculo->placa }}</option>
+                                <option value="{{ $vehiculo->placa }}" data-tuse="{{ $vehiculo->TUSE }}">
+                                    {{ $vehiculo->placa }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-4">
                         <label for="txt-tuse-principal">TUSE</label>
-                        <input type="text" required id="txt-tuse-principal"
-                            class="form-control form-control-sm" name="tuse_principal">
+                        <input type="text" required id="txt-tuse-principal" class="form-control form-control-sm"
+                            name="tuse_principal">
                     </div>
                     <div class="col-12">
                         <span class="!text-sm text-blue-500 !font-semibold">Vehículo secundario</span>
                     </div>
                     <div class="form-group col-12 col-md-6">
                         <label for="cb-placa-secun">Placas</label>
-                        <select name="placas_secun" class="form-control form-control-sm cb-relacionado" data-input="#txt-tuse-secun" data-value="tuse" id="cb-placa-secun"
-                            >
+                        <select name="placas_secun" class="form-control form-control-sm cb-relacionado"
+                            data-input="#txt-tuse-secun" data-value="tuse" id="cb-placa-secun">
                             <option value="" hidden>Seleccione un vehículo</option>
                             @foreach ($vehiculos as $vehiculo)
-                                <option value="{{ $vehiculo->placa }}" data-tuse="{{ $vehiculo->TUSE }}">{{ $vehiculo->placa }}</option>
+                                <option value="{{ $vehiculo->placa }}" data-tuse="{{ $vehiculo->TUSE }}">
+                                    {{ $vehiculo->placa }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-4">
                         <label for="txt-tuse-secun">TUSE</label>
-                        <input type="text" id="txt-tuse-secun"
-                            class="form-control form-control-sm" name="tuse_secun">
+                        <input type="text" id="txt-tuse-secun" class="form-control form-control-sm"
+                            name="tuse_secun">
                     </div>
                     <div class="col-12">
                         <span class="!text-sm text-blue-500 !font-semibold">Conductor principal</span>
                     </div>
                     <div class="form-group col-12 col-md-6">
                         <label for="cb-conductor-principal">Nombres completos</label>
-                        <select name="conductor_principal" required class="form-control form-control-sm cb-relacionado"
-                            data-input="#licencia-cond-prin,#numero-doc-cond-prin" data-value="licencia,documento" id="cb-conductor-principal">
+                        <select name="conductor_principal" required
+                            class="form-control form-control-sm cb-relacionado"
+                            data-input="#licencia-cond-prin,#numero-doc-cond-prin" data-value="licencia,documento"
+                            id="cb-conductor-principal">
                             <option value="" hidden>Seleccione un conductor</option>
                             @foreach ($conductores as $conductor)
                                 <option value="{{ $conductor->id }}"
-                                    data-licencia="{{ $conductor->driver_license }}" data-documento="{{ $conductor->n_document }}">{{ $conductor->name }}
+                                    data-licencia="{{ $conductor->driver_license }}"
+                                    data-documento="{{ $conductor->n_document }}">{{ $conductor->name }}
                                     {{ $conductor->last_name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-4">
                         <label for="numero-doc-cond-prin" id="tipo-documento-conductor-prin">N° documento</label>
-                        <input type="text" required id="numero-doc-cond-prin"
-                            class="form-control form-control-sm" name="num_doc_cond_prin">
+                        <input type="text" required id="numero-doc-cond-prin" class="form-control form-control-sm"
+                            name="num_doc_cond_prin">
                     </div>
                     <div class="form-group mod-trans-priva col-12 col-md-6 col-lg-4">
                         <label for="licencia-cond-prin">Licencia</label>
@@ -161,19 +166,21 @@
                     <div class="form-group col-12 col-md-6">
                         <label for="cb-conductor-secundario">Nombres completos</label>
                         <select name="conductor_secundario" class="form-control form-control-sm cb-relacionado"
-                            data-input="#licencia-cond-secun,#numero-doc-cond-secun" data-value="licencia,documento" id="cb-conductor-secundario">
+                            data-input="#licencia-cond-secun,#numero-doc-cond-secun" data-value="licencia,documento"
+                            id="cb-conductor-secundario">
                             <option value="" hidden>Seleccione un conductor</option>
                             @foreach ($conductores as $conductor)
                                 <option value="{{ $conductor->id }}"
-                                    data-licencia="{{ $conductor->driver_license }}" data-documento="{{ $conductor->n_document }}">{{ $conductor->name }}
+                                    data-licencia="{{ $conductor->driver_license }}"
+                                    data-documento="{{ $conductor->n_document }}">{{ $conductor->name }}
                                     {{ $conductor->last_name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-4">
                         <label for="numero-doc-cond-secun" id="tipo-documento-conductor-secun">N° documento</label>
-                        <input type="text" id="numero-doc-cond-secun"
-                            class="form-control form-control-sm" name="num_doc_cond_secun">
+                        <input type="text" id="numero-doc-cond-secun" class="form-control form-control-sm"
+                            name="num_doc_cond_secun">
                     </div>
                     <div class="form-group mod-trans-priva col-12 col-md-6 col-lg-4">
                         <label for="licencia-cond-secun">Licencia</label>
@@ -202,9 +209,9 @@
                             </table>
                         </div>
                     </div>
-                    <div class="col-12 text-right">
-                        <span class="text-blue-500">Bultos totales (KG)</span>
-                        <span class="text-black !text-base" id="bulto-total-transportista"></span>
+                    <div class="col-12 flex justify-content-end gap-2 align-items-center">
+                        <label for="txt-bulto-trans-total-kg">Bultos totales (KG)</label>
+                        <input type="text" class="form-control form-control-sm max-w-20" name="bulto_total_kg" id="txt-bulto-trans-total-kg">
                     </div>
                 </form>
             </div>

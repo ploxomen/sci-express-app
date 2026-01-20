@@ -83,9 +83,11 @@ class Gias extends Controller
             fn($item) =>
             explode(';', $item->nro_comp_cli)
         )->filter()->unique()->values();
+        $kilosTotales = $guiasDB->pluck('tot_kg')->sum();
         return response()->json([
             'tipos' => $tipos,
-            'series' => $series
+            'series' => $series,
+            'kilos' => $kilosTotales
         ]);
     }
     public function guiasSeleccionadas(Request $request)

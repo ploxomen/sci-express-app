@@ -39,7 +39,7 @@ class FacturacionSUNATController extends Controller
             'cond_prin_licencia' => $conductorPrincipal->driver_license,
             'ubigeo_remi' => $ubigeoRemitente,
             'ubigeo_dest' => $ubigeoDestinatario,
-            'tot_kg' => $guia->tot_kg,
+            'tot_kg' => $request->bulto_total_kg,
         ];
         if ($request->filled('conductor_secundario')) {
             $conductorSecundario = User::find($request->conductor_secundario);
@@ -79,7 +79,7 @@ class FacturacionSUNATController extends Controller
             'impresion' => $request->impresion,
             'ubigeo_remi' => $ubigeoRemitente,
             'ubigeo_dest' => $ubigeoDestinatario,
-            'tot_kg' => $guia->tot_kg,
+            'tot_kg' => $request->bulto_total_kg,
         ];
         //TRANSPORTE PUBLICO
         if ($request->transporte == "01") {
@@ -247,9 +247,9 @@ class FacturacionSUNATController extends Controller
         foreach ($detalles as $key => $detalle) {
             $detallePersonalizado[] = [
                 'NUM_LINEA' => $key + 1,
-                'COD_ITEM' => 'P00' . $key,
-                'COD_UND_MEDIDA_ITEM' => 'NIU',
-                'DESC_ITEM' => $detalle->descripcion,
+                'COD_ITEM' => 'P00' . ($key + 1),
+                'COD_UND_MEDIDA_ITEM' => $detalle->embase_embalaje_SUNAT ?? 'NIU',
+                'DESC_ITEM' => empty($detalle->descripcion) ? "{$detalle->grupo_envio} - {$detalle->tipoEnvio->tipo_envio}" : "{$detalle->grupo_envio} - {$detalle->tipoEnvio->tipo_envio} - {$detalle->descripcion}",
                 'CANT_ITEM' => $detalle->cantidad,
                 'PESO_ITEM' => $detalle->kg
             ];
