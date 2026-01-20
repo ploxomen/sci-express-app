@@ -1249,8 +1249,11 @@ function loadPage() {
                                     <div class="dropdown-menu">
                                         <a class="dropdown-item editar-guia" data-guia="${data}" href="#"><i class="fas fa-pen text-primary"></i> Editar</a>
                                     `;
+                                if (full.guia_tipo != "ANULADA" && !full.comprobante_sunat) {
+                                    temButtons += `<a class="dropdown-item factura-sunat" data-guia="${data}" href="#"><i class="fas fa-file text-info"></i> Generar SUNAT</a>`;
+                                }
                                 if (full.guia_tipo != "ANULADA") {
-                                    temButtons += `<a class="dropdown-item factura-sunat" data-guia="${data}" href="#"><i class="fas fa-file text-info"></i> Generar SUNAT</a><a class="dropdown-item delete-guia" data-guia="${data}" href="#"><i class="fas fa-trash-alt text-danger"></i> Anular</a>`;
+                                    temButtons += `<a class="dropdown-item delete-guia" data-guia="${data}" href="#"><i class="fas fa-trash-alt text-danger"></i> Anular</a>`;
                                 }
                                 temButtons += "</div></div></div>";
 
@@ -1501,7 +1504,7 @@ function loadPage() {
         );
         if (!continuar) return null;
         let data = new FormData($formGuiaRemitente);
-        data.append("guia", idGuia);
+        data.append("guia", datosGlobales.idGuia);
         data.append("return_guia", false);
         general.generarComprobanteFetch("guia-remision-remitente", data);
     });

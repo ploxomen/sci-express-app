@@ -101,4 +101,5 @@
 @include('comprobante.modales.seleccion-guias')
 @include('comprobante.modales.guia-remitente')
 @include('comprobante.modales.guia-transportista')
+<x-loader />
 @endsection
