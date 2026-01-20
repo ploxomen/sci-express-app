@@ -1505,6 +1505,18 @@ function loadPage() {
         data.append("return_guia", false);
         general.generarComprobanteFetch("guia-remision-remitente", data);
     });
+    const limpiarFormularioGuiasSunat = ($formulario,$comprobantes) => {
+        $formulario.reset();
+        if($comprobantes instanceof HTMLElement){
+            $($comprobantes).empty();
+        }
+    }
+    $('#guia-transportista').on('hidden.bs.modal', function (event) {
+        limpiarFormularioGuiasSunat($formTransportista,document.getElementById('cb-comprobantes-transportista'))
+    });
+    $('#guia-remitente').on('hidden.bs.modal', function (event) {
+        limpiarFormularioGuiasSunat($formGuiaRemitente, null)
+    });
     $btnSeleccionRemitente.onclick = async (event) => {
         const data = await consultaSunatForm(datosGlobales.idGuia);
         datosFormularioLlenar(data, "");
