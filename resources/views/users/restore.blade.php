@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="{{asset('library/bootstrap/bootstrap.min.css')}}">
     <script src="{{asset('library/bootstrap/bootstrap.min.js')}}"></script>
     <meta name="csrf-token" content="{{csrf_token()}}">
-    <script src="{{asset('asset/general.js?v2')}}"></script>
+    <script src="{{asset('asset/general.js?v2.5')}}"></script>
     <script src="{{asset('asset/auth/restore.js')}}"></script>
     <title>Restaurar cuenta</title>
 </head>
