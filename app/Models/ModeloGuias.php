@@ -7,16 +7,28 @@ use App\Models\Tipos\Documentos;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Symfony\Polyfill\Intl\Idn\Info;
 
 class ModeloGuias extends Model
 {
     protected $table = 'guias';
     public $timestamps = false;
-    protected $fillable = ['situ', 'comprobante_sunat'];
-    protected $appends = ['nro_guia_concatenado'];
+    protected $fillable = ['situ', 'comprobante_sunat','tipo_comprobante_sunat'];
+    protected $appends = ['nro_guia_concatenado','nombre_tipo_comprobante'];
     public const ESTADO_INACTIVO = 3;
     public const ESTADO_ACTIVO = 1;
+    public const NRO_COMP_ERROR = "0000";
+
+    public function getNombreTipoComprobanteAttribute()
+    {
+        switch ($this->tipo_comprobante_sunat) {
+            case ComprobantesSimpleFact::NRO_REMISION_REMITENTE:
+                return 'Guía de Remisión Remitente';
+            case ComprobantesSimpleFact::NRO_REMISION_TRANSPORTISTA:
+                return 'Guía de Remisión Transportista';
+            default:
+                return 'No establecido';
+        }
+    }
     public function scopeGuias($query)
     {
         return $query->leftJoin('clientes', 'clientes.id', '=', 'id_remitente')
@@ -61,6 +73,21 @@ class ModeloGuias extends Model
     public function remitenteCliente()
     {
         return $this->belongsTo(Clientes::class, 'id_remitente');
+    }
+    public function scopeSoloComprobanteSUNAT($query)
+    {
+        return $query->whereNotNull('comprobante_sunat')->where('comprobante_sunat', '!=', self::NRO_COMP_ERROR);
+    }
+    public function scopeFechaEmision($query, $fechaInicio, $fechaFin)
+    {
+        return $query->whereBetween('fech_emis', [$fechaInicio, $fechaFin]);
+    }
+    public function scopeTipoComprobanteSUNAT($query, $tipoComprobanteSUNAT)
+    {
+        if($tipoComprobanteSUNAT == "0"){
+            return $query;
+        }
+        return $query->where('tipo_comprobante_sunat', $tipoComprobanteSUNAT);
     }
     public function destinatario()
     {

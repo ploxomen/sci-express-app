@@ -12,6 +12,7 @@ use App\Http\Controllers\Fletes;
 use App\Http\Controllers\Gias;
 use App\Http\Controllers\Llegada;
 use App\Http\Controllers\Manifiesto;
+use App\Http\Controllers\MisComprobantesSUNATController;
 use App\Http\Controllers\Recojo;
 use App\Http\Controllers\Solicitud;
 use App\Http\Controllers\Ubigeo;
@@ -68,7 +69,6 @@ Route::middleware(['auth', 'share'])->prefix('intranet')->group(function () {
     Route::prefix('facturacion-sunat')->group(function () {
         Route::post('guia-remision-remitente', [FacturacionSUNATController::class, 'guiaRemisionRemitente']);
         Route::post('guia-remision-transportista', [FacturacionSUNATController::class, 'guiaRemisionTransportista']);
-
     });
     Route::prefix('vehiculos')->group(function () {
         Route::get('todos', [Embarque::class, 'viewVehiculos'])->name('viewVehiculos');
@@ -232,7 +232,15 @@ Route::middleware(['auth', 'share'])->prefix('intranet')->group(function () {
             Route::post('agregar-guia', [Gias::class, 'addGuia']);
             Route::get('reporte/{tipo}/{fechaInicio}/{fechaFin}/{estado}', [Gias::class, 'reporteGuias']);
         });
+        Route::prefix('sunat')->group(function () {
+            Route::get('/', [MisComprobantesSUNATController::class, 'index']);
+            Route::get('lista', [MisComprobantesSUNATController::class, 'obtenerComprobantes']);
+            Route::post('asociar', [MisComprobantesSUNATController::class, 'asignarComprobanteSUNAT']);
+            Route::get('consulta/{tipoImpresion}/{idGuia}', [MisComprobantesSUNATController::class, 'consultaComprobantePDFSUNAT']);
+            Route::put('desasociar', [MisComprobantesSUNATController::class, 'anulacionComprobanteSUNAT']);
+        });
     });
+
     Route::prefix('facturacion')->group(function () {
         Route::get('guias/mostrar', [Facturacion::class, 'viewFacturacionGuia'])->name('facturacionMisGuias');
         Route::get('cluster/mostrar', [Facturacion::class, 'viewFacturacionCluster'])->name('facturacionMisClusters');

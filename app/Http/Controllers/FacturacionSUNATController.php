@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Storage;
 class FacturacionSUNATController extends Controller
 {
     public $urlGenerarComprobante = 'https://demo.mifact.net.pe/api/GuiaRemision.svc/SendGuia';
-    public $token = 'gN8zNRBV+/FVxTLwdaZx0w==';
+    public $urlConsultaPDFXML = 'https://demo.mifact.net.pe/api/invoiceService.svc/GetInvoice';
+
     public function guiaRemisionTransportista(Request $request)
     {
         $guia = ModeloGuias::find($request->guia);
@@ -51,19 +52,36 @@ class FacturacionSUNATController extends Controller
         $serieDocumentoSunat = $request->serie;
         $detalles = $guia->detalles;
         $dataJSON = (object)array_merge($data, $request->all());
-        $parametros = $this->construccionJSONGuiaRemisionTransportista($dataJSON, $detalles,$serieDocumentoSunat);
-        $response = $this->enviarAPI($parametros);
-        $this->responseAPI($response, $guia, $response->serie_cpe, $response->correlativo_cpe,$serieDocumentoSunat, !$request->has('return_guia'));
+        $parametros = $this->construccionJSONGuiaRemisionTransportista($dataJSON, $detalles, $serieDocumentoSunat);
+        $response = $this->enviarAPI($parametros, $this->urlGenerarComprobante);
+        $this->responseAPI($response, $guia, $response->serie_cpe, $response->correlativo_cpe, $serieDocumentoSunat, ComprobantesSimpleFact::NRO_REMISION_TRANSPORTISTA, !$request->has('return_guia'));
         return $response;
     }
     public function documentosReferencia($textoReferencia)
     {
-        $comprobantes = explode(';',$textoReferencia);
+        $comprobantes = explode(';', $textoReferencia);
         $documentosReferencia = [];
         foreach ($comprobantes as $comprobante) {
             $documentosReferencia[] = ComprobantesSimpleFact::comprobanteSUNAT($comprobante);
         }
         return $documentosReferencia;
+    }
+    public function consultaComprobantePDF($serie, $correlativo, $fechaEmision, $tipoDocumento, $tipoComprobanteImpreso)
+    {
+        $parametros = array_merge($this->retornoCredencialesSIMPLEFACT(), [
+            "NUM_SERIE_CPE" => $serie,
+            "NUM_CORRE_CPE" => $correlativo,
+            "COD_TIP_CPE" => $tipoDocumento,
+            "FEC_EMIS" => $fechaEmision,
+            "RETORNA_PDF" => true,
+            "COD_FORM_IMPR" => $tipoComprobanteImpreso
+        ]);
+        unset($parametros['NOM_COMER_EMIS']);
+        unset($parametros['TXT_DMCL_FISC_EMIS']);
+        unset($parametros['NOM_RZN_SOC_EMIS']);
+        unset($parametros['TXT_VERS_ESTRUCT_UBL']);
+        $response = $this->enviarAPI($parametros, $this->urlConsultaPDFXML);
+        dd($response);
     }
     public function guiaRemisionRemitente(Request $request)
     {
@@ -98,9 +116,9 @@ class FacturacionSUNATController extends Controller
         $serieDocumentoSunat = $request->serie;
         $detalles = $guia->detalles;
         $dataJSON = (object)array_merge($data, $request->all());
-        $parametros = $this->construccionJSONGuiaRemisionRemitente($dataJSON, $detalles,$serieDocumentoSunat);
-        $response = $this->enviarAPI($parametros);
-        $this->responseAPI($response, $guia, $response->serie_cpe, $response->correlativo_cpe,$serieDocumentoSunat, !$request->has('return_guia'));
+        $parametros = $this->construccionJSONGuiaRemisionRemitente($dataJSON, $detalles, $serieDocumentoSunat);
+        $response = $this->enviarAPI($parametros, $this->urlGenerarComprobante);
+        $this->responseAPI($response, $guia, $response->serie_cpe, $response->correlativo_cpe, $serieDocumentoSunat, ComprobantesSimpleFact::NRO_REMISION_REMITENTE, !$request->has('return_guia'));
         return $response;
     }
     public function obtenerUBIGEOSunatNombres($ubiDepartamento, $ubiProvincia, $ubiDistrito)
@@ -118,7 +136,7 @@ class FacturacionSUNATController extends Controller
         $filename = $ruta . "/" . $nombre;
         return Storage::disk('public')->put($filename, $pdfContent);
     }
-    public function responseAPI($response, ModeloGuias $guia, $numeroSerie, $correlativo,$tipo, $deleteGuia = false)
+    public function responseAPI($response, ModeloGuias $guia, $numeroSerie, $correlativo, $tipo, $tipoDocumentoSUNAT, $deleteGuia = false)
     {
         if (!empty($response->errors) && $deleteGuia) {
             $guia->procesos()->delete();
@@ -126,16 +144,17 @@ class FacturacionSUNATController extends Controller
             $guia->delete();
             return false;
         }
-        ComprobantesSimpleFact::firstWhere('serie',$tipo)->increment('correlativo');
-        $numeroComprobante = $numeroSerie . "-" . $correlativo;
+        ComprobantesSimpleFact::firstWhere('serie', $tipo)->increment('correlativo');
+        $numeroComprobante = empty($numeroSerie) || empty($correlativo) ? ModeloGuias::NRO_COMP_ERROR : $numeroSerie . "-" . $correlativo;
         $this->guardarArchivosServidor($response->pdf_bytes, $numeroComprobante . ".pdf");
-        return $guia->update(['comprobante_sunat' => $numeroComprobante]);
+        return $guia->update(['comprobante_sunat' => $numeroComprobante, 'tipo_comprobante_sunat' => $tipoDocumentoSUNAT]);
     }
-    public function enviarAPI($parametros)
+    public function enviarAPI($parametros, $url)
     {
+
         $client = new Client();
         $body = json_encode($parametros);
-        $response = $client->post($this->urlGenerarComprobante, [
+        $response = $client->post($url, [
             'headers' => [
                 'Content-Type' => 'application/json'
             ],
@@ -144,12 +163,21 @@ class FacturacionSUNATController extends Controller
         $data = $response->getBody()->getContents();
         return json_decode($data);
     }
-
-    public function JSONGuiaRemision($tipo,$data, $detalles)
+    public function retornoCredencialesSIMPLEFACT()
+    {
+        return [
+            "NUM_NIF_EMIS" => env('SIMPLE_RUC'),
+            "NOM_COMER_EMIS" => env('SIMPLE_NOMBRE_COMERCIAL'),
+            "TXT_DMCL_FISC_EMIS" => env('SIMPLE_FISC_EMIS'),
+            "NOM_RZN_SOC_EMIS" => env('SIMPLE_RAZON_SOCIAL'),
+            "TOKEN" => env('SIMPLE_TOKEN'),
+            "TXT_VERS_ESTRUCT_UBL" => "2.0",
+        ];
+    }
+    public function JSONGuiaRemision($tipo, $data, $detalles)
     {
         $comprobanteSimple = ComprobantesSimpleFact::porSerie($tipo)->first();
-        return [
-            "TOKEN" => $this->token,
+        return array_merge($this->retornoCredencialesSIMPLEFACT(), [
             "COD_FORM_IMPR" => $data->impresion,
             "RETORNA_XML_ENVIO" => false,
             "RETORNA_PDF" => true,
@@ -161,10 +189,6 @@ class FacturacionSUNATController extends Controller
             "COD_PRCD_CARGA" => "001",
             "OBSERVACIONES" => $data->observaciones,
             "COD_TIP_NIF_EMIS" => '6',
-            "NUM_NIF_EMIS" => env('SIMPLE_RUC'),
-            "NOM_COMER_EMIS" => env('SIMPLE_NOMBRE_COMERCIAL'),
-            "TXT_DMCL_FISC_EMIS" => env('SIMPLE_FISC_EMIS'),
-            "NOM_RZN_SOC_EMIS" => env('SIMPLE_RAZON_SOCIAL'),
             "COD_UBI_EMIS" => "",
             "UBI_PARTIDA" => $data->ubigeo_remi,
             "UBI_LLEGADA" => $data->ubigeo_dest,
@@ -175,16 +199,15 @@ class FacturacionSUNATController extends Controller
             "NUM_NIF_DEST" => $data->num_doc_dest,
             "IND_TRANSBORDO" => false,
             "TXT_VERS_UBL" => "2.1",
-            "TXT_VERS_ESTRUCT_UBL" => "2.0",
             "UND_MEDIDA" => "KGM",
             "PESO_BRUTO" => $data->tot_kg,
             "items" => $this->detalleRemision($detalles),
             "docs_referenciado" => isset($data->comprobantes) ? $this->documentosReferencia($data->comprobantes) : [],
-        ];
+        ]);
     }
-    public function construccionJSONGuiaRemisionTransportista($data, $detalles,$tipo)
+    public function construccionJSONGuiaRemisionTransportista($data, $detalles, $tipo)
     {
-        $dataPrincipal = $this->JSONGuiaRemision($tipo,$data, $detalles);
+        $dataPrincipal = $this->JSONGuiaRemision($tipo, $data, $detalles);
         $dataPrincipal = array_merge($dataPrincipal, [
             "NRO_REGISTRO_MTC" => env('SIMPLE_NRO_REGISTRO_MTC'), // CONSULTAR ELLO ALAIN SI ES TRANSPORTISTA NO DEBE SER VACIO,
             "INDICADOR_PAGADOR_FLETE_REMITENTE" => "1",
@@ -192,7 +215,7 @@ class FacturacionSUNATController extends Controller
             "INDICADOR_TRASLADO_SUB_CONTRATADO" => "0",
             "INDICADOR_PAGADOR_FLETE_SUB_CONTRATADOR" => "0",
             "INDICADOR_PAGADOR_FLETE_TERCERO" => "0",
-            "COD_TIP_GUR" => "31", // TRANSPORTISTA 31 / REMITENTE 09
+            "COD_TIP_GUR" => ComprobantesSimpleFact::NRO_REMISION_TRANSPORTISTA, // TRANSPORTISTA 31 / REMITENTE 09
             "COD_TIP_NIF_REMIT" => $data->tipo_docu_remi,
             "NOM_RZN_SOC_REMITENTE" => $data->tipo_docu_remi,
             "NUM_NIF_REMITENTE" => $data->num_doc_remi,
@@ -221,10 +244,10 @@ class FacturacionSUNATController extends Controller
     }
     public function construccionJSONGuiaRemisionRemitente($data, $detalles, $tipo)
     {
-        $dataPrincipal = $this->JSONGuiaRemision($tipo,$data, $detalles);
+        $dataPrincipal = $this->JSONGuiaRemision($tipo, $data, $detalles);
         $dataPrincipal = array_merge($dataPrincipal, [
             "INDICADOR_M1_L" => isset($data->categoria_m1) ? "1" : "0",
-            "COD_TIP_GUR" => "09", // TRANSPORTISTA 31 / REMITENTE 09
+            "COD_TIP_GUR" => ComprobantesSimpleFact::NRO_REMISION_REMITENTE, // TRANSPORTISTA 31 / REMITENTE 09
             "MOT_TRASLADO" => $data->motivo_traslado,
             "MOD_TRASLADO" => $data->transporte,
         ]);

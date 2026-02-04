@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class ComprobantesSimpleFact extends Model
 {
     protected $fillable = ['tipo', 'serie', 'correlativo'];
+    public const NRO_REMISION_REMITENTE = "09";
+    public const NRO_REMISION_TRANSPORTISTA = "31";
+
+    
     protected function scopePorTipo($query, $tipo)
     {
         return $query->where('tipo', $tipo);
