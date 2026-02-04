@@ -9,6 +9,8 @@ class ComprobantesSimpleFact extends Model
     protected $fillable = ['tipo', 'serie', 'correlativo'];
     public const NRO_REMISION_REMITENTE = "09";
     public const NRO_REMISION_TRANSPORTISTA = "31";
+    public const IMPRESION_TICKET = "004";
+    public const IMPRESION_A4 = "001";
 
     
     protected function scopePorTipo($query, $tipo)

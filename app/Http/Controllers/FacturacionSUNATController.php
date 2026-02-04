@@ -69,9 +69,9 @@ class FacturacionSUNATController extends Controller
     public function consultaComprobantePDF($serie, $correlativo, $fechaEmision, $tipoDocumento, $tipoComprobanteImpreso)
     {
         $parametros = array_merge($this->retornoCredencialesSIMPLEFACT(), [
-            "NUM_SERIE_CPE" => $serie,
-            "NUM_CORRE_CPE" => $correlativo,
-            "COD_TIP_CPE" => $tipoDocumento,
+            "NUM_SERIE_GUR" => $serie,
+            "NUM_CORRE_GUR" => $correlativo,
+            "COD_TIP_GUR" => $tipoDocumento,
             "FEC_EMIS" => $fechaEmision,
             "RETORNA_PDF" => true,
             "COD_FORM_IMPR" => $tipoComprobanteImpreso
@@ -79,7 +79,6 @@ class FacturacionSUNATController extends Controller
         unset($parametros['NOM_COMER_EMIS']);
         unset($parametros['TXT_DMCL_FISC_EMIS']);
         unset($parametros['NOM_RZN_SOC_EMIS']);
-        unset($parametros['TXT_VERS_ESTRUCT_UBL']);
         $response = $this->enviarAPI($parametros, $this->urlConsultaPDFXML);
         return $response;
     }

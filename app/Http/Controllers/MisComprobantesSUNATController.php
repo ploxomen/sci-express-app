@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ComprobantesSimpleFact;
 use App\Models\ModeloGuias;
 use Illuminate\Http\Request;
 
@@ -48,7 +49,7 @@ class MisComprobantesSUNATController extends Controller
         $guia = ModeloGuias::find($idGuia);
         if ($guia) {
             list($serie, $numero) = explode('-', $nroComprobanteSUNAT);
-            $response = $this->facturacionSUNATController->consultaComprobantePDF($serie, $numero, $guia->fech_emis, $tipoComprobanteSUNAT, "001");
+            $response = $this->facturacionSUNATController->consultaComprobantePDF($serie, $numero, $guia->fech_emis, $tipoComprobanteSUNAT, ComprobantesSimpleFact::IMPRESION_TICKET);
             if(!empty($response->errors)){
                 return response()->json(['success' => false, 'message' => 'Error al consultar el comprobante en SUNAT: ' . $response->errors], 400);
             }
