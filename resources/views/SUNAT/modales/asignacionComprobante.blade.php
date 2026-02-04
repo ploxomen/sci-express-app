@@ -25,8 +25,9 @@
                         <input type="text" class="form-control form-control-sm" placeholder="0000-000000" id="nro_comprobante_sunat" required name="nro_comprobante_sunat">
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-4">
-                        <button class="btn btn-sm btn-info" type="btn" id="consulta-guia-sci">
-                            Consulta guia SCI
+                        <button class="btn btn-sm btn-info" type="button" title="Ver GUIA SCI" id="consulta-guia-sci">
+                            <i class="fas fa-eye"></i>
+                            GUIA SCI
                         </button>
                     </div>
                 </form>
