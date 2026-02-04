@@ -120,8 +120,7 @@ function loadPage() {
             if (!confirmar) {
                 return;
             }
-            const idGuia = e.target
-                .getAttribute("data-id");
+            const idGuia = e.target.getAttribute("data-id");
             fetch(`sunat/desasociar/${idGuia}`, {
                 method: "PUT",
                 headers: general.jsonToken,
@@ -146,6 +145,26 @@ function loadPage() {
                     alertify.error("Error al anular el comprobante SUNAT.");
                 });
         }
+    };
+    document.getElementById("consulta-guia-sci").onclick = async function (e) {
+        e.preventDefault();
+        const idGuia = document.getElementById("nro_guia_sci").value;
+        if (!idGuia) {
+            alertify.error("Por favor, seleccione la guia SCI.");
+            return;
+        }
+        let datos = new FormData();
+        datos.append("guia", idGuia);
+        datos.append("tipo", "detalle");
+        let response = await general.funcfetch(
+            "/intranet/comprobante/guias/obtener-detalles",
+            datos,
+        );
+        if (response.error) {
+            alertify.alert("Error", response.error);
+            return;
+        }
+        general.verDetalleGuia(response.datos);
     };
 }
 window.addEventListener("DOMContentLoaded", loadPage);

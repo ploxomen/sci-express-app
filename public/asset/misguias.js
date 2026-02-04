@@ -4,6 +4,7 @@ function loadPage() {
     let datosGlobales = {
         idGuia: null,
     };
+    $(general.$loader).hide();
     let newCliCli = false;
     const $cbCliente = document.getElementById("id_editar_id_remitente");
     let tipoCbRemi = null;

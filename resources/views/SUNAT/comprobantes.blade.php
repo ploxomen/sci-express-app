@@ -57,4 +57,6 @@
         </table>
     </section>
     @include('SUNAT.modales.asignacionComprobante')
+    @include('modal.detalleguiatodos')
+
 @endsection
