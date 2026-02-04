@@ -31,7 +31,7 @@
                 </select>
             </div>
             <div class="form-group col-12 col-md-6 col-lg-3 col-xl-6">
-                <button type="submit" class="btn btn-sm btn-light" title="Aplicar los filtros"><i
+                <button type="submit" class="btn btn-sm btn-light" data-toggle="modal" data-target="#asignacion-comprobantes" title="Aplicar los filtros"><i
                         class="fas fa-search"></i></button>
                 <button type="button" class="btn btn-sm btn-light" title="Asignación comprobante" id="asignacion-comprobante"><i class="fas fa-mouse-pointer"></i></button>
 
@@ -56,4 +56,5 @@
             </tbody>
         </table>
     </section>
+    @include('SUNAT.modales.asignacionComprobante')
 @endsection

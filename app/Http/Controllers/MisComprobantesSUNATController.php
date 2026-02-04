@@ -7,6 +7,11 @@ use Illuminate\Http\Request;
 
 class MisComprobantesSUNATController extends Controller
 {
+    public $facturacionSUNATController;
+    public function __construct()
+    {
+        $this->facturacionSUNATController = new FacturacionSUNATController();
+    }
     public function index()
     {
         $fechaActual = date('Y-m-d');
@@ -42,6 +47,12 @@ class MisComprobantesSUNATController extends Controller
         $nroComprobanteSUNAT = $request->input('nro_comprobante_sunat');
         $guia = ModeloGuias::find($idGuia);
         if ($guia) {
+            list($serie, $numero) = explode('-', $nroComprobanteSUNAT);
+            $response = $this->facturacionSUNATController->consultaComprobantePDF($serie, $numero, $guia->fech_emis, $tipoComprobanteSUNAT, "001");
+            if(!empty($response->errors)){
+                return response()->json(['success' => false, 'message' => 'Error al consultar el comprobante en SUNAT: ' . $response->errors], 400);
+            }
+            $this->facturacionSUNATController->guardarArchivosServidor($response->pdf_bytes, $nroComprobanteSUNAT . ".pdf");
             $guia->tipo_comprobante_sunat = $tipoComprobanteSUNAT;
             $guia->comprobante_sunat = $nroComprobanteSUNAT;
             $guia->save();
@@ -50,9 +61,17 @@ class MisComprobantesSUNATController extends Controller
             return response()->json(['success' => false, 'message' => 'Guía no  encontrada.'], 404);
         }
     }
-    public function anulacionComprobanteSUNAT(Request $request)
+    public function consultarComprobantesSinAsignar(Request $request)
     {
-        $idGuia = $request->input('id_guia');
+        return ModeloGuias::where('comprobante_sunat', ModeloGuias::NRO_COMP_ERROR)->get()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'nro_guia' => $item->nro_guia_concatenado,
+            ];
+        });
+    }
+    public function anulacionComprobanteSUNAT($idGuia)
+    {
         $guia = ModeloGuias::find($idGuia);
         if ($guia) {
             $guia->tipo_comprobante_sunat = null;
@@ -63,15 +82,13 @@ class MisComprobantesSUNATController extends Controller
             return response()->json(['success' => false, 'message' => 'Guía no encontrada.'], 404);
         }
     }
-    public function consultaComprobantePDFSUNAT($tipoImpresion,$idGuia)
+    public function consultaComprobantePDFSUNAT($tipoImpresion, $idGuia)
     {
         $guia = ModeloGuias::find($idGuia);
-        $facturacionSUNATController = new FacturacionSUNATController();
         if ($guia) {
             $comprobanteSUNAT = $guia->comprobante_sunat;
             list($serie, $numero) = explode('-', $comprobanteSUNAT);
-            $facturacionSUNATController->consultaComprobantePDF($serie, $numero, $guia->fech_emis, $guia->tipo_comprobante_sunat, $tipoImpresion);
-            return response()->json(['success' => true, 'message' => 'Consulta realizada correctamente.']);
+            return $this->facturacionSUNATController->consultaComprobantePDF($serie, $numero, $guia->fech_emis, $guia->tipo_comprobante_sunat, $tipoImpresion);
         } else {
             return response()->json(['success' => false, 'message' => 'Guía no encontrada.'], 404);
         }

@@ -81,7 +81,7 @@ class FacturacionSUNATController extends Controller
         unset($parametros['NOM_RZN_SOC_EMIS']);
         unset($parametros['TXT_VERS_ESTRUCT_UBL']);
         $response = $this->enviarAPI($parametros, $this->urlConsultaPDFXML);
-        dd($response);
+        return $response;
     }
     public function guiaRemisionRemitente(Request $request)
     {
@@ -151,7 +151,6 @@ class FacturacionSUNATController extends Controller
     }
     public function enviarAPI($parametros, $url)
     {
-
         $client = new Client();
         $body = json_encode($parametros);
         $response = $client->post($url, [

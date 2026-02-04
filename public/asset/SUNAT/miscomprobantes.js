@@ -48,14 +48,104 @@ function loadPage() {
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
-                    `
+                    `;
                 },
             },
         ],
     });
-    document.querySelector("#frm-aplicar-filtros").addEventListener("submit", function (e) {
+    document
+        .querySelector("#frm-aplicar-filtros")
+        .addEventListener("submit", function (e) {
+            e.preventDefault();
+            tablaGuias.ajax.reload();
+        });
+    document.getElementById("asignacion-comprobante").onclick = function () {
+        fetch("sunat/sin-asignar", {
+            method: "GET",
+            headers: general.jsonToken,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (!data || data.length === 0) {
+                    alertify.warning("No hay guías sin comprobante SUNAT.");
+                    return;
+                }
+                let opciones = '<option value="">Seleccione una guía</option>';
+                data.forEach((guia) => {
+                    opciones += `<option value="${guia.id}">${guia.nro_guia}</option>`;
+                });
+                document.getElementById("nro_guia_sci").innerHTML = opciones;
+                $("#comprobante-asignacion").modal("show");
+            })
+            .catch((error) => {
+                console.error(
+                    "Error al obtener las guías sin comprobante SUNAT:",
+                    error,
+                );
+                alertify.error("Error al cargar las guías disponibles.");
+            });
+    };
+    const $frmAsignacionComprobante = document.getElementById(
+        "frm-asignacion-comprobante",
+    );
+    $frmAsignacionComprobante.onsubmit = function (e) {
         e.preventDefault();
-        tablaGuias.ajax.reload();
-    });
+        const formData = new FormData($frmAsignacionComprobante);
+        fetch("sunat/asociar", {
+            method: "POST",
+            headers: general.jsonToken,
+            body: formData,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    alertify.success(data.message);
+                    $("#comprobante-asignacion").modal("hide");
+                    tablaGuias.ajax.reload();
+                    return;
+                }
+                throw new Error(data.message || "Error desconocido");
+            })
+            .catch((error) => {
+                console.error("Error al asignar el comprobante SUNAT:", error);
+                alertify.error(error.message);
+            });
+    };
+    document.getElementById("tabla-guias").onclick = async function (e) {
+        if (e.target.closest(".btn-eliminar-comprobante-sunat")) {
+            const confirmar = await general.alertifyConfirmPromise(
+                "Desasociar Comprobante SUNAT",
+                "Para desasociar este comprobante asegurate de haberlo ANULADO en SUNAT y el proveedor de la API ¿Deseas continuar con la anulación?",
+            );
+            if (!confirmar) {
+                return;
+            }
+            const idGuia = e.target
+                .getAttribute("data-id");
+            fetch(`sunat/desasociar/${idGuia}`, {
+                method: "PUT",
+                headers: general.jsonToken,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        alertify.success(data.message);
+                        tablaGuias.ajax.reload();
+                    } else {
+                        alertify.error(
+                            data.message ||
+                                "Error al anular el comprobante SUNAT.",
+                        );
+                    }
+                })
+                .catch((error) => {
+                    console.error(
+                        "Error al anular el comprobante SUNAT:",
+                        error,
+                    );
+                    alertify.error("Error al anular el comprobante SUNAT.");
+                });
+        }
+    };
 }
 window.addEventListener("DOMContentLoaded", loadPage);
