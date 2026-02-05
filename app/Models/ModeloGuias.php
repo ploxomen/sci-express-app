@@ -12,8 +12,8 @@ class ModeloGuias extends Model
 {
     protected $table = 'guias';
     public $timestamps = false;
-    protected $fillable = ['situ', 'comprobante_sunat','tipo_comprobante_sunat'];
-    protected $appends = ['nro_guia_concatenado','nombre_tipo_comprobante'];
+    protected $fillable = ['situ', 'comprobante_sunat', 'tipo_comprobante_sunat'];
+    protected $appends = ['nro_guia_concatenado', 'nombre_tipo_comprobante'];
     public const ESTADO_INACTIVO = 3;
     public const ESTADO_ACTIVO = 1;
     public const NRO_COMP_ERROR = "0000";
@@ -35,8 +35,9 @@ class ModeloGuias extends Model
             ->leftJoin('clientes_de_clientes', 'clientes_de_clientes.id', '=', 'id_destinatario')
             ->leftJoin('proveedor_clientes', 'proveedor_clientes.id', '=', 'id_remitente');
     }
-    public function getNroGuiaConcatenadoAttribute(){
-        return str_pad($this->prefijo,3,"0",STR_PAD_LEFT) . "-" . str_pad($this->nro_guia,7,"0",STR_PAD_LEFT);
+    public function getNroGuiaConcatenadoAttribute()
+    {
+        return str_pad($this->prefijo, 3, "0", STR_PAD_LEFT) . "-" . str_pad($this->nro_guia, 7, "0", STR_PAD_LEFT);
     }
     public function tipoDocumentoRemitente()
     {
@@ -84,7 +85,7 @@ class ModeloGuias extends Model
     }
     public function scopeTipoComprobanteSUNAT($query, $tipoComprobanteSUNAT)
     {
-        if($tipoComprobanteSUNAT == "0"){
+        if ($tipoComprobanteSUNAT == "0") {
             return $query;
         }
         return $query->where('tipo_comprobante_sunat', $tipoComprobanteSUNAT);
@@ -764,10 +765,15 @@ class ModeloGuias extends Model
         return ModeloGuias::query()->select('fech_emis', 'id', 'comprobante_sunat', 'prefijo', 'nro_guia')
             ->when(
                 $fechaInicio && $fechaFin,
-                callback: fn($q) =>
-                $q->whereBetween('fech_emis', [$fechaInicio, $fechaFin])
-            )->when(!empty($ubigeoDistrito), fn($q) => $q->where('dest_dist', $ubigeoDistrito))
-            ->get();
+                callback: function ($q) use ($fechaInicio, $fechaFin) {
+                    return $q->whereBetween('fech_emis', [$fechaInicio, $fechaFin]);
+                }
+            )->when(
+                !empty($ubigeoDistrito),
+                callback: function ($q) use ($ubigeoDistrito) {
+                    return $q->where('dest_dist', $ubigeoDistrito);
+                }
+            )->get();
     }
     public static function bultosRetornados($idRetorno)
     {

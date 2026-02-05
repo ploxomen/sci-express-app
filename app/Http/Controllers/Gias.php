@@ -76,12 +76,14 @@ class Gias extends Controller
         $guias = $request->input('guias', []);
         $guiasDB = ModeloGuias::query()->whereIn('id', $guias)->get();
         $tipos = $guiasDB->flatMap(
-            fn($item) =>
-            explode(';', $item->comp_clie)
+            function ($item) {
+                return explode(';', $item->comp_clie);
+            }
         )->filter()->unique()->values();
         $series = $guiasDB->flatMap(
-            fn($item) =>
-            explode(';', $item->nro_comp_cli)
+            function ($item) {
+                return explode(';', $item->nro_comp_cli);
+            }
         )->filter()->unique()->values();
         $kilosTotales = $guiasDB->pluck('tot_kg')->sum();
         return response()->json([
@@ -279,7 +281,7 @@ class Gias extends Controller
     }
     public function consultaGuiaSunat($guia)
     {
-        $modeloGuia = ModeloGuias::with(['detalles', 'detalles.tipoEnvio','destinatario:id,nombres'])->select(["fech_emis","fech_tras","remi_tipo_docu","remi_nro_docu", "nro_comp_cli","remi_dire","id","dest_tipo_docu","dest_nro_docu","dest_dire","id_destinatario","tot_kg", "id_remitente", "tipo_guia"])->find($guia);
+        $modeloGuia = ModeloGuias::with(['detalles', 'detalles.tipoEnvio', 'destinatario:id,nombres'])->select(["fech_emis", "fech_tras", "remi_tipo_docu", "remi_nro_docu", "nro_comp_cli", "remi_dire", "id", "dest_tipo_docu", "dest_nro_docu", "dest_dire", "id_destinatario", "tot_kg", "id_remitente", "tipo_guia"])->find($guia);
         $modeloGuia->remitente_nombre = $modeloGuia->tipo_guia == "cliente" ? $modeloGuia->remitenteCliente->nom_cli : $modeloGuia->remitenteProveedor->nomb_prov;
         return response()->json($modeloGuia);
     }
@@ -313,7 +315,7 @@ class Gias extends Controller
         $empresasTransporte = EmpresaTransporte::obtenerTransportes();
         $vehiculos = Vehiculos::obtenerVehiculos();
         $conductores = User::obtenerTiposUsuarios(User::ROL_DRIVER);
-        return view('comprobante.misguias', compact('usuarios', 'trayecto', 'departamentos', 'via_envios', 'clientes', 'tipo_documentos','empresasTransporte','conductores','vehiculos', 'cli_cli', 'modulos', 'estado_guias', 'nro_por_asignar', 'fechaFiltros'));
+        return view('comprobante.misguias', compact('usuarios', 'trayecto', 'departamentos', 'via_envios', 'clientes', 'tipo_documentos', 'empresasTransporte', 'conductores', 'vehiculos', 'cli_cli', 'modulos', 'estado_guias', 'nro_por_asignar', 'fechaFiltros'));
     }
     public function asignarMuchasGuiasUsuario(Request $request)
     {
