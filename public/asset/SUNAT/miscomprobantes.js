@@ -1,5 +1,6 @@
 function loadPage() {
     const general = new General();
+    $(general.$loader).hide();
     const tablaGuias = $("#tabla-guias").DataTable({
         ajax: {
             url: "sunat/lista",
@@ -91,6 +92,7 @@ function loadPage() {
     $frmAsignacionComprobante.onsubmit = function (e) {
         e.preventDefault();
         const formData = new FormData($frmAsignacionComprobante);
+        $(general.$loader).show();
         fetch("sunat/asociar", {
             method: "POST",
             headers: general.jsonToken,
@@ -109,6 +111,9 @@ function loadPage() {
             .catch((error) => {
                 console.error("Error al asignar el comprobante SUNAT:", error);
                 alertify.error(error.message);
+            })
+            .finally(() => {
+                $(general.$loader).hide();
             });
     };
     document.getElementById("tabla-guias").onclick = async function (e) {
@@ -120,6 +125,7 @@ function loadPage() {
             if (!confirmar) {
                 return;
             }
+            $(general.$loader).show();
             const idGuia = e.target.getAttribute("data-id");
             fetch(`sunat/desasociar/${idGuia}`, {
                 method: "PUT",
@@ -143,6 +149,9 @@ function loadPage() {
                         error,
                     );
                     alertify.error("Error al anular el comprobante SUNAT.");
+                })
+                .finally(() => {
+                    $(general.$loader).hide();
                 });
         }
     };

@@ -58,5 +58,5 @@
     </section>
     @include('SUNAT.modales.asignacionComprobante')
     @include('modal.detalleguiatodos')
-
+    <x-loader></x-loader>
 @endsection
