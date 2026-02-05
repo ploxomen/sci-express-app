@@ -50,7 +50,7 @@ class MisComprobantesSUNATController extends Controller
         if ($guia) {
             list($serie, $numero) = explode('-', $nroComprobanteSUNAT);
             $response = $this->facturacionSUNATController->consultaComprobantePDF($serie, $numero, $guia->fech_emis, $tipoComprobanteSUNAT, ComprobantesSimpleFact::IMPRESION_TICKET);
-            if(!empty($response->errors)){
+            if (!empty($response->errors)) {
                 return response()->json(['success' => false, 'message' => 'Error al consultar el comprobante en SUNAT: ' . $response->errors], 400);
             }
             $this->facturacionSUNATController->guardarArchivosServidor($response->pdf_bytes, $nroComprobanteSUNAT . ".pdf");
@@ -86,12 +86,19 @@ class MisComprobantesSUNATController extends Controller
     public function consultaComprobantePDFSUNAT($tipoImpresion, $idGuia)
     {
         $guia = ModeloGuias::find($idGuia);
-        if ($guia) {
+        try {
             $comprobanteSUNAT = $guia->comprobante_sunat;
             list($serie, $numero) = explode('-', $comprobanteSUNAT);
-            return $this->facturacionSUNATController->consultaComprobantePDF($serie, $numero, $guia->fech_emis, $guia->tipo_comprobante_sunat, $tipoImpresion);
-        } else {
-            return response()->json(['success' => false, 'message' => 'Guía no encontrada.'], 404);
+            $response = $this->facturacionSUNATController->consultaComprobantePDF($serie, $numero, $guia->fech_emis, $guia->tipo_comprobante_sunat, $tipoImpresion);
+            if (!empty($response->pdf_bytes)) {
+                $pdfContent = base64_decode($response->pdf_bytes);
+                return response($pdfContent, 200)
+                    ->header('Content-Type', 'application/pdf')
+                    ->header('Content-Disposition', 'inline; filename="' . $comprobanteSUNAT . '.pdf"');
+            }
+            throw new \Exception('No se pudo obtener el PDF del comprobante desde SUNAT.' . $response->errors);
+        } catch (\Throwable $th) {
+            return response()->json(['success' => false, 'message' => $th->getMessage()], 404);
         }
     }
 }

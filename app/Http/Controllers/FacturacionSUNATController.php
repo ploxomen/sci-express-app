@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 class FacturacionSUNATController extends Controller
 {
     public $urlGenerarComprobante = 'https://demo.mifact.net.pe/api/GuiaRemision.svc/SendGuia';
-    public $urlConsultaPDFXML = 'https://demo.mifact.net.pe/api/invoiceService.svc/GetInvoice';
+    public $urlConsultaPDFXML = 'https://demo.mifact.net.pe/api/GuiaRemision.svc/GetGuia';
 
     public function guiaRemisionTransportista(Request $request)
     {
@@ -72,7 +72,7 @@ class FacturacionSUNATController extends Controller
             "NUM_SERIE_GUR" => $serie,
             "NUM_CORRE_GUR" => $correlativo,
             "COD_TIP_GUR" => $tipoDocumento,
-            "FEC_EMIS" => $fechaEmision,
+            "FEC_EMIS_GUR" => $fechaEmision,
             "RETORNA_PDF" => true,
             "COD_FORM_IMPR" => $tipoComprobanteImpreso
         ]);
