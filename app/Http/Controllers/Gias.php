@@ -96,8 +96,8 @@ class Gias extends Controller
     {
         $fechaInicio = $request->input('fecha_inicio', null);
         $fechaFin = $request->input('fecha_fin', null);
-        $ciudadBase = $request->input(key: 'ciudad_base');
-        $guias = ModeloGuias::guiasRangoFechas($fechaInicio, $fechaFin, $ciudadBase);
+        $ciudadBase = $request->input('ciudad_base');
+        $guias = ModeloGuias::guiasRangoFechas($fechaInicio, $fechaFin,$ciudadBase);
         return view('comprobante.components.tabla-seleccion-guias', compact('guias'));
     }
     public function modificacionPreGuias(Request $request)
