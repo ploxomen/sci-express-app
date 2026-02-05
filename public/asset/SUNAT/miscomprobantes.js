@@ -68,7 +68,7 @@ function loadPage() {
             .then((response) => response.json())
             .then((data) => {
                 if (!data || data.length === 0) {
-                    alertify.warning("No hay guías sin comprobante SUNAT.");
+                    alertify.error("No hay guías sin comprobante SUNAT.");
                     return;
                 }
                 let opciones = '<option value="">Seleccione una guía</option>';

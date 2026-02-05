@@ -176,7 +176,7 @@ class ModeloCluster extends Model
         }
         return $clusters;
     }
-    public static function obtenerCiudadesBase(int|null $idCluster = null, bool $agruparDistrito = false){
+    public static function obtenerCiudadesBase($idCluster = null, bool $agruparDistrito = false){
         $ciudades = DB::table("ciudades_base_cluster AS cl")->select("cl.tipo_base","cl.ubigeo_distrito","c.nombre_ciudad","cl.ciudad_alejada", "cl.id AS id_ciudad_base")->leftJoin("ciudades AS c","cl.id_ciudad","=","c.id")->where(['cl.activo' => 1]);
         if($agruparDistrito){
             $ciudades->groupBy('cl.ubigeo_distrito');
