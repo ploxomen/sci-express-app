@@ -233,7 +233,7 @@ Route::middleware(['auth', 'share'])->prefix('intranet')->group(function () {
             Route::get('reporte/{tipo}/{fechaInicio}/{fechaFin}/{estado}', [Gias::class, 'reporteGuias']);
         });
         Route::prefix('sunat')->group(function () {
-            Route::get('/', [MisComprobantesSUNATController::class, 'index']);
+            Route::get('/', [MisComprobantesSUNATController::class, 'index'])->name('misComprobantesSunat');
             Route::get('lista', [MisComprobantesSUNATController::class, 'obtenerComprobantes']);
             Route::get('sin-asignar', [MisComprobantesSUNATController::class, 'consultarComprobantesSinAsignar']);
             Route::post('asociar', [MisComprobantesSUNATController::class, 'asignarComprobanteSUNAT']);
