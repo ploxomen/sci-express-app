@@ -765,12 +765,12 @@ class ModeloGuias extends Model
         return ModeloGuias::query()->select('fech_emis', 'id', 'comprobante_sunat', 'prefijo', 'nro_guia')
             ->when(
                 $fechaInicio && $fechaFin,
-                callback: function ($q) use ($fechaInicio, $fechaFin) {
+                function ($q) use ($fechaInicio, $fechaFin) {
                     return $q->whereBetween('fech_emis', [$fechaInicio, $fechaFin]);
                 }
             )->when(
                 !empty($ubigeoDistrito),
-                callback: function ($q) use ($ubigeoDistrito) {
+                function ($q) use ($ubigeoDistrito) {
                     return $q->where('dest_dist', $ubigeoDistrito);
                 }
             )->get();
