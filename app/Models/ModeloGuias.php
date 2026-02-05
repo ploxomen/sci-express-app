@@ -759,7 +759,7 @@ class ModeloGuias extends Model
         return $query->get();
     }
 
-    public static function guiasRangoFechas(string $fechaInicio, string $fechaFin, string|null $ubigeoDistrito = null)
+    public static function guiasRangoFechas(string $fechaInicio, string $fechaFin, $ubigeoDistrito = null)
     {
         return ModeloGuias::query()->select('fech_emis', 'id', 'comprobante_sunat', 'prefijo', 'nro_guia')
             ->when(
