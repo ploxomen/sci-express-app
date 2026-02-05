@@ -50,13 +50,14 @@ class MisComprobantesSUNATController extends Controller
         try {
             list($serie, $numero) = explode('-', $nroComprobanteSUNAT);
             $response = $this->facturacionSUNATController->consultaComprobantePDF($serie, $numero, $guia->fech_emis, $tipoComprobanteSUNAT, ComprobantesSimpleFact::IMPRESION_TICKET);
-            if (!empty($response->errors)) {
-                throw new \Exception('Error al consultar el comprobante en SUNAT: ' . $response->errors);
+            if (!empty($response->errors) || empty($response->pdf_bytes)) {
+                throw new \Exception('El comprobante SUNAT no existe ' . $response->errors);
             }
             $this->facturacionSUNATController->guardarArchivosServidor($response->pdf_bytes, $nroComprobanteSUNAT . ".pdf");
             $guia->tipo_comprobante_sunat = $tipoComprobanteSUNAT;
             $guia->comprobante_sunat = $nroComprobanteSUNAT;
             $guia->save();
+            return response()->json(['success' => true, 'message' => 'Comprobante SUNAT asignado correctamente.']);
         } catch (\Throwable $th) {
             return response()->json(['success' => false, 'message' => $th->getMessage()], 404);
         }
@@ -75,7 +76,7 @@ class MisComprobantesSUNATController extends Controller
         $guia = ModeloGuias::find($idGuia);
         if ($guia) {
             $guia->tipo_comprobante_sunat = null;
-            $guia->comprobante_sunat = null;
+            $guia->comprobante_sunat = ModeloGuias::NRO_COMP_ERROR;
             $guia->save();
             return response()->json(['success' => true, 'message' => 'Comprobante SUNAT anulado correctamente.']);
         } else {
