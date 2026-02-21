@@ -54,6 +54,15 @@
         "nivel_ubigeo": "1",
         "id_padre_ubigeo": "2533"
     }, {
+        "id_ubigeo": "4586",
+        "nombre_ubigeo": "Callao",
+        "codigo_ubigeo": "26",
+        "etiqueta_ubigeo": "Callao, Per\u00fa",
+        "buscador_ubigeo": "Callao per\u00fa",
+        "numero_hijos_ubigeo": "10",
+        "nivel_ubigeo": "1",
+        "id_padre_ubigeo": "2533"
+    },{
         "id_ubigeo": "3292",
         "nombre_ubigeo": "Cusco",
         "codigo_ubigeo": "08",

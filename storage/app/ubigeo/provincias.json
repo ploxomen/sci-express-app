@@ -1146,6 +1146,18 @@
         "nivel_ubigeo": "2",
         "id_padre_ubigeo": "3884"
     }],
+    "4586" : [
+        {
+        "id_ubigeo": "3285",
+        "nombre_ubigeo": "Callao",
+        "codigo_ubigeo": "01",
+        "etiqueta_ubigeo": "Callao, Callao, Lima",
+        "buscador_ubigeo": "callao callao lima",
+        "numero_hijos_ubigeo": "6",
+        "nivel_ubigeo": "2",
+        "id_padre_ubigeo": "4586"
+    }
+    ],
     "3926": [{
         "id_ubigeo": "3971",
         "nombre_ubigeo": "Barranca",
@@ -1162,15 +1174,6 @@
         "etiqueta_ubigeo": "Cajatambo, Lima",
         "buscador_ubigeo": "cajatambo lima",
         "numero_hijos_ubigeo": "5",
-        "nivel_ubigeo": "2",
-        "id_padre_ubigeo": "3926"
-    }, {
-        "id_ubigeo": "3285",
-        "nombre_ubigeo": "Callao",
-        "codigo_ubigeo": "01",
-        "etiqueta_ubigeo": "Callao, Callao, Lima",
-        "buscador_ubigeo": "callao callao lima",
-        "numero_hijos_ubigeo": "6",
         "nivel_ubigeo": "2",
         "id_padre_ubigeo": "3926"
     }, {

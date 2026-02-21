@@ -7,6 +7,8 @@
 docker-compose.override.yml
 Homestead.json
 Homestead.yaml
+/storage/app/entrega-guias
+/storage/app/retornos-img
 npm-debug.log
 yarn-error.log
 /.idea
