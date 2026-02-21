@@ -49,14 +49,19 @@
                             <option value="13">OTROS</option>
                         </select>
                     </div>
+                    <div class="col-12">
+                        <span class="!text-sm text-blue-500 !font-semibold">Datos del remitente</span>
+                    </div>
+                    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
+                        <label for="txt-ubigeo-partida">Ubigeo partida</label>
+                        <select name="ubigeo_partida" class="form-control form-control-sm" id="txt-ubigeo-partida" required>
+                            <option value="150103">ATE</option>
+                            <option value="150120" selected>MAGDALENA DEL MAR</option>
+                        </select>
+                    </div>
                     <div class="form-group col-12">
                         <label for="txt-partida">Punto partida</label>
                         <input type="text" name="punto_partida" class="form-control form-control-sm" id="txt-partida"
-                            required>
-                    </div>
-                    <div class="form-group col-12">
-                        <label for="txt-llegada">Punto llegada</label>
-                        <input type="text" name="punto_llegada" class="form-control form-control-sm" id="txt-llegada"
                             required>
                     </div>
                     <div class="col-12">
@@ -80,6 +85,11 @@
                         <label for="txt-dest-razon-social">Razón social</label>
                         <input type="text" name="dest_razon_social" class="form-control form-control-sm"
                             id="txt-dest-razon-social" disabled required>
+                    </div>
+                    <div class="form-group col-12">
+                        <label for="txt-llegada">Punto llegada</label>
+                        <input type="text" name="punto_llegada" class="form-control form-control-sm" id="txt-llegada"
+                            required>
                     </div>
                     <div class="col-12">
                         <span class="!text-sm text-blue-500 !font-semibold">Datos traslado</span>
