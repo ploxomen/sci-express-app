@@ -100,6 +100,14 @@ class General {
             });
         }
     }
+    colocarValueInputOfCB(event){
+        const input = document.querySelector(this.getAttribute("data-input"));
+        if(!input){
+            return
+        }
+        const optionSelected = this.options[this.selectedIndex];
+        input.value = optionSelected.dataset[this.getAttribute("data-cell")]
+    }
     verDetalleGuia(data) {
         if (!data) {
             return;
