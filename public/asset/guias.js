@@ -318,7 +318,7 @@ function pageLoaded() {
         $(general.$loader).hide();
         return guia;
     };
-    
+
     const habilitarDeshHabilitarInputs = (clase, valor) => {
         for (const element of document.querySelectorAll(`.${clase}`)) {
             const inputs = element.querySelector("input, select");
@@ -353,18 +353,21 @@ function pageLoaded() {
     const $btnSeleccionTransportista = document.getElementById(
         "btn-seleccion-transportista",
     );
-    $('#guia-transportista').on('hidden.bs.modal', function (event) {
-        limpiarFormularioGuiasSunat($formTransportista,document.getElementById('cb-comprobantes-transportista'))
+    $("#guia-transportista").on("hidden.bs.modal", function (event) {
+        limpiarFormularioGuiasSunat(
+            $formTransportista,
+            document.getElementById("cb-comprobantes-transportista"),
+        );
     });
-    $('#guia-remitente').on('hidden.bs.modal', function (event) {
-        limpiarFormularioGuiasSunat($formGuiaRemitente, null)
+    $("#guia-remitente").on("hidden.bs.modal", function (event) {
+        limpiarFormularioGuiasSunat($formGuiaRemitente, null);
     });
-    const limpiarFormularioGuiasSunat = ($formulario,$comprobantes) => {
+    const limpiarFormularioGuiasSunat = ($formulario, $comprobantes) => {
         $formulario.reset();
-        if($comprobantes instanceof HTMLElement){
+        if ($comprobantes instanceof HTMLElement) {
             $($comprobantes).empty();
         }
-    }
+    };
     $btnSeleccionTransportista.onclick = (event) => {
         colocarComprobantes("#cb-comprobantes-transportista");
         datosFormularioLlenar("trans");
@@ -380,6 +383,7 @@ function pageLoaded() {
         llenarDetaalesGuias("items-guia-remitente", "txt-bulto-remi-total-kg");
         toogleModalesGuias("#guia-remitente", "#seleccion-comprobantes");
     };
+    document.getElementById("txt-ubigeo-partida").onchange = general.colocarValueInputOfCB;
     const datosFormularioLlenar = (id) => {
         const data = {
             "txt-fecha-emision": document.getElementById("id_fech_emis").value,
@@ -390,7 +394,9 @@ function pageLoaded() {
                 document.getElementById("id_remi_tipo_docu").value,
             "txt-emi-num-doc":
                 document.getElementById("id_remi_nro_docu").value,
-            "txt-partida": document.getElementById("id_remi_dire").value,
+            "txt-partida": !id
+                ? document.querySelector("#guia-remitente #txt-partida").value
+                : document.getElementById("id_remi_dire").value,
             "txt-dest-razon-social":
                 document.getElementById("id_dest_nomb").selectedOptions[0].text,
             "txt-dest-tipo-doc":
@@ -459,29 +465,32 @@ function pageLoaded() {
         comprobantesGenerales = [];
         kilosTotalesInactiva = 0;
         if (!checkboxesSelect.length) {
-            alertify.success('comprobantes desmarcados correctamente')
+            alertify.success("comprobantes desmarcados correctamente");
             return llenarComprobantes();
         }
         const formData = new FormData();
-        checkboxesSelect.forEach(checkbox => {
-            formData.append('guias[]',checkbox.value);
-        })
-        fetch(`/intranet/comprobante/guias/seleccionadas?${new URLSearchParams(formData).toString()}`)
-        .then(response => response.json())
-        .then(data => {
-            comprobantesAgregados.tipos = data.tipos;
-            comprobantesAgregados.series = data.series;
-            kilosTotalesInactiva = data.kilos;
-            llenarComprobantes();
-            alertify.success('comprobantes seleccionados correctamente')
-            $('#seleccionar-comprobantes').modal('hide');
-        }).catch(error => {
-            alertify.error('error al seleccionar los comprobantes')
-            console.error(error);
+        checkboxesSelect.forEach((checkbox) => {
+            formData.append("guias[]", checkbox.value);
         });
+        fetch(
+            `/intranet/comprobante/guias/seleccionadas?${new URLSearchParams(formData).toString()}`,
+        )
+            .then((response) => response.json())
+            .then((data) => {
+                comprobantesAgregados.tipos = data.tipos;
+                comprobantesAgregados.series = data.series;
+                kilosTotalesInactiva = data.kilos;
+                llenarComprobantes();
+                alertify.success("comprobantes seleccionados correctamente");
+                $("#seleccionar-comprobantes").modal("hide");
+            })
+            .catch((error) => {
+                alertify.error("error al seleccionar los comprobantes");
+                console.error(error);
+            });
     };
     const llenarComprobantes = () => {
-        $('#id_nro_comp_cli').val([]).trigger('change');
+        $("#id_nro_comp_cli").val([]).trigger("change");
         comprobantesAgregados.series.forEach(function (valor) {
             $("#id_nro_comp_cli").append(new Option(valor, valor, true, true));
         });

@@ -49,14 +49,20 @@
                             <option value="13">OTROS</option>
                         </select>
                     </div>
-                    <div class="form-group col-12">
-                        <label for="txt-partida">Punto partida</label>
-                        <input type="text" name="punto_partida" class="form-control form-control-sm" id="txt-partida"
-                            required>
+                    <div class="col-12">
+                        <span class="!text-sm text-blue-500 !font-semibold">Datos del remitente</span>
                     </div>
-                    <div class="form-group col-12">
-                        <label for="txt-llegada">Punto llegada</label>
-                        <input type="text" name="punto_llegada" class="form-control form-control-sm" id="txt-llegada"
+                    <div class="form-group col-12 col-md-4 col-lg-2">
+                        <label for="txt-ubigeo-partida">Ubigeo partida</label>
+                        <select name="ubigeo_partida" class="form-control form-control-sm cb-selected-info" id="txt-ubigeo-partida" data-input="#guia-remitente #txt-partida" data-cell="direction" required>
+                            <option value="150120" data-direction="CALLE AYACUCHO 234" selected>MAGDALENA</option>
+                            <option value="150137" data-direction="URB. PRIMAVERA AV. SANTA ANA MZ. A 31 LOTE 40">SANTA ANITA</option>
+                            <option value="150134" data-direction="URB. LA VIÑA CAL. YEN ESCOBEDO GARRO 850 Int R">SAN LUIS</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-12 col-md-8 col-lg-10">
+                        <label for="txt-partida">Punto partida</label>
+                        <input type="text" name="punto_partida" value="CALLE AYACUCHO 234" class="form-control form-control-sm" id="txt-partida"
                             required>
                     </div>
                     <div class="col-12">
@@ -80,6 +86,11 @@
                         <label for="txt-dest-razon-social">Razón social</label>
                         <input type="text" name="dest_razon_social" class="form-control form-control-sm"
                             id="txt-dest-razon-social" disabled required>
+                    </div>
+                    <div class="form-group col-12">
+                        <label for="txt-llegada">Punto llegada</label>
+                        <input type="text" name="punto_llegada" class="form-control form-control-sm" id="txt-llegada"
+                            required>
                     </div>
                     <div class="col-12">
                         <span class="!text-sm text-blue-500 !font-semibold">Datos traslado</span>

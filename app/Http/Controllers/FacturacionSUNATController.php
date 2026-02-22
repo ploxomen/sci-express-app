@@ -86,7 +86,8 @@ class FacturacionSUNATController extends Controller
     {
         $guia = ModeloGuias::find($request->guia);
         $destinatario = $guia->destinatario;
-        $ubigeoRemitente = $this->obtenerUBIGEOSunatNombres($guia->remi_depa, $guia->remi_prov, $guia->remi_dist);
+        // $ubigeoRemitente = $this->obtenerUBIGEOSunatNombres($guia->remi_depa, $guia->remi_prov, $guia->remi_dist);
+        $ubigeoRemitente = $request->ubigeo_partida;
         $ubigeoDestinatario = $this->obtenerUBIGEOSunatNombres($guia->dest_depa, $guia->dest_prov, $guia->dest_dist);
         $data = [
             'observaciones' => $request->observaciones,

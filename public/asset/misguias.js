@@ -1603,13 +1603,14 @@ function loadPage() {
             .then((response) => response.json())
             .catch((error) => error.message);
     };
+    document.getElementById("txt-ubigeo-partida").onchange = general.colocarValueInputOfCB;
     const datosFormularioLlenar = (dataDB, id) => {
         const data = {
             "txt-fecha-emision": dataDB.fech_emis,
             "txt-fecha-traslado": dataDB.fech_tras,
             "txt-emi-tipo-doc": dataDB.remi_tipo_docu,
             "txt-emi-num-doc": dataDB.remi_nro_docu,
-            "txt-partida": dataDB.remi_dire,
+            "txt-partida": !id ? document.querySelector("#guia-remitente #txt-partida").value : dataDB.remi_dire,
             "txt-dest-razon-social": dataDB.destinatario.nombres,
             "txt-emi-razon-social": dataDB.remitente_nombre,
             "txt-dest-tipo-doc": dataDB.dest_tipo_docu,
