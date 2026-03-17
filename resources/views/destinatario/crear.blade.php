@@ -1,6 +1,6 @@
 @extends('general.index')
 @section('head')
-    <script src="{{asset('asset/destinatarioForm.js')}}"></script>
+    <script src="{{asset('asset/destinatarioForm.js?v1.2')}}"></script>
     <title>{{ $agregar ? 'Agregar destinatario' : 'Editar destinatario' }}</title>
 @endsection
 @section('body')

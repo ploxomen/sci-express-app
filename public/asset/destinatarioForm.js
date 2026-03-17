@@ -20,7 +20,9 @@ function loadPage(){
                 formDestinatario.reset();
                 $('.simple-select2, .cb-ubigeo').val("").trigger("change");
             }
-            return alertify.success(dataResponse.success);
+            return alertify.alert("Mensaje",dataResponse.success,() => {
+                window.location = "/intranet/destinatario/mostrar";
+            });
         } catch (error) {
             console.error(error);
         } 
