@@ -545,7 +545,7 @@ function pageLoaded() {
             </tr>`;
         });
         document.getElementById(tbody).innerHTML = template;
-        document.getElementById(totalBultos).value = totalBultoKG();
+        document.getElementById(totalBultos).value = Number(totalBultoKG()).toFixed(2);
     };
     const toogleModalesGuias = (modalMostrar, modalOcultar) => {
         $(modalOcultar).modal("hide");

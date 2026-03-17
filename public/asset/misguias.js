@@ -1526,7 +1526,7 @@ function loadPage() {
         datosFormularioLlenar(data, "");
         llenarDetaalesGuias(
             data.detalles,
-            data.tot_kg,
+            data.tot_kg ? Number(data.tot_kg).toFixed(2) : "",
             "items-guia-remitente",
             "txt-bulto-remi-total-kg",
         );
