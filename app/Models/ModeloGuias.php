@@ -759,21 +759,36 @@ class ModeloGuias extends Model
         }
         return $query->get();
     }
-
-    public static function guiasRangoFechas(string $fechaInicio, string $fechaFin, $ubigeoDistrito = null)
+    public function scopeClusterJoin($query)
     {
-        return ModeloGuias::query()->select('fech_emis', 'id', 'comprobante_sunat', 'prefijo', 'nro_guia')
+        return $query->leftJoin('cluster AS c', 'guias.id_cluster', '=', 'c.id');
+    }
+    public function scopeCiudadBaseCluster($query)
+    {
+        return $query->leftJoin('ciudades_base_cluster AS cbc', function ($join) {
+            $join->on('c.id', '=', 'cbc.id_cluster')
+                ->where('cbc.activo', 1)
+                ->where('cbc.base', 1);
+        });
+    }
+    public static function guiasRangoFechas($fechaInicio, $fechaFin, $tipoCiudadBase = null, $ciudadBase = null)
+    {
+        return ModeloGuias::query()->select('fech_emis', 'guias.id', 'comprobante_sunat', 'prefijo', 'nro_guia', 'cbc.id_ciudad', 'cbc.ubigeo_distrito')
+            ->clusterJoin()
+            ->ciudadBaseCluster()
             ->when(
                 $fechaInicio && $fechaFin,
                 function ($q) use ($fechaInicio, $fechaFin) {
                     return $q->whereBetween('fech_emis', [$fechaInicio, $fechaFin]);
                 }
-            )->when(
-                !empty($ubigeoDistrito),
-                function ($q) use ($ubigeoDistrito) {
-                    return $q->where('dest_dist', $ubigeoDistrito);
+            )
+            ->when(
+                $tipoCiudadBase && $ciudadBase,
+                function ($q) use ($tipoCiudadBase, $ciudadBase) {
+                    return $tipoCiudadBase == 'distrito' ? $q->where('cbc.ubigeo_distrito', $ciudadBase) : $q->where('cbc.id_ciudad', $ciudadBase);
                 }
-            )->get();
+            )
+            ->get();
     }
     public static function bultosRetornados($idRetorno)
     {

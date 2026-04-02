@@ -23,7 +23,7 @@
                         <label for="txt-ciudad-base">Ciudades Base</label>
                         <select name="ciudad_base" id="txt-ciudad-base" class="simple-select2">
                             @foreach ($ciudades as $ciudad)
-                                <option value="{{ $ciudad->ubigeo_distrito  }}"> {{ $ciudad->nombre_ciudad }}</option>
+                                <option value="{{ $ciudad->id_ciudad_base  }}"> {{ $ciudad->nombre_ciudad }}</option>
                             @endforeach
                         </select>
                     </div>
