@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\Reportes;
+use App\Models\CiudadBaseCluster;
 use App\Models\ClienteDetalleEnvio;
 use App\Models\Clientes;
 use App\Models\ComprobantesGuias;
@@ -29,7 +30,7 @@ class Gias extends Controller
     public function viewGuias()
     {
         $modulos = User::getModulos(Auth::id());
-        $ciudades = ModeloCluster::obtenerCiudadesBase(null, true)->sortBy('nombre_ciudad');
+        $ciudades = ModeloCluster::obtenerCiudadesBase(null, true, true)->sortBy('nombre_ciudad');
         $via_envios = InformacionAdicional::viaEnvio();
         $tipo_documentos = Documentos::where('estado', '1')->get();
         $departamentos = (new Ubigeo)->getDepartamentosClientes();
@@ -97,7 +98,8 @@ class Gias extends Controller
         $fechaInicio = $request->input('fecha_inicio', null);
         $fechaFin = $request->input('fecha_fin', null);
         $ciudadBase = $request->input('ciudad_base');
-        $guias = ModeloGuias::guiasRangoFechas($fechaInicio, $fechaFin,$ciudadBase);
+        $ciudadBase = CiudadBaseCluster::find($ciudadBase);
+        $guias = ModeloGuias::guiasRangoFechas($fechaInicio, $fechaFin,$ciudadBase->tipo_base, $ciudadBase->tipo_base == 'distrito' ? $ciudadBase->ubigeo_distrito : $ciudadBase->id_ciudad);
         return view('comprobante.components.tabla-seleccion-guias', compact('guias'));
     }
     public function modificacionPreGuias(Request $request)
