@@ -763,6 +763,10 @@ class ModeloGuias extends Model
     {
         return $query->leftJoin('cluster AS c', 'guias.id_cluster', '=', 'c.id');
     }
+    public function scopePorCluster($query, $cluster)
+    {
+        return $query->where('id_cluster', $cluster);
+    }
     public function scopeCiudadBaseCluster($query)
     {
         return $query->leftJoin('ciudades_base_cluster AS cbc', function ($join) {
@@ -771,24 +775,22 @@ class ModeloGuias extends Model
                 ->where('cbc.base', 1);
         });
     }
-    public static function guiasRangoFechas($fechaInicio, $fechaFin, $tipoCiudadBase = null, $ciudadBase = null)
+    public function scopePorCiudadBase($query, $tipoCiudadBase = "", $ciudadBase = "")
     {
-        return ModeloGuias::query()->select('fech_emis', 'guias.id', 'comprobante_sunat', 'prefijo', 'nro_guia', 'cbc.id_ciudad', 'cbc.ubigeo_distrito')
+        $queryBase = $query->ciudadBaseCluster()->addSelect('cbc.id_ciudad', 'cbc.ubigeo_distrito');
+        return $tipoCiudadBase == 'distrito' ? $queryBase->where('cbc.ubigeo_distrito', $ciudadBase) : $queryBase->where('cbc.id_ciudad', $ciudadBase);
+    }
+
+    public function scopeRangoDeFechas($query, $fechaInicio, $fechaFin)
+    {
+        return $query->select('fech_emis', 'guias.id', 'comprobante_sunat', 'prefijo', 'nro_guia')
             ->clusterJoin()
-            ->ciudadBaseCluster()
             ->when(
                 $fechaInicio && $fechaFin,
                 function ($q) use ($fechaInicio, $fechaFin) {
                     return $q->whereBetween('fech_emis', [$fechaInicio, $fechaFin]);
                 }
-            )
-            ->when(
-                $tipoCiudadBase && $ciudadBase,
-                function ($q) use ($tipoCiudadBase, $ciudadBase) {
-                    return $tipoCiudadBase == 'distrito' ? $q->where('cbc.ubigeo_distrito', $ciudadBase) : $q->where('cbc.id_ciudad', $ciudadBase);
-                }
-            )
-            ->get();
+            );
     }
     public static function bultosRetornados($idRetorno)
     {
