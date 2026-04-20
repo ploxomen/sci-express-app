@@ -10,24 +10,46 @@
             </div>
             <div class="modal-body">
                 <form id="form-filtro-seleccion" class="form-row mb-4 align-items-center">
-                    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
+                    <div class="form-group col-12 col-md-6 col-lg-3">
                         <label for="txt-fecha-inicio-guias">Fecha Inicio</label>
                         <input type="date" class="form-control" value="{{ date('Y-m-d') }}" name="fecha_inicio"
                             id="txt-fecha-inicio-guias">
                     </div>
-                    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
+                    <div class="form-group col-12 col-md-6 col-lg-3">
                         <label for="txt-fecha-final-guias">Fecha Final</label>
-                        <input type="date" class="form-control" value="{{ date('Y-m-d') }}" name="fecha_fin" id="txt-fecha-final-guias">
+                        <input type="date" class="form-control" value="{{ date('Y-m-d') }}" name="fecha_fin"
+                            id="txt-fecha-final-guias">
                     </div>
-                    <div class="form-group col-12 col-md-6 col-lg-4 col-xl-5">
+                    <div class="form-group col-12 col-md-6 col-lg-3">
+                        <div class="custom-control custom-radio">
+                            <input type="radio" value="por ciudad" checked id="customRadio1"
+                                data-filter="#txt-ciudad-base" name="tipo_filtro" class="custom-control-input">
+                            <label class="custom-control-label" for="customRadio1">Por ciudad base</label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <input type="radio" value="por cluster" id="customRadio2" data-filter="#txt-clusters"
+                                name="tipo_filtro" class="custom-control-input">
+                            <label class="custom-control-label" for="customRadio2">Por cluster</label>
+                        </div>
+                    </div>
+                    <div class="form-group col-12 col-md-6 col-lg-2">
                         <label for="txt-ciudad-base">Ciudades Base</label>
                         <select name="ciudad_base" id="txt-ciudad-base" class="simple-select2">
                             @foreach ($ciudades as $ciudad)
-                                <option value="{{ $ciudad->id_ciudad_base  }}"> {{ $ciudad->nombre_ciudad }}</option>
+                                <option value="{{ $ciudad->id_ciudad_base }}"> {{ $ciudad->nombre_ciudad }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group col-12 col-md-6 col-xl-1">
+                    <div class="form-group col-12 col-md-6 col-lg-2" hidden>
+                        <label for="txt-clusters">Clusters</label>
+                        <select id="txt-clusters" name="cluster">
+                            @foreach ($clusters as $clu)
+                                <option value="{{ $clu->id_cluster }}" data-nro="{{$clu->nombreProvincia}}">{{ $clu->name }} {{ $clu->last_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group col-12 col-md-6 col-lg-1">
                         <button class="btn btn-sm btn-primary" title="Buscar comprobantes" type="submit">
                             <i class="fas fa-search"></i>
                         </button>
@@ -39,7 +61,8 @@
                             <tr>
                                 <th>
                                     <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" id="seleccion-todos-comprobantes">
+                                        <input type="checkbox" class="custom-control-input"
+                                            id="seleccion-todos-comprobantes">
                                         <label class="custom-control-label" for="seleccion-todos-comprobantes"></label>
                                     </div>
                                 </th>
@@ -49,7 +72,7 @@
                             </tr>
                         </thead>
                         <tbody id="comprobantes-sunat">
-                            <x-non-result-table/>
+                            <x-non-result-table />
                         </tbody>
                     </table>
                 </div>

@@ -46,10 +46,11 @@ class Gias extends Controller
         $grupoEnvio = InformacionAdicional::getGrupoEnvio();
         $tipoEnvios = InformacionAdicional::getTipoEnvio();
         $comprobantes = ComprobantesGuias::listaComprobantes();
+        $clusters = ModeloCluster::obtenerTodosClusters();
         $empresasTransporte = EmpresaTransporte::obtenerTransportes();
         $vehiculos = Vehiculos::obtenerVehiculos();
         $conductores = User::obtenerTiposUsuarios(User::ROL_DRIVER);
-        return view('comprobante.guias', compact('nro_guia_result', 'cli_cli', 'clientes', 'departamentos', 'hoy', 'trayecto', 'via_envios', 'nro_os', 'tipo_documentos', 'modulos', 'antes', 'ciudades', 'embaseEmbalaje', 'grupoEnvio', 'tipoEnvios', 'comprobantes', 'conductores', 'vehiculos', 'empresasTransporte'));
+        return view('comprobante.guias', compact('nro_guia_result','clusters' ,'cli_cli', 'clientes', 'departamentos', 'hoy', 'trayecto', 'via_envios', 'nro_os', 'tipo_documentos', 'modulos', 'antes', 'ciudades', 'embaseEmbalaje', 'grupoEnvio', 'tipoEnvios', 'comprobantes', 'conductores', 'vehiculos', 'empresasTransporte'));
     }
     public function generarNroGuiaSCI()
     {
@@ -98,8 +99,11 @@ class Gias extends Controller
         $fechaInicio = $request->input('fecha_inicio', null);
         $fechaFin = $request->input('fecha_fin', null);
         $ciudadBase = $request->input('ciudad_base');
+        $tipo = $request->input('tipo_filtro', 'por ciudad');
+        $cluster = $request->input('cluster', null);
         $ciudadBase = CiudadBaseCluster::find($ciudadBase);
-        $guias = ModeloGuias::guiasRangoFechas($fechaInicio, $fechaFin,$ciudadBase->tipo_base, $ciudadBase->tipo_base == 'distrito' ? $ciudadBase->ubigeo_distrito : $ciudadBase->id_ciudad);
+        $ciudadBaseValor = $ciudadBase->tipo_base == 'distrito' ? $ciudadBase->ubigeo_distrito : $ciudadBase->id_ciudad;
+        $guias = $tipo == 'por ciudad' ? ModeloGuias::rangoDeFechas($fechaInicio, $fechaFin)->porCiudadBase($ciudadBase->tipo_base, $ciudadBaseValor)->get() : ModeloGuias::rangoDeFechas($fechaInicio, $fechaFin)->porCluster($cluster)->get();
         return view('comprobante.components.tabla-seleccion-guias', compact('guias'));
     }
     public function modificacionPreGuias(Request $request)

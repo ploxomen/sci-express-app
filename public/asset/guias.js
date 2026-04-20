@@ -383,7 +383,8 @@ function pageLoaded() {
         llenarDetaalesGuias("items-guia-remitente", "txt-bulto-remi-total-kg");
         toogleModalesGuias("#guia-remitente", "#seleccion-comprobantes");
     };
-    document.getElementById("txt-ubigeo-partida").onchange = general.colocarValueInputOfCB;
+    document.getElementById("txt-ubigeo-partida").onchange =
+        general.colocarValueInputOfCB;
     const datosFormularioLlenar = (id) => {
         const data = {
             "txt-fecha-emision": document.getElementById("id_fech_emis").value,
@@ -448,6 +449,25 @@ function pageLoaded() {
     const $formFiltroGuiasSeleccion = document.getElementById(
         "form-filtro-seleccion",
     );
+    $("#txt-clusters").select2({
+        theme: "bootstrap",
+        templateResult: general.tempSeleCli,
+        width: "100%",
+        placeholder: "Seleccione un cliente",
+    });
+    $formFiltroGuiasSeleccion.onclick = (event) => {
+        if (event.target.dataset.filter) {
+            $formFiltroGuiasSeleccion
+                .querySelector("#txt-ciudad-base")
+                .closest("div").hidden = true;
+            $formFiltroGuiasSeleccion
+                .querySelector("#txt-clusters")
+                .closest("div").hidden = true;
+            $formFiltroGuiasSeleccion
+                .querySelector(event.target.dataset.filter)
+                .closest("div").hidden = !event.target.checked;
+        }
+    };
     const $tableComprobanteSunat =
         document.getElementById("comprobantes-sunat");
     const $selectCheckBoxTodoSunat = document.getElementById(
@@ -545,7 +565,8 @@ function pageLoaded() {
             </tr>`;
         });
         document.getElementById(tbody).innerHTML = template;
-        document.getElementById(totalBultos).value = Number(totalBultoKG()).toFixed(2);
+        document.getElementById(totalBultos).value =
+            Number(totalBultoKG()).toFixed(2);
     };
     const toogleModalesGuias = (modalMostrar, modalOcultar) => {
         $(modalOcultar).modal("hide");
