@@ -162,7 +162,8 @@ class ModeloCluster extends Model
     }
     public static function obtenerTodosClusters()
     {
-        $clusters = DB::table('cluster AS c')->select('u.id','c.provincia_clu','c.id AS id_cluster','u.name','u.last_name','u.status')->join('usuarios AS u','c.id_usuario','=','u.id')->where(['c.activo' => 1])->whereIn("u.status",[1,2])->get();
+        $clusters = DB::table('cluster AS c')->select('u.id','c.provincia_clu','c.id AS id_cluster','u.name','u.last_name','u.status')
+        ->join('usuarios AS u','c.id_usuario','=','u.id')->where(['c.activo' => 1])->whereIn("u.status",[1,2])->get();
         foreach ($clusters as $cluster) {
             $cluster->nombreProvincia = mb_strtoupper((new Ubigeo)->getNameProvincia($cluster->provincia_clu),"UTF-8");
         }
@@ -170,7 +171,7 @@ class ModeloCluster extends Model
     }
     public static function obtenerTodosClustersFacturacion()
     {
-        $clusters = DB::table('cluster AS c')->select('c.provincia_clu','c.id AS id_cluster','u.name','u.last_name','u.status')->join('usuarios AS u','c.id_usuario','=','u.id')->where("u.status","!=",0)->groupBy("u.type_document","u.n_document","u.name","u.last_name")->get();
+        $clusters = DB::table('cluster AS c')->select('c.provincia_clu','c.id AS id_cluster','u.name','u.last_name','u.status','u.n_document')->join('usuarios AS u','c.id_usuario','=','u.id')->where("u.status","!=",0)->groupBy("u.type_document","u.n_document","u.name","u.last_name")->get();
         foreach ($clusters as $cluster) {
             $cluster->nomProv = mb_strtoupper((new Ubigeo())->getNameProvincia($cluster->provincia_clu),'UTF-8');
         }

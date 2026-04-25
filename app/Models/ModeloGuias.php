@@ -780,7 +780,12 @@ class ModeloGuias extends Model
         $queryBase = $query->ciudadBaseCluster()->addSelect('cbc.id_ciudad', 'cbc.ubigeo_distrito');
         return $tipoCiudadBase == 'distrito' ? $queryBase->where('cbc.ubigeo_distrito', $ciudadBase) : $queryBase->where('cbc.id_ciudad', $ciudadBase);
     }
-
+    public function scopeUsuariosJoin($query) {
+        return $query->join('usuarios AS u', 'u.id','=','c.id_usuario');
+    }
+    public function scopeBuscarTipoDocumento($query, $nroDocumento) {
+        return $query->where('u.n_document', $nroDocumento);
+    }
     public function scopeRangoDeFechas($query, $fechaInicio, $fechaFin)
     {
         return $query->select('fech_emis', 'guias.id', 'comprobante_sunat', 'prefijo', 'nro_guia')
