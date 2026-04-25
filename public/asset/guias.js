@@ -533,6 +533,7 @@ function pageLoaded() {
     };
     const comprobantesSeleccion = () => {
         const formData = new FormData($formFiltroGuiasSeleccion);
+        const $checkedGuias = $tableComprobanteSunat.querySelectorAll("input[type='checkbox']:checked");
         fetch(
             `/intranet/comprobante/guias/seleccion?${new URLSearchParams(
                 formData,
@@ -540,7 +541,15 @@ function pageLoaded() {
         )
             .then((response) => response.text())
             .then((data) => {
-                $tableComprobanteSunat.innerHTML = data;
+                let fragment = document.createDocumentFragment();
+                if(document.querySelector("#switchConservarFilas").checked){
+                    Array.from($checkedGuias).forEach(element => fragment.appendChild(element.closest('tr')));
+                }
+                const template = document.createElement('template');
+                template.innerHTML = data.trim();
+                fragment.appendChild(template.content);
+                $tableComprobanteSunat.innerHTML = '';
+                $tableComprobanteSunat.appendChild(fragment);
             });
     };
     const llenarDetaalesGuias = (tbody, totalBultos) => {

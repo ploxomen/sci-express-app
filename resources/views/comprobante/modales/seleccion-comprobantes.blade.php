@@ -20,31 +20,20 @@
                         <input type="date" class="form-control" value="{{ date('Y-m-d') }}" name="fecha_fin"
                             id="txt-fecha-final-guias">
                     </div>
-                    <div class="form-group col-12 col-md-6 col-lg-3">
-                        <div class="custom-control custom-radio">
-                            <input type="radio" value="por ciudad" checked id="customRadio1"
-                                data-filter="#txt-ciudad-base" name="tipo_filtro" class="custom-control-input">
-                            <label class="custom-control-label" for="customRadio1">Por ciudad base</label>
-                        </div>
-                        <div class="custom-control custom-radio">
-                            <input type="radio" value="por cluster" id="customRadio2" data-filter="#txt-clusters"
-                                name="tipo_filtro" class="custom-control-input">
-                            <label class="custom-control-label" for="customRadio2">Por cluster</label>
-                        </div>
-                    </div>
-                    <div class="form-group col-12 col-md-6 col-lg-2">
+                    {{-- <div class="form-group col-12 col-md-6 col-lg-2">
                         <label for="txt-ciudad-base">Ciudades Base</label>
                         <select name="ciudad_base" id="txt-ciudad-base" class="simple-select2">
                             @foreach ($ciudades as $ciudad)
                                 <option value="{{ $ciudad->id_ciudad_base }}"> {{ $ciudad->nombre_ciudad }}</option>
                             @endforeach
                         </select>
-                    </div>
-                    <div class="form-group col-12 col-md-6 col-lg-2" hidden>
+                    </div> --}}
+                    <div class="form-group col-12 col-md-6 col-lg-5">
                         <label for="txt-clusters">Clusters</label>
                         <select id="txt-clusters" name="cluster">
                             @foreach ($clusters as $clu)
-                                <option value="{{ $clu->id_cluster }}" data-nro="{{$clu->nombreProvincia}}">{{ $clu->name }} {{ $clu->last_name }}
+                                <option value="{{ $clu->n_document }}" data-nro="{{ $clu->n_document }}">
+                                    {{ $clu->name }} {{ $clu->last_name }}
                                 </option>
                             @endforeach
                         </select>
@@ -53,6 +42,12 @@
                         <button class="btn btn-sm btn-primary" title="Buscar comprobantes" type="submit">
                             <i class="fas fa-search"></i>
                         </button>
+                    </div>
+                    <div class="col-12">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" checked id="switchConservarFilas">
+                            <label class="custom-control-label" for="switchConservarFilas">Conservar filas</label>
+                        </div>
                     </div>
                 </form>
                 <div class="table-responsive my-2">

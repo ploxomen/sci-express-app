@@ -46,7 +46,7 @@ class Gias extends Controller
         $grupoEnvio = InformacionAdicional::getGrupoEnvio();
         $tipoEnvios = InformacionAdicional::getTipoEnvio();
         $comprobantes = ComprobantesGuias::listaComprobantes();
-        $clusters = ModeloCluster::obtenerTodosClusters();
+        $clusters = ModeloCluster::obtenerTodosClustersFacturacion();
         $empresasTransporte = EmpresaTransporte::obtenerTransportes();
         $vehiculos = Vehiculos::obtenerVehiculos();
         $conductores = User::obtenerTiposUsuarios(User::ROL_DRIVER);
@@ -98,12 +98,9 @@ class Gias extends Controller
     {
         $fechaInicio = $request->input('fecha_inicio', null);
         $fechaFin = $request->input('fecha_fin', null);
-        $ciudadBase = $request->input('ciudad_base');
-        $tipo = $request->input('tipo_filtro', 'por ciudad');
+        //El input cluster es el DNI de este mismo
         $cluster = $request->input('cluster', null);
-        $ciudadBase = CiudadBaseCluster::find($ciudadBase);
-        $ciudadBaseValor = $ciudadBase->tipo_base == 'distrito' ? $ciudadBase->ubigeo_distrito : $ciudadBase->id_ciudad;
-        $guias = $tipo == 'por ciudad' ? ModeloGuias::rangoDeFechas($fechaInicio, $fechaFin)->porCiudadBase($ciudadBase->tipo_base, $ciudadBaseValor)->get() : ModeloGuias::rangoDeFechas($fechaInicio, $fechaFin)->porCluster($cluster)->get();
+        $guias = ModeloGuias::rangoDeFechas($fechaInicio, $fechaFin)->usuariosJoin()->buscarTipoDocumento($cluster)->get();
         return view('comprobante.components.tabla-seleccion-guias', compact('guias'));
     }
     public function modificacionPreGuias(Request $request)
