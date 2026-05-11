@@ -13,8 +13,8 @@
                     <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
                         <label for="txt-serie">Serie</label>
                         <select name="serie" class="form-control form-control-sm" id="txt-serie" required>
-                            <option value="TT01" selected>TT01 - Terrestre</option>
-                            <option value="TA01">TA01 - Aereo</option>
+                            <option value="TT02" selected>TT02 - Terrestre</option>
+                            <option value="TA02">TA02 - Aereo</option>
                         </select>
                     </div>
                     <div class="form-group col-12 col-md-6 col-lg-4 col-xl-3">
