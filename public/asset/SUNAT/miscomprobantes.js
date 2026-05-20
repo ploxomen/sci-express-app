@@ -3,7 +3,7 @@ function loadPage() {
     $(general.$loader).hide();
     const tablaGuias = $("#tabla-guias").DataTable({
         ajax: {
-            url: "sunat/lista",
+            url: "/intranet/comprobante/sunat/lista",
             method: "GET",
             headers: general.jsonToken,
             data: function (d) {

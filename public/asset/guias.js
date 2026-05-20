@@ -217,7 +217,6 @@ function pageLoaded() {
         for (const e of tableDetalleGuia.children) {
             let objeto = new Object();
             let deta = e.querySelectorAll("input, select, textarea");
-            console.log(deta);
             for (const ele2 of deta) {
                 objeto[ele2.dataset.name] = ele2.value;
                 if (ele2.dataset.name === "tipo_envio") {
@@ -386,7 +385,12 @@ function pageLoaded() {
     document.getElementById("txt-ubigeo-partida").onchange =
         general.colocarValueInputOfCB;
     const datosFormularioLlenar = (id) => {
+        let valorSerie = id ? "VT02" : "TT02";
+        if(document.getElementById("id_via_tras").value === "2"){
+            valorSerie = id ? "VA02" : "TA02";
+        }
         const data = {
+            "txt-serie" : valorSerie,
             "txt-fecha-emision": document.getElementById("id_fech_emis").value,
             "txt-fecha-traslado": document.getElementById("id_fech_tras").value,
             "txt-emi-razon-social":
@@ -629,7 +633,6 @@ function pageLoaded() {
                 window.location.reload();
             });
         } catch (error) {
-            console.log(error);
             console.error(error);
             alertify.alert("Error", error);
         }
@@ -766,7 +769,6 @@ function pageLoaded() {
         }
     };
     function generarSeries(e) {
-        console.log(e);
         let selectedOption = e.target.selectedOptions[0];
         let series = selectedOption.getAttribute("data-series");
         e.target.closest("li").querySelector("[data-type='serie']").innerHTML =
