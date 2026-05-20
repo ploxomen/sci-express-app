@@ -117,7 +117,7 @@ class MisComprobantesSUNATController extends Controller
         ini_set('memory_limit', '1024M');
         set_time_limit(300);
 
-        $comprobantes = $request->ids;
+        $comprobantes = $request->input('ids', []);
         $guias = ModeloGuias::select('comprobante_sunat', 'fech_emis', 'tipo_comprobante_sunat')->whereIn('comprobante_sunat', $comprobantes)->get();
         $tipoImpresion = $request->input('tipo_impresion', ComprobantesSimpleFact::IMPRESION_TICKET);
         $pdf = new Fpdi();
