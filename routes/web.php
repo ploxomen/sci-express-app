@@ -239,8 +239,8 @@ Route::middleware(['auth', 'share'])->prefix('intranet')->group(function () {
             Route::post('asociar', [MisComprobantesSUNATController::class, 'asignarComprobanteSUNAT']);
             Route::get('consulta/{tipoImpresion}/{idGuia}', [MisComprobantesSUNATController::class, 'consultaComprobantePDFSUNAT']);
             Route::put('desasociar/{idGuia}', [MisComprobantesSUNATController::class, 'anulacionComprobanteSUNAT']);
-            Route::get('impresion',[MisComprobantesSUNATController::class, 'impresionMasiva']);
-            Route::get('impresion/masivo',[MisComprobantesSUNATController::class, 'unirComprobantes'])->name('impresionMasivaSunat');
+            Route::get('impresion',[MisComprobantesSUNATController::class, 'impresionMasiva'])->name('impresionMasivaSunat');
+            Route::get('impresion/masivo',[MisComprobantesSUNATController::class, 'unirComprobantes']);
         });
     });
 
