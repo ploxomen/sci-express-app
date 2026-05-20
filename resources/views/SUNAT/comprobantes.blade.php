@@ -7,7 +7,7 @@
     <script src="{{ asset('library/datatable/datatable-bootstrap4.min.js') }}"></script>
     <script src="{{ asset('library/datatable/datatable-responsive.min.js') }}"></script>
     <script src="{{ asset('library/datatable/responsive-bootstrap.min.js') }}"></script>
-    <script src="{{ asset('asset/SUNAT/miscomprobantes.js?v1') }}"></script>
+    <script src="{{ asset('asset/SUNAT/miscomprobantes.js?v1.1') }}"></script>
     <title>Mis comprobantes - SUNAT</title>
 @endsection
 @section('body')
