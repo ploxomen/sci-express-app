@@ -118,7 +118,7 @@ class MisComprobantesSUNATController extends Controller
         set_time_limit(300);
 
         $comprobantes = $request->ids;
-        $guias = ModeloGuias::query()->select('comprobante_sunat', 'fech_emis', 'tipo_comprobante_sunat')->whereIn('comprobante_sunat', $comprobantes)->get();
+        $guias = ModeloGuias::select('comprobante_sunat', 'fech_emis', 'tipo_comprobante_sunat')->whereIn('comprobante_sunat', $comprobantes)->get();
         $tipoImpresion = $request->input('tipo_impresion', ComprobantesSimpleFact::IMPRESION_TICKET);
         $pdf = new Fpdi();
         $pdf->SetCompression(true);
