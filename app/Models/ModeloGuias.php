@@ -57,7 +57,8 @@ class ModeloGuias extends Model
     }
     public function scopeGuiasInactivasSUNAT($query)
     {
-        return $query->where('guias.estado', self::ESTADO_INACTIVO)->whereNotNull('comprobante_sunat');
+        return $query->where('guias.estado', self::ESTADO_INACTIVO);
+        // ->whereNotNull('comprobante_sunat');
     }
     public function detalles()
     {
