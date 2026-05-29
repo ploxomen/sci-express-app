@@ -606,7 +606,7 @@ class General {
                     }
                     cbGuiasEmbarque.append(
                         new Option(
-                            `${prefijo}-${correlativo} | ${guiasPendientes.comprobante_sunat}`,
+                            guiasPendientes.comprobante_sunat ? `${prefijo}-${correlativo} | ${guiasPendientes.comprobante_sunat}` :  `${prefijo}-${correlativo}`,
                             `${prefijo}-${correlativo}`,
                             nroGuiaEmbarque === `${prefijo}-${correlativo}`
                         )
