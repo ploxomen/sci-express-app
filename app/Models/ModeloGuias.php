@@ -57,7 +57,8 @@ class ModeloGuias extends Model
     }
     public function scopeGuiasInactivasSUNAT($query)
     {
-        return $query->where('guias.estado', self::ESTADO_INACTIVO);
+        return $query->where('guias.estado', self::ESTADO_INACTIVO)
+        ->where('fech_emis','>=', '2026-01-01');
         // ->whereNotNull('comprobante_sunat');
     }
     public function detalles()
