@@ -592,9 +592,9 @@ class General {
             let existeOpcionGuiasEmbarque = false;
             response.embarque.guias_inactivas_pendientes.forEach(
                 (guiasPendientes) => {
-                    const prefijo = guiasPendientes.prefijo
+                    const prefijo = guiasPendientes.prefijo ? guiasPendientes.prefijo
                         .toString()
-                        .padStart(3, "0");
+                        .padStart(3, "0") : "000";
                     const correlativo = guiasPendientes.nro_guia
                         .toString()
                         .padStart(7, "0");
@@ -606,7 +606,7 @@ class General {
                     }
                     cbGuiasEmbarque.append(
                         new Option(
-                            `${prefijo}-${correlativo} | ${guiasPendientes.comprobante_sunat}`,
+                            guiasPendientes.comprobante_sunat ? `${prefijo}-${correlativo} | ${guiasPendientes.comprobante_sunat}` :  `${prefijo}-${correlativo}`,
                             `${prefijo}-${correlativo}`,
                             nroGuiaEmbarque === `${prefijo}-${correlativo}`
                         )
