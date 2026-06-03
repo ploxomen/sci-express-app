@@ -14,3 +14,9 @@ yarn-error.log
 /.idea
 /.vscode
 .env
+/storage/app/entrega-guias/*
+/storage/app/retornos-img/*
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*

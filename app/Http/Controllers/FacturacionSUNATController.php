@@ -13,8 +13,15 @@ use Illuminate\Support\Facades\Storage;
 
 class FacturacionSUNATController extends Controller
 {
-    public $urlGenerarComprobante = 'https://demo.mifact.net.pe/api/GuiaRemision.svc/SendGuia';
-    public $urlConsultaPDFXML = 'https://demo.mifact.net.pe/api/GuiaRemision.svc/GetGuia';
+    public $urlGenerarComprobante = '';
+    public $urlConsultaPDFXML = '';
+
+    public function __construct()
+    {
+        $baseUrl = env('SIMPLE_URL');
+        $this->urlGenerarComprobante = $baseUrl . '/GuiaRemision.svc/SendGuia';
+        $this->urlConsultaPDFXML = $baseUrl . '/GuiaRemision.svc/GetGuia';
+    }
 
     public function guiaRemisionTransportista(Request $request)
     {
