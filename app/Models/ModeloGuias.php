@@ -15,6 +15,7 @@ class ModeloGuias extends Model
     protected $fillable = ['situ', 'comprobante_sunat', 'tipo_comprobante_sunat'];
     protected $appends = ['nro_guia_concatenado', 'nombre_tipo_comprobante'];
     public const ESTADO_INACTIVO = 3;
+    public const ESTADO_ANULADO = 2;
     public const ESTADO_ACTIVO = 1;
     public const NRO_COMP_ERROR = "0000";
 
@@ -791,6 +792,7 @@ class ModeloGuias extends Model
     public function scopeRangoDeFechas($query, $fechaInicio, $fechaFin)
     {
         return $query->select('fech_emis', 'guias.id', 'comprobante_sunat', 'prefijo', 'nro_guia')
+            ->habilitado()
             ->clusterJoin()
             ->when(
                 $fechaInicio && $fechaFin,
@@ -836,6 +838,9 @@ class ModeloGuias extends Model
     public static function cambiarEstadoRetornoGuia($id_usuario, $id_guia, $nuevo_estado)
     {
         return DB::select('CALL sp_actualizar_estado_guia_retorno(?,?,?)', [$id_guia, $id_usuario, $nuevo_estado]);
+    }
+    public function scopeHabilitado($query) {
+        return $query->where('guias.estado', '!=' , self::ESTADO_ANULADO);
     }
     public static function mostrarTodasGuias($estado, $tipo, $fechaInicio, $fechaFin)
     {
