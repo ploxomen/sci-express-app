@@ -25,7 +25,7 @@
     <script src="{{ asset('library/alertify/alertify.min.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('library/pagination/pagination.css') }}">
     <script src="{{ asset('library/pagination/pagination.js') }}"></script>
-    <script src="{{ asset('asset/general.js?v2.7') }}"></script>
+    <script src="{{ asset('asset/general.js?v2.8') }}"></script>
     <script src="{{ asset('asset/home.js?v.1.4') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="icon" href="{{ asset('asset/img/icono.png') }}">
