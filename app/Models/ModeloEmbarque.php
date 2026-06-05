@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Http\Controllers\Ubigeo;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,7 @@ class ModeloEmbarque extends Model
                 $em->transportes = DB::table('transporte_embarque AS te')->select('et.id', 'et.empresa', 'et.aereo')
                     ->join('empresa_transporte AS et', 'te.id_empr_tran', '=', 'et.id')->where(['te.id_list_emba' => $em->id, 'et.activo' => 1])->get();
             }
-            $em->guias_inactivas_pendientes = ModeloGuias::select('guias.id', 'guias.prefijo', 'guias.nro_guia', 'comprobante_sunat')->sinRelacionEmbarque()->guiasInactivasSUNAT()->get();
+            $em->guias_inactivas_pendientes = ModeloGuias::select('guias.id', 'guias.prefijo', 'guias.nro_guia', 'comprobante_sunat','ecl.nro_guia_embarque')->sinRelacionEmbarque()->guiasInactivasSUNAT()->rangoFecha(Carbon::yesterday()->toDateString(), Carbon::today()->toDateString())->get();
             $em->manfiestos = DB::select('CALL sp_embarque_embarcar_manifiesto(?)', [$em->id]);
             foreach ($em->manfiestos as $prov) {
                 if ($condicion == 'informe' && $prov->tipo_trayecto == 'TERRESTRE') {
@@ -77,15 +78,17 @@ class ModeloEmbarque extends Model
                     'ecl.prefijo_guia_embarque' => null
                 ];
                 if (!empty($guiaEmbarque) && $trayecto == 'TERRESTRE') {
-                    if (strlen(trim($guiaEmbarque)) > 11 && strpos($guiaEmbarque, '-') != 3) {
-                        return ['error' => 'La guía de embarque N° ' . $guiaEmbarque . ' no está con el formato solicitado'];
-                    }
                     $nro_guia = explode('-', trim($guiaEmbarque));
-                    if (DB::table('embarque_ciudad_llegada')->where(['nro_guia_embarque' => $nro_guia[1], 'prefijo_guia_embarque' => $nro_guia[0]])->where('id', '!=', $idEmbarqueCiudad)->count() > 0) {
+                    $correlativo = count($nro_guia) === 2 ? $nro_guia[1] : $nro_guia[0];
+                    $prefijo = count($nro_guia) === 2 ? $nro_guia[0] : null;
+                    if(is_null($prefijo) && DB::table('embarque_ciudad_llegada')->where(['nro_guia_embarque' => $correlativo])->whereNull('prefijo_guia_embarque')->where('id', '!=', $idEmbarqueCiudad)->count() > 0){
                         return ['error' => 'La guía de embarque N° <b>' . $guiaEmbarque . '</b> ya está registrada, por favor intente con otro número de guía.'];
                     }
-                    $datosEmbarqueCiudad['ecl.nro_guia_embarque'] = $nro_guia[1];
-                    $datosEmbarqueCiudad['ecl.prefijo_guia_embarque'] = $nro_guia[0];
+                    if (!is_null($prefijo) && DB::table('embarque_ciudad_llegada')->where(['nro_guia_embarque' => $correlativo, 'prefijo_guia_embarque' => $prefijo])->where('id', '!=', $idEmbarqueCiudad)->count() > 0) {
+                        return ['error' => 'La guía de embarque N° <b>' . $guiaEmbarque . '</b> ya está registrada, por favor intente con otro número de guía.'];
+                    }
+                    $datosEmbarqueCiudad['ecl.nro_guia_embarque'] = $correlativo;
+                    $datosEmbarqueCiudad['ecl.prefijo_guia_embarque'] = $prefijo;
                 }
                 if (!empty($comprobantes)) {
                     $datosEmbarqueCiudad['ecl.comprobantes'] = implode(';', $comprobantes);
@@ -115,7 +118,7 @@ class ModeloEmbarque extends Model
     public function scopeVerEmbarqueInforme($query, $idEmbarque)
     {
         $embarque = DB::table('embarque AS e')->select('e.total_bultos_paquete', 'e.fch_emba')->where('id', $idEmbarque)->first();
-        $embarque->guias_inactivas_pendientes = ModeloGuias::select('guias.id', 'guias.prefijo', 'guias.nro_guia', 'comprobante_sunat')->sinRelacionEmbarque()->guiasInactivasSUNAT()->get();
+        $embarque->guias_inactivas_pendientes = ModeloGuias::select('guias.id', 'guias.prefijo', 'guias.nro_guia', 'comprobante_sunat')->sinRelacionEmbarque()->guiasInactivasSUNAT()->rangoFecha(Carbon::yesterday()->toDateString(), Carbon::today()->toDateString())->get();
         $embarque->lista_empresas_transporte = DB::table('transporte_embarque AS te')->select('et.id', 'et.empresa')->join('empresa_transporte AS et', 'te.id_empr_tran', '=', 'et.id')->where('id_list_emba', $idEmbarque)->get();
         $embarque->manfiestos = DB::table('embarque_ciudad_llegada AS ecl')
             ->select('ecl.*', 'c.nombre_ciudad', 'et.empresa AS empresa_trasporte')->selectRaw('SUM(ef.cajas) AS embarque_nro_cajas,SUM(ef.cajones) AS embarque_nro_cajones, SUM(ef.jabas) AS embarque_nro_jabas, SUM(ef.paquetes) AS embarque_nro_paquetes, SUM(ef.sobres) AS embarque_nro_sobres, SUM(ef.otros) AS embarque_num_otros')

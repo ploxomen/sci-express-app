@@ -51,16 +51,23 @@ class ModeloGuias extends Model
     public function scopeSinRelacionEmbarque($query)
     {
         return $query->leftJoin('embarque_ciudad_llegada AS ecl', function ($join) {
-            $join->on('ecl.prefijo_guia_embarque', '=', 'guias.prefijo')
-                ->on('ecl.nro_guia_embarque', '=', 'guias.nro_guia');
-        })->whereNull('ecl.prefijo_guia_embarque')
-            ->whereNull('ecl.nro_guia_embarque');
+            $join->where(function ($q) {
+                $q->whereNull('guias.prefijo')
+                    ->whereColumn('ecl.nro_guia_embarque', 'guias.nro_guia');
+            })->orWhere(function ($q) {
+                $q->whereNotNull('guias.prefijo')
+                    ->whereColumn('ecl.prefijo_guia_embarque', 'guias.prefijo')
+                    ->whereColumn('ecl.nro_guia_embarque', 'guias.nro_guia');
+            });
+        })->whereNull('ecl.nro_guia_embarque');
     }
     public function scopeGuiasInactivasSUNAT($query)
     {
-        return $query->where('guias.estado', self::ESTADO_INACTIVO)
-        ->where('fech_emis','>=', '2026-01-01');
-        // ->whereNotNull('comprobante_sunat');
+        return $query->where('guias.estado', self::ESTADO_INACTIVO);
+    }
+    public function scopeRangoFecha($query, $startDate, $endDate)
+    {
+        return $query->whereBetween('guias.fech_emis', [$startDate, $endDate]);
     }
     public function detalles()
     {
@@ -783,10 +790,12 @@ class ModeloGuias extends Model
         $queryBase = $query->ciudadBaseCluster()->addSelect('cbc.id_ciudad', 'cbc.ubigeo_distrito');
         return $tipoCiudadBase == 'distrito' ? $queryBase->where('cbc.ubigeo_distrito', $ciudadBase) : $queryBase->where('cbc.id_ciudad', $ciudadBase);
     }
-    public function scopeUsuariosJoin($query) {
-        return $query->join('usuarios AS u', 'u.id','=','c.id_usuario');
+    public function scopeUsuariosJoin($query)
+    {
+        return $query->join('usuarios AS u', 'u.id', '=', 'c.id_usuario');
     }
-    public function scopeBuscarTipoDocumento($query, $nroDocumento) {
+    public function scopeBuscarTipoDocumento($query, $nroDocumento)
+    {
         return $query->where('u.n_document', $nroDocumento);
     }
     public function scopeRangoDeFechas($query, $fechaInicio, $fechaFin)
@@ -839,8 +848,9 @@ class ModeloGuias extends Model
     {
         return DB::select('CALL sp_actualizar_estado_guia_retorno(?,?,?)', [$id_guia, $id_usuario, $nuevo_estado]);
     }
-    public function scopeHabilitado($query) {
-        return $query->where('guias.estado', '!=' , self::ESTADO_ANULADO);
+    public function scopeHabilitado($query)
+    {
+        return $query->where('guias.estado', '!=', self::ESTADO_ANULADO);
     }
     public static function mostrarTodasGuias($estado, $tipo, $fechaInicio, $fechaFin)
     {

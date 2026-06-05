@@ -583,12 +583,11 @@ class General {
             cbGuiasEmbarque.id = `id_guia_embarque_${e.id}`;
             cbGuiasEmbarque.name = "guias_embarque[]";
             cbGuiasEmbarque.append(new Option("Seleccione un comprobante", ""));
-            const nroGuiaEmbarque =
+            let nroGuiaEmbarque =
                 e.prefijo_guia_embarque == null && e.nro_guia_embarque == null
                     ? ""
-                    : e.prefijo_guia_embarque.toString().padStart(3, "0") +
-                      "-" +
-                      e.nro_guia_embarque.toString().padStart(7, "0");
+                    : e.nro_guia_embarque.toString().padStart(7, "0");
+            nroGuiaEmbarque = e.prefijo_guia_embarque == null ? nroGuiaEmbarque : `${e.prefijo_guia_embarque.toString().padStart(3, "0")}-${nroGuiaEmbarque}`;
             let existeOpcionGuiasEmbarque = false;
             response.embarque.guias_inactivas_pendientes.forEach(
                 (guiasPendientes) => {
@@ -598,17 +597,18 @@ class General {
                     const correlativo = guiasPendientes.nro_guia
                         .toString()
                         .padStart(7, "0");
+                    const nroGuiaEmbarquePendiente = guiasPendientes.prefijo === null ? correlativo : `${prefijo}-${correlativo}`;
                     if (
                         !existeOpcionGuiasEmbarque &&
-                        nroGuiaEmbarque === `${prefijo}-${correlativo}`
+                        nroGuiaEmbarque === nroGuiaEmbarquePendiente
                     ) {
                         existeOpcionGuiasEmbarque = true;
                     }
                     cbGuiasEmbarque.append(
                         new Option(
-                            guiasPendientes.comprobante_sunat ? `${prefijo}-${correlativo} | ${guiasPendientes.comprobante_sunat}` :  `${prefijo}-${correlativo}`,
-                            `${prefijo}-${correlativo}`,
-                            nroGuiaEmbarque === `${prefijo}-${correlativo}`
+                            guiasPendientes.comprobante_sunat ? `${nroGuiaEmbarquePendiente} | ${guiasPendientes.comprobante_sunat}` :  nroGuiaEmbarquePendiente,
+                            nroGuiaEmbarquePendiente,
+                            nroGuiaEmbarque === nroGuiaEmbarquePendiente
                         )
                     );
                 }
